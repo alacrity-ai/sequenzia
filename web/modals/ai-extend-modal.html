@@ -1,0 +1,81 @@
+<!-- AI Extend Modal -->
+<div id="ai-extend-modal" class="ai-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 w-[700px] max-w-3xl">
+      <h2 class="text-lg font-semibold mb-4">AI Extension</h2>
+      <p class="mb-6">Extend your composition by generating additional measures that follow your musical style.</p>
+      
+      <!-- Mini Contour -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-sm font-medium">Select Start Time</label>
+          <button id="extend-start-help-btn"
+                  title="How does start time work?"
+                  class="text-purple-400 hover:text-white focus:outline-none text-lg leading-none transition-colors duration-150">
+            ℹ️
+          </button>
+        </div>           
+        <div class="relative w-full h-12 border border-purple-800 rounded bg-gray-900">
+          <canvas id="extend-mini-contour" class="w-full h-full absolute top-0 left-0 z-0"></canvas>
+          <canvas id="extend-mini-playhead" class="w-full h-full absolute top-0 left-0 z-10 cursor-ew-resize"></canvas>
+        </div>
+  
+        <!-- Help Popup -->
+        <div id="extend-start-help-popup"
+            class="mt-2 text-xs text-gray-300 bg-gray-800 border border-purple-700 rounded p-3 shadow-lg hidden">
+          <p>The AI will begin extending your composition from the selected beat.</p>
+          <ul class="mt-1 list-disc list-inside text-gray-400">
+            <li><strong>End of song:</strong> New measures will be appended.</li>
+            <li><strong>Middle of song:</strong> Later content will be overwritten.</li>
+            <li>
+              <strong>Blue region:</strong> This shows the <span class="italic">context window</span> the AI will use when composing.
+              It includes the preceding musical material, up to the selected start point.
+            </li>
+          </ul>
+          <div class="mt-2 text-right">
+            <button id="extend-start-help-close"
+                    type="button"
+                    class="text-purple-400 hover:text-purple-200 text-xs underline">
+              Got it
+            </button>
+          </div>
+        </div>    
+      </div>
+  
+      <!-- Track Selection Checkboxes -->
+      <div class="mb-6">
+        <label class="text-sm font-medium block mb-2">Select Tracks</label>
+  
+        <div class="flex items-center gap-4 mb-2">
+          <button id="extend-select-all" class="text-xs underline text-purple-400 hover:text-purple-200">Select All</button>
+          <button id="extend-deselect-all" class="text-xs underline text-purple-400 hover:text-purple-200">Deselect All</button>
+        </div>
+  
+        <div id="extend-track-checkboxes"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-2">
+          <!-- checkboxes injected here -->
+        </div>
+      </div>
+  
+  
+      <!-- Genre Tags with Checkbox -->
+      <div class="mb-6">
+        <div class="flex items-center gap-2 mb-2">
+          <input type="checkbox" 
+                 id="extend-use-tags" 
+                 class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-500">
+          <label class="text-sm font-medium">Use Genre Tags</label>
+        </div>
+        <input type="text" 
+               id="extend-tags"
+               placeholder="Classical, Rich Harmonies, Beautiful Melody"
+               disabled
+               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500 disabled:opacity-50 disabled:cursor-not-allowed">
+      </div>
+  
+      <!-- Action Buttons -->
+      <div class="flex flex-col gap-3">
+        <button class="generate-btn bg-purple-600 hover:bg-purple-700 py-2 rounded">Generate</button>
+        <button class="cancel-btn bg-gray-600 hover:bg-gray-700 py-2 rounded">Cancel</button>
+      </div>
+    </div>
+  </div>

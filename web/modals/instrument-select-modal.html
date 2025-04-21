@@ -1,0 +1,44 @@
+<!-- Instrument Select Modal -->
+<div id="instrument-select-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 w-96">
+      <h2 class="text-lg font-semibold mb-4">Select Instrument</h2>
+      
+      <!-- Instrument Library Selection -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-2">Instrument Library</label>
+        <select id="instrument-library-select" 
+                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+        </select>
+      </div>
+
+      <!-- Instrument Selection -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-2">Instrument</label>
+        <select id="instrument-select" 
+                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+
+      <!-- Loop Toggle -->
+      <div class="mb-6">
+        <label class="flex items-center gap-2">
+          <input type="checkbox" 
+                 id="instrument-loop-toggle"
+                 class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-500">
+          <span class="text-sm">Loop instrument sound</span>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-3">
+        <button id="instrument-select-confirm" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded">Select</button>
+        <button id="instrument-cancel-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded">Cancel</button>
+      </div>
+    </div>
+</div>
+
+
+
+
+

@@ -1,0 +1,71 @@
+<!-- AI Generate Modal -->
+<div id="ai-generate-modal" class="ai-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 w-[500px]"> <!-- made wider -->
+      <h2 class="text-lg font-semibold mb-4">AI Generation</h2>
+      <p class="mb-6">Generate new musical ideas from scratch using AI.</p>
+      
+      <!-- Tracks Selection -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-2">Tracks</label>
+        <select id="generate-tracks" 
+                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+          <option value="melody">Melody</option>
+          <option value="chords">Chords</option>
+          <option value="chords_melody">Chords, Melody</option>
+          <option value="chords_melody_bass" selected>Chords, Melody, Bassline</option>
+          <option value="bassline">Bassline</option>
+          <option value="bassline_chords">Bassline, Chords</option>
+          <option value="bassline_melody">Bassline, Melody</option>
+        </select>
+      </div>
+  
+      <!-- Key, Accidental, and Tonality Selection (side by side) -->
+      <div class="mb-4 flex gap-4">
+        <div class="flex-1">
+          <label class="block text-sm font-medium mb-2">Key</label>
+          <select id="generate-key" 
+                  class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="G">G</option>
+          </select>
+        </div>
+        <div class="flex-1">
+          <label class="block text-sm font-medium mb-2">♮/♯/♭</label>
+          <select id="generate-accidental" 
+                  class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+            <option value="natural" selected>♮</option>
+            <option value="sharp">♯</option>
+            <option value="flat">♭</option>
+          </select>
+        </div>
+        <div class="flex-1">
+          <label class="block text-sm font-medium mb-2">Tonality</label>
+          <select id="generate-tonality" 
+                  class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+            <option value="major">Major</option>
+            <option value="minor">Minor</option>
+          </select>
+        </div>
+      </div>
+  
+      <!-- Genre Tags -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-2">Genre Tags</label>
+        <input type="text" 
+               id="generate-tags"
+               placeholder="Classical, Rich Harmonies, Beautiful Melody"
+               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+      </div>
+  
+      <!-- Action Buttons (side by side) -->
+      <div class="flex gap-3">
+        <button class="generate-btn flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded">Generate</button>
+        <button class="cancel-btn flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded">Cancel</button>
+      </div>
+    </div>
+  </div>
