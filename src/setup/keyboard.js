@@ -5,7 +5,7 @@ import { attachKeyboardListeners, detachKeyboardListeners } from '../keyboard/ke
 import { WHITE_KEYS, BLACK_KEYS } from '../keyboard/constants.js';
 import { setActiveInstrument, getActiveInstrumentName } from '../sf2/sf2-player.js';
 import { getSequencerById } from './sequencers.js';
-import { getMalletInstruments, getDrumMachineInstruments, getSmolkenInstruments, getSoundfontInstruments } from '../sf2/sf2-loader.js';
+import { getMalletInstruments, getDrumMachineInstruments, getSmolkenInstruments, getSoundfontInstruments, getElectricPianoInstruments, getSplendidGrandPianoInstruments } from '../sf2/sf2-loader.js';
 
 let currentOctave = 3;
 let keyMap = getKeyMap(currentOctave);
@@ -93,8 +93,8 @@ export async function setupKeyboard(canvas) {
     'fluidr3-gm': 'soundfont',
     'musyngkite': 'soundfont',
     'fatboy': 'soundfont',
-    'splendidgrandpiano': '/static/splendidgrandpiano.json',
-    'electricpiano': '/static/electricpiano.json',
+    'splendidgrandpiano': 'builtin',
+    'electricpiano': 'builtin',
     'mallets': 'builtin',
     'drummachines': 'builtin',
     'smolken': 'builtin'
@@ -121,6 +121,10 @@ export async function setupKeyboard(canvas) {
       let instruments;
       if (selectedLibrary === 'mallets') {
         instruments = await getMalletInstruments();
+      } else if (selectedLibrary === 'electricpiano') {
+        instruments = await getElectricPianoInstruments();
+      } else if (selectedLibrary === 'splendidgrandpiano') {
+        instruments = await getSplendidGrandPianoInstruments();
       } else if (selectedLibrary === 'drummachines') {
         instruments = await getDrumMachineInstruments();
       } else if (selectedLibrary === 'smolken') {

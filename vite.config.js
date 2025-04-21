@@ -1,7 +1,9 @@
 // vite.config.js
 import { defineConfig } from 'vite';
 
+const isGH = process.env.GITHUB_PAGES === 'true';
+
 export default defineConfig({
-  base: './', // ensures it works with local file previews
-  publicDir: 'public', // default, but explicit
+  base: isGH ? '/sequenzia/' : './',
+  publicDir: 'public',
 });

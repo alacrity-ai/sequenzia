@@ -122,7 +122,17 @@ export async function getMalletInstruments() {
   await initSF2Engine();
   return smplr.getMalletNames();
 }
-  
+
+export async function getElectricPianoInstruments() {
+  await initSF2Engine();
+  return smplr.getElectricPianoNames();
+}
+
+export async function getSplendidGrandPianoInstruments() {
+  await initSF2Engine();
+  return ['splendidgrandpiano'];
+}
+
 export async function getDrumMachineInstruments() {
   await initSF2Engine();
   return smplr.getDrumMachineNames(); // e.g. ['TR-808', 'TR-909']
