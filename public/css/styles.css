@@ -1,0 +1,57 @@
+  /* Prevent text selection across the whole UI */
+  * {
+    user-select: none;
+  }
+
+  /* Prevent button focus outlines */
+  button:focus {
+    outline: none;
+  }
+
+
+  .button-locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+  }
+  
+  .button-locked::after {
+    content: '🔒';
+    position: absolute;
+    font-size: 10px;
+    top: -5px;
+    right: -5px;
+  }
+
+  .side-button {
+    padding: 0.25rem 0.5rem;           /* Equivalent to Tailwind px-2 py-1 */
+    border-radius: 0.25rem;            /* Tailwind rounded */
+    color: white;                      /* Tailwind text-white */
+    width: 36px;
+    height: 36px;
+    display: flex;                     /* Tailwind flex */
+    align-items: center;              /* Tailwind items-center */
+    justify-content: center;          /* Tailwind justify-center */
+    border: 1px solid rgb(146, 51, 234); /* border-purple-800 */
+    background-color: transparent;
+    transition: background-color 0.2s;
+    cursor: pointer;
+  }
+  
+  .side-button-primary {
+    background-color: rgb(147, 51, 234);   /* Tailwind bg-purple-600 */
+  }
+  
+  .side-button-primary:hover {
+    background-color: rgb(126, 34, 206);   /* Tailwind hover:bg-purple-700 */
+  }
+  
+  .side-button-secondary {
+    background-color: rgb(55, 65, 81);     /* Tailwind bg-gray-700 */
+  }
+  
+  .side-button-secondary:hover {
+    background-color: rgb(126, 34, 206);   /* Tailwind hover:bg-purple-700 */
+  }
+  
