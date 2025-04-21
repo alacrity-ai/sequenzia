@@ -1,0 +1,2 @@
+# sequenzia
+AI-Native DAW
