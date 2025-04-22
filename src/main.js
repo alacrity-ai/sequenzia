@@ -13,6 +13,10 @@ import { drawGlobalPlayhead, initGlobalPlayhead } from './playhead/global-playhe
 import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';
 import { setupControlModeSwitch } from './setup/controlModeSwitch.js';
 import { setupSelectModeUI } from './sequencer/grid/interaction/select-mode-ui.js';
+import { onStateUpdated } from './appState/onStateUpdated.js';
+import { resyncFromState } from './appState/resyncFromState.js';
+
+onStateUpdated(resyncFromState);
 
 function refreshGlobalMiniContour() {
   drawGlobalMiniContour(globalMiniCanvas, sequencers);
