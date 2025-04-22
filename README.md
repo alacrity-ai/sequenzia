@@ -4,6 +4,8 @@ AI-Native DAW
 ## Overview
 Sequenzia is a modern, web-based Digital Audio Workstation (DAW) with integrated AI capabilities. It combines traditional music production tools with artificial intelligence to enhance the creative process.
 
+🎵 **Try it now**: [https://alacrity-ai.github.io/sequenzia/](https://alacrity-ai.github.io/sequenzia/)
+
 <img src="screenshot.PNG" alt="Sequenzia DAW Interface" width="800" style="border-radius: 8px; margin: 20px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
 
 ## Features
@@ -92,6 +94,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
 
 
 
