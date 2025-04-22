@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/styles.css" />
   <link rel="shortcut icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
   <link rel="icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
-  <script type="module" crossorigin src="/sequenzia/assets/index-ojxIWayS.js"></script>
+  <script type="module" crossorigin src="/sequenzia/assets/index-C4MulFSQ.js"></script>
 </head>
 
 <body class="bg-black text-gray-200 font-sans pb-36">
@@ -141,9 +141,7 @@
                 <canvas class="note-grid absolute top-0 left-0"></canvas>
                 <canvas class="playhead-canvas absolute top-0 left-0 z-20 pointer-events-none"></canvas>
               </div>
-              
             </div>
-        
           </div>
         </template>
         
@@ -167,7 +165,7 @@
       </div>
       
       <!-- Mode Selection and Note Duration Buttons Row -->
-      <div class="flex justify-center gap-3 p-2 border-b border-purple-800">
+      <div class="flex justify-left gap-3 p-2 pl-32 border-b border-purple-800">
         <!-- Mode Selection Buttons -->
         <div class="flex gap-2 border-r border-purple-800 pr-3 mr-1">
           <button id="note-mode-btn" 
@@ -190,55 +188,114 @@
         <div id="note-duration-panel" class="flex gap-3">
           <!-- Note Edit Mode Controls -->
           <div class="flex gap-2 border-r border-purple-800 pr-3 mr-1">
+            <button id="note-placement-mode-btn"
+                    class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    title="Note Placement Mode (Q)">
+              <svg class="w-6 h-6" aria-hidden="true">
+                <use href="#icon-music"></use>
+              </svg>
+            </button>
             <button id="select-mode-btn"
-                    class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Select Mode">
+                    class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    title="Select Mode (W)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-draw-square"></use>
               </svg>
             </button>
             <button id="velocity-mode-btn"
-                    class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Velocity Mode">
+                    class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    title="Velocity Mode (E)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-chart"></use>
               </svg>
             </button>
           </div>
 
-          <!-- Note Duration Buttons -->
-          <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  data-value="4" title="1: Whole Note (𝅝)">𝅝</button>
-          <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  data-value="2" title="2: Half Note (𝅗𝅥)">𝅗𝅥</button>
-          <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  data-value="1" title="3: Quarter Note (𝅘𝅥)">𝅘𝅥</button>
-          <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  data-value="0.5" title="4: Eighth Note (♪)">♪</button>
-          <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  data-value="0.25" title="5: Sixteenth Note (♬)">♬</button>
-          <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  data-value="0.125" title="6: Thirty-Second Note (𝅘𝅥𝅰)">𝅘𝅥𝅰</button>
-          <div class="border-l border-purple-800 mx-2"></div>
-          <button id="dotted-note-btn"
-                  class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  title="Toggle Dotted Note">•</button>
-          <button id="triplet-note-btn"
-                  class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  title="Toggle Triplet">³</button>
+          <!-- Note Duration Controls -->
+          <div id="note-duration-controls" class="flex gap-2">
+            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    data-value="4" title="Whole-Note (1)">𝅝</button>
+            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    data-value="2" title="Half-Note (2)">𝅗𝅥</button>
+            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    data-value="1" title="Quarter-Note (3)">𝅘𝅥</button>
+            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    data-value="0.5" title="Eigth-Note (4)">♪</button>
+            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    data-value="0.25" title="Sixteenth-Note (5)">♬</button>
+            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    data-value="0.125" title="32nd-Note (6)">𝅘𝅥𝅰</button>
+            <div class="border-l border-purple-800 mx-2"></div>
+            <button id="dotted-note-btn"
+                    class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    title="Toggle Dotted Note (.)">•</button>
+            <button id="triplet-note-btn"
+                    class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                    title="Toggle Triplet (/)">³</button>
+          </div>
+
+          <!-- Select Mode Controls (Initially Hidden) -->
+          <div id="select-mode-controls" class="flex gap-2 hidden">
+            <button class="select-mode-copy bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Copy (CTRL+C)">
+              <svg class="w-6 h-6" aria-hidden="true">
+                <use href="#icon-copy"></use>
+              </svg>
+            </button>
+            <button class="select-mode-cut bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Cut (CTRL+X)">
+              <svg class="w-6 h-6" aria-hidden="true">
+                <use href="#icon-cut"></use>
+              </svg>
+            </button>
+            <button class="select-mode-paste bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Paste (CTRL+V)">
+              <svg class="w-6 h-6" aria-hidden="true">
+                <use href="#icon-paste"></use>
+              </svg>
+            </button>
+            <button class="select-mode-delete bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Delete (Del)">
+              <svg class="w-6 h-6" aria-hidden="true">
+                <use href="#icon-trash"></use>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Velocity Mode Controls (Initially Hidden) -->
+          <div id="velocity-mode-controls" class="flex gap-2 hidden">
+            <button class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Velocity Tool (Coming Soon)">
+              <svg class="w-6 h-6" aria-hidden="true">
+                <use href="#icon-ruler"></use>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- AI Control Panel -->
         <div id="ai-control-panel" class="flex gap-3 hidden">
           <button id="ai-inpaint-btn"
-                  class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  title="AI Inpaint">🎨</button>
+                  class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                  title="AI Inpaint">
+            <svg class="w-6 h-6" aria-hidden="true">
+              <use href="#icon-paintbrush"></use>
+            </svg>
+          </button>
           <button id="ai-extend-btn"
-                  class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  title="AI Extend">➡️</button>
+                  class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                  title="AI Extend">
+            <svg class="w-6 h-6" aria-hidden="true">
+              <use href="#icon-forward"></use>
+            </svg>
+          </button>
           <button id="ai-generate-btn"
-                  class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700"
-                  title="AI Generate">✨</button>
+                  class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
+                  title="AI Generate">
+            <svg class="w-6 h-6" aria-hidden="true">
+              <use href="#icon-lightbulb"></use>
+            </svg>
+          </button>
         </div>
       </div>
 
