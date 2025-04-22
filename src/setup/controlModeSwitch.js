@@ -2,6 +2,7 @@ import { setupExtendModeControls } from '../aimode/ExtendMode.js';
 import { setupExtendModeUI } from '../aimode/ExtendMode.js';
 import { getOpenAIKey } from '../userconfig/userConfig.js';
 import { toggleZoomControls } from './sequencers.js';
+import { setupEditModeControls } from './editModeControls.js';
 
 export function setupControlModeSwitch() {
   const noteModeBtn = document.getElementById('note-mode-btn');
@@ -115,6 +116,12 @@ export function setupControlModeSwitch() {
   document.getElementById('ai-generate-btn').addEventListener('click', () => {
     generateModal.classList.remove('hidden');
   });
+
+  // Setup edit mode controls
+  setupEditModeControls();
 }
+
+
+
 
 

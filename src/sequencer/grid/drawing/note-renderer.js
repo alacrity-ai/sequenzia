@@ -1,7 +1,11 @@
+// sequencer/grid/drawing/note-renderer.js
+
 export function drawNotes(ctx, notes, {
-  previewNote,
+  previewNotes = null,
   hoveredNote,
   selectedNote,
+  selectedNotes = [],
+  highlightedNotes = [],
   cellWidth,
   cellHeight,
   visibleStartBeat,
@@ -11,6 +15,7 @@ export function drawNotes(ctx, notes, {
   PITCH_COLOR_MAP,
   drawRoundedRect
 }) {
+
   for (const note of notes) {
     if (note.start + note.duration < visibleStartBeat || note.start > visibleEndBeat) continue;
 
@@ -25,9 +30,17 @@ export function drawNotes(ctx, notes, {
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 1;
     ctx.shadowOffsetY = 2;
-    ctx.fillStyle = baseColor;
+    
+    // 🎨 Highlighted notes get a rich blue fill
+    if (highlightedNotes.includes(note)) {
+      ctx.fillStyle = 'rgba(96, 165, 250, 0.6)'; // blue-400 fill with alpha
+    } else {
+      ctx.fillStyle = baseColor;
+    }
+    
     drawRoundedRect(ctx, x, y, w, h);
     ctx.fill();
+    
 
     // Gloss overlay
     const gloss = ctx.createLinearGradient(x, y, x, y + h);
@@ -40,24 +53,38 @@ export function drawNotes(ctx, notes, {
     drawRoundedRect(ctx, x, y, w, h);
     ctx.fill();
 
-    if (note === hoveredNote || note === selectedNote) {
+    const isSelected = selectedNotes.includes(note);
+    const isHovered = note === hoveredNote;
+    const isHighlighted = highlightedNotes.includes(note);
+    
+    if (isSelected || isHovered || isHighlighted) {
       ctx.lineWidth = 2;
-      ctx.strokeStyle = note === selectedNote ? 'blue' : 'black';
+    
+      if (isSelected) {
+        ctx.strokeStyle = 'rgba(59, 130, 246, 1.0)'; // blue-500
+      } else if (isHovered) {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)'; // hovered = black
+      } else if (isHighlighted) {
+        ctx.strokeStyle = 'rgba(96, 165, 250, 0.6)'; // light-blue stroke for selection preview
+      }
+    
       drawRoundedRect(ctx, x, y, w, h);
       ctx.stroke();
-    }
+    }    
   }
 
-  if (previewNote && !hoveredNote && !selectedNote) {
-    const x = previewNote.start * cellWidth;
-    const y = getPitchRow(previewNote.pitch) * cellHeight;
-    const w = previewNote.duration * cellWidth;
-    const h = cellHeight - 1;
-    const color = PITCH_COLOR_MAP[getPitchClass(previewNote.pitch)] || '#999';
-
-    ctx.fillStyle = hexToRgba(color, 0.4);
-    drawRoundedRect(ctx, x, y, w, h);
-    ctx.fill();
+  if (previewNotes) {
+    for (const previewNote of previewNotes) {
+      const x = previewNote.start * cellWidth;
+      const y = getPitchRow(previewNote.pitch) * cellHeight;
+      const w = previewNote.duration * cellWidth;
+      const h = cellHeight - 1;
+      const color = PITCH_COLOR_MAP[getPitchClass(previewNote.pitch)] || '#999';
+  
+      ctx.fillStyle = hexToRgba(color, 0.4);
+      drawRoundedRect(ctx, x, y, w, h);
+      ctx.fill();
+    }
   }
 }
 

@@ -12,6 +12,7 @@ import { getTotalBeats } from './helpers.js';
 import { drawGlobalPlayhead, initGlobalPlayhead } from './playhead/global-playhead.js';
 import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';
 import { setupControlModeSwitch } from './setup/controlModeSwitch.js';
+import { setupSelectModeUI } from './sequencer/grid/interaction/select-mode-ui.js';
 
 function refreshGlobalMiniContour() {
   drawGlobalMiniContour(globalMiniCanvas, sequencers);
@@ -33,7 +34,7 @@ const visualizer = setupVisualizer(waveform, document.getElementById('visualizer
 const { seq: firstSeq, wrapper: firstSeqWrapper } = createSequencer();
 toggleZoomControls(firstSeqWrapper, true);
 
-
+setupSelectModeUI();
 refreshGlobalMiniContour();
 setupAddTrackButton();
 setupNoteDurationButtons();

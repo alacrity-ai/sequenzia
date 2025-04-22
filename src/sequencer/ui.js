@@ -1,5 +1,8 @@
+// sequencer/ui.js
+
 import { config } from '../setup/sequencers.js';
 import { initConfigModal } from '../userconfig/ConfigInteraction.js';
+import { getEditMode, EditModes } from '../setup/editModeStore.js';
 
 const SNAP_RESOLUTIONS = {
   "4": "𝅝",      // whole note
@@ -36,6 +39,8 @@ export function setupUI({
   const playBtnIcon = playBtn.querySelector('use');
   const stopBtn = document.getElementById('stop-button');
   const durationSelect = document.getElementById('note-duration');
+  const dottedNoteBtn = document.getElementById('dotted-note-btn');
+  const tripletNoteBtn = document.getElementById('triplet-note-btn');
   durationSelect.value = String(config.currentDuration || 1);
   const snapSelect = document.getElementById('snap-resolution');
   snapSelect.value = String(config.snapResolution || 0.25);
@@ -96,21 +101,41 @@ export function setupUI({
   };
   
   window.addEventListener('keydown', (e) => {
-    // If any AI modal is open and visible, allow normal spacebar behavior
+    // Skip if any AI modal is open
     const modalOpen = document.querySelector('.ai-modal:not(.hidden)');
     if (modalOpen) return;
   
+    // Ignore when typing into input/textarea
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  
+    // Spacebar = play
     if (e.code === 'Space') {
       e.preventDefault();
       playBtn.click();
       return;
     }
   
+    // Only allow duration keys in NOTE PLACEMENT mode
+    if (getEditMode() !== EditModes.NOTE_PLACEMENT) return;
+  
     if (durationHotkeys.hasOwnProperty(e.code)) {
       e.preventDefault();
       const duration = durationHotkeys[e.code];
       durationSelect.value = duration;
       durationSelect.dispatchEvent(new Event('change'));
+    }
+
+    if (e.key === '.') {
+      e.preventDefault();
+      dottedNoteBtn?.click();
+      return;
+    }
+  
+    if (e.key === '/') {
+      e.preventDefault();
+      tripletNoteBtn?.click();
+      return;
     }
   });
 

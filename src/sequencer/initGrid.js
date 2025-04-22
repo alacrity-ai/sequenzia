@@ -8,18 +8,24 @@ import { drawNotes } from './grid/drawing/note-renderer.js';
 import { drawPlayhead } from './grid/drawing/playhead-renderer.js';
 import { getCanvasPos } from './grid/interaction/canvas-coords.js';
 import { findNoteAt } from './grid/interaction/note-finder.js';
-import { bindMouseEvents } from './grid/interaction/mouse-handlers.js';
 import { drawGlobalMiniContour } from './mini-contour.js';
 import { sequencers } from '../setup/sequencers.js'; 
 import { getTotalBeats } from '../helpers.js';
 import { initZoomControls } from './grid/interaction/zoom-controls.js';
+import { getNotePlacementHandlers } from './grid/interaction/mouse-handlers.js';
+import { getSelectModeHandlers } from './grid/interaction/select-handlers.js';
+import { subscribeEditMode, getEditMode } from '../setup/editModeStore.js';
+import { clearSelectionTracker } from '../setup/selectionTracker.js';
 
 export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config, sequencer) {
   let previewNote = null;
+  let pastePreviewNote = null;
+  let pastePreviewNotes = null;
   let hoveredNote = null;
   let selectedNote = null;
   let scrollX = 0;
   let scrollY = 0;
+
   let playheadX = null;
 
   const ZOOM_LEVELS = [
@@ -71,23 +77,50 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.translate(-scrollX + labelWidth, -scrollY);
+    const selectedNotes = handlerContext.getSelectedNotes();
 
     drawGridBackground(ctx, config, scrollX, scrollY, visibleNotes, cellWidth, cellHeight, getPitchFromRow);
 
     drawNotes(ctx, notes, {
-      previewNote,
-      hoveredNote,
-      selectedNote,
-      cellWidth,
-      cellHeight,
-      visibleStartBeat: scrollX / cellWidth,
-      visibleEndBeat: (scrollX + canvas.width) / cellWidth,
-      getPitchRow,
-      getPitchClass,
-      PITCH_COLOR_MAP,
-      drawRoundedRect,
+        previewNotes: pastePreviewNotes ?? (previewNote ? [previewNote] : null),
+        hoveredNote,
+        selectedNote,
+        selectedNotes,
+        highlightedNotes: handlerContext.getHighlightedNotes(),
+        cellWidth,
+        cellHeight,
+        visibleStartBeat: scrollX / cellWidth,
+        visibleEndBeat: (scrollX + canvas.width) / cellWidth,
+        getPitchRow,
+        getPitchClass,
+        PITCH_COLOR_MAP,
+        drawRoundedRect,
     });
+      
 
+    // Draw marquee selection box (if active)
+    if (handlerContext.selectionBox?.active) {
+        const box = handlerContext.selectionBox;
+    
+        const x1 = box.startX;
+        const y1 = box.startY;
+        const x2 = box.currentX;
+        const y2 = box.currentY;
+    
+        const left = Math.min(x1, x2);
+        const top = Math.min(y1, y2);
+        const width = Math.abs(x2 - x1);
+        const height = Math.abs(y2 - y1);
+    
+        ctx.save();
+        ctx.strokeStyle = 'rgba(128, 90, 213, 1.0)'; // tailwind purple-500
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        drawRoundedRect(ctx, left, top, width, height, 3);
+        ctx.stroke();
+        ctx.restore();
+    }
+  
     ctx.restore();
   }
   
@@ -162,36 +195,132 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
     }
   }
 
-  // Bind all event listeners
-  bindMouseEvents(canvas, {
+  let activeMouseHandler = null;
+  let selectedNotes = [];
+
+  const handlerContext = {
     sequencer,
+    grid: null,
     config,
     notes,
-    getCellWidth: () => cellWidth,
     getCellHeight: () => cellHeight,
     getCanvasPos: (e) => getCanvasPos(canvas, e, scrollContainer, labelWidth),
     findNoteAt: (x, y) => findNoteAt(x, y, notes, getPitchRow, cellHeight, cellWidth),
     scheduleRedraw,
     getPitchFromRow,
-    getSnappedBeatFromX: (x) => getSnappedBeatFromX(x, config, () => cellWidth),
-    getRawBeatFromX: (x) => getRawBeatFromX(x, () => cellWidth),    
+    getSnappedBeatFromX: (x) => getSnappedBeatFromX(x, config, () => cellWidth), 
     updatePreview: note => (previewNote = note),
     clearPreview: () => (previewNote = null),
     getSelectedNote: () => selectedNote,
-    setSelectedNote: n => (selectedNote = n),
-    getHoveredNote: () => hoveredNote,
+    setSelectedNote: n => {
+      selectedNote = n;
+      selectedNotes = n ? [n] : [];
+    },
+    
+    getSelectedNotes: () => selectedNotes,
+    setSelectedNotes: ns => {
+      selectedNotes = ns;
+      selectedNote = ns.length === 1 ? ns[0] : null;
+    },    
     setHoveredNote: n => (hoveredNote = n),
     onNotesChanged: refreshGlobalMiniContour
+  };
+  
+  function setMouseHandler(handler) {
+    if (activeMouseHandler) activeMouseHandler.detach(canvas);
+    activeMouseHandler = handler;
+    if (activeMouseHandler) activeMouseHandler.attach(canvas);
+  }
+  
+  // Clear selection of notes
+  function clearSelection() {
+    selectedNote = null;
+    selectedNotes = [];
+    hoveredNote = null;
+    pastePreviewNote = null;
+    highlightedNotesDuringMarquee = [];
+    scheduleRedraw();
+  }
+  
+  // Sync with current mode at init
+  const currentMode = getEditMode();
+  if (currentMode === 'note-placement') {
+    setMouseHandler(getNotePlacementHandlers(handlerContext));
+  } else if (currentMode === 'select') {
+    setMouseHandler(getSelectModeHandlers(handlerContext));
+  } else {
+    setMouseHandler(null);
+  }
+
+ // Subscribe to mode changes
+ let unsubscribe = subscribeEditMode(mode => {
+    // Clear previews
+    previewNote = null;
+    pastePreviewNotes = null;
+    highlightedNotesDuringMarquee = [];
+    handlerContext.clearPreview?.();
+    handlerContext.setPastePreviewNotes?.(null);
+  
+    // Clear any in-progress selectionBox
+    if (handlerContext.selectionBox) {
+        handlerContext.selectionBox.active = false;
+        handlerContext.selectionBox = null;
+    }
+
+    // Clear selection
+    clearSelection();
+  
+    // Set interaction handler
+    if (mode === 'note-placement') {
+      setMouseHandler(getNotePlacementHandlers(handlerContext));
+    } else if (mode === 'select') {
+      setMouseHandler(getSelectModeHandlers(handlerContext));
+    } else {
+      setMouseHandler(null);
+    }
+  
+    // Full redraw
+    scheduleRedraw();
   });  
 
-  return {
+  const grid = {
+    canvas,
     scheduleRedraw,
     drawPlayhead: drawPlayheadWrapper,
     getSelectedNote: () => selectedNote,
-    clearSelection: () => { selectedNote = null; scheduleRedraw(); },
+    clearSelection,
     getPreviewNote: () => previewNote,
     zoomIn,
     zoomOut,
     getXForBeat: beat => beat * cellWidth,
+    setMouseHandler,
+    setCursor: (cursor) => { canvas.style.cursor = cursor; },
+    gridContext: handlerContext,
+    getSelectedNotes: () => selectedNotes,
+    setSelectedNotes: ns => {
+      selectedNotes = ns;
+      selectedNote = ns.length === 1 ? ns[0] : null;
+    },
+    destroy() {
+      unsubscribe();
+      clearSelectionTracker();
+    }
   };
+  
+  // Add a method to set the paste preview notes
+  handlerContext.setPastePreviewNotes = notes => {
+    pastePreviewNotes = notes;
+  };
+
+  // Add a method to get the highlighted notes during marquee selection
+  let highlightedNotesDuringMarquee = [];
+  handlerContext.getHighlightedNotes = () => highlightedNotesDuringMarquee;
+  handlerContext.setHighlightedNotes = (notes) => {
+    highlightedNotesDuringMarquee = notes;
+  };
+
+  // ✅ Now wire up the back-reference
+  handlerContext.grid = grid;
+  
+  return grid;
 }
