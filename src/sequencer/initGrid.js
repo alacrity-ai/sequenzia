@@ -16,6 +16,7 @@ import { getNotePlacementHandlers } from './grid/interaction/mouse-handlers.js';
 import { getSelectModeHandlers } from './grid/interaction/select-handlers.js';
 import { subscribeEditMode, getEditMode } from '../setup/editModeStore.js';
 import { clearSelectionTracker } from '../setup/selectionTracker.js';
+import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
 
 export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config, sequencer) {
   let previewNote = null;
@@ -74,13 +75,17 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
   }
 
   function drawGrid() {
+    // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-    ctx.translate(-scrollX + labelWidth, -scrollY);
-    const selectedNotes = handlerContext.getSelectedNotes();
 
+    // Translate the canvas to account for scrolling
+    ctx.translate(-scrollX + labelWidth, -scrollY);
+
+    // Draw the grid itself
     drawGridBackground(ctx, config, scrollX, scrollY, visibleNotes, cellWidth, cellHeight, getPitchFromRow);
 
+    // Draw the notes on the grid
     drawNotes(ctx, notes, {
         previewNotes: pastePreviewNotes ?? (previewNote ? [previewNote] : null),
         hoveredNote,
@@ -97,28 +102,9 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
         drawRoundedRect,
     });
       
-
-    // Draw marquee selection box (if active)
+    // Draw the marquee selection
     if (handlerContext.selectionBox?.active) {
-        const box = handlerContext.selectionBox;
-    
-        const x1 = box.startX;
-        const y1 = box.startY;
-        const x2 = box.currentX;
-        const y2 = box.currentY;
-    
-        const left = Math.min(x1, x2);
-        const top = Math.min(y1, y2);
-        const width = Math.abs(x2 - x1);
-        const height = Math.abs(y2 - y1);
-    
-        ctx.save();
-        ctx.strokeStyle = 'rgba(128, 90, 213, 1.0)'; // tailwind purple-500
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        drawRoundedRect(ctx, left, top, width, height, 3);
-        ctx.stroke();
-        ctx.restore();
+        drawMarqueeSelectionBox(ctx, handlerContext);
     }
   
     ctx.restore();
