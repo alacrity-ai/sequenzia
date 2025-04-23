@@ -1,11 +1,11 @@
 import { initGrid } from './initGrid.js';
-// import { drawPianoRoll } from './piano-roll.js';
-import { audioCtx, masterGain, playNoteWithContext } from '../audio/audio.js';
+import { audioCtx, masterGain } from '../audio/audio.js';
 import { onBeatUpdate } from './transport.js';
 import { getTotalBeats } from '../helpers.js';
 import { loadInstrument } from '../sf2/sf2-loader.js';
 import { loadAndPlayNote } from '../sf2/sf2-player.js';
 import { pitchToMidi } from '../audio/pitch-utils.js';
+import { drawMiniContour } from './mini-contour.js';
 
 export default class Sequencer {
   constructor(containerEl, config, context = audioCtx, destination = masterGain, instrument = 'fluidr3-gm/acoustic_grand_piano') {
@@ -79,6 +79,7 @@ export default class Sequencer {
 
     const noteCanvas = this.container.querySelector('canvas.note-grid');
     const playheadCanvas = this.container.querySelector('.playhead-canvas');
+    const miniCanvas = this.container.querySelector('.mini-contour');
 
     if (noteCanvas) {
       noteCanvas.width = fullWidth;
@@ -88,6 +89,11 @@ export default class Sequencer {
     if (playheadCanvas) {
       playheadCanvas.width = fullWidth;
       playheadCanvas.style.width = `${fullWidth}px`;
+    }11
+
+    // Always update mini contour when measures change
+    if (miniCanvas) {
+      drawMiniContour(miniCanvas, this.notes, this.config, this.colorIndex);
     }
 
     this.redraw();

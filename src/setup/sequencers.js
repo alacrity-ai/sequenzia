@@ -221,8 +221,9 @@ export function setupAddTrackButton() {
   const canvas = document.getElementById('global-mini-contour');
 
   addBtn.addEventListener('click', () => {
-    createSequencer();
+    const { seq, wrapper } = createSequencer();
     drawGlobalMiniContour(canvas, sequencers);
+    toggleZoomControls(wrapper, true);
   });
 }
 
