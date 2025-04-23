@@ -24,8 +24,6 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
   let pastePreviewNotes = null;
   let hoveredNote = null;
   let selectedNote = null;
-  let scrollX = 0;
-  let scrollY = 0;
 
   let playheadX = null;
 
@@ -61,13 +59,6 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
   playheadCanvas.style.width = `${fullWidth}px`;
   playheadCanvas.style.height = `${fullHeight}px`;
 
-  // Handle scroll
-  scrollContainer.addEventListener('scroll', () => {
-    scrollX = scrollContainer.scrollLeft;
-    scrollY = scrollContainer.scrollTop;
-    scheduleRedraw();
-  });
-
   let frameId = null;
   function scheduleRedraw() {
     if (frameId !== null) cancelAnimationFrame(frameId);
@@ -79,11 +70,11 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
 
-    // Translate the canvas to account for scrolling
-    ctx.translate(-scrollX + labelWidth, -scrollY);
+    // Translate the canvas for the note label (piano roll)
+    ctx.translate(labelWidth, 0);
 
     // Draw the grid itself
-    drawGridBackground(ctx, config, scrollX, scrollY, visibleNotes, cellWidth, cellHeight, getPitchFromRow);
+    drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow);
 
     // Draw the notes on the grid
     drawNotes(ctx, notes, {
@@ -94,8 +85,8 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
         highlightedNotes: handlerContext.getHighlightedNotes(),
         cellWidth,
         cellHeight,
-        visibleStartBeat: scrollX / cellWidth,
-        visibleEndBeat: (scrollX + canvas.width) / cellWidth,
+        visibleStartBeat: 0,
+        visibleEndBeat: canvas.width / cellWidth,
         getPitchRow,
         getPitchClass,
         PITCH_COLOR_MAP,
@@ -157,7 +148,7 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
   
   function drawPlayheadWrapper(x) {
     playheadX = x;
-    drawPlayhead(playheadCtx, x, scrollX, scrollY, labelWidth, canvas.height);
+    drawPlayhead(playheadCtx, x, labelWidth, canvas.height);
   }
 
   initZoomControls(sequencer.container, zoomIn, zoomOut, resetZoom);

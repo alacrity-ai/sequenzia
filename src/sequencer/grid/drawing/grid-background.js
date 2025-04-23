@@ -9,7 +9,7 @@ import { getTotalBeats } from '../../../helpers.js';
  * - thick vertical lines per measure
  * - thin subdivisions per beat
  */
-export function drawGridBackground(ctx, config, scrollX, scrollY, visibleNotes, cellWidth, cellHeight, getPitchFromRow) {
+export function drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow) {
   const { totalMeasures, beatsPerMeasure } = config;
 
   // === ROW BACKGROUND ===
