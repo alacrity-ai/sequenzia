@@ -15,9 +15,11 @@ export function drawNotes(ctx, notes, {
   PITCH_COLOR_MAP,
   drawRoundedRect
 }) {
+  // Set overscan compensation
+  const overscanBeats = 2;
 
   for (const note of notes) {
-    if (note.start + note.duration < visibleStartBeat || note.start > visibleEndBeat) continue;
+    if (note.start + note.duration < visibleStartBeat - overscanBeats || note.start > visibleEndBeat) continue;
 
     const x = note.start * cellWidth;
     const y = getPitchRow(note.pitch) * cellHeight;

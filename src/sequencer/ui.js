@@ -3,6 +3,7 @@
 import { config } from '../setup/sequencers.js';
 import { initConfigModal } from '../userconfig/ConfigInteraction.js';
 import { getEditMode, EditModes } from '../setup/editModeStore.js';
+import { drawMiniContour } from './mini-contour.js';
 
 const SNAP_RESOLUTIONS = {
   "4": "𝅝",      // whole note
