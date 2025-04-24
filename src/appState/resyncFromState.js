@@ -13,9 +13,9 @@ import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/mini-contou
  */
 export function resyncFromState(state = getAppState()) {
   // 🔁 Update transport globals
-  updateTempo(state.tempo);
-  updateTimeSignature(state.timeSignature[0]);
-  updateTotalMeasures(state.totalMeasures);
+  updateTempo(state.tempo, false);
+  updateTimeSignature(state.timeSignature[0], false);
+  updateTotalMeasures(state.totalMeasures, false);
 
   // 🔁 Ensure all sequencers exist and are in sync
   for (const serialized of state.sequencers) {

@@ -15,14 +15,23 @@ export function pushDiff({ forwardDiff, reverseDiff }) {
 export function undo() {
   if (pointer < 0) return null;
 
-  const entry = history[pointer];
-  if (!entry || !entry.reverseDiff) return null;
+  // Scan backward to find the previous non-checkpoint diff
+  for (let i = pointer; i >= 0; i--) {
+    const entry = history[i];
+    if (entry?.forwardDiff?.type === 'CHECKPOINT') {
+      return null; // Cannot undo past a checkpoint
+    }
+    if (entry?.reverseDiff) {
+      pointer = i - 1;
+      applyDiff(entry.reverseDiff);
+      notifyStateUpdated(getAppState());
+      return entry.reverseDiff;
+    }
+  }
 
-  pointer--;
-  applyDiff(entry.reverseDiff);
-  notifyStateUpdated(getAppState());
-  return entry.reverseDiff;
+  return null; // Nothing to undo
 }
+
 
 export function redo() {
   if (pointer >= history.length - 1) return null;

@@ -1,6 +1,7 @@
 // js/main.js
 import { setupKeyboard } from './setup/keyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
+import { collapseAllSequencers } from './helpers.js';
 import { config, sequencers, createSequencer, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';
 import { setupUI, resetPlayButtonState } from './sequencer/ui.js';
 import { exportSessionToJSON, exportSessionToWAV } from './export/save.js';
@@ -16,6 +17,7 @@ import { onStateUpdated } from './appState/onStateUpdated.js';
 import { resyncFromState } from './appState/resyncFromState.js';
 import { recordDiff } from './appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './appState/diffEngine/types/sequencer/createSequencer.js';
+import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/diffEngine/types/internal/checkpoint.js';
 
 onStateUpdated(resyncFromState);
 
@@ -42,6 +44,12 @@ const firstInstrument = 'fluidr3-gm/acoustic_grand_piano';
 recordDiff(
   createCreateSequencerDiff(firstId, firstInstrument),
   createReverseCreateSequencerDiff(firstId)
+);
+
+// Lock in the initial application state so undo never goes before this point
+recordDiff(
+  createCheckpointDiff('Initial App State'),
+  createReverseCheckpointDiff('Initial App State')
 );
 
 setupSelectModeUI();
@@ -169,6 +177,13 @@ setupUI({
         );
       }
   
+      // Lock the session state with a checkpoint
+      recordDiff(
+        createCheckpointDiff('Session Loaded'),
+        createReverseCheckpointDiff('Session Loaded')
+      );
+      
+      collapseAllSequencers();
       refreshGlobalMiniContour();
       setCurrentBeat(0);
       drawGlobalPlayhead(0);
