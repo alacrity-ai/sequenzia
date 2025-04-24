@@ -1,7 +1,7 @@
 import { initGrid } from './initGrid.js';
 import { audioCtx, masterGain } from '../audio/audio.js';
-import { onBeatUpdate } from './transport.js';
-import { getTotalBeats } from '../helpers.js';
+import { onBeatUpdate, getTempo } from './transport.js';
+import { getTotalBeats } from './transport.js';
 import { loadInstrument } from '../sf2/sf2-loader.js';
 import { loadAndPlayNote } from '../sf2/sf2-player.js';
 import { pitchToMidi } from '../audio/pitch-utils.js';
@@ -71,8 +71,7 @@ export default class Sequencer {
   }  
 
   updateTotalMeasures(newTotalMeasures) {
-    this.config.totalMeasures = newTotalMeasures;
-    const totalBeats = getTotalBeats(this.config);
+    const totalBeats = getTotalBeats();
     this.clampNotesToGrid();
 
     const fullWidth = totalBeats * this.config.cellWidth + (this.config.labelWidth || 64);
@@ -100,7 +99,7 @@ export default class Sequencer {
   }
 
   clampNotesToGrid() {
-    const totalBeats = getTotalBeats(this.config);
+    const totalBeats = getTotalBeats();
 
     const clamped = this.notes.filter(note => note.start < totalBeats);
     clamped.forEach(note => {
@@ -119,29 +118,31 @@ export default class Sequencer {
     this._activeNotes.clear();
     this._noteHandlers.clear();
   
-    const bpm = this.config.bpm;
+    const bpm = getTempo();
     const beatToSec = 60 / bpm;
   
     this._beatHandler = (beat) => {
       this.grid?.drawPlayhead(this.grid.getXForBeat(beat));
       if (!this.shouldPlay) return;
-  
+    
+      const beatToSec = 60 / getTempo(); // ⬅️ move inside the handler
+    
       for (const note of this.notes) {
         const noteStart = note.start;
         const noteEnd = note.start + note.duration;
-  
+    
         if (
           !this._activeNotes.has(note) &&
           noteStart <= beat &&
           beat <= noteEnd
         ) {
           const durationSec = note.duration * beatToSec;
-          this.playNote(note.pitch, durationSec); // 🔁 no need to track handler
-  
-          this._activeNotes.add(note); // Only to prevent retriggering
+          this.playNote(note.pitch, durationSec);
+    
+          this._activeNotes.add(note);
         }
       }
-    };
+    };    
   
     this._unsub = onBeatUpdate(this._beatHandler);
     this._beatHandler(0); // ✅ force first tick
@@ -261,7 +262,7 @@ export default class Sequencer {
   }
   
   async exportToOffline() {
-    const beatToSec = 60 / this.config.bpm;
+    const beatToSec = 60 / getTempo();
   
     // 🛠 Ensure instrument is loaded into the correct context
     const instrument = await loadInstrument(this.instrumentName, this.context, this.destination);

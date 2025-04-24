@@ -1,9 +1,17 @@
-import { pitchToMidi, midiToPitch, getTotalBeats } from '../../../helpers.js';
+// src/sequencer/grid/interaction/mouse-handlers.js
+
+import { pitchToMidi, midiToPitch } from '../../../helpers.js';
+import { getTotalBeats } from '../../transport.js'
+import { recordDiff } from '../../../appState/appState.js';
+import { createPlaceNotesDiff, createReversePlaceNotesDiff } from '../../../appState/diffEngine/types/grid/placeNotes.js';
+import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../appState/diffEngine/types/grid/deleteNotes.js';
+import { createMoveNotesDiff, createReverseMoveNotesDiff } from '../../../appState/diffEngine/types/grid/moveNotes.js';
 
 export function getNotePlacementHandlers(ctx) {
   let dragState = null;
   let lastPlayedPitch = null;
 
+  // Left click to place a note
   function clickHandler(e) {
     const { x, y } = ctx.getCanvasPos(e);
 
@@ -23,34 +31,69 @@ export function getNotePlacementHandlers(ctx) {
 
     const snappedBeat = ctx.getSnappedBeatFromX(x);
     const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
-    const totalBeats = getTotalBeats(ctx.config);
+    const totalBeats = getTotalBeats();
 
     if (snappedBeat + ctx.config.currentDuration > totalBeats) return;
 
     ctx.sequencer.playNote(pitch, 0.5);
 
-    ctx.notes.push({
+    const newNote = {
       pitch,
       start: snappedBeat,
       duration: ctx.config.currentDuration
-    });
+    };
+    
+    recordDiff(
+      createPlaceNotesDiff(ctx.sequencer.id, [newNote]),
+      createReversePlaceNotesDiff(ctx.sequencer.id, [newNote])
+    );    
 
     ctx.scheduleRedraw();
     ctx.onNotesChanged?.();
   }
 
+  // Right click to delete a note
   function contextHandler(e) {
     e.preventDefault();
     const { x, y } = ctx.getCanvasPos(e);
     const found = ctx.findNoteAt(x, y);
-    if (found) {
-      const idx = ctx.notes.indexOf(found);
-      if (idx !== -1) ctx.notes.splice(idx, 1);
-      ctx.scheduleRedraw();
-      ctx.onNotesChanged?.();
-    }
+    if (!found) return;
+  
+    const idx = ctx.notes.indexOf(found);
+    if (idx === -1) return;
+  
+    const toDelete = [found];
+  
+    // Record the diff
+    recordDiff(
+      createDeleteNotesDiff(ctx.sequencer.id, toDelete),
+      createReverseDeleteNotesDiff(ctx.sequencer.id, toDelete)
+    );
   }
 
+  // Hold down on a note (with the intent to drag it)
+  function downHandler(e) {
+    const { x, y } = ctx.getCanvasPos(e);
+    const note = ctx.findNoteAt(x, y);
+    if (!note) return;
+  
+    ctx.setSelectedNote(note);
+  
+    dragState = {
+      startX: x,
+      startY: y,
+      anchorNote: note,
+      initialStart: note.start,
+      initialMidi: pitchToMidi(note.pitch),
+      initialNote: {
+        pitch: note.pitch,
+        start: note.start,
+        duration: note.duration
+      }
+    };
+  }
+
+  // Handles dragging of the note while mouse is held down
   function moveHandler(e) {
     const { x, y } = ctx.getCanvasPos(e);
     if (x < 0) {
@@ -69,7 +112,7 @@ export function getNotePlacementHandlers(ctx) {
     if (!hovered && !dragState) {
       const snappedBeat = ctx.getSnappedBeatFromX(x);
       const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
-      const totalBeats = getTotalBeats(ctx.config);
+      const totalBeats = getTotalBeats();
 
       if (snappedBeat + ctx.config.currentDuration <= totalBeats) {
         ctx.updatePreview({ pitch, start: snappedBeat, duration: ctx.config.currentDuration });
@@ -84,7 +127,7 @@ export function getNotePlacementHandlers(ctx) {
       const deltaX = x - dragState.startX;
       const beatDelta = ctx.getSnappedBeatFromX(deltaX) - ctx.getSnappedBeatFromX(0);
       const newStart = Math.max(0, dragState.initialStart + beatDelta);
-      const totalBeats = getTotalBeats(ctx.config);
+      const totalBeats = getTotalBeats();
 
       if (newStart + selected.duration <= totalBeats) {
         selected.start = newStart;
@@ -116,28 +159,38 @@ export function getNotePlacementHandlers(ctx) {
     ctx.scheduleRedraw();
   }
 
+  // Handles releasing a dragged note
+  function upHandler() {
+    if (!dragState || !ctx.getSelectedNote()) {
+      dragState = null;
+      return;
+    }
+  
+    const { anchorNote, initialNote } = dragState;
+    const finalNote = {
+      pitch: anchorNote.pitch,
+      start: anchorNote.start,
+      duration: anchorNote.duration
+    };
+  
+    const wasMoved =
+      initialNote.pitch !== finalNote.pitch ||
+      initialNote.start !== finalNote.start;
+  
+    if (wasMoved) {
+      recordDiff(
+        createMoveNotesDiff(ctx.sequencer.id, [initialNote], [finalNote]),
+        createReverseMoveNotesDiff(ctx.sequencer.id, [initialNote], [finalNote])
+      );
+    }
+  
+    dragState = null;
+  }
+
   function leaveHandler() {
     ctx.clearPreview();
     ctx.setHoveredNote(null);
     ctx.scheduleRedraw();
-  }
-
-  function downHandler(e) {
-    const { x, y } = ctx.getCanvasPos(e);
-    const note = ctx.findNoteAt(x, y);
-    if (!note) return;
-
-    ctx.setSelectedNote(note);
-    dragState = {
-      startX: x,
-      startY: y,
-      initialStart: note.start,
-      initialMidi: pitchToMidi(note.pitch)
-    };
-  }
-
-  function upHandler() {
-    dragState = null;
   }
 
   return {

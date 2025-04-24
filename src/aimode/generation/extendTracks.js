@@ -10,6 +10,7 @@ import { config } from '../../setup/sequencers.js';
 import { getMaxBeatsContext, getExtendBeatsAmount } from '../aiConfig.js';
 import { drawMiniContour, drawGlobalMiniContour } from '../../sequencer/mini-contour.js';
 import { updateMeasuresInput } from '../../sequencer/ui.js';
+import { updateTotalMeasures, getTimeSignature } from '../../sequencer/transport.js';
 
 export async function extendTracksWithAI() {
     const workingModal = document.getElementById('ai-working-modal');
@@ -46,10 +47,9 @@ export async function extendTracksWithAI() {
       const merged = mergeTracksMaps(trackMaps, aiResponse);
       const allMergedBeats = merged.flatMap(t => t.n.map(n => n[1] + n[2]));
       const maxBeat = Math.max(...allMergedBeats);
-      const newTotalMeasures = Math.ceil(maxBeat / config.beatsPerMeasure);
+      const newTotalMeasures = Math.ceil(maxBeat / getTimeSignature());
   
-      config.totalMeasures = newTotalMeasures;
-      updateMeasuresInput(newTotalMeasures);
+      updateTotalMeasures(newTotalMeasures);
   
       allSequencers.forEach((seq, i) => {
         seq.updateTotalMeasures(newTotalMeasures);

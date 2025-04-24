@@ -1,3 +1,5 @@
+// src/appState/stateModel.js
+
 export const createEmptyAppState = () => ({
     tempo: 120,
     timeSignature: [4, 4],

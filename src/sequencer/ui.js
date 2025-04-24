@@ -3,7 +3,8 @@
 import { config } from '../setup/sequencers.js';
 import { initConfigModal } from '../userconfig/ConfigInteraction.js';
 import { getEditMode, EditModes } from '../setup/editModeStore.js';
-import { drawMiniContour } from './mini-contour.js';
+import { getTimeSignature, getTotalMeasures } from './transport.js';
+import { undo, redo } from '../appState/stateHistory.js';
 
 const SNAP_RESOLUTIONS = {
   "4": "𝅝",      // whole note
@@ -116,7 +117,19 @@ export function setupUI({
       playBtn.click();
       return;
     }
-  
+
+    // Undo / Redo
+    if (e.metaKey || e.ctrlKey) {
+      if (e.key === 'z') undo();
+      if (e.key === 'y') redo();
+    }
+
+    // Prevent accidental browser reload (Ctrl+R / Cmd+R)
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'r') {
+      e.preventDefault();
+      return;
+    }
+
     // Only allow duration keys in NOTE PLACEMENT mode
     if (getEditMode() !== EditModes.NOTE_PLACEMENT) return;
   
@@ -246,9 +259,9 @@ export function setupUI({
 
   initConfigModal();
 
-  // Initialize inputs with correct values from config
-  measuresInput.value = config.totalMeasures;
-  beatsPerMeasureInput.value = config.beatsPerMeasure;
+  // Initialize inputs with correct values
+  measuresInput.value = getTotalMeasures();
+  beatsPerMeasureInput.value = getTimeSignature();
 
   measuresInput.addEventListener('change', (e) => {
     const measures = parseInt(e.target.value, 10);

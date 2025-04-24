@@ -1,9 +1,14 @@
 import Sequencer from '../sequencer/sequencer.js';
 import { drawMiniContour } from '../sequencer/mini-contour.js';
-import { importFromJSON, importSessionFromJSON } from '../export/load.js';
+import { importSessionFromJSON } from '../export/load.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
-import { drawGlobalMiniContour } from '../sequencer/mini-contour.js';
 import { audioCtx, masterGain } from '../audio/audio.js';
+import { recordDiff } from '../appState/appState.js'
+import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
+import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../appState/diffEngine/types/sequencer/deleteSequencer.js';
+import { getAppState, setAppState } from '../appState/appState.js';
+import { clearHistory } from '../appState/stateHistory.js';
+import { notifyStateUpdated } from '../appState/onStateUpdated.js';
 
 export const config = {
   cellWidth: 40,
@@ -13,11 +18,8 @@ export const config = {
   currentDuration: 1,
   snapResolution: 1,
   isTripletMode: false,
-  bpm: 220,
   loopEnabled: false,
   useEqualTemperament: true,
-  beatsPerMeasure: 4,
-  totalMeasures: 8
 };
 
 export const sequencers = [];
@@ -49,7 +51,6 @@ export function getSequencerById(id) {
     String(seq.id) === targetId || String(seq.config?.id) === targetId
   );
 }
-
 
 function updateSoloStates() {
   const anySoloed = sequencers.some(s => s.solo);
@@ -89,6 +90,7 @@ export function createSequencer(initialState) {
   seq.updateTrackLabel();
   seq.initInstrument(); // ✅ instrument already correctly set now
 
+  // Collapse Button
   const collapseBtn = wrapper.querySelector('.collapse-btn');
   const collapseIcon = collapseBtn.querySelector('use');
   const body = wrapper.querySelector('.sequencer-body');
@@ -101,40 +103,40 @@ export function createSequencer(initialState) {
     if (hidden) drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
   });
 
+  // Delete Button
   const deleteBtn = wrapper.querySelector('.delete-btn');
-  deleteBtn.innerHTML = `
-    <svg class="w-6 h-6" aria-hidden="true">
-      <use href="#icon-close-circle"></use>
-    </svg>
-  `;
   deleteBtn.addEventListener('click', () => {
     const modal = document.getElementById('delete-confirm-modal');
     const confirmBtn = document.getElementById('delete-confirm');
     const cancelBtn = document.getElementById('delete-cancel');
-
+  
     modal.classList.remove('hidden');
-
-    // One-time event listeners for this specific deletion
+  
     const handleConfirm = () => {
-      seq.destroy();
-      const idx = sequencers.indexOf(seq);
-      if (idx >= 0) sequencers.splice(idx, 1);
+      // 🧠 Construct forward + reverse diffs
+      const forwardDiff = createDeleteSequencerDiff(seq.id, seq.instrumentName, seq.notes);
+      const reverseDiff = createReverseDeleteSequencerDiff(seq.id, seq.instrumentName, seq.notes);
+  
+      recordDiff(forwardDiff, reverseDiff);
+  
+      // 🔁 AppState will be updated, and resyncFromState will destroy the live sequencer automatically
       cleanup();
     };
-
+  
     const handleCancel = () => {
       cleanup();
     };
-
+  
     const cleanup = () => {
       modal.classList.add('hidden');
       confirmBtn.removeEventListener('click', handleConfirm);
       cancelBtn.removeEventListener('click', handleCancel);
     };
-
+  
     confirmBtn.addEventListener('click', handleConfirm);
     cancelBtn.addEventListener('click', handleCancel);
   });
+  
 
   // Mute/Solo buttons
   const muteBtn = wrapper.querySelector('.mute-btn');
@@ -213,27 +215,40 @@ export function createSequencer(initialState) {
 }
 
 export function destroyAllSequencers() {
-  sequencers.slice().forEach(s => s.destroy());
+  // 🔁 Destroy all live sequencers and clear UI
+  sequencers.slice().forEach(seq => seq.destroy());
   sequencers.length = 0;
+
+  // 🔁 Reset canonical state
+  const state = getAppState();
+  const newState = structuredClone(state);
+  newState.sequencers = [];
+
+  // 🔁 Clear undo/redo history
+  clearHistory();
+
+  // 🔁 Commit and notify
+  setAppState(newState);
+  notifyStateUpdated(newState);
 }
 
 export function setupAddTrackButton() {
   const canvas = document.getElementById('global-mini-contour');
 
   addBtn.addEventListener('click', () => {
-    const { seq, wrapper } = createSequencer();
-    drawGlobalMiniContour(canvas, sequencers);
-    toggleZoomControls(wrapper, true);
+    const newId = sequencers.length;
+    const instrument = 'fluidr3-gm/acoustic_grand_piano';
+
+    recordDiff(
+      createCreateSequencerDiff(newId, instrument),
+      createReverseCreateSequencerDiff(newId)
+    );
   });
 }
 
 export async function loadSession(file) {
   let tracks;
-  try {
-    tracks = await importSessionFromJSON(file);
-  } catch {
-    tracks = await importFromJSON(file);
-  }
+  tracks = await importSessionFromJSON(file);
 
   destroyAllSequencers();
 

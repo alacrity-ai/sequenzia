@@ -1,5 +1,5 @@
 import { drawGlobalPlayhead } from './global-playhead.js';
-import { getTotalBeats } from '../helpers.js';
+import { getTotalBeats } from '../sequencer/transport.js'
 import {
   setCurrentBeat,
   isTransportRunning,
@@ -59,7 +59,7 @@ function updatePlayheadFromEvent(e) {
     // Clamp x to canvas width
     x = Math.max(0, Math.min(canvas.width, x));
   
-    const totalBeats = getTotalBeats(config);
+    const totalBeats = getTotalBeats();
     const beat = (x / canvas.width) * totalBeats;
   
     setCurrentBeat(beat);

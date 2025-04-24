@@ -1,3 +1,9 @@
+import { getSequencers } from '../setup/sequencers.js';
+import { recordDiff } from '../appState/appState.js';
+import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState/diffEngine/types/global/changeTempo.js';
+import { createSetTimeSignatureDiff, createReverseSetTimeSignatureDiff } from '../appState/diffEngine/types/global/changeTimeSignature.js';
+import { createSetTotalMeasuresDiff, createReverseSetTotalMeasuresDiff } from '../appState/diffEngine/types/global/changeMeasures.js';
+
 let animationId = null;
 let beatDuration = 500;
 let startTime = null;
@@ -6,6 +12,8 @@ let endBeat = Infinity;
 let listeners = [];
 let onEndCallback = null;
 let currentBeat = 0;
+let beatsPerMeasure = 4; // default fallback
+let totalMeasures = 8; // default fallback
 
 export function onBeatUpdate(listener) {
     listeners.push(listener);
@@ -23,8 +31,96 @@ export function setCurrentBeat(beat) {
   currentBeat = beat;
 }
 
+export function getTotalBeats() {
+  return getTotalMeasures() * getTimeSignature();
+}
+
 export function getCurrentBeat() {
   return currentBeat;
+}
+
+export function updateTempo(bpm, record = true) {
+  if (record) {
+    const prevBpm = getTempo();
+    recordDiff(
+      createChangeTempoDiff(bpm),
+      createReverseChangeTempoDiff(prevBpm)
+    );
+    return;
+  }
+
+  if (isTransportRunning()) {
+    const now = performance.now();
+    const currentBeat = (now - startTime) / beatDuration;
+    beatDuration = 60 / bpm * 1000;
+    startTime = now - (currentBeat * beatDuration);
+  } else {
+    beatDuration = 60 / bpm * 1000;
+  }
+
+  const tempoInput = document.getElementById('tempo-input');
+  if (tempoInput && tempoInput.value !== String(bpm)) {
+    tempoInput.value = bpm;
+  }
+}
+
+export function getTempo() {
+  return 60 / (beatDuration / 1000);
+}
+
+export function updateTimeSignature(beats, record = true) {
+  if (record) {
+    const prev = getTimeSignature();
+    recordDiff(
+      createSetTimeSignatureDiff(beats),
+      createReverseSetTimeSignatureDiff(prev)
+    );
+    return;
+  }
+
+  beatsPerMeasure = beats;
+
+  const beatsInput = document.getElementById('beats-per-measure-input');
+  if (beatsInput && beatsInput.value !== String(beats)) {
+    beatsInput.value = beats;
+  }
+
+  getSequencers().forEach(seq => {
+    if (seq.grid?.resizeAndRedraw) {
+      seq.grid.resizeAndRedraw();
+    } else {
+      seq.grid?.scheduleRedraw();
+    }
+  });
+}
+
+export function getTimeSignature() {
+  return beatsPerMeasure;
+}
+
+export function updateTotalMeasures(measures, record = true) {
+  if (record) {
+    const prev = getTotalMeasures();
+    recordDiff(
+      createSetTotalMeasuresDiff(measures),
+      createReverseSetTotalMeasuresDiff(prev)
+    );
+    return;
+  }
+
+  totalMeasures = measures;
+
+  const measuresInput = document.getElementById('measures-input');
+  if (measuresInput && measuresInput.value !== String(measures)) {
+    measuresInput.value = measures;
+  }
+
+  getSequencers().forEach(seq => {
+    seq.grid?.scheduleRedraw();
+  });
+}
+export function getTotalMeasures() {
+  return totalMeasures;
 }
 
 export function onTransportEnd(callback) {

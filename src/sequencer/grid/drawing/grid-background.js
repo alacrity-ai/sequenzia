@@ -1,7 +1,7 @@
 // grid/drawing/grid-background.js
 import { isBlackKey } from '../geometry.js';
 import { labelWidth } from '../constants.js';
-import { getTotalBeats } from '../../../helpers.js';
+import { getTotalBeats, getTimeSignature } from '../../transport.js';
 
 /**
  * Renders the piano roll grid with:
@@ -10,10 +10,10 @@ import { getTotalBeats } from '../../../helpers.js';
  * - thin subdivisions per beat
  */
 export function drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow) {
-  const { totalMeasures, beatsPerMeasure } = config;
+  const beatsPerMeasure = getTimeSignature(); 
 
   // === ROW BACKGROUND ===
-  const gridWidth = getTotalBeats(config) * cellWidth;
+  const gridWidth = getTotalBeats() * cellWidth;
 
   for (let row = 0; row < visibleNotes; row++) {
     const y = row * cellHeight;
@@ -25,7 +25,6 @@ export function drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHei
     ctx.fillStyle = isBlackKey(pitch) ? '#a088b0' : '#dddddd';
     ctx.fillRect(-labelWidth, y, labelWidth, cellHeight);
   }
-  
 
   // === PITCH LABELS ===
   ctx.font = `${Math.floor(cellHeight * 0.6)}px sans-serif`;
@@ -40,49 +39,32 @@ export function drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHei
   }
 
   // === HORIZONTAL PITCH LINES ===
-ctx.strokeStyle = '#ddd';
-ctx.lineWidth = 1;
-for (let row = 0; row < visibleNotes; row++) {
-  const y = row * cellHeight;
-  ctx.beginPath();
-  ctx.moveTo(0, y);
-  ctx.lineTo(gridWidth, y); // ✅ use gridWidth instead of canvasWidth
-  ctx.stroke();
-}
-
-// ✅ Draw final bottom boundary line
-const finalY = visibleNotes * cellHeight;
-ctx.beginPath();
-ctx.moveTo(0, finalY);
-ctx.lineTo(gridWidth, finalY);
-ctx.stroke();
-
-
-  const maxY = visibleNotes * cellHeight;
+  ctx.strokeStyle = '#ddd';
+  ctx.lineWidth = 1;
+  for (let row = 0; row < visibleNotes; row++) {
+    const y = row * cellHeight;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(gridWidth, y); // ✅ use gridWidth instead of canvasWidth
+    ctx.stroke();
+  }
 
 // === MEASURE + BEAT LINES ===
-const totalBeats = totalMeasures * beatsPerMeasure;
+  const totalBeats = getTotalBeats();
+  console.log(`Got ${totalBeats} beats and beatsPerMeasure: ${beatsPerMeasure}`);
+  const maxY = visibleNotes * cellHeight;
 
-for (let beat = 0; beat <= totalBeats; beat++) {
-  const x = beat * cellWidth;
-  const isMeasureStart = (beat % beatsPerMeasure === 0);
+  for (let beat = 0; beat <= totalBeats; beat++) {
+    const x = beat * cellWidth;
+    const isMeasureStart = (beat % beatsPerMeasure === 0);
 
-  ctx.strokeStyle = isMeasureStart ? '#bbb' : '#eee';
-  ctx.lineWidth = isMeasureStart ? 2 : 1;
+    ctx.strokeStyle = isMeasureStart ? '#bbb' : '#eee';
+    ctx.lineWidth = isMeasureStart ? 2 : 1;
 
-  ctx.beginPath();
-  ctx.moveTo(x, 0);
-  ctx.lineTo(x, maxY);
-  ctx.stroke();
-}
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, maxY);
+    ctx.stroke();
+  }
 
-
-// Draw the final boundary line at the end
-const finalX = totalMeasures * beatsPerMeasure * cellWidth;
-ctx.strokeStyle = '#bbb';
-ctx.lineWidth = 2;
-ctx.beginPath();
-ctx.moveTo(finalX, 0);
-ctx.lineTo(finalX, maxY);
-ctx.stroke();
 }
