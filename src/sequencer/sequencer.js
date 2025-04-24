@@ -193,7 +193,6 @@ export default class Sequencer {
       this._unsub = onBeatUpdate(this._beatHandler);
     }
   }
-  
 
   seekTo(beat) {
     this.stop();

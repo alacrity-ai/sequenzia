@@ -17,6 +17,7 @@ import { getSelectModeHandlers } from './grid/interaction/select-handlers.js';
 import { subscribeEditMode, getEditMode } from '../setup/editModeStore.js';
 import { clearSelectionTracker } from '../setup/selectionTracker.js';
 import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
+import { ZOOM_LEVELS } from './grid/constants.js';
 
 export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config, sequencer) {
   let previewNote = null;
@@ -26,14 +27,6 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
   let selectedNote = null;
 
   let playheadX = null;
-
-  const ZOOM_LEVELS = [
-    { cellWidth: 20, cellHeight: 10 },
-    { cellWidth: 30, cellHeight: 15 },
-    { cellWidth: 40, cellHeight: 20 }, // ⬅️ default
-    { cellWidth: 50, cellHeight: 25 },
-    { cellWidth: 60, cellHeight: 30 }
-  ];
   
   let zoomIndex = 2; // start at default level  
 
@@ -164,7 +157,7 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
     return midiToPitch(clamped);
   }
 
-  // ✅ Refresh the global mini-contour from within this instance
+  // Refresh the global mini-contour from within this instance
   function refreshGlobalMiniContour() {
     const globalCanvas = document.getElementById('global-mini-contour');
     if (globalCanvas) {
