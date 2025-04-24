@@ -14,6 +14,8 @@ import { setupControlModeSwitch } from './setup/controlModeSwitch.js';
 import { setupSelectModeUI } from './sequencer/grid/interaction/select-mode-ui.js';
 import { onStateUpdated } from './appState/onStateUpdated.js';
 import { resyncFromState } from './appState/resyncFromState.js';
+import { recordDiff } from './appState/appState.js';
+import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './appState/diffEngine/types/sequencer/createSequencer.js';
 
 onStateUpdated(resyncFromState);
 
@@ -33,9 +35,14 @@ const pianoCanvas = document.getElementById('piano');
 setupKeyboard(pianoCanvas);
 const waveform = document.getElementById('waveform');
 const visualizer = setupVisualizer(waveform, document.getElementById('visualizer-mode'));
-// Creat the first sequencer
-const { seq: firstSeq, wrapper: firstSeqWrapper } = createSequencer();
-toggleZoomControls(firstSeqWrapper, true);
+
+// Create the first sequencer via diff — just like a user click
+const firstId = 0;
+const firstInstrument = 'fluidr3-gm/acoustic_grand_piano';
+recordDiff(
+  createCreateSequencerDiff(firstId, firstInstrument),
+  createReverseCreateSequencerDiff(firstId)
+);
 
 setupSelectModeUI();
 refreshGlobalMiniContour();
@@ -129,28 +136,38 @@ setupUI({
     try {
       const { tracks, globalConfig } = await importSessionFromJSON(file);
   
+      // Update transport
       updateTempo(globalConfig.bpm);
       updateTimeSignature(globalConfig.beatsPerMeasure);
       updateTotalMeasures(globalConfig.totalMeasures);
   
-      // UI sync
+      // Sync UI elements
       const tempoInput = document.getElementById('tempo-input');
       if (tempoInput) tempoInput.value = getTempo();
   
       const measuresInput = document.getElementById('measures-input');
       if (measuresInput) measuresInput.value = getTotalMeasures();
   
+      // Reset app state & history
       destroyAllSequencers();
   
-      tracks.forEach(state => {
-        const { seq, wrapper } = createSequencer(state);
-        const body = wrapper.querySelector('.sequencer-body');
-        const mini = wrapper.querySelector('canvas.mini-contour');
-        const collapseBtn = wrapper.querySelector('.collapse-btn');
-        body.classList.add('hidden');
-        mini.classList.remove('hidden');
-        collapseBtn.textContent = '⯅';
-      });
+      // Restore sequencers via appState diff
+      for (const [i, state] of tracks.entries()) {
+        const id = i;
+        const instrument = state.instrument || 'fluidr3-gm/acoustic_grand_piano';
+        const notes = state.notes || [];
+  
+        recordDiff(
+          {
+            type: 'CREATE_SEQUENCER',
+            id,
+            instrument,
+            notes: structuredClone(notes),
+            config: state.config || {}
+          },
+          createReverseCreateSequencerDiff(id)
+        );
+      }
   
       refreshGlobalMiniContour();
       setCurrentBeat(0);

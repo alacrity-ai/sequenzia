@@ -6,27 +6,36 @@ import { notifyStateUpdated } from './onStateUpdated.js';
 const history = [];
 let pointer = -1;
 
-export function pushDiff(diff) {
-  history.splice(pointer + 1); // drop future
-  history.push(diff);
+export function pushDiff({ forwardDiff, reverseDiff }) {
+  history.splice(pointer + 1);
+  history.push({ forwardDiff, reverseDiff });
   pointer = history.length - 1;
 }
 
 export function undo() {
-  if (pointer <= 0) return null;
+  if (pointer < 0) return null;
+
+  const entry = history[pointer];
+  if (!entry || !entry.reverseDiff) return null;
+
   pointer--;
-  applyDiff(history[pointer]);
+  applyDiff(entry.reverseDiff);
   notifyStateUpdated(getAppState());
-  return history[pointer];
+  return entry.reverseDiff;
 }
 
 export function redo() {
   if (pointer >= history.length - 1) return null;
+
   pointer++;
-  applyDiff(history[pointer]);
+  const entry = history[pointer];
+  if (!entry || !entry.forwardDiff) return null;
+
+  applyDiff(entry.forwardDiff);
   notifyStateUpdated(getAppState());
-  return history[pointer];
+  return entry.forwardDiff;
 }
+
 
 export function clearHistory() {
   history.length = 0;

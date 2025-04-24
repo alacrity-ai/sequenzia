@@ -2,8 +2,11 @@ import { setClipboard, getClipboard } from '../../clipboard.js';
 import { pitchToMidi, midiToPitch } from '../../../helpers.js';
 import { getActiveGrid } from '../../../setup/selectionTracker.js';
 import { startPasteMode, endPasteMode } from '../../../setup/pasteModeStore.js';
-import { getEditMode, EditModes } from '../../../setup/editModeStore.js'; // ⬅️ Add this at the top if not already
-
+import { getEditMode, EditModes } from '../../../setup/editModeStore.js';
+import { recordDiff } from '../../../appState/appState.js';
+import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../appState/diffEngine/types/grid/deleteNotes.js';
+import { createCutNotesDiff, createReverseCutNotesDiff } from '../../../appState/diffEngine/types/grid/cutNotes.js';
+import { createPasteNotesDiff, createReversePasteNotesDiff } from '../../../appState/diffEngine/types/grid/pasteNotes.js';
 
 export function setupSelectModeUI() {
   let isPasting = false;
@@ -48,18 +51,18 @@ export function setupSelectModeUI() {
     deleteBtn.onclick = () => {
       const grid = getActiveGrid();
       if (!grid) return;
+  
       const ctx = grid.gridContext;
-      const selected = grid.getSelectedNotes();
+      const selected = ctx.getSelectedNotes();
       if (selected.length === 0) return;
-
-      for (const note of selected) {
-        const idx = ctx.notes.indexOf(note);
-        if (idx !== -1) ctx.notes.splice(idx, 1);
-      }
-
+  
+      // Use state-driven model — do not mutate ctx.notes directly
+      recordDiff(
+        createDeleteNotesDiff(ctx.sequencer.id, selected),
+        createReverseDeleteNotesDiff(ctx.sequencer.id, selected)
+      );
+  
       ctx.setSelectedNotes([]);
-      ctx.scheduleRedraw();
-      ctx.onNotesChanged?.();
     };
   }
 
@@ -79,20 +82,21 @@ export function setupSelectModeUI() {
     cutBtn.onclick = () => {
       const grid = getActiveGrid();
       if (!grid) return;
+  
       const ctx = grid.gridContext;
-      const selected = grid.getSelectedNotes();
+      const selected = ctx.getSelectedNotes();
       if (selected.length === 0) return;
-
+  
+      // Clipboard gets populated (we don't undo clipboard state)
       setClipboard(selected);
-
-      for (const note of selected) {
-        const idx = ctx.notes.indexOf(note);
-        if (idx !== -1) ctx.notes.splice(idx, 1);
-      }
-
+  
+      // Diff-based deletion
+      recordDiff(
+        createCutNotesDiff(ctx.sequencer.id, selected),
+        createReverseCutNotesDiff(ctx.sequencer.id, selected)
+      );
+  
       ctx.setSelectedNotes([]);
-      ctx.scheduleRedraw();
-      ctx.onNotesChanged?.();
     };
   }
 
@@ -106,29 +110,31 @@ export function setupSelectModeUI() {
   
       startPasteMode((grid, e) => {
         const ctx = grid.gridContext;
-  
+      
         const { x, y } = ctx.getCanvasPos(e);
         const clickedBeat = ctx.getSnappedBeatFromX(x);
         const clickedPitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
         const clickedMidi = pitchToMidi(clickedPitch);
-  
-        const { notes, anchorBeat, anchorMidi } = clipboard;
+      
+        const { notes, anchorBeat, anchorMidi } = getClipboard();
         const deltaBeat = clickedBeat - anchorBeat;
         const deltaMidi = clickedMidi - anchorMidi;
-  
+      
         const pasted = notes.map(n => ({
           pitch: midiToPitch(pitchToMidi(n.pitch) + deltaMidi),
           start: n.start + deltaBeat,
           duration: n.duration
         }));
-  
-        ctx.notes.push(...pasted);
+      
+        // 🧠 Diff-based insertion
+        recordDiff(
+          createPasteNotesDiff(ctx.sequencer.id, pasted),
+          createReversePasteNotesDiff(ctx.sequencer.id, pasted)
+        );
+      
         ctx.setSelectedNotes(pasted);
-        ctx.scheduleRedraw();
-        ctx.onNotesChanged?.();
-  
         document.body.style.cursor = 'default';
-        endPasteMode(); // ✅ properly ends paste mode
+        endPasteMode();
       });
     };
   }

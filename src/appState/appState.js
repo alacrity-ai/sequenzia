@@ -19,8 +19,8 @@ export function setAppState(newState) {
   notifyStateUpdated(currentAppState); // 🔁 sync live models
 }
 
-export function recordDiff(diff) {
-  applyDiff(diff);            // updates currentAppState
-  pushDiff(diff);             // track in undo/redo history
-  notifyStateUpdated(currentAppState); // 🔁 trigger subscribers
+export function recordDiff(forwardDiff, reverseDiff) {
+  applyDiff(forwardDiff);
+  pushDiff({ forwardDiff, reverseDiff });
+  notifyStateUpdated(currentAppState);
 }

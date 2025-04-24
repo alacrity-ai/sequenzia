@@ -4,10 +4,14 @@ import { registerSelectionStart } from '../../../setup/selectionTracker.js';
 import { handlePasteEvent, isPasteModeActive } from '../../../setup/pasteModeStore.js';
 import { getClipboard } from '../../clipboard.js';
 import { updatePasteHoverGrid } from '../../../setup/pasteModeStore.js';
+import { recordDiff } from '../../../appState/appState.js';
+import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../appState/diffEngine/types/grid/deleteNotes.js';
+import { createMoveNotesDiff, createReverseMoveNotesDiff } from '../../../appState/diffEngine/types/grid/moveNotes.js';
 
 export function getSelectModeHandlers(ctx) {
   let dragState = null;
 
+  // Right click to delete a note
   function contextHandler(e) {
     e.preventDefault();
     const { x, y } = ctx.getCanvasPos(e);
@@ -15,26 +19,23 @@ export function getSelectModeHandlers(ctx) {
     if (!clicked) return;
   
     const selected = ctx.getSelectedNotes();
+    const notesToDelete = selected.includes(clicked) ? selected : [clicked];
   
-    if (selected.includes(clicked)) {
-      // Delete all selected notes
-      for (const note of selected) {
-        const idx = ctx.notes.indexOf(note);
-        if (idx !== -1) ctx.notes.splice(idx, 1);
-      }
-      ctx.setSelectedNotes([]);
-    } else {
-      // Delete only the clicked note
-      const idx = ctx.notes.indexOf(clicked);
-      if (idx !== -1) ctx.notes.splice(idx, 1);
-    }
+    if (!notesToDelete.length) return;
   
-    ctx.scheduleRedraw();
-    ctx.onNotesChanged?.();
-  }  
+    // 👇 Do NOT mutate ctx.notes directly — let the state engine drive it
+    ctx.setSelectedNotes([]); // Just update selection state (visual)
+  
+    // Trigger diff (which will call resyncFromState automatically)
+    recordDiff(
+      createDeleteNotesDiff(ctx.sequencer.id, notesToDelete),
+      createReverseDeleteNotesDiff(ctx.sequencer.id, notesToDelete)
+    );
+  }
 
+  // Hold down to drag a marquee box over a set of notes (if we don't have paste mode enabled), or to drag around pasted notes, if we have just pasted
   function downHandler(e) {
-    // llow paste to hijack this click and short-circuit normal selection
+    // Allow paste to hijack this click and short-circuit normal selection
     if (isPasteModeActive()) {
         handlePasteEvent(ctx.grid, e);
         e.preventDefault();
@@ -81,6 +82,7 @@ export function getSelectModeHandlers(ctx) {
     ctx.setSelectedNote(null);
   }
 
+  // Handles dragging of note(s) while mouse is held down
   function moveHandler(e) {
     updatePasteHoverGrid(ctx.grid);
     const { x, y } = ctx.getCanvasPos(e);
@@ -180,45 +182,77 @@ export function getSelectModeHandlers(ctx) {
     }
   }
 
+  // Handles releasing dragged note(s)
   function upHandler(e) {
+    if (dragState?.initialNotes?.length) {
+      const { initialNotes } = dragState;
+  
+      const from = initialNotes.map(({ start, midi, note }) => ({
+        pitch: midiToPitch(midi),
+        start,
+        duration: note.duration
+      }));
+  
+      const to = initialNotes.map(({ note }) => ({
+        pitch: note.pitch,
+        start: note.start,
+        duration: note.duration
+      }));
+  
+      const wasMoved = from.some((f, i) =>
+        f.pitch !== to[i].pitch || f.start !== to[i].start
+      );
+  
+      if (wasMoved) {
+        recordDiff(
+          createMoveNotesDiff(ctx.sequencer.id, from, to),
+          createReverseMoveNotesDiff(ctx.sequencer.id, from, to)
+        );
+      }
+    }
+  
     dragState = null;
-
+  
+    // Marquee selection logic
     if (ctx.selectionBox?.active) {
       const { x, y } = ctx.getCanvasPos(e);
       ctx.selectionBox.currentX = x;
       ctx.selectionBox.currentY = y;
       ctx.selectionBox.active = false;
-
+  
       const box = ctx.selectionBox;
       const x1 = Math.min(box.startX, box.currentX);
       const y1 = Math.min(box.startY, box.currentY);
       const x2 = Math.max(box.startX, box.currentX);
       const y2 = Math.max(box.startY, box.currentY);
-
+  
       const topRow = Math.floor(y1 / ctx.getCellHeight());
       const bottomRow = Math.floor(y2 / ctx.getCellHeight());
       const startBeat = ctx.getSnappedBeatFromX(x1);
       const endBeat = ctx.getSnappedBeatFromX(x2);
-
+  
       const pitchTop = pitchToMidi(ctx.getPitchFromRow(topRow));
       const pitchBottom = pitchToMidi(ctx.getPitchFromRow(bottomRow));
-
+  
       const selected = ctx.notes.filter(note => {
         const midi = pitchToMidi(note.pitch);
         const noteStart = note.start;
         const noteEnd = note.start + note.duration;
-      
+  
         const fullyWithinBeats = noteStart >= startBeat && noteEnd <= endBeat;
         const fullyWithinPitches = midi >= pitchBottom && midi <= pitchTop;
-      
+  
         return fullyWithinBeats && fullyWithinPitches;
-      });      
+      });
+  
       ctx.setHighlightedNotes([]);
       ctx.setSelectedNotes(selected);
       ctx.scheduleRedraw();
     }
   }
+  
 
+  // Handles mouse leaving the grid canvas area
   function leaveHandler() {
     ctx.setHoveredNote(null);
     ctx.setHighlightedNotes([]);

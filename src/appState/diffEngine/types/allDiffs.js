@@ -1,3 +1,5 @@
+// src/appState/diffEngine/types/allDiffs.js
+
 // GLOBAL
 export { applyCHANGE_TEMPO as CHANGE_TEMPO } from './global/changeTempo.js';
 export { applySET_TIME_SIGNATURE as SET_TIME_SIGNATURE } from './global/changeTimeSignature.js';
