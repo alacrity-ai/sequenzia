@@ -18,3 +18,11 @@ export const PITCH_COLOR_MAP = {
 export const HEIGHT_RATIO = 0.15;
 export const MIN_CELL_WIDTH = 100;
 export const MAX_CELL_WIDTH = 300;
+
+export const ZOOM_LEVELS = [
+  { cellWidth: 20, cellHeight: 10 },
+  { cellWidth: 30, cellHeight: 15 },
+  { cellWidth: 40, cellHeight: 20 }, // ⬅️ default
+  { cellWidth: 50, cellHeight: 25 },
+  { cellWidth: 60, cellHeight: 30 }
+];
