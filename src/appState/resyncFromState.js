@@ -11,7 +11,7 @@ import { updateTempo, updateTimeSignature, updateTotalMeasures } from '../sequen
 export function resyncFromState(state = getAppState()) {
   // 🔁 Resync global transport parameters
   updateTempo(state.tempo);
-  updateTimeSignature(...state.timeSignature); // [4,4] → 4, 4
+  updateTimeSignature(state.timeSignature[0]);
   updateTotalMeasures(state.totalMeasures);
 
   // 🔁 Resync each sequencer by ID

@@ -1,4 +1,5 @@
-import { pitchToMidi, midiToPitch, getTotalBeats } from '../../../helpers.js';
+import { pitchToMidi, midiToPitch } from '../../../helpers.js';
+import { getTotalBeats } from '../../transport.js'
 
 export function getNotePlacementHandlers(ctx) {
   let dragState = null;
@@ -23,7 +24,7 @@ export function getNotePlacementHandlers(ctx) {
 
     const snappedBeat = ctx.getSnappedBeatFromX(x);
     const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
-    const totalBeats = getTotalBeats(ctx.config);
+    const totalBeats = getTotalBeats();
 
     if (snappedBeat + ctx.config.currentDuration > totalBeats) return;
 
@@ -69,7 +70,7 @@ export function getNotePlacementHandlers(ctx) {
     if (!hovered && !dragState) {
       const snappedBeat = ctx.getSnappedBeatFromX(x);
       const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
-      const totalBeats = getTotalBeats(ctx.config);
+      const totalBeats = getTotalBeats();
 
       if (snappedBeat + ctx.config.currentDuration <= totalBeats) {
         ctx.updatePreview({ pitch, start: snappedBeat, duration: ctx.config.currentDuration });
@@ -84,7 +85,7 @@ export function getNotePlacementHandlers(ctx) {
       const deltaX = x - dragState.startX;
       const beatDelta = ctx.getSnappedBeatFromX(deltaX) - ctx.getSnappedBeatFromX(0);
       const newStart = Math.max(0, dragState.initialStart + beatDelta);
-      const totalBeats = getTotalBeats(ctx.config);
+      const totalBeats = getTotalBeats();
 
       if (newStart + selected.duration <= totalBeats) {
         selected.start = newStart;

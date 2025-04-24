@@ -1,4 +1,5 @@
-import { pitchToMidi, midiToPitch, getTotalBeats } from '../../../helpers.js';
+import { pitchToMidi, midiToPitch } from '../../../helpers.js';
+import { getTotalBeats } from '../../transport.js'
 import { registerSelectionStart } from '../../../setup/selectionTracker.js';
 import { handlePasteEvent, isPasteModeActive } from '../../../setup/pasteModeStore.js';
 import { getClipboard } from '../../clipboard.js';
@@ -149,7 +150,7 @@ export function getSelectModeHandlers(ctx) {
       const deltaY = y - dragState.startY;
       const pitchOffset = Math.round(deltaY / ctx.getCellHeight());
 
-      const totalBeats = getTotalBeats(ctx.config);
+      const totalBeats = getTotalBeats();
       const minMidi = pitchToMidi(ctx.config.noteRange[0]);
       const maxMidi = pitchToMidi(ctx.config.noteRange[1]);
       

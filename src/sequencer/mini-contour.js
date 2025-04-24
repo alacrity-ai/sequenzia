@@ -1,6 +1,6 @@
 // sequencer/mini-contour.js
 import { pitchToMidi } from "./grid/geometry.js";
-import { getTotalBeats } from "../helpers.js";
+import { getTotalBeats } from "./transport.js";
 
 const TRACK_COLORS = [
   '#ff006e', '#3a86ff', '#ffbe0b', '#8338ec', '#06d6a0',
@@ -16,7 +16,7 @@ export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
   const color = TRACK_COLORS[colorIndex % TRACK_COLORS.length];
   ctx.fillStyle = color;
 
-  const totalBeats = getTotalBeats(config);
+  const totalBeats = getTotalBeats();
   const minMidi = pitchToMidi(config.noteRange[0]);
   const maxMidi = pitchToMidi(config.noteRange[1]);
   const pitchRange = maxMidi - minMidi || 1;
@@ -43,7 +43,7 @@ export function drawGlobalMiniContour(canvas, sequencers) {
     const config = seq.config;
     if (!notes?.length) return;
 
-    const totalBeats = getTotalBeats(config);
+    const totalBeats = getTotalBeats();
     const color = TRACK_COLORS[index % TRACK_COLORS.length];
     ctx.fillStyle = color;
 

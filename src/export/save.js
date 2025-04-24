@@ -1,5 +1,6 @@
 // save.js — responsible for exporting single-sequence or full session
 import Sequencer from '../sequencer/sequencer.js';
+import { getTotalBeats, getTempo, getTimeSignature, getTotalMeasures } from '../sequencer/transport.js';
 
 export function exportToJSON(notes, config) {
   // old single-track export (kept for backwards compatibility)
@@ -7,13 +8,13 @@ export function exportToJSON(notes, config) {
     version: 1,
     exportedAt: new Date().toISOString(),
     config: {
-      bpm: config.bpm,
+      bpm: getTempo(),
       snapResolution: config.snapResolution,
       currentDuration: config.currentDuration,
       noteRange: config.noteRange,
-      totalBeats: config.totalBeats,
-      beatsPerMeasure: config.beatsPerMeasure,
-      totalMeasures: config.totalMeasures
+      totalBeats: getTotalBeats(),
+      beatsPerMeasure: getTimeSignature(),
+      totalMeasures: getTotalMeasures()
     },
     notes: notes.map(n => ({ pitch: n.pitch, start: n.start, duration: n.duration }))
   };
@@ -24,9 +25,9 @@ export function exportToJSON(notes, config) {
 export function exportSessionToJSON(tracks) {
   if (!tracks.length) throw new Error("No tracks to export.");
 
-  const bpm = tracks[0].config.bpm;
-  const beatsPerMeasure = tracks[0].config.beatsPerMeasure;
-  const totalMeasures = tracks[0].config.totalMeasures;
+  const bpm = getTempo();
+  const beatsPerMeasure = getTimeSignature();
+  const totalMeasures = getTotalMeasures();
 
   const payload = {
     v: 3,
@@ -58,7 +59,7 @@ export function exportToMIDI(notes, config) {
 export async function exportSessionToWAV(tracks) {
   if (!tracks.length) return;
 
-  const bpm          = tracks[0].config.bpm;
+  const bpm          = getTempo();
   const beatDuration = 60 / bpm;
 
   const totalSeconds = Math.max(

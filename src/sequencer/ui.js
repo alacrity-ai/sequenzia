@@ -3,7 +3,7 @@
 import { config } from '../setup/sequencers.js';
 import { initConfigModal } from '../userconfig/ConfigInteraction.js';
 import { getEditMode, EditModes } from '../setup/editModeStore.js';
-import { drawMiniContour } from './mini-contour.js';
+import { getTimeSignature, getTotalMeasures } from './transport.js';
 
 const SNAP_RESOLUTIONS = {
   "4": "𝅝",      // whole note
@@ -246,9 +246,9 @@ export function setupUI({
 
   initConfigModal();
 
-  // Initialize inputs with correct values from config
-  measuresInput.value = config.totalMeasures;
-  beatsPerMeasureInput.value = config.beatsPerMeasure;
+  // Initialize inputs with correct values
+  measuresInput.value = getTotalMeasures();
+  beatsPerMeasureInput.value = getTimeSignature();
 
   measuresInput.addEventListener('change', (e) => {
     const measures = parseInt(e.target.value, 10);

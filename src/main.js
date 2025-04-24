@@ -4,11 +4,10 @@ import { setupVisualizer } from './setup/visualizer.js';
 import { config, sequencers, createSequencer, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';
 import { setupUI, resetPlayButtonState } from './sequencer/ui.js';
 import { exportSessionToJSON, exportSessionToWAV } from './export/save.js';
-import { importFromJSON, importSessionFromJSON } from './export/load.js';
-import { startTransport, stopTransport, pauseTransport, resumeTransport, onTransportEnd, onBeatUpdate, getCurrentBeat, setCurrentBeat } from './sequencer/transport.js';
+import { importSessionFromJSON } from './export/load.js';
+import { getTotalBeats, startTransport, stopTransport, pauseTransport, resumeTransport, onTransportEnd, onBeatUpdate, getCurrentBeat, setCurrentBeat, updateTotalMeasures, updateTimeSignature, updateTempo, getTempo, getTimeSignature, getTotalMeasures } from './sequencer/transport.js';
 import { setupNoteDurationButtons } from './setup/noteDurationButtons.js';
 import { drawGlobalMiniContour } from './sequencer/mini-contour.js';
-import { getTotalBeats } from './helpers.js';
 import { drawGlobalPlayhead, initGlobalPlayhead } from './playhead/global-playhead.js';
 import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';
 import { setupControlModeSwitch } from './setup/controlModeSwitch.js';
@@ -50,10 +49,10 @@ setupUI({
   onPlay: () => {
     stopTransport();
 
-    const globalEndBeat = getTotalBeats(config);
+    const globalEndBeat = getTotalBeats();
     const startBeat = getCurrentBeat(); // Respect current playhead location
 
-    startTransport(config.bpm, {
+    startTransport(getTempo(), {
       loop: config.loopEnabled,
       endBeat: globalEndBeat,
       startBeat,
@@ -105,10 +104,7 @@ setupUI({
     config.loopEnabled = enabled;
     sequencers.forEach(s => (s.config.loopEnabled = enabled));
   },
-  onTempoChange: val => {
-    config.bpm = val;
-    sequencers.forEach(s => (s.config.bpm = val));
-  },
+  onTempoChange: updateTempo,
   onTemperamentToggle: isEqual => {
     config.useEqualTemperament = isEqual;
     sequencers.forEach(s => (s.config.useEqualTemperament = isEqual));
@@ -131,33 +127,21 @@ setupUI({
   },
   onLoad: async file => {
     try {
-      let tracks = [];
-      try {
-        tracks = await importSessionFromJSON(file);
-      } catch {
-        tracks = await importFromJSON(file);
-      }
-
-      // Extract global settings from first track and apply globally
-      if (tracks.length > 0) {
-        const firstTrackConfig = tracks[0].config;
-        
-        // Update BPM
-        config.bpm = firstTrackConfig.bpm ?? config.bpm;
-        const tempoInput = document.getElementById('tempo-input');
-        if (tempoInput) tempoInput.value = config.bpm;
-
-        // Update measure settings
-        config.beatsPerMeasure = firstTrackConfig.beatsPerMeasure ?? config.beatsPerMeasure;
-        config.totalMeasures = firstTrackConfig.totalMeasures ?? config.totalMeasures;
-        
-        // Update measures input if it exists
-        const measuresInput = document.getElementById('measures-input');
-        if (measuresInput) measuresInput.value = config.totalMeasures;
-      }
-
+      const { tracks, globalConfig } = await importSessionFromJSON(file);
+  
+      updateTempo(globalConfig.bpm);
+      updateTimeSignature(globalConfig.beatsPerMeasure);
+      updateTotalMeasures(globalConfig.totalMeasures);
+  
+      // UI sync
+      const tempoInput = document.getElementById('tempo-input');
+      if (tempoInput) tempoInput.value = getTempo();
+  
+      const measuresInput = document.getElementById('measures-input');
+      if (measuresInput) measuresInput.value = getTotalMeasures();
+  
       destroyAllSequencers();
-
+  
       tracks.forEach(state => {
         const { seq, wrapper } = createSequencer(state);
         const body = wrapper.querySelector('.sequencer-body');
@@ -167,30 +151,23 @@ setupUI({
         mini.classList.remove('hidden');
         collapseBtn.textContent = '⯅';
       });
+  
       refreshGlobalMiniContour();
       setCurrentBeat(0);
       drawGlobalPlayhead(0);
     } catch (err) {
       alert('Failed to load file: ' + err.message);
     }
-  },
+  },  
   onMeasuresChange: (totalMeasures) => {
-    config.totalMeasures = totalMeasures;
-    sequencers.forEach(seq => {
-      seq.updateTotalMeasures(totalMeasures);
-    });
+    updateTotalMeasures(totalMeasures);
   
     const globalMiniCanvas = document.getElementById('global-mini-contour');
     if (globalMiniCanvas) drawGlobalMiniContour(globalMiniCanvas, sequencers);
   },
   onBeatsPerMeasureChange: (beatsPerMeasure) => {
-    config.beatsPerMeasure = beatsPerMeasure;
-    sequencers.forEach(seq => {
-      seq.config.beatsPerMeasure = beatsPerMeasure;
-      seq.updateTotalMeasures(config.totalMeasures); // This will recalculate total beats
-    });
-    
-    // Redraw global mini contour since total beats changed
+    updateTimeSignature(beatsPerMeasure);
+  
     const globalMiniCanvas = document.getElementById('global-mini-contour');
     if (globalMiniCanvas) drawGlobalMiniContour(globalMiniCanvas, sequencers);
   }

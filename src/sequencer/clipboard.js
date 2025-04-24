@@ -1,6 +1,6 @@
 // sequencer/clipboard.js — shared clipboard across sequencers
 
-import { pitchToMidi, midiToPitch, getTotalBeats } from '../helpers.js';
+import { pitchToMidi } from '../helpers.js';
 
 let clipboard = {
     notes: [],

@@ -1,4 +1,4 @@
-import { getTotalBeats } from '../../helpers.js';
+import { getTotalBeats } from '../../sequencer/transport.js';
 import { config } from '../../setup/sequencers.js';
 import { aiContext } from '../aiConfig.js';
 
@@ -10,7 +10,7 @@ import { aiContext } from '../aiConfig.js';
  * @param {number} startBeat
  */
 export function drawExtendPlayhead(ctx, canvasWidth, canvasHeight, startBeat) {
-  const totalBeats = getTotalBeats(config);
+  const totalBeats = getTotalBeats();
   const playheadX = (startBeat / totalBeats) * canvasWidth;
 
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);

@@ -1,6 +1,6 @@
 import Sequencer from '../sequencer/sequencer.js';
 import { drawMiniContour } from '../sequencer/mini-contour.js';
-import { importFromJSON, importSessionFromJSON } from '../export/load.js';
+import { importSessionFromJSON } from '../export/load.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
 import { drawGlobalMiniContour } from '../sequencer/mini-contour.js';
 import { audioCtx, masterGain } from '../audio/audio.js';
@@ -13,11 +13,11 @@ export const config = {
   currentDuration: 1,
   snapResolution: 1,
   isTripletMode: false,
-  bpm: 220,
   loopEnabled: false,
   useEqualTemperament: true,
-  beatsPerMeasure: 4,
-  totalMeasures: 8
+  // bpm: 220,
+  // beatsPerMeasure: 4,
+  // totalMeasures: 8
 };
 
 export const sequencers = [];
@@ -229,11 +229,7 @@ export function setupAddTrackButton() {
 
 export async function loadSession(file) {
   let tracks;
-  try {
-    tracks = await importSessionFromJSON(file);
-  } catch {
-    tracks = await importFromJSON(file);
-  }
+  tracks = await importSessionFromJSON(file);
 
   destroyAllSequencers();
 

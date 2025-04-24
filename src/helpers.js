@@ -1,6 +1,3 @@
-export function getTotalBeats(config) {
-    return config.totalMeasures * config.beatsPerMeasure;
-  }
 
   export function pitchToMidi(pitch) {
     const match = pitch.match(/^([A-G]#?)(\d)$/);

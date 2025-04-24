@@ -1,6 +1,6 @@
 import { drawGlobalMiniContour } from '../sequencer/mini-contour.js';
 import { getSequencers, config } from '../setup/sequencers.js';
-import { getTotalBeats } from '../helpers.js';
+import { getTotalBeats } from '../sequencer/transport.js';
 import { drawExtendPlayhead } from './drawing/ExtendMiniContour.js';
 
 let controlsInitialized = false;
@@ -141,7 +141,7 @@ export function setupExtendModeUI() {
   });
 
   function updatePlayhead(x) {
-    const totalBeats = getTotalBeats(config);
+    const totalBeats = getTotalBeats();
     const clampedX = Math.max(0, Math.min(x, width));
     startBeat = Math.round((clampedX / width) * totalBeats);
     drawExtendPlayhead(ctx, width, height, startBeat);

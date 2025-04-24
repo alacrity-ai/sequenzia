@@ -10,7 +10,7 @@ import { getCanvasPos } from './grid/interaction/canvas-coords.js';
 import { findNoteAt } from './grid/interaction/note-finder.js';
 import { drawGlobalMiniContour } from './mini-contour.js';
 import { sequencers } from '../setup/sequencers.js'; 
-import { getTotalBeats } from '../helpers.js';
+import { getTotalBeats } from '../sequencer/transport.js';
 import { initZoomControls } from './grid/interaction/zoom-controls.js';
 import { getNotePlacementHandlers } from './grid/interaction/mouse-handlers.js';
 import { getSelectModeHandlers } from './grid/interaction/select-handlers.js';
@@ -38,7 +38,7 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
 
   const visibleNotes = pitchToMidi(config.noteRange[1]) - pitchToMidi(config.noteRange[0]) + 1;
   const fullHeight = visibleNotes * cellHeight;
-  const totalBeats = getTotalBeats(config);  
+  const totalBeats = getTotalBeats();  
   const fullWidth = totalBeats * cellWidth + labelWidth;
   
   // Set canvas dimensions
@@ -121,7 +121,7 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
   }
   
   function resizeAndRedraw() {
-    const totalBeats = getTotalBeats(config);
+    const totalBeats = getTotalBeats();
     const fullWidth = totalBeats * cellWidth + labelWidth;
     const visibleNotes = pitchToMidi(config.noteRange[1]) - pitchToMidi(config.noteRange[0]) + 1;
     const fullHeight = visibleNotes * cellHeight;
