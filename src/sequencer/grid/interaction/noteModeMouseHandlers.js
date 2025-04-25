@@ -16,7 +16,8 @@ import {
   clearPastePreviewIfNeeded
 } from './sharedMouseListeners.js';
 import { registerSelectionStart } from '../../../setup/selectionTracker.js';
-import { animateNotePlacement } from '../animation/noteAnimate.js';
+import { animateNotePlacement } from '../animation/notePlacementAnimation.js';
+import { animateNoteDeletion } from '../animation/noteDeleteAnimation.js';
 import { labelWidth } from '../helpers/constants.js';
 
 export function getNotePlacementHandlers(ctx) {
@@ -94,6 +95,14 @@ export function getNotePlacementHandlers(ctx) {
     const idx = ctx.notes.indexOf(found);
     if (idx === -1) return;
   
+    // Animate before deletion
+    animateNoteDeletion(ctx, found, {
+      getPitchRow: ctx.getPitchRow,
+      cellWidth: ctx.config.cellWidth,
+      cellHeight: ctx.getCellHeight(),
+      labelWidth
+    });
+
     const toDelete = [found];
   
     // Record the diff

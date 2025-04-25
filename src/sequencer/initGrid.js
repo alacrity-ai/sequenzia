@@ -287,7 +287,7 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     destroy() {
       unsubscribe();
       clearSelectionTracker();
-    }
+    },
   };
   
   // Add a method to set the paste preview notes

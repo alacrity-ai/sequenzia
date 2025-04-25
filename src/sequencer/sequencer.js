@@ -1,3 +1,5 @@
+// src/sequencer/sequencer.js
+
 import { initGrid } from './initGrid.js';
 import { audioCtx, masterGain } from '../audio/audio.js';
 import { onBeatUpdate, getTempo } from './transport.js';
@@ -6,6 +8,8 @@ import { loadInstrument } from '../sf2/sf2-loader.js';
 import { loadAndPlayNote } from '../sf2/sf2-player.js';
 import { pitchToMidi } from '../audio/pitch-utils.js';
 import { drawMiniContour } from './mini-contour.js';
+import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
+import { labelWidth } from './grid/helpers/constants.js';
 
 export default class Sequencer {
   constructor(containerEl, config, context = audioCtx, destination = masterGain, instrument = 'fluidr3-gm/acoustic_grand_piano') {
@@ -139,7 +143,17 @@ export default class Sequencer {
         ) {
           const durationSec = note.duration * beatToSec;
           this.playNote(note.pitch, durationSec);
-    
+          
+          if (this.grid?.gridContext) {
+            const gctx = this.grid.gridContext;
+            animateNotePlay(gctx, note, {
+              getPitchRow: gctx.getPitchRow,
+              cellWidth: this.config.cellWidth,
+              cellHeight: gctx.getCellHeight(),
+              labelWidth
+            });                      
+          }    
+
           this._activeNotes.add(note);
         }
       }
