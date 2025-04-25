@@ -1,11 +1,8 @@
 // sequencer/mini-contour.js
 import { pitchToMidi } from "./grid/helpers/geometry.js";
 import { getTotalBeats } from "./transport.js";
+import { TRACK_COLORS } from "./grid/helpers/sequencerColors.js";
 
-const TRACK_COLORS = [
-  '#ff006e', '#3a86ff', '#ffbe0b', '#8338ec', '#06d6a0',
-  '#ef476f', '#118ab2', '#ffd166', '#073b4c', '#8ac926'
-];
 
 export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
   const ctx = canvas.getContext('2d');

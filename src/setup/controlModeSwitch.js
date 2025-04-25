@@ -1,6 +1,6 @@
 import { setupExtendModeControls } from '../aimode/ExtendMode.js';
 import { setupExtendModeUI } from '../aimode/ExtendMode.js';
-import { getOpenAIKey } from '../userconfig/userConfig.js';
+import { getOpenAIKey } from '../userconfig/settings/aiSettings.js';
 import { toggleZoomControls } from './sequencers.js';
 import { setupEditModeControls } from './editModeControls.js';
 

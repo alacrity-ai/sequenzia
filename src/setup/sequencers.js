@@ -1,6 +1,5 @@
 import Sequencer from '../sequencer/sequencer.js';
 import { drawMiniContour } from '../sequencer/mini-contour.js';
-import { importSessionFromJSON } from '../export/load.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
 import { audioCtx, masterGain } from '../audio/audio.js';
 import { recordDiff } from '../appState/appState.js'
@@ -192,7 +191,7 @@ export function createSequencer(initialState) {
     instrumentLibrarySelect.value = library;
   
     // ⬇️ Populate instrument dropdown and set current instrument
-    await instrumentLibrarySelect.dispatchEvent(new CustomEvent('change', {
+    instrumentLibrarySelect.dispatchEvent(new CustomEvent('change', {
       detail: { preselect: fullName }
     }));
   

@@ -1,7 +1,7 @@
 // sequencer/ui.js
 
 import { config } from '../setup/sequencers.js';
-import { initConfigModal } from '../userconfig/ConfigInteraction.js';
+import { initConfigModal } from '../userconfig/initUserConfig.js';
 import { getEditMode, EditModes } from '../setup/editModeStore.js';
 import { getTimeSignature, getTotalMeasures } from './transport.js';
 import { undo, redo } from '../appState/stateHistory.js';
@@ -257,9 +257,10 @@ export function setupUI({
     configModal.classList.remove('hidden');
   });
 
+  // Initialize the User Config Modal
   initConfigModal();
 
-  // Initialize inputs with correct values
+  // Initialize Footer Bar inputs with correct values
   measuresInput.value = getTotalMeasures();
   beatsPerMeasureInput.value = getTimeSignature();
 

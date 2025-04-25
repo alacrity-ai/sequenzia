@@ -1,32 +1,29 @@
-// grid/drawing/grid-background.js
+// src/sequencer/grid/drawing/grid-background.js
 import { isBlackKey } from '../helpers/geometry.js';
 import { labelWidth } from '../helpers/constants.js';
 import { getTotalBeats, getTimeSignature } from '../../transport.js';
+import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
+import { GRID_COLOR_SCHEMES } from './color-schemes/grid-colors.js';
 
 /**
- * Renders the piano roll grid with:
- * - pitch rows
- * - thick vertical lines per measure
- * - thin subdivisions per beat
+ * Renders the piano roll grid using the user-selected color scheme.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Object} config
+ * @param {number} visibleNotes
+ * @param {number} cellWidth
+ * @param {number} cellHeight
+ * @param {Function} getPitchFromRow
  */
 export function drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow) {
-  const beatsPerMeasure = getTimeSignature(); 
+  const { gridColorScheme } = getUserConfig();
+  const gridColors = GRID_COLOR_SCHEMES[gridColorScheme] || GRID_COLOR_SCHEMES['Darkroom'];
 
-  // === ROW BACKGROUND ===
-  const gridWidth = getTotalBeats() * cellWidth;
+  const beatsPerMeasure = getTimeSignature();
+  const totalBeats = getTotalBeats();
+  const gridWidth = totalBeats * cellWidth;
+  const maxY = visibleNotes * cellHeight;
 
-  for (let row = 0; row < visibleNotes; row++) {
-    const y = row * cellHeight;
-    const pitch = getPitchFromRow(row);
-  
-    ctx.fillStyle = isBlackKey(pitch) ? 'rgb(174,173,175)' : '#fefefe';
-    ctx.fillRect(0, y, gridWidth, cellHeight); // ✅ only draw up to content area
-  
-    ctx.fillStyle = isBlackKey(pitch) ? '#a088b0' : '#dddddd';
-    ctx.fillRect(-labelWidth, y, labelWidth, cellHeight);
-  }
-
-  // === PITCH LABELS ===
   ctx.font = `${Math.floor(cellHeight * 0.6)}px sans-serif`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
@@ -34,31 +31,33 @@ export function drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHei
   for (let row = 0; row < visibleNotes; row++) {
     const y = row * cellHeight;
     const pitch = getPitchFromRow(row);
-    ctx.fillStyle = isBlackKey(pitch) ? '#800080' : '#444';
+    const isBlack = isBlackKey(pitch);
+
+    ctx.fillStyle = isBlack ? gridColors.blackKey : gridColors.whiteKey;
+    ctx.fillRect(0, y, gridWidth, cellHeight);
+
+    ctx.fillStyle = isBlack ? gridColors.labelBlack : gridColors.labelWhite;
+    ctx.fillRect(-labelWidth, y, labelWidth, cellHeight);
+
+    ctx.fillStyle = isBlack ? gridColors.textBlack : gridColors.textWhite;
     ctx.fillText(pitch, -8, y + cellHeight / 2);
   }
 
-  // === HORIZONTAL PITCH LINES ===
-  ctx.strokeStyle = '#ddd';
+  ctx.strokeStyle = gridColors.gridLine;
   ctx.lineWidth = 1;
   for (let row = 0; row < visibleNotes; row++) {
     const y = row * cellHeight;
     ctx.beginPath();
     ctx.moveTo(0, y);
-    ctx.lineTo(gridWidth, y); // ✅ use gridWidth instead of canvasWidth
+    ctx.lineTo(gridWidth, y);
     ctx.stroke();
   }
-
-// === MEASURE + BEAT LINES ===
-  const totalBeats = getTotalBeats();
-  console.log(`Got ${totalBeats} beats and beatsPerMeasure: ${beatsPerMeasure}`);
-  const maxY = visibleNotes * cellHeight;
 
   for (let beat = 0; beat <= totalBeats; beat++) {
     const x = beat * cellWidth;
     const isMeasureStart = (beat % beatsPerMeasure === 0);
 
-    ctx.strokeStyle = isMeasureStart ? '#bbb' : '#eee';
+    ctx.strokeStyle = isMeasureStart ? gridColors.measureLine : gridColors.beatLine;
     ctx.lineWidth = isMeasureStart ? 2 : 1;
 
     ctx.beginPath();
@@ -66,5 +65,4 @@ export function drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHei
     ctx.lineTo(x, maxY);
     ctx.stroke();
   }
-
 }

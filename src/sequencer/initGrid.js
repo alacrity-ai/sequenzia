@@ -16,7 +16,8 @@ import { getSelectModeHandlers } from './grid/interaction/selectModeMouseHandler
 import { subscribeEditMode, getEditMode } from '../setup/editModeStore.js';
 import { clearSelectionTracker } from '../setup/selectionTracker.js';
 import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
-import { ZOOM_LEVELS, labelWidth, PITCH_COLOR_MAP } from './grid/helpers/constants.js';
+import { ZOOM_LEVELS, labelWidth } from './grid/helpers/constants.js';
+import { getTrackColorFromSequencer } from './grid/helpers/sequencerColors.js';
 
 export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config, sequencer) {
   let previewNote = null;
@@ -70,20 +71,20 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
 
     // Draw the notes on the grid
     drawNotes(ctx, notes, {
-        previewNotes: pastePreviewNotes ?? (previewNote ? [previewNote] : null),
-        hoveredNote,
-        selectedNote,
-        selectedNotes,
-        highlightedNotes: handlerContext.getHighlightedNotes(),
-        cellWidth,
-        cellHeight,
-        visibleStartBeat: 0,
-        visibleEndBeat: canvas.width / cellWidth,
-        getPitchRow,
-        getPitchClass,
-        PITCH_COLOR_MAP,
-        drawRoundedRect,
-    });
+      previewNotes: pastePreviewNotes ?? (previewNote ? [previewNote] : null),
+      hoveredNote,
+      selectedNote,
+      selectedNotes,
+      highlightedNotes: handlerContext.getHighlightedNotes(),
+      cellWidth,
+      cellHeight,
+      visibleStartBeat: 0,
+      visibleEndBeat: canvas.width / cellWidth,
+      getPitchRow,
+      getPitchClass,
+      getTrackColor: () => getTrackColorFromSequencer(sequencer),
+      drawRoundedRect,
+    });    
       
     // Draw the marquee selection
     if (handlerContext.selectionBox?.active) {
