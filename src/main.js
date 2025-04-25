@@ -4,6 +4,7 @@ import { setupVisualizer } from './setup/visualizer.js';
 import { collapseAllSequencers } from './helpers.js';
 import { config, sequencers, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';
 import { setupUI, resetPlayButtonState } from './sequencer/ui.js';
+import { initFooterUI } from './setup/footerUI.js';
 import { exportSessionToJSON, exportSessionToWAV } from './export/save.js';
 import { importSessionFromJSON } from './export/load.js';
 import { getTotalBeats, startTransport, stopTransport, pauseTransport, resumeTransport, onTransportEnd, onBeatUpdate, getCurrentBeat, setCurrentBeat, updateTotalMeasures, updateTimeSignature, updateTempo, getTempo, getTimeSignature, getTotalMeasures } from './sequencer/transport.js';
@@ -57,6 +58,8 @@ refreshGlobalMiniContour();
 setupAddTrackButton();
 setupNoteDurationButtons();
 setupControlModeSwitch();
+initFooterUI();
+
 
 // === UI Wiring ===
 setupUI({
