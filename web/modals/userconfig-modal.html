@@ -1,8 +1,32 @@
 <!-- User Configuration Modal -->
 <div id="userconfig-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 w-[500px]">
-      <h2 class="text-lg font-semibold mb-4">Configuration</h2>
-  
+  <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 w-[500px] relative">
+    <!-- Top Icon Bar -->
+    <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+      <div class="flex gap-4 text-xl cursor-pointer select-none">
+        <span class="settings-tab hover:text-purple-400" data-tab="global-settings" title="Global Settings">⚙️</span>
+        <span class="settings-tab hover:text-purple-400" data-tab="sequencer-settings" title="Sequencer Settings">🎹</span>
+        <span class="settings-tab hover:text-purple-400 text-purple-500" data-tab="ai-settings" title="AI Settings">🤖</span>
+      </div>
+      <button id="config-close" class="text-sm text-gray-400 hover:text-white">&times;</button>
+    </div>
+
+    <!-- Global Settings -->
+    <div id="global-settings" class="settings-section hidden">
+      <h2 class="text-lg font-semibold mb-4">Global Settings</h2>
+      <p class="text-sm text-gray-300">Coming soon: preferences for layout, theming, and behavior.</p>
+    </div>
+
+    <!-- Sequencer/Grid Settings -->
+    <div id="sequencer-settings" class="settings-section hidden">
+      <h2 class="text-lg font-semibold mb-4">Sequencer/Grid Settings</h2>
+      <p class="text-sm text-gray-300">Coming soon: grid size, note snapping, velocity defaults, and more.</p>
+    </div>
+
+    <!-- AI Settings -->
+    <div id="ai-settings" class="settings-section">
+      <h2 class="text-lg font-semibold mb-4">AI Configuration</h2>
+
       <!-- OpenAI API Key -->
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">OpenAI API Key</label>
@@ -11,7 +35,7 @@
                placeholder="sk-..."
                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
       </div>
-  
+
       <!-- OpenAI Model Selection -->
       <div class="mb-8">
         <label class="block text-sm font-medium mb-2">OpenAI Model</label>
@@ -25,33 +49,18 @@
           <option value="o4-mini" class="bg-green-700 text-white">o4-mini</option>
         </select>
       </div>
-  
-      <!-- Action Buttons -->
-      <div class="flex gap-3">
-        <button id="config-save" 
-                class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded">
-          Save
-        </button>
-        <button id="config-close" 
-                class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded">
-          Close
-        </button>
-      </div>
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="flex gap-3 mt-4">
+      <button id="config-save" 
+              class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded">
+        Save
+      </button>
+      <button id="config-close-bottom" 
+              class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded">
+        Close
+      </button>
     </div>
   </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+</div>
