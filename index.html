@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/styles.css" />
   <link rel="shortcut icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
   <link rel="icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
-  <script type="module" crossorigin src="/sequenzia/assets/index-WUAvkpjQ.js"></script>
+  <script type="module" crossorigin src="/sequenzia/assets/index-CKzo6BDW.js"></script>
 </head>
 
 <body class="bg-black text-gray-200 font-sans pb-36">
@@ -136,11 +136,11 @@
             <!-- Body: both canvases share one scrollable wrapper -->
             <div class="sequencer-body flex border-t border-purple-700 pt-2 h-[720px]">
               <div id="grid-scroll-container" class="relative overflow-auto h-full w-full">
-
-                <!-- Canvas is fixed over scroll area -->
                 <canvas class="note-grid absolute top-0 left-0"></canvas>
+                <canvas class="note-animate-canvas absolute top-0 left-0 z-10 pointer-events-none"></canvas>
                 <canvas class="playhead-canvas absolute top-0 left-0 z-20 pointer-events-none"></canvas>
               </div>
+              
             </div>
           </div>
         </template>
@@ -179,7 +179,6 @@
         </div>
       </div>
     </div>
-    
 
     <div id="transport-ui"
          class="w-[1260px] mx-auto bg-gray-900 border-t border-purple-800">
