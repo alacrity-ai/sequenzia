@@ -1,7 +1,7 @@
 // js/aimode/clients/OpenAIService.js
 
 import OpenAIClient from '../clients/OpenAIClient.js';
-import { getOpenAIKey, getOpenAIModel } from '../../userconfig/userConfig.js';
+import { getOpenAIKey, getOpenAIModel } from '../../userconfig/settings/aiSettings.js';
 import { parseAITrackArray } from '../helpers/aiResponseHelpers.js';
 
 /**
