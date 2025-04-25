@@ -1,4 +1,5 @@
 // src/sequencer/grid/animation/notePlayAnimation.js
+import { getTempo } from "../../transport.js";
 
 export function animateNotePlay(ctx, note, {
     getPitchRow,
@@ -28,7 +29,10 @@ export function animateNotePlay(ctx, note, {
     let animCtx = offscreen.getContext('2d');
   
     const startTime = performance.now();
-    const duration = 300;
+    const bpm = getTempo();
+    let duration = (note.duration * 60000) / bpm;
+    duration = Math.max(100, Math.min(duration, 1600));    
+  
     const rippleCount = 2;
     const rippleDelay = 50;
   
@@ -88,7 +92,7 @@ export function animateNotePlay(ctx, note, {
       
       // Composite onto main animation canvas
       baseCtx.save();
-      const rippleScale = 1.3;
+      const rippleScale = 1.5;
       const clearW = w * rippleScale + 8;
       const clearH = h * rippleScale + 8;
       baseCtx.clearRect(cx - clearW / 2, cy - clearH / 2, clearW, clearH);

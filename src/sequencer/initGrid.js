@@ -146,6 +146,13 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     playheadCanvas.style.width = `${fullWidth}px`;
     playheadCanvas.style.height = `${fullHeight}px`;
   
+    animationCanvas.width = fullWidth;
+    animationCanvas.height = fullHeight;
+    animationCanvas.style.width = `${fullWidth}px`;
+    animationCanvas.style.height = `${fullHeight}px`;
+
+    animCtx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+
     scheduleRedraw();
   }
   
@@ -186,6 +193,7 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     canvas,
     animationCtx: animCtx,
     getCellHeight: () => cellHeight,
+    getCellWidth: () => cellWidth,
     getCanvasPos: (e) => getCanvasPos(canvas, e, scrollContainer, labelWidth),
     findNoteAt: (x, y) => findNoteAt(x, y, notes, getPitchRow, cellHeight, cellWidth),
     scheduleRedraw,
@@ -206,7 +214,7 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
       selectedNote = ns.length === 1 ? ns[0] : null;
     },    
     setHoveredNote: n => (hoveredNote = n),
-    onNotesChanged: refreshGlobalMiniContour
+    onNotesChanged: refreshGlobalMiniContour,
   };
   
   function setMouseHandler(handler) {

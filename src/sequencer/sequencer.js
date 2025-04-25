@@ -148,7 +148,7 @@ export default class Sequencer {
             const gctx = this.grid.gridContext;
             animateNotePlay(gctx, note, {
               getPitchRow: gctx.getPitchRow,
-              cellWidth: this.config.cellWidth,
+              cellWidth: gctx.getCellWidth(),
               cellHeight: gctx.getCellHeight(),
               labelWidth
             });                      

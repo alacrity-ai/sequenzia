@@ -76,7 +76,7 @@ export function getNotePlacementHandlers(ctx) {
 
     animateNotePlacement(ctx, newNote, {
       getPitchRow: ctx.getPitchRow,
-      cellWidth: ctx.config.cellWidth,
+      cellWidth: ctx.getCellWidth(),
       cellHeight: ctx.getCellHeight(),
       labelWidth: labelWidth
     });
@@ -98,7 +98,7 @@ export function getNotePlacementHandlers(ctx) {
     // Animate before deletion
     animateNoteDeletion(ctx, found, {
       getPitchRow: ctx.getPitchRow,
-      cellWidth: ctx.config.cellWidth,
+      cellWidth: ctx.getCellWidth(),
       cellHeight: ctx.getCellHeight(),
       labelWidth
     });
