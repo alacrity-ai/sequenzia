@@ -136,7 +136,6 @@ export function createSequencer(initialState) {
     confirmBtn.addEventListener('click', handleConfirm);
     cancelBtn.addEventListener('click', handleCancel);
   });
-  
 
   // Mute/Solo buttons
   const muteBtn = wrapper.querySelector('.mute-btn');
@@ -245,28 +244,3 @@ export function setupAddTrackButton() {
     );
   });
 }
-
-export async function loadSession(file) {
-  let tracks;
-  tracks = await importSessionFromJSON(file);
-
-  destroyAllSequencers();
-
-  tracks.forEach(state => {
-    const { notes, config, instrumentName } = state;
-    const { seq, wrapper } = createSequencer({ notes, config, instrumentName });
-    
-    const body = wrapper.querySelector('.sequencer-body');
-    const mini = wrapper.querySelector('canvas.mini-contour');
-    const collapseBtn = wrapper.querySelector('.collapse-btn');
-
-    if (!body.classList.contains('hidden')) {
-      body.classList.add('hidden');
-      mini.classList.remove('hidden');
-      collapseBtn.textContent = '⯅';
-      toggleZoomControls(wrapper, !hidden);
-      drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
-    }
-  });
-}
-

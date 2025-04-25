@@ -1,3 +1,5 @@
+// src/setup/editModeStore.js
+
 import { endPasteMode } from './pasteModeStore.js'; // ⬅️ Add this import at the top
 
 export const EditModes = {
@@ -24,4 +26,33 @@ export function setEditMode(mode) {
 export function subscribeEditMode(cb) {
   subscribers.add(cb);
   return () => subscribers.delete(cb);
+}
+
+// Temporary select mode flag handling
+let isTemporarySelectMode = false;
+
+export function enterTemporarySelectMode() {
+  isTemporarySelectMode = true;
+  setEditMode(EditModes.SELECT);
+}
+
+export function clearTemporarySelectModeFlag() {
+  isTemporarySelectMode = false;
+}
+
+export function shouldAutoExitSelectMode() {
+  return isTemporarySelectMode;
+}
+
+// Suppress note placement flag handling
+let suppressNextNotePlacement = false;
+
+export function setSuppressNextNotePlacement(v = true) {
+  suppressNextNotePlacement = v;
+}
+export function shouldSuppressNotePlacement() {
+  return suppressNextNotePlacement;
+}
+export function clearSuppressNotePlacementFlag() {
+  suppressNextNotePlacement = false;
 }

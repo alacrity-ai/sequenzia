@@ -1,12 +1,15 @@
+// src/sequencer/grid/interaction/selectModeMouseHandlers.js
+
 import { pitchToMidi, midiToPitch } from '../../../helpers.js';
+import { EditModes, setEditMode, setSuppressNextNotePlacement, shouldAutoExitSelectMode, clearTemporarySelectModeFlag } from '../../../setup/editModeStore.js';
 import { getTotalBeats } from '../../transport.js'
 import { registerSelectionStart } from '../../../setup/selectionTracker.js';
-import { handlePasteEvent, isPasteModeActive } from '../../../setup/pasteModeStore.js';
-import { getClipboard } from '../../clipboard.js';
+import { isPasteModeActive } from '../../../setup/pasteModeStore.js';
 import { updatePasteHoverGrid } from '../../../setup/pasteModeStore.js';
 import { recordDiff } from '../../../appState/appState.js';
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../appState/diffEngine/types/grid/deleteNotes.js';
 import { createMoveNotesDiff, createReverseMoveNotesDiff } from '../../../appState/diffEngine/types/grid/moveNotes.js';
+import { interceptPasteClickIfActive, updatePastePreview, clearPastePreviewIfNeeded } from './sharedMouseListeners.js';
 
 export function getSelectModeHandlers(ctx) {
   let dragState = null;
@@ -31,17 +34,17 @@ export function getSelectModeHandlers(ctx) {
       createDeleteNotesDiff(ctx.sequencer.id, notesToDelete),
       createReverseDeleteNotesDiff(ctx.sequencer.id, notesToDelete)
     );
+
+    if (shouldAutoExitSelectMode()) {
+      clearTemporarySelectModeFlag();
+      setEditMode(EditModes.NOTE_PLACEMENT);
+    }    
   }
 
   // Hold down to drag a marquee box over a set of notes (if we don't have paste mode enabled), or to drag around pasted notes, if we have just pasted
   function downHandler(e) {
     // Allow paste to hijack this click and short-circuit normal selection
-    if (isPasteModeActive()) {
-        handlePasteEvent(ctx.grid, e);
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-    }
+    if (interceptPasteClickIfActive(ctx, e)) return;
 
     const { x, y } = ctx.getCanvasPos(e);
     if (x < 0) return;
@@ -90,28 +93,7 @@ export function getSelectModeHandlers(ctx) {
     const hovered = ctx.findNoteAt(x, y);
     ctx.setHoveredNote(hovered);
 
-    if (isPasteModeActive()) {
-        const { notes, anchorBeat, anchorMidi } = getClipboard();
-        const snappedBeat = ctx.getSnappedBeatFromX(x);
-        const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
-        const midi = pitchToMidi(pitch);
-      
-        const deltaBeat = snappedBeat - anchorBeat;
-        const deltaMidi = midi - anchorMidi;
-      
-        const previewNotes = notes.map(n => ({
-          pitch: midiToPitch(pitchToMidi(n.pitch) + deltaMidi),
-          start: n.start + deltaBeat,
-          duration: n.duration
-        }));
-      
-        ctx.setPastePreviewNotes(previewNotes);
-        ctx.scheduleRedraw();
-        return;
-      } else {
-        ctx.setPastePreviewNotes(null);
-      }
-      
+    updatePastePreview(ctx, x, y);
 
     if (ctx.selectionBox?.active) {
       ctx.selectionBox.currentX = x;
@@ -208,6 +190,11 @@ export function getSelectModeHandlers(ctx) {
           createMoveNotesDiff(ctx.sequencer.id, from, to),
           createReverseMoveNotesDiff(ctx.sequencer.id, from, to)
         );
+
+        if (shouldAutoExitSelectMode()) {
+          clearTemporarySelectModeFlag();
+          setEditMode(EditModes.NOTE_PLACEMENT);
+        }        
       }
     }
   
@@ -248,21 +235,26 @@ export function getSelectModeHandlers(ctx) {
       ctx.setHighlightedNotes([]);
       ctx.setSelectedNotes(selected);
       ctx.scheduleRedraw();
+
+      if (shouldAutoExitSelectMode()) {
+        const selected = ctx.getSelectedNotes();
+        if (selected.length === 0) {
+          e.stopPropagation();
+          clearTemporarySelectModeFlag();
+          setEditMode(EditModes.NOTE_PLACEMENT);
+          setSuppressNextNotePlacement(true);
+        }
+      }      
     }
   }
-  
 
   // Handles mouse leaving the grid canvas area
   function leaveHandler() {
     ctx.setHoveredNote(null);
     ctx.setHighlightedNotes([]);
-    if (isPasteModeActive()) {
-      ctx.setPastePreviewNotes(null); // ✅ updated from setPastePreviewNote
-    }
-  
+    clearPastePreviewIfNeeded(ctx);
     ctx.scheduleRedraw();
   }  
-  
 
   return {
     attach(canvas) {

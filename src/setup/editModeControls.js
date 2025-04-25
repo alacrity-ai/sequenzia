@@ -1,4 +1,6 @@
-import { setEditMode, EditModes } from './editModeStore.js';
+// src/setup/editModeControls.js
+
+import { setEditMode } from './editModeStore.js';
 
 export function setupEditModeControls() {
   // Mode buttons

@@ -1,23 +1,22 @@
-import { labelWidth, PITCH_COLOR_MAP } from './grid/constants.js';
 import {
   pitchToMidi, midiToPitch, getPitchClass, getRawBeatFromX, getSnappedBeatFromX
-} from './grid/geometry.js';
+} from './grid/helpers/geometry.js';
 import { drawRoundedRect } from './grid/drawing/rounded-rect.js';
 import { drawGridBackground } from './grid/drawing/grid-background.js';
 import { drawNotes } from './grid/drawing/note-renderer.js';
 import { drawPlayhead } from './grid/drawing/playhead-renderer.js';
-import { getCanvasPos } from './grid/interaction/canvas-coords.js';
-import { findNoteAt } from './grid/interaction/note-finder.js';
+import { getCanvasPos } from './grid/helpers/canvas-coords.js';
+import { findNoteAt } from '../sequencer/grid/helpers/note-finder.js';
 import { drawGlobalMiniContour } from './mini-contour.js';
 import { sequencers } from '../setup/sequencers.js'; 
 import { getTotalBeats } from '../sequencer/transport.js';
-import { initZoomControls } from './grid/interaction/zoom-controls.js';
-import { getNotePlacementHandlers } from './grid/interaction/mouse-handlers.js';
-import { getSelectModeHandlers } from './grid/interaction/select-handlers.js';
+import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
+import { getNotePlacementHandlers } from './grid/interaction/noteModeMouseHandlers.js';
+import { getSelectModeHandlers } from './grid/interaction/selectModeMouseHandlers.js';
 import { subscribeEditMode, getEditMode } from '../setup/editModeStore.js';
 import { clearSelectionTracker } from '../setup/selectionTracker.js';
 import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
-import { ZOOM_LEVELS } from './grid/constants.js';
+import { ZOOM_LEVELS, labelWidth, PITCH_COLOR_MAP } from './grid/helpers/constants.js';
 
 export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config, sequencer) {
   let previewNote = null;

@@ -1,5 +1,5 @@
 // grid/interaction/canvas-coords.js
-import { labelWidth } from '../constants.js';
+import { labelWidth } from './constants.js';
 
 /**
  * Computes logical grid-space coordinates from a mouse event.

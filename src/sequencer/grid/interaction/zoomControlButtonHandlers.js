@@ -1,7 +1,9 @@
+// src/sequencer/grid/interaction/zoomControlButtonHandlers.js
+
 export function initZoomControls(wrapper, zoomInFn, zoomOutFn, resetZoomFn) {
     const zoomInBtn = wrapper.querySelector('.zoom-in-btn');
     const zoomOutBtn = wrapper.querySelector('.zoom-out-btn');
-    const zoomResetBtn = wrapper.querySelector('.zoom-reset-btn'); // Added this
+    const zoomResetBtn = wrapper.querySelector('.zoom-reset-btn');
   
     if (!zoomInBtn || !zoomOutBtn || !zoomResetBtn) return;
   

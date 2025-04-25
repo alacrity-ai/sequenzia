@@ -1,6 +1,6 @@
 // grid/drawing/grid-background.js
-import { isBlackKey } from '../geometry.js';
-import { labelWidth } from '../constants.js';
+import { isBlackKey } from '../helpers/geometry.js';
+import { labelWidth } from '../helpers/constants.js';
 import { getTotalBeats, getTimeSignature } from '../../transport.js';
 
 /**

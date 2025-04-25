@@ -1,5 +1,5 @@
 // sequencer/mini-contour.js
-import { pitchToMidi } from "./grid/geometry.js";
+import { pitchToMidi } from "./grid/helpers/geometry.js";
 import { getTotalBeats } from "./transport.js";
 
 const TRACK_COLORS = [
