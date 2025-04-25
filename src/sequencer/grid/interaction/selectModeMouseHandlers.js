@@ -4,7 +4,7 @@ import { pitchToMidi, midiToPitch } from '../../../helpers.js';
 import { EditModes, setEditMode, setSuppressNextNotePlacement, shouldAutoExitSelectMode, clearTemporarySelectModeFlag } from '../../../setup/editModeStore.js';
 import { getTotalBeats } from '../../transport.js'
 import { registerSelectionStart } from '../../../setup/selectionTracker.js';
-import { isPasteModeActive } from '../../../setup/pasteModeStore.js';
+import { getNotesInMarquee } from '../helpers/marquee.js';
 import { updatePasteHoverGrid } from '../../../setup/pasteModeStore.js';
 import { recordDiff } from '../../../appState/appState.js';
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../appState/diffEngine/types/grid/deleteNotes.js';
@@ -100,31 +100,20 @@ export function getSelectModeHandlers(ctx) {
       ctx.selectionBox.currentY = y;
 
       const box = ctx.selectionBox;
-      const x1 = Math.min(box.startX, box.currentX);
-      const y1 = Math.min(box.startY, box.currentY);
-      const x2 = Math.max(box.startX, box.currentX);
-      const y2 = Math.max(box.startY, box.currentY);
 
-      const topRow = Math.floor(y1 / ctx.getCellHeight());
-      const bottomRow = Math.floor(y2 / ctx.getCellHeight());
-      const startBeat = ctx.getSnappedBeatFromX(x1);
-      const endBeat = ctx.getSnappedBeatFromX(x2);
-
-      const pitchTop = pitchToMidi(ctx.getPitchFromRow(topRow));
-      const pitchBottom = pitchToMidi(ctx.getPitchFromRow(bottomRow));
-
-      const highlightCandidates = ctx.notes.filter(note => {
-        const midi = pitchToMidi(note.pitch);
-        const noteStart = note.start;
-        const noteEnd = note.start + note.duration;
-        const beatOverlap = noteStart >= startBeat && noteEnd <= endBeat;
-        const pitchOverlap = midi >= pitchBottom && midi <= pitchTop;
-        return beatOverlap && pitchOverlap;
+      // const overlap extra pixels
+      const highlightCandidates = getNotesInMarquee(ctx.notes, {
+        startX: box.startX,
+        currentX: box.currentX,
+        startY: box.startY,
+        currentY: box.currentY,
+        getCellHeight: ctx.getCellHeight,
+        getSnappedBeatFromX: ctx.getSnappedBeatFromX,
+        getPitchFromRow: ctx.getPitchFromRow
       });
-
       ctx.setHighlightedNotes(highlightCandidates);
-
       ctx.scheduleRedraw();
+      
       return;
     }
 
@@ -206,30 +195,15 @@ export function getSelectModeHandlers(ctx) {
       ctx.selectionBox.currentX = x;
       ctx.selectionBox.currentY = y;
       ctx.selectionBox.active = false;
-  
-      const box = ctx.selectionBox;
-      const x1 = Math.min(box.startX, box.currentX);
-      const y1 = Math.min(box.startY, box.currentY);
-      const x2 = Math.max(box.startX, box.currentX);
-      const y2 = Math.max(box.startY, box.currentY);
-  
-      const topRow = Math.floor(y1 / ctx.getCellHeight());
-      const bottomRow = Math.floor(y2 / ctx.getCellHeight());
-      const startBeat = ctx.getSnappedBeatFromX(x1);
-      const endBeat = ctx.getSnappedBeatFromX(x2);
-  
-      const pitchTop = pitchToMidi(ctx.getPitchFromRow(topRow));
-      const pitchBottom = pitchToMidi(ctx.getPitchFromRow(bottomRow));
-  
-      const selected = ctx.notes.filter(note => {
-        const midi = pitchToMidi(note.pitch);
-        const noteStart = note.start;
-        const noteEnd = note.start + note.duration;
-  
-        const fullyWithinBeats = noteStart >= startBeat && noteEnd <= endBeat;
-        const fullyWithinPitches = midi >= pitchBottom && midi <= pitchTop;
-  
-        return fullyWithinBeats && fullyWithinPitches;
+      
+      const selected = getNotesInMarquee(ctx.notes, {
+        startX: ctx.selectionBox.startX,
+        currentX: ctx.selectionBox.currentX,
+        startY: ctx.selectionBox.startY,
+        currentY: ctx.selectionBox.currentY,
+        getCellHeight: ctx.getCellHeight,
+        getSnappedBeatFromX: ctx.getSnappedBeatFromX,
+        getPitchFromRow: ctx.getPitchFromRow
       });
   
       ctx.setHighlightedNotes([]);

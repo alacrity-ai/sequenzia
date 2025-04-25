@@ -19,7 +19,7 @@ import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
 import { ZOOM_LEVELS, labelWidth } from './grid/helpers/constants.js';
 import { getTrackColorFromSequencer } from './grid/helpers/sequencerColors.js';
 
-export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config, sequencer) {
+export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContainer, notes, config, sequencer) {
   let previewNote = null;
   let pastePreviewNote = null;
   let pastePreviewNotes = null;
@@ -30,8 +30,12 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
   
   let zoomIndex = 2; // start at default level  
 
+  // Main canvas
   const ctx = canvas.getContext('2d');
+  // Playhead canvas
   const playheadCtx = playheadCanvas.getContext('2d');
+  // Animation canvas
+  const animCtx = animationCanvas.getContext('2d');
 
   let cellWidth = ZOOM_LEVELS[zoomIndex].cellWidth;
   let cellHeight = ZOOM_LEVELS[zoomIndex].cellHeight;  
@@ -51,6 +55,12 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
   playheadCanvas.height = fullHeight;
   playheadCanvas.style.width = `${fullWidth}px`;
   playheadCanvas.style.height = `${fullHeight}px`;
+
+  // Set up the animation canvas
+  animationCanvas.width = fullWidth;
+  animationCanvas.height = fullHeight;
+  animationCanvas.style.width = `${fullWidth}px`;
+  animationCanvas.style.height = `${fullHeight}px`;
 
   let frameId = null;
   function scheduleRedraw() {
@@ -173,11 +183,14 @@ export function initGrid(canvas, playheadCanvas, scrollContainer, notes, config,
     grid: null,
     config,
     notes,
+    canvas,
+    animationCtx: animCtx,
     getCellHeight: () => cellHeight,
     getCanvasPos: (e) => getCanvasPos(canvas, e, scrollContainer, labelWidth),
     findNoteAt: (x, y) => findNoteAt(x, y, notes, getPitchRow, cellHeight, cellWidth),
     scheduleRedraw,
     getPitchFromRow,
+    getPitchRow,
     getSnappedBeatFromX: (x) => getSnappedBeatFromX(x, config, () => cellWidth), 
     updatePreview: note => (previewNote = note),
     clearPreview: () => (previewNote = null),

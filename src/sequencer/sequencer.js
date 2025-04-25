@@ -61,8 +61,9 @@ export default class Sequencer {
     const noteCanvas = this.container.querySelector('canvas.note-grid');
     const playheadCanvas = this.container.querySelector('canvas.playhead-canvas');
     const scrollContainer = this.container.querySelector('#grid-scroll-container');
+    const animationCanvas = this.container.querySelector('canvas.note-animate-canvas');
   
-    this.grid = initGrid(noteCanvas, playheadCanvas, scrollContainer, this.notes, this.config, this);
+    this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, this.notes, this.config, this);
     this.grid.scheduleRedraw();
   }
 

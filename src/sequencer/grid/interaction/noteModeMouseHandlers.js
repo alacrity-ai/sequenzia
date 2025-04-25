@@ -16,6 +16,8 @@ import {
   clearPastePreviewIfNeeded
 } from './sharedMouseListeners.js';
 import { registerSelectionStart } from '../../../setup/selectionTracker.js';
+import { animateNotePlacement } from '../animation/noteAnimate.js';
+import { labelWidth } from '../helpers/constants.js';
 
 export function getNotePlacementHandlers(ctx) {
   let dragState = null;
@@ -54,7 +56,7 @@ export function getNotePlacementHandlers(ctx) {
   
     if (snappedBeat + ctx.config.currentDuration > totalBeats) return;
   
-    // ❌ Prevent duplicate placement
+    // Prevent duplicate placement
     const alreadyExists = ctx.notes.some(n => n.pitch === pitch && n.start === snappedBeat);
     if (alreadyExists) return;
   
@@ -70,6 +72,13 @@ export function getNotePlacementHandlers(ctx) {
       createPlaceNotesDiff(ctx.sequencer.id, [newNote]),
       createReversePlaceNotesDiff(ctx.sequencer.id, [newNote])
     );
+
+    animateNotePlacement(ctx, newNote, {
+      getPitchRow: ctx.getPitchRow,
+      cellWidth: ctx.config.cellWidth,
+      cellHeight: ctx.getCellHeight(),
+      labelWidth: labelWidth
+    });
   
     ctx.scheduleRedraw();
     ctx.onNotesChanged?.();
