@@ -1,4 +1,4 @@
-import { getOpenAIKey, getOpenAIModel } from '../../userconfig/userConfig.js';
+import { getOpenAIKey, getOpenAIModel } from '../../userconfig/settings/aiSettings.js';
 
 const BASE_URL = 'https://api.openai.com/v1';
 
