@@ -17,6 +17,11 @@ export function resyncFromState(state = getAppState()) {
   updateTimeSignature(state.timeSignature[0], false);
   updateTotalMeasures(state.totalMeasures, false);
 
+  // Tell each sequencer to update its grid width based on new total measures
+  for (const seq of sequencers) {
+    seq.updateTotalMeasures(state.totalMeasures);
+  }
+
   // 🔁 Ensure all sequencers exist and are in sync
   for (const serialized of state.sequencers) {
     let live = sequencers.find(seq => seq.id === serialized.id);
