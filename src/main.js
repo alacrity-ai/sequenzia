@@ -2,7 +2,7 @@
 import { setupKeyboard } from './setup/keyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
 import { collapseAllSequencers } from './helpers.js';
-import { config, sequencers, createSequencer, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';
+import { config, sequencers, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';
 import { setupUI, resetPlayButtonState } from './sequencer/ui.js';
 import { exportSessionToJSON, exportSessionToWAV } from './export/save.js';
 import { importSessionFromJSON } from './export/load.js';

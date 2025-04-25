@@ -1,6 +1,6 @@
 // src/appState/diffEngine/types/sequencer/createSequencer.js
 
-import { createSequencer, sequencers } from '../../../../setup/sequencers.js';
+import { createSequencer, sequencers, toggleZoomControls } from '../../../../setup/sequencers.js';
 
 export function applyCREATE_SEQUENCER(state, diff) {
   const newState = structuredClone(state);
@@ -13,7 +13,7 @@ export function applyCREATE_SEQUENCER(state, diff) {
 
   const existing = sequencers.find(s => s.id === diff.id);
   if (!existing) {
-    createSequencer({
+    const { seq, wrapper } = createSequencer({
       config: {
         id: diff.id,
         ...diff.config
@@ -21,6 +21,7 @@ export function applyCREATE_SEQUENCER(state, diff) {
       notes: diff.notes || [],
       instrument: diff.instrument
     });
+    toggleZoomControls(wrapper, true);
   }
 
   return newState;
