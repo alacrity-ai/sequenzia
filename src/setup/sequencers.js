@@ -1,4 +1,5 @@
 import Sequencer from '../sequencer/sequencer.js';
+import { setupSequencerGripHandler } from '../sequencer/ui.js';
 import { drawMiniContour } from '../sequencer/mini-contour.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
 import { audioCtx, masterGain } from '../audio/audio.js';
@@ -38,6 +39,7 @@ export function toggleZoomControls(wrapper, show) {
   wrapper.querySelector('.zoom-out-btn')?.classList.toggle('hidden', !show);
   wrapper.querySelector('.zoom-reset-btn')?.classList.toggle('hidden', !show);
   wrapper.querySelector('.zoom-button-divider')?.classList.toggle('hidden', !show);
+  wrapper.querySelector('.grip-handle')?.classList.toggle('hidden', !show);
 }
 
 export function getSequencers() {
@@ -93,7 +95,7 @@ export function createSequencer(initialState) {
   const collapseBtn = wrapper.querySelector('.collapse-btn');
   const collapseIcon = collapseBtn.querySelector('use');
   const body = wrapper.querySelector('.sequencer-body');
-  
+
   collapseBtn.addEventListener('click', () => {
     const hidden = body.classList.toggle('hidden');
     collapseIcon.setAttribute('href', hidden ? '#icon-caret-up' : '#icon-caret-down');
@@ -202,6 +204,7 @@ export function createSequencer(initialState) {
     instrumentSelectModal.classList.remove('hidden');
   });
   
+  setupSequencerGripHandler(wrapper);
 
   // Initial visual state
   toggleButtonState(muteBtn, false);

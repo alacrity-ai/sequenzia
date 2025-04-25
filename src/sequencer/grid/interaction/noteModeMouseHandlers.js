@@ -162,6 +162,7 @@ export function getNotePlacementHandlers(ctx) {
         currentY: y
       };
       hasActivatedMarquee = true;
+      registerSelectionStart(ctx.grid);
       resetMouseGestureState(); // clear for cleanliness
       return;
     }    

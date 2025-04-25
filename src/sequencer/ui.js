@@ -311,3 +311,48 @@ export function showLoadingModal() {
 export function hideLoadingModal() {
   document.getElementById('loading-modal')?.classList.add('hidden');
 }
+
+export function setupSequencerGripHandler(sequencerElement) {
+  const gripHandle = sequencerElement.querySelector('.cursor-grab');
+
+  if (!gripHandle) return;
+
+  const body = sequencerElement.querySelector('.sequencer-body');
+  if (!body) return;
+
+  let isDragging = false;
+  let startY = 0;
+  let startHeight = 0;
+
+  const MIN_HEIGHT = 150;
+  const MAX_HEIGHT = 1000;
+
+  gripHandle.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startY = e.clientY;
+    startHeight = body.offsetHeight;
+    gripHandle.classList.replace('cursor-grab', 'cursor-grabbing');
+
+    document.body.style.userSelect = 'none'; // Prevent accidental text selection
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+    const deltaY = e.clientY - startY;
+    let newHeight = startHeight + deltaY;
+
+    // Clamp the height within allowed bounds
+    newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
+
+    body.style.height = `${newHeight}px`;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    gripHandle.classList.replace('cursor-grabbing', 'cursor-grab');
+
+    document.body.style.userSelect = '';
+  });
+}
