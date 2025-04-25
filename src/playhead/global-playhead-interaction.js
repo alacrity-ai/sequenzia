@@ -7,15 +7,17 @@ import {
   resumeTransport
 } from '../sequencer/transport.js';
 import { sequencers } from '../setup/sequencers.js';
+import { getSnappedBeat } from '../sequencer/grid/helpers/geometry.js';
+import { config } from '../setup/sequencers.js';
 
 let isDragging = false;
 let canvas = null;
-let config = null;
+let globalConfig = null;
 let wasAutoPaused = false;
 
-export function initGlobalPlayheadInteraction(targetCanvas, globalConfig) {
+export function initGlobalPlayheadInteraction(targetCanvas, targetConfig) {
   canvas = targetCanvas;
-  config = globalConfig;
+  globalConfig = targetConfig;
 
   canvas.addEventListener('mousedown', onMouseDown);
   window.addEventListener('mousemove', onMouseMove);
@@ -50,19 +52,25 @@ function onMouseUp() {
 }
 
 function updatePlayheadFromEvent(e) {
-    const rect = canvas.getBoundingClientRect();
+  const rect = canvas.getBoundingClientRect();
+
+  // ✅ Device-pixel aware scaling
+  const scaleX = canvas.width / rect.width;
+  let x = (e.clientX - rect.left) * scaleX;
+
+  // Clamp x to canvas width
+  x = Math.max(0, Math.min(canvas.width, x));
+
+  const totalBeats = getTotalBeats();
+  const unsnappedBeat = (x / canvas.width) * totalBeats;
   
-    // ✅ Device-pixel aware scaling
-    const scaleX = canvas.width / rect.width;
-    let x = (e.clientX - rect.left) * scaleX;
+  // Apply snapping using the current config settings
+  const snappedBeat = getSnappedBeat(unsnappedBeat, config);
   
-    // Clamp x to canvas width
-    x = Math.max(0, Math.min(canvas.width, x));
-  
-    const totalBeats = getTotalBeats();
-    const beat = (x / canvas.width) * totalBeats;
-  
-    setCurrentBeat(beat);
-    drawGlobalPlayhead(x);
-  }
+  // Convert snapped beat back to x position
+  const snappedX = (snappedBeat / totalBeats) * canvas.width;
+
+  setCurrentBeat(snappedBeat);
+  drawGlobalPlayhead(snappedX);
+}
   

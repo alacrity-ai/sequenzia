@@ -1,11 +1,12 @@
 // sequencer/mini-contour.js
 import { pitchToMidi } from "./grid/helpers/geometry.js";
-import { getTotalBeats } from "./transport.js";
 import { TRACK_COLORS } from "./grid/helpers/sequencerColors.js";
-
+import { getTotalBeats, getTimeSignature, getTotalMeasures } from "./transport.js";
 
 export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
   const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
   const W = canvas.width;
   const H = canvas.height;
   ctx.clearRect(0, 0, W, H);
@@ -17,28 +18,69 @@ export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
 
   const totalBeats = getTotalBeats();
 
-  // 🎯 Scan actual used notes
+  // 🎯 Determine pitch range from actual notes
   const midiNotes = notes.map(note => pitchToMidi(note.pitch));
-  const minUsedMidi = Math.min(...midiNotes);
-  const maxUsedMidi = Math.max(...midiNotes);
+  let minUsedMidi = Math.min(...midiNotes);
+  let maxUsedMidi = Math.max(...midiNotes);
+  let pitchRange = Math.max(1, maxUsedMidi - minUsedMidi);
+  
+  // 🔥 Snap pitch range so that H / pitchRange is integer
+  while (H % pitchRange !== 0) {
+    maxUsedMidi++; // Expand upwards
+    pitchRange = maxUsedMidi - minUsedMidi;
+  }
+  
+  const blockH = H / pitchRange; // perfect, integer
 
-  // 🎯 Fallback if somehow identical
-  const pitchRange = Math.max(1, maxUsedMidi - minUsedMidi);
-
-  const blockH = Math.max(2, H / pitchRange);
-
+  // 🎼 Draw note contours (snap to integer pixels)
   for (const note of notes) {
-    const x = (note.start / totalBeats) * W;
-    const w = Math.max(1, (note.duration / totalBeats) * W);
-
+    const rawX = (note.start / totalBeats) * W;
+    const rawW = (note.duration / totalBeats) * W;
     const midi = pitchToMidi(note.pitch);
-    const norm = (midi - minUsedMidi) / pitchRange; // ⬅️ relative to used range
-    const y = H - norm * H - blockH / 2;
+    const norm = (midi - minUsedMidi) / pitchRange;
+    const rawY = H - norm * H - blockH / 2;
+
+    const x = Math.round(rawX);
+    const w = Math.max(1, Math.round(rawW));
+    const y = Math.round(rawY);
 
     ctx.fillRect(x, y, w, blockH);
   }
-}
 
+  // 📏 Draw measure markers (dynamic density, clean + minimal)
+  const beatsPerMeasure = getTimeSignature();
+  const totalMeasures = getTotalMeasures();
+
+  ctx.save();
+
+  let drawEvery = 1;
+  if (totalMeasures > 256) drawEvery = 16;
+  else if (totalMeasures > 128) drawEvery = 8;
+  else if (totalMeasures > 32)  drawEvery = 4;
+
+  for (let m = 0; m <= totalMeasures; m++) {
+    if (m % drawEvery !== 0) continue;
+
+    const beat = m * beatsPerMeasure;
+    const rawX = (beat / totalBeats) * W;
+    const x = Math.round(rawX) + 0.5;
+
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+
+    const strong = drawEvery === 1 || m % (drawEvery * 2) === 0;
+
+    ctx.strokeStyle = strong
+      ? 'rgba(255, 255, 255, 0.12)'
+      : 'rgba(255, 255, 255, 0.04)';
+    ctx.lineWidth = 0.2;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+}
 
 export function drawGlobalMiniContour(canvas, sequencers) {
   const ctx = canvas.getContext('2d');
@@ -68,6 +110,8 @@ export function drawGlobalMiniContour(canvas, sequencers) {
       const y = H - norm * H - blockH / 2;
       ctx.fillRect(x, y, w, blockH);
     }
+
+    
   });
 }
 
