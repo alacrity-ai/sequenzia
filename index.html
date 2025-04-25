@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/styles.css" />
   <link rel="shortcut icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
   <link rel="icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
-  <script type="module" crossorigin src="/sequenzia/assets/index-C2CIWlFD.js"></script>
+  <script type="module" crossorigin src="/sequenzia/assets/index-D8PmDtR4.js"></script>
 </head>
 
 <body class="bg-black text-gray-200 font-sans pb-36">
@@ -140,7 +140,12 @@
                 <canvas class="note-animate-canvas absolute top-0 left-0 z-10 pointer-events-none"></canvas>
                 <canvas class="playhead-canvas absolute top-0 left-0 z-20 pointer-events-none"></canvas>
               </div>
-              
+            </div>
+            <!-- Add grip at bottom -->
+            <div class="grip-handle flex justify-center items-center h-6 cursor-grab">
+              <svg class="w-6 h-6 text-purple-700" aria-hidden="true">
+                <use href="#icon-grip"></use>
+              </svg>
             </div>
           </div>
         </template>
