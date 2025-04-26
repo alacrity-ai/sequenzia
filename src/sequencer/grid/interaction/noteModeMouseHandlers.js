@@ -1,12 +1,13 @@
 // src/sequencer/grid/interaction/noteModeMouseHandlers.js
 
 import { pitchToMidi, midiToPitch } from '../../../helpers.js';
-import { getTotalBeats } from '../../transport.js'
-import { enterTemporarySelectMode, shouldSuppressNotePlacement, clearSuppressNotePlacementFlag } from '../../../setup/editModeStore.js';
+import { getSnapResolution, getTotalBeats } from '../../transport.js'
+import { enterTemporarySelectMode, setSuppressNextNotePlacement, shouldSuppressNotePlacement, clearSuppressNotePlacementFlag } from '../../../setup/editModeStore.js';
 import { recordDiff } from '../../../appState/appState.js';
 import { createPlaceNotesDiff, createReversePlaceNotesDiff } from '../../../appState/diffEngine/types/grid/placeNotes.js';
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../appState/diffEngine/types/grid/deleteNotes.js';
 import { createMoveNotesDiff, createReverseMoveNotesDiff } from '../../../appState/diffEngine/types/grid/moveNotes.js';
+import { createResizeNotesDiff, createReverseResizeNotesDiff } from '../../../appState/diffEngine/types/grid/resizeNotes.js';
 import {
   registerPotentialDragStart,
   hasCrossedDragThreshold,
@@ -19,6 +20,16 @@ import { registerSelectionStart } from '../../../setup/selectionTracker.js';
 import { animateNotePlacement } from '../animation/notePlacementAnimation.js';
 import { animateNoteDeletion } from '../animation/noteDeleteAnimation.js';
 import { labelWidth } from '../helpers/constants.js';
+import { isOnResizeHandle } from '../helpers/resize-note.js';
+import { 
+  setHoveredResizeNote, 
+  clearHoveredResizeNote, 
+  getHoveredResizeNote,
+  getResizeState,
+  clearResizeState,
+  startResizeMode
+} from './sharedMouseListeners.js';
+
 
 export function getNotePlacementHandlers(ctx) {
   let dragState = null;
@@ -30,24 +41,33 @@ export function getNotePlacementHandlers(ctx) {
   function clickHandler(e) {
     registerSelectionStart(ctx.grid);
   
+    if (getResizeState()) return;
+
+    // If we're suppressing note placement, clear the flag and deselect the note
     if (shouldSuppressNotePlacement()) {
       clearSuppressNotePlacementFlag();
+      // deselect note if selected and redraw
+      ctx.setSelectedNote(null);
+      ctx.scheduleRedraw();
       return;
     }
   
     const { x, y } = ctx.getCanvasPos(e);
-  
+
+    // If we're clicking on the label, just play the note
     if (x < 0) {
       const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
       ctx.sequencer.playNote(pitch, 0.5);
       return;
     }
   
+    // Check if we're clicking on an existing note
     const found = ctx.findNoteAt(x, y);
     if (found) {
       ctx.setSelectedNote(found);
       ctx.scheduleRedraw();
       ctx.onNotesChanged?.();
+      setSuppressNextNotePlacement();
       return;
     }
   
@@ -61,8 +81,8 @@ export function getNotePlacementHandlers(ctx) {
     const alreadyExists = ctx.notes.some(n => n.pitch === pitch && n.start === snappedBeat);
     if (alreadyExists) return;
   
+    // Play the note and place it
     ctx.sequencer.playNote(pitch, 0.5);
-  
     const newNote = {
       pitch,
       start: snappedBeat,
@@ -118,7 +138,24 @@ export function getNotePlacementHandlers(ctx) {
     const { x, y } = ctx.getCanvasPos(e);
   
     const note = ctx.findNoteAt(x, y);
+  
+    const hoveredResize = getHoveredResizeNote();
+    if (hoveredResize && isOnResizeHandle(ctx, hoveredResize, x, y)) {
+      startResizeMode(hoveredResize, x, y);
+      return;
+    }
+
     if (note) {
+      // Check if we're clicking on a resize handle
+      const resizeHandleHit = isOnResizeHandle(ctx, note, x, y);
+      if (resizeHandleHit) {
+        // Begin resize mode
+        console.log('Resize mode started!');
+        startResizeMode(note, x, y);
+        return;
+      }
+  
+      // Normal note dragging
       registerSelectionStart(ctx.grid);
       ctx.setSelectedNote(note);
       dragState = {
@@ -138,21 +175,52 @@ export function getNotePlacementHandlers(ctx) {
   
     // If empty space — initiate pending click
     registerPotentialDragStart(x, y);
-    hasActivatedMarquee = false;    
+    hasActivatedMarquee = false;
   }
-  
 
   // Handles dragging of the note while mouse is held down
   function moveHandler(e) {
+    ctx.grid.setCursor('default');
     const { x, y } = ctx.getCanvasPos(e);
     if (x < 0) {
       ctx.clearPreview();
       return;
     }
 
+    const resizeState = getResizeState();
+    if (resizeState) {
+      ctx.grid.setCursor('ew-resize');
+      const { anchorNote, startX } = resizeState;
+      const { x } = ctx.getCanvasPos(e);
+    
+      const deltaX = x - startX;
+      const beatDelta = ctx.getSnappedBeatFromX(deltaX) - ctx.getSnappedBeatFromX(0);
+    
+      const newDuration = Math.max(getSnapResolution(), resizeState.originalDuration + beatDelta);
+      anchorNote.duration = newDuration;
+    
+      ctx.scheduleRedraw();
+      ctx.onNotesChanged?.();
+      return; // Only handle resize this frame
+    }    
+
     updatePastePreview(ctx, x, y);
 
-    if (!hasActivatedMarquee && hasCrossedDragThreshold(x, y)) {
+    // Check if hovering over a resize handle
+    clearHoveredResizeNote();
+    ctx.grid.setCursor('default'); // Reset to default at start of move
+
+    const selectedNotes = ctx.getSelectedNotes?.() ?? [];
+    for (const note of selectedNotes) {
+      if (isOnResizeHandle(ctx, note, x, y)) {
+        setHoveredResizeNote(note);
+        ctx.grid.setCursor('ew-resize'); // Change cursor to horizontal resize
+        break;
+      }
+    }
+
+    // Check if we've crossed the drag threshold
+    if (!resizeState && !hasActivatedMarquee && hasCrossedDragThreshold(x, y)) {
       enterTemporarySelectMode();
       ctx.selectionBox = {
         active: true,
@@ -167,15 +235,22 @@ export function getNotePlacementHandlers(ctx) {
       return;
     }    
 
+    // Check if we're hovering over a note
     const hovered = ctx.findNoteAt(x, y);
-    ctx.setHoveredNote(hovered);
-
     const selected = ctx.getSelectedNote();
-    if (!dragState && selected && selected !== hovered) {
-      ctx.setSelectedNote(null);
-    }
+    ctx.setHoveredNote(hovered);
+    
+    // Cursor logic for note hovering/dragging
+    if (!getResizeState()) { // Don't override resize cursor
+      if (dragState && selected) {
+        ctx.grid.setCursor('grabbing');
+      } else if (hovered) {
+        ctx.grid.setCursor('grab');
+      }
+    }    
 
-    if (!hovered && !dragState) {
+    // Show preview note if not hovering over a note
+    if (!hovered && !dragState && !shouldSuppressNotePlacement()) {
       const snappedBeat = ctx.getSnappedBeatFromX(x);
       const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
       const totalBeats = getTotalBeats();
@@ -189,6 +264,7 @@ export function getNotePlacementHandlers(ctx) {
       ctx.clearPreview();
     }
 
+    // Handle dragging
     if (dragState && selected) {
       const deltaX = x - dragState.startX;
       const beatDelta = ctx.getSnappedBeatFromX(deltaX) - ctx.getSnappedBeatFromX(0);
@@ -230,6 +306,28 @@ export function getNotePlacementHandlers(ctx) {
     resetMouseGestureState(); // replaces pendingClick = null;
     hasActivatedMarquee = false;
 
+    const resizeState = getResizeState();
+    if (resizeState) {
+      const { anchorNote, originalDuration } = resizeState;
+      const finalDuration = anchorNote.duration;
+      
+      const wasResized = originalDuration !== finalDuration;
+    
+      if (wasResized) {
+        recordDiff(
+          createResizeNotesDiff(ctx.sequencer.id, [
+            { pitch: anchorNote.pitch, start: anchorNote.start, newDuration: finalDuration }
+          ]),
+          createReverseResizeNotesDiff(ctx.sequencer.id, [
+            { pitch: anchorNote.pitch, start: anchorNote.start, oldDuration: originalDuration }
+          ])
+        );
+      }
+    
+      clearResizeState();
+      return;
+    }    
+
     if (!dragState || !ctx.getSelectedNote()) {
       dragState = null;
       return;
@@ -259,6 +357,7 @@ export function getNotePlacementHandlers(ctx) {
   function leaveHandler() {
     ctx.clearPreview();
     ctx.setHoveredNote(null);
+    clearHoveredResizeNote();
     clearPastePreviewIfNeeded(ctx);
     ctx.scheduleRedraw();
   }
@@ -279,6 +378,6 @@ export function getNotePlacementHandlers(ctx) {
       canvas.removeEventListener('mouseleave', leaveHandler);
       canvas.removeEventListener('mousedown', downHandler);
       canvas.removeEventListener('mouseup', upHandler);
-    }
+    },
   };
 }

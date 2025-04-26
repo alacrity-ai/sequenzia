@@ -3,7 +3,6 @@
 let activeGrid = null;
 
 export function registerSelectionStart(grid) {
-  console.log(`registerSelectionStart called with grid: ${grid}`);
   if (activeGrid && activeGrid !== grid) {
     activeGrid.clearSelection();
   }

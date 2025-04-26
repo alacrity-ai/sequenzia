@@ -13,9 +13,11 @@ import { getTotalBeats } from '../sequencer/transport.js';
 import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
 import { getNotePlacementHandlers } from './grid/interaction/noteModeMouseHandlers.js';
 import { getSelectModeHandlers } from './grid/interaction/selectModeMouseHandlers.js';
+import { getHoveredResizeNote } from './grid/interaction/sharedMouseListeners.js';
 import { subscribeEditMode, getEditMode } from '../setup/editModeStore.js';
 import { clearSelectionTracker } from '../setup/selectionTracker.js';
 import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
+import { drawResizeArrow } from './grid/drawing/resize-arrow.js';
 import { ZOOM_LEVELS, labelWidth } from './grid/helpers/constants.js';
 import { getTrackColorFromSequencer } from './grid/helpers/sequencerColors.js';
 
@@ -95,7 +97,17 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
       getTrackColor: () => getTrackColorFromSequencer(sequencer),
       drawRoundedRect,
     });    
-      
+
+    // Draw the resize handles
+    for (const note of selectedNotes) {
+      drawResizeArrow(ctx, note, {
+        cellWidth,
+        cellHeight,
+        getPitchRow,
+        isHovered: note === getHoveredResizeNote()
+      });
+    }  
+
     // Draw the marquee selection
     if (handlerContext.selectionBox?.active) {
         drawMarqueeSelectionBox(ctx, handlerContext);
@@ -232,19 +244,9 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     highlightedNotesDuringMarquee = [];
     scheduleRedraw();
   }
-  
-  // Sync with current mode at init
-  const currentMode = getEditMode();
-  if (currentMode === 'note-placement') {
-    setMouseHandler(getNotePlacementHandlers(handlerContext));
-  } else if (currentMode === 'select') {
-    setMouseHandler(getSelectModeHandlers(handlerContext));
-  } else {
-    setMouseHandler(null);
-  }
 
- // Subscribe to mode changes
- let unsubscribe = subscribeEditMode(mode => {
+  // Subscribe to mode changes
+  let unsubscribe = subscribeEditMode(mode => {
     // Clear previews
     previewNote = null;
     pastePreviewNotes = null;
@@ -298,6 +300,21 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     },
   };
   
+  // Sync with current mode at init
+  const currentMode = getEditMode();
+  let notePlacementHandlers = null;
+  let selectModeHandlers = null;
+
+  if (currentMode === 'note-placement') {
+    notePlacementHandlers = getNotePlacementHandlers(handlerContext);
+    setMouseHandler(notePlacementHandlers);
+  } else if (currentMode === 'select') {
+    selectModeHandlers = getSelectModeHandlers(handlerContext);
+    setMouseHandler(selectModeHandlers);
+  } else {
+    setMouseHandler(null);
+  } 
+
   // Add a method to set the paste preview notes
   handlerContext.setPastePreviewNotes = notes => {
     pastePreviewNotes = notes;

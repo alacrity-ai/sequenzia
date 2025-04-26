@@ -5,6 +5,40 @@ import { isPasteModeActive, handlePasteEvent } from '../../../setup/pasteModeSto
 import { getClipboard } from '../../clipboard.js';
 import { pitchToMidi, midiToPitch } from '../../../helpers.js';
 
+// Handle resize
+let hoveredResizeNote = null;
+let resizeState = null;
+
+export function setHoveredResizeNote(note) {
+  hoveredResizeNote = note;
+}
+
+export function getHoveredResizeNote() {
+  return hoveredResizeNote;
+}
+
+export function clearHoveredResizeNote() {
+  hoveredResizeNote = null;
+}
+
+export function startResizeMode(anchorNote, startX, startY) {
+  resizeState = {
+    anchorNote,
+    startX,
+    startY,
+    originalDuration: anchorNote.duration,
+  };
+}
+
+export function getResizeState() {
+  return resizeState;
+}
+
+export function clearResizeState() {
+  resizeState = null;
+}
+
+
 /**
  * Update paste preview notes based on cursor position
  * Used in move handlers while paste mode is active

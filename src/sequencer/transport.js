@@ -3,6 +3,7 @@ import { recordDiff } from '../appState/appState.js';
 import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState/diffEngine/types/global/changeTempo.js';
 import { createSetTimeSignatureDiff, createReverseSetTimeSignatureDiff } from '../appState/diffEngine/types/global/changeTimeSignature.js';
 import { createSetTotalMeasuresDiff, createReverseSetTotalMeasuresDiff } from '../appState/diffEngine/types/global/changeMeasures.js';
+import { config } from '../setup/sequencers.js';
 
 let animationId = null;
 let beatDuration = 500;
@@ -125,6 +126,10 @@ export function getTotalMeasures() {
 
 export function onTransportEnd(callback) {
   onEndCallback = callback;
+}
+
+export function getSnapResolution() {
+  return config.snapResolution;
 }
 
 export function startTransport(bpm, opts = {}) {

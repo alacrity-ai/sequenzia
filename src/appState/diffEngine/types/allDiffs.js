@@ -17,6 +17,7 @@ export { applyMOVE_NOTES as MOVE_NOTES } from './grid/moveNotes.js';
 export { applyCUT_NOTES as CUT_NOTES } from './grid/cutNotes.js';
 export { applyPASTE_NOTES as PASTE_NOTES } from './grid/pasteNotes.js';
 export { applyUPDATE_NOTE_VELOCITY as UPDATE_NOTE_VELOCITY } from './grid/updateNoteVelocity.js';
+export { applyRESIZE_NOTES as RESIZE_NOTES } from './grid/resizeNotes.js';
 
 // INTERNAL
 export { applyCHECKPOINT as CHECKPOINT } from './internal/checkpoint.js';
