@@ -240,7 +240,7 @@ export function getNotePlacementHandlers(ctx) {
       }
     }    
 
-    if (!hovered && !dragState && !shouldSuppressNotePlacement() && !selected) {
+    if (!hovered && !dragState && !shouldSuppressNotePlacement() && !getHoveredResizeNote()) {
       const snappedBeat = ctx.getSnappedBeatFromX(x);
       const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
       const totalBeats = getTotalBeats();
