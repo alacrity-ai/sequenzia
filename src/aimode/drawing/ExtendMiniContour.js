@@ -1,3 +1,5 @@
+// src/aimode/drawing/ExtendMiniContour.js
+
 import { getTotalBeats } from '../../sequencer/transport.js';
 import { config } from '../../setup/sequencers.js';
 import { aiContext } from '../aiConfig.js';

@@ -1,3 +1,5 @@
+// src/sequencer/transport.js
+
 import { getSequencers } from '../setup/sequencers.js';
 import { recordDiff } from '../appState/appState.js';
 import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState/diffEngine/types/global/changeTempo.js';
