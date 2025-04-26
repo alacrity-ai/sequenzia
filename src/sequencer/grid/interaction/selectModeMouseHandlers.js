@@ -185,6 +185,7 @@ export function getSelectModeHandlers(ctx) {
           setEditMode(EditModes.NOTE_PLACEMENT);
         }        
       }
+
     }
   
     dragState = null;
@@ -211,14 +212,16 @@ export function getSelectModeHandlers(ctx) {
       ctx.scheduleRedraw();
 
       if (shouldAutoExitSelectMode()) {
+        console.log('AUTO EXITED MODE')
         const selected = ctx.getSelectedNotes();
         if (selected.length === 0) {
           e.stopPropagation();
           clearTemporarySelectModeFlag();
           setEditMode(EditModes.NOTE_PLACEMENT);
-          setSuppressNextNotePlacement(true);
+          setSuppressNextNotePlacement();
         }
-      }      
+      }
+      setSuppressNextNotePlacement();    
     }
   }
 

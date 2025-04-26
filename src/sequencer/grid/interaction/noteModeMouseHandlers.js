@@ -40,14 +40,10 @@ export function getNotePlacementHandlers(ctx) {
   function clickHandler(e) {
     console.log('ClickHandler called')
     registerSelectionStart(ctx.grid);
-  
-    // if (getResizeState()) return;
 
     // If we're suppressing note placement, clear the flag and deselect the note
     if (shouldSuppressNotePlacement()) {
       clearSuppressNotePlacementFlag();
-      // deselect note if selected and redraw
-      // ctx.setSelectedNote(null);
       ctx.scheduleRedraw();
       return;
     }
@@ -60,17 +56,6 @@ export function getNotePlacementHandlers(ctx) {
       ctx.sequencer.playNote(pitch, 0.5);
       return;
     }
-  
-    // // Check if we're clicking on an existing note
-    // const found = ctx.findNoteAt(x, y);
-    // if (found) {
-    //   ctx.setSelectedNote(found);
-    //   console.log('HIIII!!!')
-    //   ctx.scheduleRedraw();
-    //   ctx.onNotesChanged?.();
-    //   setSuppressNextNotePlacement();
-    //   return;
-    // }
   
     const snappedBeat = ctx.getSnappedBeatFromX(x);
     const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
@@ -94,6 +79,8 @@ export function getNotePlacementHandlers(ctx) {
       createPlaceNotesDiff(ctx.sequencer.id, [newNote]),
       createReversePlaceNotesDiff(ctx.sequencer.id, [newNote])
     );
+
+    ctx.setSelectedNote(null);
 
     animateNotePlacement(ctx, newNote, {
       getPitchRow: ctx.getPitchRow,
@@ -132,6 +119,8 @@ export function getNotePlacementHandlers(ctx) {
       createReverseDeleteNotesDiff(ctx.sequencer.id, toDelete)
     );
     clearSuppressNotePlacementFlag();
+    ctx.setSelectedNote(null);
+    ctx.scheduleRedraw();
   }
 
   // Hold down on a note (with the intent to drag it)
