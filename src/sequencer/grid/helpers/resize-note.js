@@ -17,14 +17,6 @@ export function isOnResizeHandle(ctx, note, mouseX, mouseY) {
     const top = y - hitPadding;
     const bottom = y + arrowSize + hitPadding;
     
-    // Log detailed information about the hit test
-    // Log if we hit or didn't hit
-    if (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom) {
-        console.log('Hit resize handle!');
-    } else {
-        console.log('Missed resize handle.');
-    }
-    
     return (
       mouseX >= left &&
       mouseX <= right &&

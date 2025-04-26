@@ -50,9 +50,11 @@ let suppressNextNotePlacement = false;
 export function setSuppressNextNotePlacement(v = true) {
   suppressNextNotePlacement = v;
 }
+
 export function shouldSuppressNotePlacement() {
   return suppressNextNotePlacement;
 }
+
 export function clearSuppressNotePlacementFlag() {
   suppressNextNotePlacement = false;
 }

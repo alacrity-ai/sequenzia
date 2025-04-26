@@ -20,13 +20,20 @@ import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
 import { drawResizeArrow } from './grid/drawing/resize-arrow.js';
 import { ZOOM_LEVELS, labelWidth } from './grid/helpers/constants.js';
 import { getTrackColorFromSequencer } from './grid/helpers/sequencerColors.js';
+import {
+  getSelectedNote,
+  setSelectedNote,
+  getSelectedNotes,
+  setSelectedNotes,
+  clearSelection as sharedClearSelection
+} from './grid/interaction/sharedMouseListeners.js';
+
 
 export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContainer, notes, config, sequencer) {
   let previewNote = null;
   let pastePreviewNote = null;
   let pastePreviewNotes = null;
   let hoveredNote = null;
-  let selectedNote = null;
 
   let playheadX = null;
   
@@ -81,12 +88,15 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     // Draw the grid itself
     drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow);
 
+    console.log('SelectedNotes:', getSelectedNotes());
+    console.log('Notes in sequencer:', notes);
+
     // Draw the notes on the grid
     drawNotes(ctx, notes, {
       previewNotes: pastePreviewNotes ?? (previewNote ? [previewNote] : null),
       hoveredNote,
-      selectedNote,
-      selectedNotes,
+      selectedNote: getSelectedNote(),
+      selectedNotes: getSelectedNotes(),
       highlightedNotes: handlerContext.getHighlightedNotes(),
       cellWidth,
       cellHeight,
@@ -99,7 +109,7 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     });    
 
     // Draw the resize handles
-    for (const note of selectedNotes) {
+    for (const note of getSelectedNotes()) {
       drawResizeArrow(ctx, note, {
         cellWidth,
         cellHeight,
@@ -195,7 +205,6 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
   }
 
   let activeMouseHandler = null;
-  let selectedNotes = [];
 
   const handlerContext = {
     sequencer,
@@ -214,20 +223,14 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     getSnappedBeatFromX: (x) => getSnappedBeatFromX(x, config, () => cellWidth), 
     updatePreview: note => (previewNote = note),
     clearPreview: () => (previewNote = null),
-    getSelectedNote: () => selectedNote,
-    setSelectedNote: n => {
-      selectedNote = n;
-      selectedNotes = n ? [n] : [];
-    },
-    
-    getSelectedNotes: () => selectedNotes,
-    setSelectedNotes: ns => {
-      selectedNotes = ns;
-      selectedNote = ns.length === 1 ? ns[0] : null;
-    },    
+    getSelectedNote,
+    setSelectedNote,
+    getSelectedNotes,
+    setSelectedNotes,
     setHoveredNote: n => (hoveredNote = n),
     onNotesChanged: refreshGlobalMiniContour,
   };
+  
   
   function setMouseHandler(handler) {
     if (activeMouseHandler) activeMouseHandler.detach(canvas);
@@ -237,13 +240,13 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
   
   // Clear selection of notes
   function clearSelection() {
-    selectedNote = null;
-    selectedNotes = [];
+    sharedClearSelection();
     hoveredNote = null;
     pastePreviewNote = null;
     highlightedNotesDuringMarquee = [];
     scheduleRedraw();
   }
+  
 
   // Subscribe to mode changes
   let unsubscribe = subscribeEditMode(mode => {
@@ -280,8 +283,10 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     canvas,
     scheduleRedraw,
     drawPlayhead: drawPlayheadWrapper,
-    getSelectedNote: () => selectedNote,
-    clearSelection,
+    getSelectedNote,
+    getSelectedNotes,
+    setSelectedNotes,
+    clearSelection: sharedClearSelection, // ⬅️ bind to shared clearSelection
     getPreviewNote: () => previewNote,
     zoomIn,
     zoomOut,
@@ -289,16 +294,12 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     setMouseHandler,
     setCursor: (cursor) => { canvas.style.cursor = cursor; },
     gridContext: handlerContext,
-    getSelectedNotes: () => selectedNotes,
-    setSelectedNotes: ns => {
-      selectedNotes = ns;
-      selectedNote = ns.length === 1 ? ns[0] : null;
-    },
     destroy() {
       unsubscribe();
       clearSelectionTracker();
     },
   };
+  
   
   // Sync with current mode at init
   const currentMode = getEditMode();
@@ -309,6 +310,7 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     notePlacementHandlers = getNotePlacementHandlers(handlerContext);
     setMouseHandler(notePlacementHandlers);
   } else if (currentMode === 'select') {
+    console.log('SWITCHED TO SELECT MODE!');
     selectModeHandlers = getSelectModeHandlers(handlerContext);
     setMouseHandler(selectModeHandlers);
   } else {

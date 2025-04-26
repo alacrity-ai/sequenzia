@@ -5,6 +5,48 @@ import { isPasteModeActive, handlePasteEvent } from '../../../setup/pasteModeSto
 import { getClipboard } from '../../clipboard.js';
 import { pitchToMidi, midiToPitch } from '../../../helpers.js';
 
+let suppressNextClick = false;
+
+export function setSuppressNextClick() {
+    suppressNextClick = true;
+  }
+  
+  export function clearSuppressNextClick() {
+    suppressNextClick = false;
+  }
+  
+  export function shouldSuppressNextClick() {
+    return suppressNextClick;
+  }
+  
+
+let selectedNote = null;
+let selectedNotes = [];
+
+export function getSelectedNote() {
+  return selectedNote;
+}
+
+export function setSelectedNote(note) {
+  selectedNote = note;
+  selectedNotes = note ? [note] : [];
+  console.log('Selected note set to: ', note);
+}
+
+export function getSelectedNotes() {
+  return selectedNotes;
+}
+
+export function setSelectedNotes(notes) {
+  selectedNotes = notes;
+  selectedNote = notes.length === 1 ? notes[0] : null;
+}
+
+export function clearSelection() {
+  selectedNote = null;
+  selectedNotes = [];
+}
+
 // Handle resize
 let hoveredResizeNote = null;
 let resizeState = null;

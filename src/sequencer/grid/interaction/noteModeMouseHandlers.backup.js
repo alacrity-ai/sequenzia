@@ -159,6 +159,15 @@ export function getNotePlacementHandlers(ctx) {
     }
 
     if (note) {
+      // Check if we're clicking on a resize handle
+      const resizeHandleHit = isOnResizeHandle(ctx, note, x, y);
+      if (resizeHandleHit) {
+        // Begin resize mode
+        dragState = null;
+        startResizeMode(note, x, y);
+        return;
+      }
+  
       // Normal note dragging
       registerSelectionStart(ctx.grid);
       console.log('Calling setSelectedNote from downHandler line 173')
@@ -212,6 +221,8 @@ export function getNotePlacementHandlers(ctx) {
 
     updatePastePreview(ctx, x, y);
 
+    // Check if hovering over a resize handle
+    clearHoveredResizeNote();
     ctx.grid.setCursor('default'); // Reset to default at start of move
 
     const selectedNotes = getSelectedNotes?.() ?? [];
@@ -337,7 +348,17 @@ export function getNotePlacementHandlers(ctx) {
       clearResizeState();
 
       console.log('Calling setSelectedNote from upHandler line 348')
-      setSelectedNote(anchorNote);
+      const refreshedNote = ctx.findNoteAt(
+        anchorNote.start * ctx.getCellWidth() + 1, // a little offset to land inside the note
+        ctx.getPitchRow(anchorNote.pitch) * ctx.getCellHeight() + 1
+      );
+      
+      if (refreshedNote) {
+        setSelectedNote(refreshedNote);
+      } else {
+        console.warn('Failed to refresh moved note reference');
+      }
+      
 
       setSuppressNextClick();
 
@@ -369,7 +390,11 @@ export function getNotePlacementHandlers(ctx) {
       );
       setSuppressNextClick();
       setSuppressNextNotePlacement();
+      console.log('Calling setSelectedNote from upHandler line 379')
       setSelectedNote(anchorNote);
+      console.log('Selected anchorNote:', anchorNote);
+      console.log('Current selectedNote (getSelectedNote()):', getSelectedNote());
+
     }
   
     ctx.scheduleRedraw();
