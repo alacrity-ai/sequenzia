@@ -35,19 +35,19 @@ export function getNotePlacementHandlers(ctx) {
   let dragState = null;
   let lastPlayedPitch = null;
   let hasActivatedMarquee = false;
-  
 
   // Left click to place a note
   function clickHandler(e) {
+    console.log('ClickHandler called')
     registerSelectionStart(ctx.grid);
   
-    if (getResizeState()) return;
+    // if (getResizeState()) return;
 
     // If we're suppressing note placement, clear the flag and deselect the note
     if (shouldSuppressNotePlacement()) {
       clearSuppressNotePlacementFlag();
       // deselect note if selected and redraw
-      ctx.setSelectedNote(null);
+      // ctx.setSelectedNote(null);
       ctx.scheduleRedraw();
       return;
     }
@@ -61,15 +61,16 @@ export function getNotePlacementHandlers(ctx) {
       return;
     }
   
-    // Check if we're clicking on an existing note
-    const found = ctx.findNoteAt(x, y);
-    if (found) {
-      ctx.setSelectedNote(found);
-      ctx.scheduleRedraw();
-      ctx.onNotesChanged?.();
-      setSuppressNextNotePlacement();
-      return;
-    }
+    // // Check if we're clicking on an existing note
+    // const found = ctx.findNoteAt(x, y);
+    // if (found) {
+    //   ctx.setSelectedNote(found);
+    //   console.log('HIIII!!!')
+    //   ctx.scheduleRedraw();
+    //   ctx.onNotesChanged?.();
+    //   setSuppressNextNotePlacement();
+    //   return;
+    // }
   
     const snappedBeat = ctx.getSnappedBeatFromX(x);
     const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
@@ -130,6 +131,7 @@ export function getNotePlacementHandlers(ctx) {
       createDeleteNotesDiff(ctx.sequencer.id, toDelete),
       createReverseDeleteNotesDiff(ctx.sequencer.id, toDelete)
     );
+    clearSuppressNotePlacementFlag();
   }
 
   // Hold down on a note (with the intent to drag it)
@@ -182,7 +184,7 @@ export function getNotePlacementHandlers(ctx) {
   function moveHandler(e) {
     ctx.grid.setCursor('default');
     const { x, y } = ctx.getCanvasPos(e);
-    if (x < 0) {
+    if (x < 0 ) {
       ctx.clearPreview();
       return;
     }
@@ -249,8 +251,7 @@ export function getNotePlacementHandlers(ctx) {
       }
     }    
 
-    // Show preview note if not hovering over a note
-    if (!hovered && !dragState && !shouldSuppressNotePlacement()) {
+    if (!hovered && !dragState && !shouldSuppressNotePlacement() && !selected) {
       const snappedBeat = ctx.getSnappedBeatFromX(x);
       const pitch = ctx.getPitchFromRow(Math.floor(y / ctx.getCellHeight()));
       const totalBeats = getTotalBeats();
@@ -292,9 +293,9 @@ export function getNotePlacementHandlers(ctx) {
           ctx.sequencer.playNote(newPitch, 0.5);
         }
       }
-
       ctx.scheduleRedraw();
       ctx.onNotesChanged?.();
+      setSuppressNextNotePlacement();
       return;
     }
 
@@ -303,6 +304,7 @@ export function getNotePlacementHandlers(ctx) {
 
   // Handles releasing a dragged note
   function upHandler(e) {
+    console.log('UpHandler called')
     resetMouseGestureState(); // replaces pendingClick = null;
     hasActivatedMarquee = false;
 
@@ -325,6 +327,7 @@ export function getNotePlacementHandlers(ctx) {
       }
     
       clearResizeState();
+      setSuppressNextNotePlacement();
       return;
     }    
 
@@ -349,8 +352,9 @@ export function getNotePlacementHandlers(ctx) {
         createMoveNotesDiff(ctx.sequencer.id, [initialNote], [finalNote]),
         createReverseMoveNotesDiff(ctx.sequencer.id, [initialNote], [finalNote])
       );
+
     }
-  
+    setSuppressNextNotePlacement();
     dragState = null;
   }
 
