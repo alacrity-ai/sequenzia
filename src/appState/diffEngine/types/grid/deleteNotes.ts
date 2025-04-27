@@ -23,8 +23,8 @@ export function applyDELETE_NOTES(state: AppState, diff: Diff): AppState {
     return !toDelete.has(key);
   });
 
-  // Refresh global mini contour after note deletion
-  const globalMiniCanvas = document.getElementById('global-mini-contour');
+  // ✅ Refresh global mini contour (using LIVE sequencers array)
+  const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
   if (globalMiniCanvas) {
     drawGlobalMiniContour(globalMiniCanvas, sequencers);
   }

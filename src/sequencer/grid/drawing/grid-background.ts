@@ -1,4 +1,5 @@
-// src/sequencer/grid/drawing/grid-background.js
+// src/sequencer/grid/drawing/grid-background.ts
+
 import { isBlackKey } from '../../../audio/pitch-utils.js';
 import { labelWidth } from '../helpers/constants.js';
 import { getTotalBeats, getTimeSignature } from '../../transport.js';
@@ -7,15 +8,15 @@ import { GRID_COLOR_SCHEMES } from './color-schemes/grid-colors.js';
 
 /**
  * Renders the piano roll grid using the user-selected color scheme.
- *
- * @param {CanvasRenderingContext2D} ctx
- * @param {Object} config
- * @param {number} visibleNotes
- * @param {number} cellWidth
- * @param {number} cellHeight
- * @param {Function} getPitchFromRow
  */
-export function drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow) {
+export function drawGridBackground(
+  ctx: CanvasRenderingContext2D,
+  config: any, // 🔥 discussed below
+  visibleNotes: number,
+  cellWidth: number,
+  cellHeight: number,
+  getPitchFromRow: (row: number) => string
+): void {
   const { gridColorScheme } = getUserConfig();
   const gridColors = GRID_COLOR_SCHEMES[gridColorScheme] || GRID_COLOR_SCHEMES['Darkroom'];
 

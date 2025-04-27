@@ -31,8 +31,8 @@ export function applyRESIZE_NOTES(state: AppState, diff: Diff): AppState {
     }
   }
 
-  // Refresh global mini contour after resizing notes
-  const globalMiniCanvas = document.getElementById('global-mini-contour');
+  // ✅ Refresh global mini contour properly (use live sequencers)
+  const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
   if (globalMiniCanvas) {
     drawGlobalMiniContour(globalMiniCanvas, sequencers);
   }

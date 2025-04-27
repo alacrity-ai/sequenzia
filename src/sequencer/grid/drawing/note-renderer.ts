@@ -1,23 +1,52 @@
-// sequencer/grid/drawing/note-renderer.js
+// src/sequencer/grid/drawing/note-renderer.ts
 
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
 import { NOTE_COLOR_SCHEMES } from './color-schemes/note-colors.js';
+import { colorToRgba } from './utility/colorConversion.js';
+import { Note } from '../../interfaces/Note.js';
+import { NoteContext } from '../../grid/drawing/color-schemes/note-colors.js';
 
-export function drawNotes(ctx, notes, {
-  previewNotes = null,
-  hoveredNote,
-  selectedNote,
-  selectedNotes = [],
-  highlightedNotes = [],
-  cellWidth,
-  cellHeight,
-  visibleStartBeat,
-  visibleEndBeat,
-  getPitchRow,
-  getPitchClass,
-  getTrackColor,  // ⬅️ required for some strategies
-  drawRoundedRect
-}) {
+interface DrawNotesOptions {
+  previewNotes?: Note[] | null;
+  hoveredNote?: Note | null;
+  selectedNote?: Note | null;
+  selectedNotes?: Note[];
+  highlightedNotes?: Note[];
+  cellWidth: number;
+  cellHeight: number;
+  visibleStartBeat: number;
+  visibleEndBeat: number;
+  getPitchRow: (pitch: string) => number;
+  getPitchClass?: (pitch: string) => string;
+  getTrackColor?: (trackId: any) => string; // kept generic 'any' for now
+  drawRoundedRect: (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number
+  ) => void;
+}
+
+export function drawNotes(
+  ctx: CanvasRenderingContext2D,
+  notes: Note[],
+  {
+    previewNotes = null,
+    hoveredNote,
+    selectedNote,
+    selectedNotes = [],
+    highlightedNotes = [],
+    cellWidth,
+    cellHeight,
+    visibleStartBeat,
+    visibleEndBeat,
+    getPitchRow,
+    getPitchClass,
+    getTrackColor,
+    drawRoundedRect
+  }: DrawNotesOptions
+): void {
   const overscanBeats = 2;
   const { noteColorScheme } = getUserConfig();
   const getNoteColor = NOTE_COLOR_SCHEMES[noteColorScheme] || (() => '#999');
@@ -30,7 +59,7 @@ export function drawNotes(ctx, notes, {
     const w = note.duration * cellWidth;
     const h = cellHeight - 1;
 
-    const baseColor = getNoteColor(note, { getPitchClass, getTrackColor });
+    const baseColor = getNoteColor(note, { getPitchClass, getTrackColor } as NoteContext);
 
     ctx.shadowColor = 'rgba(0,0,0,0.3)';
     ctx.shadowBlur = 4;
@@ -60,17 +89,16 @@ export function drawNotes(ctx, notes, {
 
     if (isSelected || isHovered || isHighlighted) {
       ctx.lineWidth = isSelected ? 3 : 2;
-    
+
       ctx.strokeStyle = isSelected
         ? 'rgba(0, 255, 255, 1.0)'      // Bright cyan for selected
         : isHovered
           ? 'rgba(255, 255, 255, 0.9)'  // White for hover
           : 'rgba(255, 200, 50, 0.7)';  // Amber for highlighted
-    
+
       drawRoundedRect(ctx, x, y, w, h);
       ctx.stroke();
     }
-    
   }
 
   // === Preview Notes ===
@@ -81,54 +109,11 @@ export function drawNotes(ctx, notes, {
       const w = previewNote.duration * cellWidth;
       const h = cellHeight - 1;
 
-      const color = getNoteColor(previewNote, { getPitchClass, getTrackColor });
+      const color = getNoteColor(previewNote, { getPitchClass, getTrackColor } as NoteContext);
 
       ctx.fillStyle = colorToRgba(color, 0.4);
       drawRoundedRect(ctx, x, y, w, h);
       ctx.fill();
     }
   }
-}
-
-function colorToRgba(color, alpha = 1.0) {
-  if (color.startsWith('#')) {
-    const bigint = parseInt(color.slice(1), 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  if (color.startsWith('hsl(')) {
-    // Convert hsl(h, s%, l%) to rgba
-    const [h, s, l] = color
-      .slice(4, -1)
-      .split(',')
-      .map(part => parseFloat(part));
-    const [r, g, b] = hslToRgb(h, s / 100, l / 100);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  // Default fallback
-  return color;
-}
-
-function hslToRgb(h, s, l) {
-  const c = (1 - Math.abs(2 * l - 1)) * s;
-  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-  const m = l - c / 2;
-  let [r, g, b] = [0, 0, 0];
-
-  if (0 <= h && h < 60)      [r, g, b] = [c, x, 0];
-  else if (60 <= h && h < 120) [r, g, b] = [x, c, 0];
-  else if (120 <= h && h < 180)[r, g, b] = [0, c, x];
-  else if (180 <= h && h < 240)[r, g, b] = [0, x, c];
-  else if (240 <= h && h < 300)[r, g, b] = [x, 0, c];
-  else if (300 <= h && h < 360)[r, g, b] = [c, 0, x];
-
-  return [
-    Math.round((r + m) * 255),
-    Math.round((g + m) * 255),
-    Math.round((b + m) * 255)
-  ];
 }

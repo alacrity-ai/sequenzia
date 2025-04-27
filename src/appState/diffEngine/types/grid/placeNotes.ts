@@ -16,8 +16,8 @@ export function applyPLACE_NOTES(state: AppState, diff: Diff): AppState {
 
   seq.notes.push(...(diff.notes as Note[]));
 
-  // Refresh global mini contour after note placement
-  const globalMiniCanvas = document.getElementById('global-mini-contour');
+  // ✅ Refresh global mini contour (using LIVE sequencers array)
+  const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
   if (globalMiniCanvas) {
     drawGlobalMiniContour(globalMiniCanvas, sequencers);
   }

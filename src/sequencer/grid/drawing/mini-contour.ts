@@ -1,10 +1,23 @@
-// sequencer/mini-contour.js
-import { pitchToMidi } from "../../../audio/pitch-utils.js";
-import { TRACK_COLORS } from "../helpers/sequencerColors.js";
-import { getTotalBeats, getTimeSignature, getTotalMeasures } from "../../transport.js";
+// src/sequencer/grid/drawing/mini-contour.ts
 
-export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
+import { pitchToMidi } from '../../../audio/pitch-utils.js';
+import { TRACK_COLORS } from '../helpers/sequencerColors.js';
+import { getTotalBeats, getTimeSignature, getTotalMeasures } from '../../transport.js';
+import { Note } from '../../interfaces/Note.js';
+
+interface Sequencer {
+  notes: Note[];
+  config: { noteRange: [string, string] };
+}
+
+export function drawMiniContour(
+  canvas: HTMLCanvasElement,
+  notes: Note[],
+  config: any,
+  colorIndex = 0
+): void {
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
   ctx.imageSmoothingEnabled = false;
 
   const W = canvas.width;
@@ -18,25 +31,26 @@ export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
 
   const totalBeats = getTotalBeats();
 
-  // 🎯 Determine pitch range from actual notes
-  const midiNotes = notes.map(note => pitchToMidi(note.pitch));
+  const midiNotes = notes.map(note => pitchToMidi(note.pitch)).filter((midi): midi is number => midi !== null);
+  if (!midiNotes.length) return;
+
   let minUsedMidi = Math.min(...midiNotes);
   let maxUsedMidi = Math.max(...midiNotes);
   let pitchRange = Math.max(1, maxUsedMidi - minUsedMidi);
-  
-  // 🔥 Snap pitch range so that H / pitchRange is integer
+
   while (H % pitchRange !== 0) {
-    maxUsedMidi++; // Expand upwards
+    maxUsedMidi++;
     pitchRange = maxUsedMidi - minUsedMidi;
   }
-  
-  const blockH = H / pitchRange; // perfect, integer
 
-  // 🎼 Draw note contours (snap to integer pixels)
+  const blockH = H / pitchRange;
+
   for (const note of notes) {
+    const midi = pitchToMidi(note.pitch);
+    if (midi == null) continue;
+
     const rawX = (note.start / totalBeats) * W;
     const rawW = (note.duration / totalBeats) * W;
-    const midi = pitchToMidi(note.pitch);
     const norm = (midi - minUsedMidi) / pitchRange;
     const rawY = H - norm * H - blockH / 2;
 
@@ -47,7 +61,6 @@ export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
     ctx.fillRect(x, y, w, blockH);
   }
 
-  // 📏 Draw measure markers (dynamic density, clean + minimal)
   const beatsPerMeasure = getTimeSignature();
   const totalMeasures = getTotalMeasures();
 
@@ -56,7 +69,7 @@ export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
   let drawEvery = 1;
   if (totalMeasures > 256) drawEvery = 16;
   else if (totalMeasures > 128) drawEvery = 8;
-  else if (totalMeasures > 32)  drawEvery = 4;
+  else if (totalMeasures > 32) drawEvery = 4;
 
   for (let m = 0; m <= totalMeasures; m++) {
     if (m % drawEvery !== 0) continue;
@@ -79,42 +92,50 @@ export function drawMiniContour(canvas, notes, config, colorIndex = 0) {
   }
 
   ctx.restore();
-
 }
 
-export function drawGlobalMiniContour(canvas, sequencers) {
+export function drawGlobalMiniContour(
+  canvas: HTMLCanvasElement,
+  sequencers: Sequencer[]
+): void {
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
   const W = canvas.width;
   const H = canvas.height;
   ctx.clearRect(0, 0, W, H);
 
-  sequencers.forEach((seq, index) => {
-    const notes = seq.notes;
-    const config = seq.config;
-    if (!notes?.length) return;
+  const totalBeats = getTotalBeats();
 
-    const totalBeats = getTotalBeats();
-    const color = TRACK_COLORS[index % TRACK_COLORS.length];
+  for (const seq of sequencers) {
+    const { notes, config } = seq;
+    if (!notes?.length) continue;
+
+    const color = TRACK_COLORS[sequencers.indexOf(seq) % TRACK_COLORS.length];
     ctx.fillStyle = color;
 
     const minMidi = pitchToMidi(config.noteRange[0]);
     const maxMidi = pitchToMidi(config.noteRange[1]);
+    if (minMidi == null || maxMidi == null) continue;
+
     const pitchRange = maxMidi - minMidi || 1;
     const blockH = Math.max(2, H / pitchRange);
 
     for (const note of notes) {
+      const midi = pitchToMidi(note.pitch);
+      if (midi == null) continue;
+
       const x = (note.start / totalBeats) * W;
       const w = Math.max(1, (note.duration / totalBeats) * W);
-      const midi = pitchToMidi(note.pitch);
       const norm = (midi - minMidi) / pitchRange;
       const y = H - norm * H - blockH / 2;
       ctx.fillRect(x, y, w, blockH);
     }
-
-    
-  });
+  }
 }
 
-export function refreshGlobalMiniContour(globalMiniCanvas, sequencers) {
+export function refreshGlobalMiniContour(
+  globalMiniCanvas: HTMLCanvasElement,
+  sequencers: Sequencer[]
+): void {
   drawGlobalMiniContour(globalMiniCanvas, sequencers);
 }
