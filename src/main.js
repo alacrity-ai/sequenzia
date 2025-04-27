@@ -128,21 +128,41 @@ setupUI({
     sequencers.forEach(s => (s.config.useEqualTemperament = isEqual));
   },
   onSave: async (format) => {
-    const states = sequencers.map(s => s.getState());
-
+    // Create an AppState object from sequencers
+    const appState = {
+      tempo: getTempo(),
+      timeSignature: getTimeSignature(),
+      totalMeasures: getTotalMeasures(),
+      sequencers: sequencers.map(s => s.getState()) // Assuming `getState()` returns a SequencerState
+    };
+  
     if (format === 'json') {
-      const { url, filename } = exportSessionToJSON(states);
+      const { url, filename } = exportSessionToJSON(appState);  // Pass appState here
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
     } else if (format === 'wav') {
-      await exportSessionToWAV(states); // 👈 async export
+      // Convert appState to session for WAV export
+      const session = {
+        globalConfig: {
+          bpm: appState.tempo,
+          beatsPerMeasure: appState.timeSignature[0],
+          totalMeasures: appState.totalMeasures
+        },
+        tracks: appState.sequencers.map(s => ({
+          notes: s.notes,
+          instrument: s.instrument,
+          config: s.config // Include config if needed
+        }))
+      };
+      await exportSessionToWAV(session);  // Pass session here
     } else if (format === 'midi') {
       alert("MIDI export not implemented yet.");
     }
   },
+  
   onLoad: async file => {
     try {
       const { tracks, globalConfig } = await importSessionFromJSON(file);

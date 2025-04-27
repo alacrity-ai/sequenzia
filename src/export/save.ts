@@ -1,40 +1,15 @@
-// save.js — responsible for exporting single-sequence or full session
-import Sequencer from '../sequencer/sequencer.js';
-import { getTotalBeats, getTempo, getTimeSignature, getTotalMeasures } from '../sequencer/transport.js';
+// src/export/save.ts
 
-/**
- * Exports a single sequence to JSON format (legacy format - v1).
- * @param {Array<{pitch: string, start: number, duration: number}>} notes - Array of note objects
- * @param {Object} config - Configuration object
- * @param {number} config.snapResolution - Grid snap resolution
- * @param {number} config.currentDuration - Current note duration
- * @param {Array<string>} config.noteRange - Range of available notes [lowest, highest]
- * @returns {{url: string, filename: string}} Object containing the blob URL and suggested filename
- */
-export function exportToJSON(notes, config) {
-  const payload = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    config: {
-      bpm: getTempo(),
-      snapResolution: config.snapResolution,
-      currentDuration: config.currentDuration,
-      noteRange: config.noteRange,
-      totalBeats: getTotalBeats(),
-      beatsPerMeasure: getTimeSignature(),
-      totalMeasures: getTotalMeasures()
-    },
-    notes: notes.map(n => ({ pitch: n.pitch, start: n.start, duration: n.duration }))
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  return { url: URL.createObjectURL(blob), filename: `sequence-${Date.now()}.json` };
-}
+import { Session } from '../sequencer/interfaces/Session.js';
+import Sequencer from '../sequencer/sequencer.js';
+import { getTempo, getTimeSignature, getTotalMeasures } from '../sequencer/transport.js';
+import { AppState } from '../appState/interfaces/AppState.js';
+
 
 /**
  * Exports the complete session to JSON format (current format - v3).
- * @param {Array<{notes: Array<{pitch: string, start: number, duration: number}>, instrument: string}>} tracks 
- *        Array of track objects, each containing notes and instrument information
- * @throws {Error} If tracks array is empty
+ * @param {AppState} appState - The app state containing sequencer data
+ * @throws {Error} If sequencers array is empty
  * @returns {{url: string, filename: string}} Object containing the blob URL and suggested filename
  * 
  * @example
@@ -53,12 +28,12 @@ export function exportToJSON(notes, config) {
  *   }, ...]
  * }
  */
-export function exportSessionToJSON(tracks) {
-  if (!tracks.length) throw new Error("No tracks to export.");
+export function exportSessionToJSON(appState: AppState): { url: string, filename: string } {
+  if (!appState.sequencers.length) throw new Error("No tracks to export.");
 
-  const bpm = getTempo();
-  const beatsPerMeasure = getTimeSignature();
-  const totalMeasures = getTotalMeasures();
+  const bpm = appState.tempo;
+  const beatsPerMeasure = appState.timeSignature[0];
+  const totalMeasures = appState.totalMeasures;
 
   const payload = {
     v: 3,
@@ -68,9 +43,9 @@ export function exportSessionToJSON(tracks) {
       bpm: beatsPerMeasure,
       tm: totalMeasures
     },
-    i: tracks.map(t => t.instrument || 'fluidr3-gm/acoustic_grand_piano'),
-    tr: tracks.map(({ notes }) => ({
-      n: notes.map(n => [n.pitch, n.start, n.duration])
+    i: appState.sequencers.map(s => s.instrument || 'fluidr3-gm/acoustic_grand_piano'),
+    tr: appState.sequencers.map(s => ({
+      n: s.notes.map(n => [n.pitch, n.start, n.duration])
     }))
   };
 
@@ -82,46 +57,40 @@ export function exportSessionToJSON(tracks) {
 }
 
 
-// Placeholder for future export options
-/**
- * Placeholder for MIDI export functionality.
- * @param {Array<{pitch: string, start: number, duration: number}>} notes - Array of note objects
- * @param {Object} config - Configuration object
- * @throws {Error} Always throws as this is not implemented yet
- */
-export function exportToMIDI(notes, config) {
-  throw new Error("MIDI export not implemented yet.");
-}
-
 /**
  * Exports the complete session to WAV format.
- * @param {Array<{notes: Array<{pitch: string, start: number, duration: number}>, instrument: string}>} tracks 
- *        Array of track objects to render
+ * @param {Session} session - The session object containing tracks
  * @returns {Promise<void>} Resolves when the WAV file has been generated and download triggered
  * @description Renders all tracks to an audio buffer using Web Audio API's OfflineAudioContext,
  *             then converts to WAV format and triggers download
  */
-export async function exportSessionToWAV(tracks) {
-  if (!tracks.length) return;
+export async function exportSessionToWAV(session: Session): Promise<void> {
+  // Check if the session has tracks
+  if (!session.tracks || session.tracks.length === 0) {
+    throw new Error("No tracks to export.");
+  }
 
   const bpm = getTempo();
   const beatDuration = 60 / bpm;
 
+  // Calculate the total duration of the session in seconds
   const totalSeconds = Math.max(
-    ...tracks.flatMap(t =>
+    ...session.tracks.flatMap(t =>
       t.notes.map(n => (n.start + n.duration) * beatDuration + 0.2)
     )
   );
 
   const sampleRate = 44100;
   const offlineCtx = new OfflineAudioContext(
-    2,
+    2, // Two channels (stereo)
     Math.ceil(sampleRate * totalSeconds),
     sampleRate
   );
 
-  for (const state of tracks) {
+  // Process each track
+  for (const state of session.tracks) {
     const instrumentName = state.instrument || 'fluidr3-gm/acoustic_grand_piano';
+    // @ts-ignore | Fix this after refactoring Sequencer to ts
     const seq = new Sequencer(null, state.config, offlineCtx, offlineCtx.destination, instrumentName);
     seq.setState(state);
     await seq.exportToOffline();
@@ -131,6 +100,7 @@ export async function exportSessionToWAV(tracks) {
   const wavBlob = audioBufferToWavBlob(renderedBuffer);
   const url = URL.createObjectURL(wavBlob);
 
+  // Create a download link and trigger the download
   const a = document.createElement('a');
   a.href = url;
   a.download = `session-${Date.now()}.wav`;
@@ -139,12 +109,13 @@ export async function exportSessionToWAV(tracks) {
 }
 
 
-function audioBufferToWavBlob(buffer) {
+
+function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
   const numChannels = buffer.numberOfChannels;
   const length = buffer.length * numChannels * 2;
   const result = new DataView(new ArrayBuffer(44 + length));
 
-  const writeString = (offset, str) => {
+  const writeString = (offset: number, str: string): void => {
     for (let i = 0; i < str.length; i++) result.setUint8(offset + i, str.charCodeAt(i));
   };
 
