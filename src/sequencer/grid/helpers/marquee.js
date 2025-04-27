@@ -1,4 +1,4 @@
-import { pitchToMidi } from '../../../helpers.js';
+import { pitchToMidi } from '../../../audio/pitch-utils.js';
 
 export function getNotesInMarquee(notes, {
     startX, currentX, startY, currentY,

@@ -1,6 +1,6 @@
 import Sequencer from '../sequencer/sequencer.js';
 import { setupSequencerGripHandler } from '../sequencer/ui.js';
-import { drawMiniContour } from '../sequencer/mini-contour.js';
+import { drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
 import { audioCtx, masterGain } from '../audio/audio.js';
 import { recordDiff } from '../appState/appState.js'

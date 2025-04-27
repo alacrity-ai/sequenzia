@@ -1,5 +1,5 @@
 // src/sequencer/grid/drawing/grid-background.js
-import { isBlackKey } from '../helpers/geometry.js';
+import { isBlackKey } from '../../../audio/pitch-utils.js';
 import { labelWidth } from '../helpers/constants.js';
 import { getTotalBeats, getTimeSignature } from '../../transport.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';

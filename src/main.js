@@ -9,7 +9,7 @@ import { exportSessionToJSON, exportSessionToWAV } from './export/save.js';
 import { importSessionFromJSON } from './export/load.js';
 import { getTotalBeats, startTransport, stopTransport, pauseTransport, resumeTransport, onTransportEnd, onBeatUpdate, getCurrentBeat, setCurrentBeat, updateTotalMeasures, updateTimeSignature, updateTempo, getTempo, getTimeSignature, getTotalMeasures } from './sequencer/transport.js';
 import { setupNoteDurationButtons } from './setup/noteDurationButtons.js';
-import { drawGlobalMiniContour } from './sequencer/mini-contour.js';
+import { drawGlobalMiniContour } from './sequencer/grid/drawing/mini-contour.js';
 import { drawGlobalPlayhead, initGlobalPlayhead } from './playhead/global-playhead.js';
 import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';
 import { setupControlModeSwitch } from './setup/controlModeSwitch.js';

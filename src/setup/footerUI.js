@@ -1,7 +1,7 @@
 // src/setup/footerUI.js
 
 import { getSequencers } from '../setup/sequencers.js';
-import { drawGlobalMiniContour } from '../sequencer/mini-contour.js';
+import { drawGlobalMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 
 export function initFooterUI() {
     const expandBtn = document.getElementById('global-mini-expand-btn');

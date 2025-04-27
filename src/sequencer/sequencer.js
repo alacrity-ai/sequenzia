@@ -7,7 +7,7 @@ import { getTotalBeats } from './transport.js';
 import { loadInstrument } from '../sf2/sf2-loader.js';
 import { loadAndPlayNote } from '../sf2/sf2-player.js';
 import { pitchToMidi } from '../audio/pitch-utils.js';
-import { drawMiniContour } from './mini-contour.js';
+import { drawMiniContour } from './grid/drawing/mini-contour.js';
 import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
 import { labelWidth } from './grid/helpers/constants.js';
 

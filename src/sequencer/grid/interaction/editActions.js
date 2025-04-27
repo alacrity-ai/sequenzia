@@ -1,6 +1,6 @@
 // src/sequencer/grid/interaction/editActions.js
 import { getClipboard, setClipboard } from '../../clipboard.js';
-import { pitchToMidi, midiToPitch } from '../../../helpers.js';
+import { pitchToMidi, midiToPitch } from '../../../audio/pitch-utils.js';
 import { getActiveGrid } from '../../../setup/selectionTracker.js';
 import { startPasteMode, endPasteMode } from '../../../setup/pasteModeStore.js';
 import { recordDiff } from '../../../appState/appState.js';

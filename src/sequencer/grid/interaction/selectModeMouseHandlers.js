@@ -1,6 +1,6 @@
 // src/sequencer/grid/interaction/selectModeMouseHandlers.js
 
-import { pitchToMidi, midiToPitch } from '../../../helpers.js';
+import { pitchToMidi, midiToPitch } from '../../../audio/pitch-utils.js';
 import { EditModes, setEditMode, setSuppressNextNotePlacement, shouldAutoExitSelectMode, clearTemporarySelectModeFlag } from '../../../setup/editModeStore.js';
 import { getTotalBeats } from '../../transport.js'
 import { registerSelectionStart } from '../../../setup/selectionTracker.js';

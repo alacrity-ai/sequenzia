@@ -1,13 +1,12 @@
-import {
-  pitchToMidi, midiToPitch, getPitchClass, getRawBeatFromX, getSnappedBeatFromX
-} from './grid/helpers/geometry.js';
+import { getSnappedBeatFromX } from './grid/helpers/geometry.js';
+import { pitchToMidi, midiToPitch, getPitchClass } from '../audio/pitch-utils.js';
 import { drawRoundedRect } from './grid/drawing/rounded-rect.js';
 import { drawGridBackground } from './grid/drawing/grid-background.js';
 import { drawNotes } from './grid/drawing/note-renderer.js';
 import { drawPlayhead } from './grid/drawing/playhead-renderer.js';
 import { getCanvasPos } from './grid/helpers/canvas-coords.js';
 import { findNoteAt } from '../sequencer/grid/helpers/note-finder.js';
-import { drawGlobalMiniContour } from './mini-contour.js';
+import { drawGlobalMiniContour } from './grid/drawing/mini-contour.js';
 import { sequencers } from '../setup/sequencers.js'; 
 import { getTotalBeats } from '../sequencer/transport.js';
 import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';

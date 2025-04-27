@@ -3,7 +3,7 @@
 import { isPasteModeActive, handlePasteEvent } from '../../../setup/pasteModeStore.js';
 
 import { getClipboard } from '../../clipboard.js';
-import { pitchToMidi, midiToPitch } from '../../../helpers.js';
+import { pitchToMidi, midiToPitch } from '../../../audio/pitch-utils.js';
 
 // Handle resize
 let hoveredResizeNote = null;

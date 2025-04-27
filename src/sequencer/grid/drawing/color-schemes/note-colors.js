@@ -1,7 +1,7 @@
 // src/sequencer/grid/drawing/color-schemes/note-colors.js
 
 import { PITCH_COLOR_MAP } from '../../helpers/constants.js';
-import { pitchToMidi } from '../../helpers/geometry.js';
+import { pitchToMidi } from '../../../../audio/pitch-utils.js';
 
 export const NOTE_COLOR_SCHEMES = {
   'Scriabin': (note, { getPitchClass }) => {
