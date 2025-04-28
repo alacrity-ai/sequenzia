@@ -2,20 +2,27 @@
 
 import { setEditMode } from './editModeStore.js';
 
-export function setupEditModeControls() {
+export function setupEditModeControls(): void {
   // Mode buttons
-  const notePlacementModeBtn = document.getElementById('note-placement-mode-btn');
-  const selectModeBtn = document.getElementById('select-mode-btn');
-  const velocityModeBtn = document.getElementById('velocity-mode-btn');
+  const notePlacementModeBtn = document.getElementById('note-placement-mode-btn') as HTMLElement | null;
+  const selectModeBtn = document.getElementById('select-mode-btn') as HTMLElement | null;
+  const velocityModeBtn = document.getElementById('velocity-mode-btn') as HTMLElement | null;
 
   // Control panels
-  const noteDurationControls = document.getElementById('note-duration-controls');
-  const selectModeControls = document.getElementById('select-mode-controls');
-  const velocityModeControls = document.getElementById('velocity-mode-controls');
+  const noteDurationControls = document.getElementById('note-duration-controls') as HTMLElement | null;
+  const selectModeControls = document.getElementById('select-mode-controls') as HTMLElement | null;
+  const velocityModeControls = document.getElementById('velocity-mode-controls') as HTMLElement | null;
+
+  if (!notePlacementModeBtn || !selectModeBtn || !velocityModeBtn || 
+      !noteDurationControls || !selectModeControls || !velocityModeControls) {
+    console.error("Missing essential UI elements for edit mode switching.");
+    return;
+  }
 
   // Helper function to update button states
-  function updateButtonStates(activeButton) {
+  function updateButtonStates(activeButton: HTMLElement): void {
     [notePlacementModeBtn, selectModeBtn, velocityModeBtn].forEach(btn => {
+      if (!btn) return;
       btn.classList.remove('bg-purple-600');
       btn.classList.add('bg-gray-800');
     });
@@ -25,8 +32,9 @@ export function setupEditModeControls() {
   }
 
   // Helper function to update control panel visibility
-  function updateControlPanels(activePanel) {
+  function updateControlPanels(activePanel: HTMLElement): void {
     [noteDurationControls, selectModeControls, velocityModeControls].forEach(panel => {
+      if (!panel) return;
       panel.classList.add('hidden');
     });
 
@@ -49,18 +57,18 @@ export function setupEditModeControls() {
   velocityModeBtn.addEventListener('click', () => {
     updateButtonStates(velocityModeBtn);
     updateControlPanels(velocityModeControls);
-    setEditMode('velocity');
+    setEditMode('none');
   });
 
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener('keydown', (e: KeyboardEvent) => {
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-  
-    const modalOpen = document.querySelector('.ai-modal:not(.hidden)');
+
+    const modalOpen = document.querySelector('.ai-modal:not(.hidden)') as HTMLElement | null;
     if (modalOpen) return;
-  
+
     // Mode switching hotkeys
-    switch (e.key) {
+    switch (e.key.toLowerCase()) {
       case 'q':
         notePlacementModeBtn.click();
         break;
@@ -72,7 +80,7 @@ export function setupEditModeControls() {
         break;
       default:
         return;
-    }    
+    }
   });
 
   // Default UI state
