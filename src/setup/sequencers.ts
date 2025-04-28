@@ -10,7 +10,7 @@ import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../
 import { getAppState, setAppState } from '../appState/appState.js';
 import { clearHistory } from '../appState/stateHistory.js';
 import { notifyStateUpdated } from '../appState/onStateUpdated.js';
-import { GRID_CONFIG as config } from '../sequencer/grid/helpers/constants.js';
+import { GRID_CONFIG as config } from '../sequencer/grid/helpers/constants.js'; // Imported as 'config'
 import type { SequencerState } from '../appState/interfaces/AppState.js';
 
 export const sequencers: Sequencer[] = [];
@@ -19,52 +19,14 @@ const container = document.getElementById('sequencers-container') as HTMLElement
 const template  = document.getElementById('sequencer-template') as HTMLTemplateElement;
 const addBtn    = document.getElementById('add-sequencer') as HTMLElement;
 
-export function refreshPlaybackAt(currentBeat: number): void {
-  sequencers.forEach(seq => {
-    seq.seekTo(currentBeat);
-  });
-}
-
-export function toggleZoomControls(wrapper: HTMLElement, show: boolean): void {
-  wrapper.querySelector('.zoom-in-btn')?.classList.toggle('hidden', !show);
-  wrapper.querySelector('.zoom-out-btn')?.classList.toggle('hidden', !show);
-  wrapper.querySelector('.zoom-reset-btn')?.classList.toggle('hidden', !show);
-  wrapper.querySelector('.zoom-button-divider')?.classList.toggle('hidden', !show);
-  wrapper.querySelector('.grip-handle')?.classList.toggle('hidden', !show);
-}
-
-export function getSequencers(): Sequencer[] {
-  return sequencers;
-}
-
-export function getSequencerById(id: string | number): Sequencer | undefined {
-  const targetId = String(id);
-  return sequencers.find(seq =>
-    String(seq.id) === targetId || String(seq.config?.id) === targetId
-  );
-}
-
-function updateSoloStates(): void {
-  const anySoloed = sequencers.some(s => s.solo);
-  sequencers.forEach(s => {
-    s.shouldPlay = anySoloed ? s.solo : !s.mute;
-  });
-}
-
-function toggleButtonState(button: HTMLElement, enabled: boolean): void {
-  button.classList.toggle('opacity-100', enabled);
-  button.classList.toggle('opacity-40', !enabled);
-}
-
 export function createSequencer(initialState?: SequencerState): { seq: Sequencer, wrapper: HTMLElement } {
   const clone = template.content.cloneNode(true) as DocumentFragment;
   const wrapper = clone.querySelector('.sequencer') as HTMLElement;
   container.insertBefore(wrapper, addBtn);
 
   const newId = sequencers.length;
-  const mergedConfig = initialState
-    ? { id: newId, ...config, ...initialState.config }
-    : { id: newId, ...config };
+
+  const mergedConfig = { id: newId, ...config };
 
   const instrument = initialState?.instrument || 'fluidr3-gm/acoustic_grand_piano';
   const seq = new Sequencer(wrapper, mergedConfig, audioCtx, masterGain, instrument);
@@ -75,8 +37,14 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   seq.shouldPlay = true;
 
   const mini = wrapper.querySelector('canvas.mini-contour') as HTMLCanvasElement;
-  if (initialState) seq.setState(initialState);
-  drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
+  if (initialState) {
+    seq.setState({
+      notes: initialState.notes,
+      config: {},
+      instrument: initialState.instrument,
+    });
+  }
+  drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);  
 
   seq.updateTrackLabel();
   seq.initInstrument();
@@ -104,10 +72,10 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     const handleConfirm = () => {
       const forwardDiff = createDeleteSequencerDiff(seq.id, seq.instrumentName, seq.notes);
       const reverseDiff = createReverseDeleteSequencerDiff(seq.id, seq.instrumentName, seq.notes);
-
+    
       recordDiff(forwardDiff, reverseDiff);
       cleanup();
-    };
+    };    
 
     const handleCancel = () => {
       cleanup();
@@ -179,6 +147,41 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
 
   sequencers.push(seq);
   return { seq, wrapper };
+}
+
+export function refreshPlaybackAt(currentBeat: number): void {
+  sequencers.forEach(seq => {
+    seq.seekTo(currentBeat);
+  });
+}
+
+export function toggleZoomControls(wrapper: HTMLElement, show: boolean): void {
+  wrapper.querySelector('.zoom-in-btn')?.classList.toggle('hidden', !show);
+  wrapper.querySelector('.zoom-out-btn')?.classList.toggle('hidden', !show);
+  wrapper.querySelector('.zoom-reset-btn')?.classList.toggle('hidden', !show);
+  wrapper.querySelector('.zoom-button-divider')?.classList.toggle('hidden', !show);
+  wrapper.querySelector('.grip-handle')?.classList.toggle('hidden', !show);
+}
+
+export function getSequencers(): Sequencer[] {
+  return sequencers;
+}
+
+export function getSequencerById(id: number): Sequencer | undefined {
+  const targetId = id;
+  return sequencers.find(seq => seq.id === targetId);
+}
+
+function updateSoloStates(): void {
+  const anySoloed = sequencers.some(s => s.solo);
+  sequencers.forEach(s => {
+    s.shouldPlay = anySoloed ? s.solo : !s.mute;
+  });
+}
+
+function toggleButtonState(button: HTMLElement, enabled: boolean): void {
+  button.classList.toggle('opacity-100', enabled);
+  button.classList.toggle('opacity-40', !enabled);
 }
 
 export function destroyAllSequencers(): void {

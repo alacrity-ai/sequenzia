@@ -1,16 +1,8 @@
 // src/appState/diffEngine/types/sequencer/createSequencer.ts
 
 import { createSequencer, sequencers, toggleZoomControls } from '../../../../setup/sequencers.js';
-import { AppState } from '../../../interfaces/AppState.js';
+import { AppState, SequencerState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
-
-/**
- * Minimal interface for dynamic sequencer config.
- */
-interface SequencerConfig {
-  id: string;
-  [key: string]: any;
-}
 
 /**
  * Applies a CREATE_SEQUENCER diff to add a new sequencer.
@@ -26,14 +18,13 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
 
   const existing = sequencers.find(s => s.id === diff.id);
   if (!existing) {
-    const { seq, wrapper } = createSequencer({
-      config: {
-        id: parseInt(diff.id, 10),
-        ...(diff.config as Partial<SequencerConfig>),
-      },
-      notes: diff.notes ?? [],
+    const initialState: SequencerState = {
+      id: diff.id,
       instrument: diff.instrument,
-    });    
+      notes: diff.notes ?? [],
+    };
+
+    const { seq, wrapper } = createSequencer(initialState);
     toggleZoomControls(wrapper, true);
   }
 
@@ -43,7 +34,7 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
 /**
  * Creates a diff to create a sequencer.
  */
-export function createCreateSequencerDiff(id: string, instrument: string): Diff {
+export function createCreateSequencerDiff(id: number, instrument: string): Diff {
   return {
     type: 'CREATE_SEQUENCER',
     id,
@@ -54,7 +45,7 @@ export function createCreateSequencerDiff(id: string, instrument: string): Diff 
 /**
  * Creates a reverse diff to delete the newly created sequencer.
  */
-export function createReverseCreateSequencerDiff(id: string): Diff {
+export function createReverseCreateSequencerDiff(id: number): Diff {
   return {
     type: 'DELETE_SEQUENCER',
     id,

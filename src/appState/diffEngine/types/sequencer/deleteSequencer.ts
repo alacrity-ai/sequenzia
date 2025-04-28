@@ -24,7 +24,7 @@ export function applyDELETE_SEQUENCER(state: AppState, diff: Diff): AppState {
 /**
  * Creates a diff to delete a sequencer.
  */
-export function createDeleteSequencerDiff(id: string, instrument: string, notes: any[] = []): Diff {
+export function createDeleteSequencerDiff(id: number, instrument: string, notes: any[] = []): Diff {
   return {
     type: 'DELETE_SEQUENCER',
     id,
@@ -36,7 +36,7 @@ export function createDeleteSequencerDiff(id: string, instrument: string, notes:
 /**
  * Creates a reverse diff to recreate a deleted sequencer.
  */
-export function createReverseDeleteSequencerDiff(id: string, instrument: string, notes: any[] = []): Diff {
+export function createReverseDeleteSequencerDiff(id: number, instrument: string, notes: any[] = []): Diff {
   return {
     type: 'CREATE_SEQUENCER',
     id,

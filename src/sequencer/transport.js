@@ -5,7 +5,7 @@ import { recordDiff } from '../appState/appState.js';
 import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState/diffEngine/types/global/changeTempo.js';
 import { createSetTimeSignatureDiff, createReverseSetTimeSignatureDiff } from '../appState/diffEngine/types/global/changeTimeSignature.js';
 import { createSetTotalMeasuresDiff, createReverseSetTotalMeasuresDiff } from '../appState/diffEngine/types/global/changeMeasures.js';
-import { config } from '../setup/sequencers.js';
+import { GRID_CONFIG as config } from './grid/helpers/constants.js';
 
 let animationId = null;
 let beatDuration = 500;

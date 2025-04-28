@@ -28,7 +28,7 @@ export function applyPLACE_NOTES(state: AppState, diff: Diff): AppState {
 /**
  * Creates a forward diff to place notes.
  */
-export function createPlaceNotesDiff(sequencerId: string, notes: Note[]): Diff {
+export function createPlaceNotesDiff(sequencerId: number, notes: Note[]): Diff {
   return {
     type: 'PLACE_NOTES',
     sequencerId,
@@ -39,7 +39,7 @@ export function createPlaceNotesDiff(sequencerId: string, notes: Note[]): Diff {
 /**
  * Creates a reverse diff to delete placed notes.
  */
-export function createReversePlaceNotesDiff(sequencerId: string, notes: Note[]): Diff {
+export function createReversePlaceNotesDiff(sequencerId: number, notes: Note[]): Diff {
   return {
     type: 'DELETE_NOTES',
     sequencerId,

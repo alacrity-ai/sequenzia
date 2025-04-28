@@ -1,4 +1,5 @@
-import { config, sequencers } from './sequencers.js';
+import { sequencers } from './sequencers.js';
+import { GRID_CONFIG as config } from '../sequencer/grid/helpers/constants.js';
 
 export function setupNoteDurationButtons() {
   const buttons = document.querySelectorAll('.note-duration-btn');

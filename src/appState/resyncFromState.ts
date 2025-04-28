@@ -6,19 +6,14 @@ import { createSequencer, toggleZoomControls, sequencers } from '../setup/sequen
 import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { AppState, SequencerState } from './interfaces/AppState.js';
 import { NotePosition } from '../sequencer/interfaces/Grid.js';
-import { GRID_CONFIG } from '../sequencer/grid/helpers/constants.js';
 import { GridConfig } from '../sequencer/interfaces/GridConfig.js';
 
 interface SerializedSequencer extends SequencerState {
-  config?: { [key: string]: any }; // optional loose config
+  config?: Partial<GridConfig>; // optional loose config, typed better
 }
 
-function sequencerIdsMatch(liveId: number | undefined, serializedId: string | undefined): boolean {
-  return liveId !== undefined && serializedId !== undefined && String(liveId) === serializedId;
-}
-
-function hydrateGridConfig(serializedConfig?: Partial<GridConfig>): GridConfig {
-  return { ...GRID_CONFIG, ...(serializedConfig || {}) };
+function sequencerIdsMatch(liveId: number | undefined, serializedId: number | undefined): boolean {
+  return liveId !== undefined && serializedId !== undefined && liveId === serializedId;
 }
 
 /**
@@ -40,67 +35,65 @@ export function resyncFromState(state: AppState = getAppState()): void {
 
   // 🔁 Sync each serialized sequencer
   for (const serialized of state.sequencers as SerializedSequencer[]) {
-    let live = sequencers.find(seq => sequencerIdsMatch(seq.id, serialized.id));
+    const live = sequencers.find(seq => sequencerIdsMatch(seq.id, serialized.id));
 
     if (!live) {
       // Create new sequencer if missing
-      const { wrapper } = createSequencer({
-        config: {
-          id: parseInt(serialized.id, 10),
-          ...hydrateGridConfig(serialized.config),
-        },
+      const initialState: SequencerState = {
+        id: serialized.id,
         instrument: serialized.instrument,
-        notes: serialized.notes,
-      });
-      
+        notes: structuredClone(serialized.notes),
+      };
+
+      const { wrapper } = createSequencer(initialState);
 
       const zoomWrapper = wrapper.querySelector('.sequencer') as HTMLElement | null;
       if (zoomWrapper) {
         toggleZoomControls(zoomWrapper, true);
       }
     } else {
-      // 🔁 Update live sequencer
-      if (live.config) {
-        live.config.instrument = serialized.instrument;
-      }      
+      // 🔁 Update existing live sequencer
+      live.instrumentName = serialized.instrument;
 
-      const miniCanvas = live.container.querySelector('canvas.mini-contour') as HTMLCanvasElement | null;
+      const miniCanvas = live.container?.querySelector('canvas.mini-contour') as HTMLCanvasElement | null;
       if (miniCanvas) {
         drawMiniContour(miniCanvas, live.notes, live.config, live.colorIndex);
       }
 
-      const gridCtx = live.grid.gridContext;
-      const selectedNotes = gridCtx.getSelectedNotes ? gridCtx.getSelectedNotes() : [];
-      const selectedNote = gridCtx.getSelectedNote ? gridCtx.getSelectedNote() : null;
+      const gridCtx = live.grid?.gridContext;
+      if (gridCtx) {
+        const selectedNotes = gridCtx.getSelectedNotes ? gridCtx.getSelectedNotes() : [];
+        const selectedNote = gridCtx.getSelectedNote ? gridCtx.getSelectedNote() : null;
 
-      const selectedPositions: NotePosition[] = selectedNotes.map((note: any) => ({
-        pitch: note.pitch,
-        start: note.start,
-        duration: note.duration,
-      }));      
+        const selectedPositions: NotePosition[] = selectedNotes.map((note: any) => ({
+          pitch: note.pitch,
+          start: note.start,
+          duration: note.duration,
+        }));
 
-      gridCtx.notes.length = 0;
-      gridCtx.notes.push(...structuredClone(serialized.notes));
+        gridCtx.notes.length = 0;
+        gridCtx.notes.push(...structuredClone(serialized.notes));
 
-      if (selectedNotes.length > 0) {
-        const newSelectedNotes = selectedPositions.map(pos =>
-          gridCtx.notes.find((note: any) =>
-            note.pitch === pos.pitch &&
-            note.start === pos.start &&
-            note.duration === pos.duration
-          )
-        ).filter(Boolean);        
+        if (selectedNotes.length > 0) {
+          const newSelectedNotes = selectedPositions.map(pos =>
+            gridCtx.notes.find((note: any) =>
+              note.pitch === pos.pitch &&
+              note.start === pos.start &&
+              note.duration === pos.duration
+            )
+          ).filter(Boolean);
 
-        if (newSelectedNotes.length > 0) {
-          gridCtx.setSelectedNotes(newSelectedNotes);
+          if (newSelectedNotes.length > 0) {
+            gridCtx.setSelectedNotes(newSelectedNotes as any);
 
-          if (selectedNote && newSelectedNotes.length === 1) {
-            gridCtx.setSelectedNote(newSelectedNotes[0]);
+            if (selectedNote && newSelectedNotes.length === 1) {
+              gridCtx.setSelectedNote(newSelectedNotes[0] as any);
+            }
           }
         }
-      }
 
-      live.grid.scheduleRedraw();
+        live.grid?.scheduleRedraw();
+      }
     }
   }
 

@@ -1,6 +1,6 @@
 // sequencer/ui.js
 
-import { config } from '../setup/sequencers.js';
+import { GRID_CONFIG as config } from './grid/helpers/constants.js';
 import { initConfigModal } from '../userconfig/initUserConfig.js';
 import { getEditMode, EditModes } from '../setup/editModeStore.js';
 import { getTimeSignature, getTotalMeasures } from './transport.js';

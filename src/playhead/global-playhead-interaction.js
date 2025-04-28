@@ -8,7 +8,7 @@ import {
 } from '../sequencer/transport.js';
 import { sequencers } from '../setup/sequencers.js';
 import { getSnappedBeat } from '../sequencer/grid/helpers/geometry.js';
-import { config } from '../setup/sequencers.js';
+import { GRID_CONFIG as config } from '../sequencer/grid/helpers/constants.js';
 
 let isDragging = false;
 let canvas = null;

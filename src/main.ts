@@ -1,8 +1,10 @@
-// js/main.js
+// src/main.ts
+
 import { setupKeyboard } from './setup/keyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
 import { collapseAllSequencers } from './helpers.js';
-import { config, sequencers, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';
+import { sequencers, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';
+import { GRID_CONFIG as config } from './sequencer/grid/helpers/constants.js';
 import { setupUI, resetPlayButtonState } from './sequencer/ui.js';
 import { initFooterUI } from './setup/footerUI.js';
 import { exportSessionToJSON, exportSessionToWAV } from './export/save.js';
@@ -22,22 +24,25 @@ import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/di
 
 onStateUpdated(resyncFromState);
 
-function refreshGlobalMiniContour() {
-  drawGlobalMiniContour(globalMiniCanvas, sequencers);
-}  
+function refreshGlobalMiniContour(): void {
+  const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
+  if (canvas) drawGlobalMiniContour(canvas, sequencers);
+}
 
 // === Playhead ===
-const globalMiniCanvas = document.getElementById('global-mini-contour');
-const globalPlayheadCanvas = document.getElementById('global-mini-playhead');
+const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
+const globalPlayheadCanvas = document.getElementById('global-mini-playhead') as HTMLCanvasElement;
 initGlobalPlayhead(globalPlayheadCanvas);
 initGlobalPlayheadInteraction(globalPlayheadCanvas, config);
 drawGlobalPlayhead(0);
 
 // === INIT ALL COMPONENTS ===
-const pianoCanvas = document.getElementById('piano');
+const pianoCanvas = document.getElementById('piano') as HTMLCanvasElement;
 setupKeyboard(pianoCanvas);
-const waveform = document.getElementById('waveform');
-const visualizer = setupVisualizer(waveform, document.getElementById('visualizer-mode'));
+
+const waveform = document.getElementById('waveform') as HTMLCanvasElement;
+const visualizerMode = document.getElementById('visualizer-mode') as HTMLElement;
+const visualizer = setupVisualizer(waveform, visualizerMode);
 
 // Create the first sequencer via diff — just like a user click
 const firstId = 0;
@@ -60,7 +65,6 @@ setupNoteDurationButtons();
 setupControlModeSwitch();
 initFooterUI();
 
-
 // === UI Wiring ===
 setupUI({
   getSequencers: () => sequencers,
@@ -68,28 +72,24 @@ setupUI({
     stopTransport();
 
     const globalEndBeat = getTotalBeats();
-    const startBeat = getCurrentBeat(); // Respect current playhead location
+    const startBeat = getCurrentBeat();
 
     startTransport(getTempo(), {
       loop: config.loopEnabled,
       endBeat: globalEndBeat,
       startBeat,
       onLoop: () => {
-        // Clear all active notes on loop
         sequencers.forEach(seq => seq.onTransportLoop?.());
       }
     });
 
-    // Redraw the global playhead on each beat
-    onBeatUpdate(beat => {
+    onBeatUpdate((beat: number) => {
       const x = (beat / globalEndBeat) * globalPlayheadCanvas.width;
       drawGlobalPlayhead(x);
     });
 
-    // Start all sequencers
-    sequencers.forEach(s => s.play());
+    sequencers.forEach(seq => seq.play());
 
-    // Reset the play button UI when transport ends
     onTransportEnd(() => {
       resetPlayButtonState();
       setCurrentBeat(0);
@@ -98,96 +98,87 @@ setupUI({
   },
   onPause: () => {
     pauseTransport();
-    sequencers.forEach(s => s.pause());
+    sequencers.forEach(seq => seq.pause());
   },
   onResume: () => {
     resumeTransport();
-    sequencers.forEach(s => s.resume());
+    sequencers.forEach(seq => seq.resume());
   },
   onStop: () => {
     stopTransport();
     setCurrentBeat(0);
-    sequencers.forEach(s => s.stop());
+    sequencers.forEach(seq => seq.stop());
     drawGlobalPlayhead(0);
   },
-  onDurationChange: val => {
+  onDurationChange: (val: number) => {
     config.currentDuration = val;
-    sequencers.forEach(s => (s.config.currentDuration = val));
+    sequencers.forEach(seq => (seq.config.currentDuration = val));
   },
-  onSnapChange: val => {
+  onSnapChange: (val: number) => {
     config.snapResolution = val;
-    sequencers.forEach(s => (s.config.snapResolution = val));
+    sequencers.forEach(seq => (seq.config.snapResolution = val));
   },
-  onToggleLoop: enabled => {
+  onToggleLoop: (enabled: boolean) => {
     config.loopEnabled = enabled;
-    sequencers.forEach(s => (s.config.loopEnabled = enabled));
+    sequencers.forEach(seq => (seq.config.loopEnabled = enabled));
   },
-  onTempoChange: updateTempo,
-  onTemperamentToggle: isEqual => {
-    config.useEqualTemperament = isEqual;
-    sequencers.forEach(s => (s.config.useEqualTemperament = isEqual));
+  onTempoChange: (tempo: number) => {
+    updateTempo(tempo);
   },
-  onSave: async (format) => {
-    // Create an AppState object from sequencers
-    const appState = {
-      tempo: getTempo(),
-      timeSignature: getTimeSignature(),
-      totalMeasures: getTotalMeasures(),
-      sequencers: sequencers.map(s => s.getState()) // Assuming `getState()` returns a SequencerState
-    };
-  
-    if (format === 'json') {
-      const { url, filename } = exportSessionToJSON(appState);  // Pass appState here
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else if (format === 'wav') {
-      // Convert appState to session for WAV export
-      const session = {
-        globalConfig: {
-          bpm: appState.tempo,
-          beatsPerMeasure: appState.timeSignature[0],
-          totalMeasures: appState.totalMeasures
-        },
-        tracks: appState.sequencers.map(s => ({
-          notes: s.notes,
-          instrument: s.instrument,
-          config: s.config // Include config if needed
-        }))
-      };
-      await exportSessionToWAV(session);  // Pass session here
-    } else if (format === 'midi') {
-      alert("MIDI export not implemented yet.");
-    }
+  onSave: async (format: string) => {
+    // const appState = {
+    //   tempo: getTempo(),
+    //   timeSignature: getTimeSignature(),
+    //   totalMeasures: getTotalMeasures(),
+    //   sequencers: sequencers.map(seq => seq.getState())
+    // };
+
+    // if (format === 'json') {
+    //   const { url, filename } = exportSessionToJSON(appState);
+    //   const a = document.createElement('a');
+    //   a.href = url;
+    //   a.download = filename;
+    //   a.click();
+    //   URL.revokeObjectURL(url);
+    // } else if (format === 'wav') {
+    //   const session = {
+    //     globalConfig: {
+    //       bpm: appState.tempo,
+    //       beatsPerMeasure: appState.timeSignature[0],
+    //       totalMeasures: appState.totalMeasures
+    //     },
+    //     tracks: appState.sequencers.map(seq => ({
+    //       notes: seq.notes,
+    //       instrument: seq.instrument,
+    //       config: seq.config
+    //     }))
+    //   };
+    //   await exportSessionToWAV(session);
+    // } else if (format === 'midi') {
+    //   alert("MIDI export not implemented yet.");
+    // }
   },
-  
-  onLoad: async file => {
+  onLoad: async (file: File) => {
     try {
       const { tracks, globalConfig } = await importSessionFromJSON(file);
-  
-      // Update transport
+
       updateTempo(globalConfig.bpm);
       updateTimeSignature(globalConfig.beatsPerMeasure);
       updateTotalMeasures(globalConfig.totalMeasures);
-  
-      // Sync UI elements
-      const tempoInput = document.getElementById('tempo-input');
-      if (tempoInput) tempoInput.value = getTempo();
-  
-      const measuresInput = document.getElementById('measures-input');
-      if (measuresInput) measuresInput.value = getTotalMeasures();
-  
-      // Reset app state & history
+
+      const tempoInput = document.getElementById('tempo-input') as HTMLInputElement | null;
+      if (tempoInput) tempoInput.value = String(getTempo());
+
+      const measuresInput = document.getElementById('measures-input') as HTMLInputElement | null;
+      if (measuresInput) measuresInput.value = String(getTotalMeasures());
+
       destroyAllSequencers();
-  
-      // Restore sequencers via appState diff
+
       for (const [i, state] of tracks.entries()) {
         const id = i;
         const instrument = state.instrument || 'fluidr3-gm/acoustic_grand_piano';
         const notes = state.notes || [];
-  
+
         recordDiff(
           {
             type: 'CREATE_SEQUENCER',
@@ -199,32 +190,34 @@ setupUI({
           createReverseCreateSequencerDiff(id)
         );
       }
-  
-      // Lock the session state with a checkpoint
+
       recordDiff(
         createCheckpointDiff('Session Loaded'),
         createReverseCheckpointDiff('Session Loaded')
       );
-      
+
       collapseAllSequencers();
       refreshGlobalMiniContour();
       setCurrentBeat(0);
       drawGlobalPlayhead(0);
     } catch (err) {
-      alert('Failed to load file: ' + err.message);
+      if (err instanceof Error) {
+        alert('Failed to load file: ' + err.message);
+      } else {
+        alert('Failed to load file: Unknown error');
+      }
     }
-  },  
-  onMeasuresChange: (totalMeasures) => {
-    updateTotalMeasures(totalMeasures);
-  
-    const globalMiniCanvas = document.getElementById('global-mini-contour');
-    if (globalMiniCanvas) drawGlobalMiniContour(globalMiniCanvas, sequencers);
   },
-  onBeatsPerMeasureChange: (beatsPerMeasure) => {
+  onMeasuresChange: (totalMeasures: number) => {
+    updateTotalMeasures(totalMeasures);
+
+    const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
+    if (canvas) drawGlobalMiniContour(canvas, sequencers);
+  },
+  onBeatsPerMeasureChange: (beatsPerMeasure: number) => {
     updateTimeSignature(beatsPerMeasure);
-  
-    const globalMiniCanvas = document.getElementById('global-mini-contour');
-    if (globalMiniCanvas) drawGlobalMiniContour(globalMiniCanvas, sequencers);
+
+    const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
+    if (canvas) drawGlobalMiniContour(canvas, sequencers);
   }
 });
-

@@ -165,7 +165,7 @@ export async function setupKeyboard(canvas) {
   });
   
 
-  // ✅ Trigger the handler once on load to populate with the initial library
+  // Trigger the handler once on load to populate with the initial library
   instrumentLibrarySelect.dispatchEvent(new Event('change'));
 
 
@@ -176,7 +176,7 @@ export async function setupKeyboard(canvas) {
   
     instrumentLibrarySelect.value = library;
   
-    // ⬇️ Pass selected instrument via CustomEvent `detail`
+    // Pass selected instrument via CustomEvent `detail`
     await instrumentLibrarySelect.dispatchEvent(new CustomEvent('change', {
       detail: { preselect: fullName }
     }));
@@ -189,13 +189,15 @@ export async function setupKeyboard(canvas) {
   instrumentSelectConfirm.addEventListener('click', async () => {
     const selectedInstrument = instrumentSelect.value;
     instrumentSelectModal.classList.add('hidden');
-    const seqId = instrumentSelectModal.dataset.currentSequencer;
-  
-    if (seqId) {
+
+    const seqIdRaw = instrumentSelectModal.dataset.currentSequencer;
+    const seqId = seqIdRaw !== undefined ? parseInt(seqIdRaw, 10) : undefined;
+
+    if (seqId !== undefined && !isNaN(seqId)) {
       console.log('[Modal] Looking up sequencer with id:', seqId);
       const seq = getSequencerById(seqId);
       console.log('[Modal] Lookup result:', seq);
-      
+
       if (seq) {
         seq.setInstrument(selectedInstrument);
       }
