@@ -22,29 +22,30 @@ import { getAppState, recordDiff } from './appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './appState/diffEngine/types/sequencer/createSequencer.js';
 import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/diffEngine/types/internal/checkpoint.js';
 
+// === State Sync ===
 onStateUpdated(resyncFromState);
 
+// === Playhead ===
 function refreshGlobalMiniContour(): void {
   const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
   if (canvas) drawGlobalMiniContour(canvas, sequencers);
 }
-
-// === Playhead ===
 const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
 const globalPlayheadCanvas = document.getElementById('global-mini-playhead') as HTMLCanvasElement;
 initGlobalPlayhead(globalPlayheadCanvas);
 initGlobalPlayheadInteraction(globalPlayheadCanvas, config);
 drawGlobalPlayhead(0);
 
-// === INIT ALL COMPONENTS ===
+// === Virtual Piano Keyboard ===
 const pianoCanvas = document.getElementById('piano') as HTMLCanvasElement;
 setupKeyboard(pianoCanvas);
 
+// === Visualizer ===
 const waveform = document.getElementById('waveform') as HTMLCanvasElement;
-const visualizerMode = document.getElementById('visualizer-mode') as HTMLElement;
+const visualizerMode = document.getElementById('visualizer-mode') as HTMLButtonElement;
 const visualizer = setupVisualizer(waveform, visualizerMode);
 
-// Create the first sequencer via diff — just like a user click
+// === Initial Sequencer ===
 const firstId = 0;
 const firstInstrument = 'fluidr3-gm/acoustic_grand_piano';
 recordDiff(
@@ -58,6 +59,7 @@ recordDiff(
   createReverseCheckpointDiff('Initial App State')
 );
 
+// === Additional UI Setup ===
 setupSelectModeUI();
 refreshGlobalMiniContour();
 setupAddTrackButton();

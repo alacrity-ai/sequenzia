@@ -60,3 +60,7 @@ export function shouldSuppressNotePlacement(): boolean {
 export function clearSuppressNextNotePlacementFlag(): void {
   suppressNextNotePlacement = false;
 }
+
+export function clearSuppressNotePlacementFlag(): void {
+  suppressNextNotePlacement = false;
+}
