@@ -2,8 +2,7 @@
 
 import { setupKeyboard } from './setup/setupKeyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
-import { collapseAllSequencers } from './helpers.js';
-import { sequencers, destroyAllSequencers, setupAddTrackButton } from './setup/sequencers.js';
+import { sequencers, setupAddTrackButton } from './setup/sequencers.js';
 import { GRID_CONFIG as config } from './sequencer/grid/helpers/constants.js';
 import { setupUI, resetPlayButtonState } from './sequencer/ui.js';
 import { initFooterUI } from './setup/footerUI.js';
@@ -12,7 +11,6 @@ import { exportSessionToMIDI } from './export/midi/exportToMidi.js';
 import { importSessionFromJSON } from './export/load.js';
 import { importSessionFromMIDI } from './export/midi/loadFromMidi.js';
 import { loadSession } from './export/loadSession.js';
-import { getTotalBeats, startTransport, stopTransport, pauseTransport, resumeTransport, onTransportEnd, onBeatUpdate, getCurrentBeat, setCurrentBeat, updateTotalMeasures, updateTimeSignature, updateTempo, getTempo, getTimeSignature, getTotalMeasures } from './sequencer/transport.js';
 import { setupNoteDurationButtons } from './setup/noteDurationButtons.js';
 import { drawGlobalMiniContour } from './sequencer/grid/drawing/mini-contour.js';
 import { drawGlobalPlayhead, initGlobalPlayhead } from './playhead/global-playhead.js';
@@ -24,6 +22,21 @@ import { resyncFromState } from './appState/resyncFromState.js';
 import { getAppState, recordDiff } from './appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './appState/diffEngine/types/sequencer/createSequencer.js';
 import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/diffEngine/types/internal/checkpoint.js';
+import { 
+  getTotalBeats, 
+  startTransport, 
+  stopTransport, 
+  pauseTransport, 
+  resumeTransport, 
+  onTransportEnd, 
+  onBeatUpdate, 
+  getCurrentBeat, 
+  setCurrentBeat, 
+  updateTotalMeasures, 
+  updateTimeSignature, 
+  updateTempo, 
+  getTempo, 
+  setLoopEnabled } from './sequencer/transport.js';
 
 // === State Sync ===
 onStateUpdated(resyncFromState);
@@ -126,6 +139,7 @@ setupUI({
   onToggleLoop: (enabled: boolean) => {
     config.loopEnabled = enabled;
     sequencers.forEach(seq => (seq.config.loopEnabled = enabled));
+    setLoopEnabled(enabled);
   },
   onTempoChange: (tempo: number) => {
     updateTempo(tempo);

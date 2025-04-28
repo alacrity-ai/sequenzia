@@ -134,6 +134,10 @@ export function getTotalMeasures(): number {
   return totalMeasures;
 }
 
+export function setLoopEnabled(enabled: boolean): void {
+  loop = enabled;
+}
+
 export function onTransportEnd(callback: () => void): void {
   onEndCallback = callback;
 }
