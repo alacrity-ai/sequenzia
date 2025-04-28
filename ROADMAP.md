@@ -1,5 +1,12 @@
 # Roadmap
 
+
+## Phase 0: Refactor to TS
+- Complete all js -> ts refactoring
+- Fix bugs:
+  - Drum tracks on Wav export throw: Sample not found: '50', Sample not found: '53', etc
+  - Double check that we aren't loading instruments/updating state when every note is played. The playhead looks a bit stuttery on playback
+
 ## Phase 1: Core Functionality
 
 - Handle resizing of groups of selected notes

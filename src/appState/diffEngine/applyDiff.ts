@@ -1,7 +1,7 @@
 // src/appState/diffEngine/applyDiff.ts
 
 import { getAppState, setAppState } from '../appState.js';
-import { AppState } from '../interfaces/Appstate.js';
+import { AppState } from '../interfaces/AppState.js';
 import { Diff } from '../interfaces/Diff.js';
 import * as diffTypes from './types/allDiffs.js';
 

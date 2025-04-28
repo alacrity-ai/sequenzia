@@ -1,21 +1,20 @@
+// src/playhead/global-playhead-interaction.ts
+
 import { drawGlobalPlayhead } from './global-playhead.js';
-import { getTotalBeats } from '../sequencer/transport.js'
-import {
-  setCurrentBeat,
-  isTransportRunning,
-  pauseTransport,
-  resumeTransport
-} from '../sequencer/transport.js';
+import { getTotalBeats, setCurrentBeat, isTransportRunning, pauseTransport, resumeTransport } from '../sequencer/transport.js';
 import { sequencers } from '../setup/sequencers.js';
 import { getSnappedBeat } from '../sequencer/grid/helpers/geometry.js';
-import { GRID_CONFIG as config } from '../sequencer/grid/helpers/constants.js';
+import type { GridConfig } from '../sequencer/interfaces/GridConfig.js';
 
 let isDragging = false;
-let canvas = null;
-let globalConfig = null;
+let canvas: HTMLCanvasElement | null = null;
+let globalConfig: GridConfig | null = null;
 let wasAutoPaused = false;
 
-export function initGlobalPlayheadInteraction(targetCanvas, targetConfig) {
+/**
+ * Initializes global playhead dragging interaction.
+ */
+export function initGlobalPlayheadInteraction(targetCanvas: HTMLCanvasElement, targetConfig: GridConfig): void {
   canvas = targetCanvas;
   globalConfig = targetConfig;
 
@@ -24,7 +23,7 @@ export function initGlobalPlayheadInteraction(targetCanvas, targetConfig) {
   window.addEventListener('mouseup', onMouseUp);
 }
 
-function onMouseDown(e) {
+function onMouseDown(e: MouseEvent): void {
   if (isTransportRunning()) {
     pauseTransport();
     sequencers.forEach(s => s.pause?.());
@@ -35,12 +34,12 @@ function onMouseDown(e) {
   updatePlayheadFromEvent(e);
 }
 
-function onMouseMove(e) {
+function onMouseMove(e: MouseEvent): void {
   if (!isDragging) return;
   updatePlayheadFromEvent(e);
 }
 
-function onMouseUp() {
+function onMouseUp(): void {
   if (!isDragging) return;
   isDragging = false;
 
@@ -51,7 +50,9 @@ function onMouseUp() {
   }
 }
 
-function updatePlayheadFromEvent(e) {
+function updatePlayheadFromEvent(e: MouseEvent): void {
+  if (!canvas || !globalConfig) return;
+
   const rect = canvas.getBoundingClientRect();
 
   // ✅ Device-pixel aware scaling
@@ -63,14 +64,13 @@ function updatePlayheadFromEvent(e) {
 
   const totalBeats = getTotalBeats();
   const unsnappedBeat = (x / canvas.width) * totalBeats;
-  
+
   // Apply snapping using the current config settings
-  const snappedBeat = getSnappedBeat(unsnappedBeat, config);
-  
+  const snappedBeat = getSnappedBeat(unsnappedBeat, globalConfig);
+
   // Convert snapped beat back to x position
   const snappedX = (snappedBeat / totalBeats) * canvas.width;
 
   setCurrentBeat(snappedBeat);
   drawGlobalPlayhead(snappedX);
 }
-  

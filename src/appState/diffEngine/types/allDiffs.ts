@@ -8,7 +8,7 @@ export { applySET_TOTAL_MEASURES as SET_TOTAL_MEASURES } from './global/changeMe
 // SEQUENCER
 export { applyCREATE_SEQUENCER as CREATE_SEQUENCER } from './sequencer/createSequencer.js';
 export { applyDELETE_SEQUENCER as DELETE_SEQUENCER } from './sequencer/deleteSequencer.js';
-export { applyCHANGE_INSTRUMENT as CHANGE_INSTRUMENT } from './sequencer/changeInstrument.js';
+export { applySET_INSTRUMENT as SET_INSTRUMENT } from './sequencer/setInstrument.js';
 
 // GRID
 export { applyPLACE_NOTES as PLACE_NOTES } from './grid/placeNotes.js';

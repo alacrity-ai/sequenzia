@@ -6,6 +6,8 @@ import { WHITE_KEYS, BLACK_KEYS } from '../keyboard/constants.js';
 import { setActiveInstrument, getActiveInstrumentName } from '../sf2/sf2-player.js';
 import { getSequencerById } from './sequencers.js';
 import { getMalletInstruments, getDrumMachineInstruments, getSmolkenInstruments, getSoundfontInstruments, getElectricPianoInstruments, getSplendidGrandPianoInstruments } from '../sf2/sf2-loader.js';
+import { recordDiff } from '../appState/appState.js';
+import { createSetInstrumentDiff, createReverseSetInstrumentDiff } from '../appState/diffEngine/types/sequencer/setInstrument.js';
 
 let currentOctave = 3;
 let keyMap = getKeyMap(currentOctave);
@@ -199,6 +201,10 @@ export async function setupKeyboard(canvas) {
       console.log('[Modal] Lookup result:', seq);
 
       if (seq) {
+        recordDiff(
+          createSetInstrumentDiff(seq.id, selectedInstrument),
+          createReverseSetInstrumentDiff(seq.id, seq.instrumentName) // Save old instrument for undo
+        );
         seq.setInstrument(selectedInstrument);
       }
       instrumentSelectModal.dataset.currentSequencer = ''; // cleanup

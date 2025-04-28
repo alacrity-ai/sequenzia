@@ -1,4 +1,5 @@
 // src/sequencer/grid/interaction/editActions.js
+
 import { getClipboard, setClipboard } from '../../clipboard.js';
 import { pitchToMidi, midiToPitch } from '../../../audio/pitch-utils.js';
 import { getActiveGrid } from '../../../setup/selectionTracker.js';

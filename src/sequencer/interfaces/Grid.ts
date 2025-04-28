@@ -26,4 +26,5 @@ export interface Grid {
     getSelectedNotes: () => Note[];
     setSelectedNotes: (notes: Note[]) => void;
     destroy: () => void;
+    resizeAndRedraw: () => void;
 }

@@ -2,18 +2,28 @@
 
 import { getUserConfig, updateUserConfig } from './userConfig.js';
 import { getSequencers } from '../../setup/sequencers.js';
+import { UserConfig } from '../interfaces/UserConfig.js';
 
-export const GRID_COLOR_SCHEMES = ['Darkroom', 'Seashell', 'Cyberpunk', 'Classic Blue', 'Midnight'];
-export const NOTE_COLOR_SCHEMES = [
+export const GRID_COLOR_SCHEMES: string[] = [
+  'Darkroom',
+  'Seashell',
+  'Cyberpunk',
+  'Classic Blue',
+  'Midnight'
+];
+
+export const NOTE_COLOR_SCHEMES: string[] = [
   'Track Color',
   'Pitch Class Contrast',
   'Scriabin',
   'Octave Bands'
 ];
 
-export function initSequencerSettings() {
-  const gridSelect = document.getElementById('grid-color-select');
-  const noteSelect = document.getElementById('note-color-select');
+export function initSequencerSettings(): void {
+  const gridSelect = document.getElementById('grid-color-select') as HTMLSelectElement | null;
+  const noteSelect = document.getElementById('note-color-select') as HTMLSelectElement | null;
+
+  if (!gridSelect || !noteSelect) return;
 
   // Populate dropdowns
   for (const scheme of GRID_COLOR_SCHEMES) {
@@ -31,20 +41,20 @@ export function initSequencerSettings() {
   }
 
   // Set initial values
-  const config = getUserConfig();
+  const config: UserConfig = getUserConfig();
   gridSelect.value = config.gridColorScheme;
   noteSelect.value = config.noteColorScheme;
 
-  // Listeners (stub behavior for now)
-  gridSelect.addEventListener('change', (e) => {
-    updateUserConfig({ gridColorScheme: e.target.value });
-    // TODO: Trigger grid re-render with new theme
+  // Listeners
+  gridSelect.addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    updateUserConfig({ gridColorScheme: target.value });
     getSequencers().forEach(seq => seq.grid?.scheduleRedraw());
   });
 
-  noteSelect.addEventListener('change', (e) => {
-    updateUserConfig({ noteColorScheme: e.target.value });
-    // TODO: Trigger note re-coloring
+  noteSelect.addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    updateUserConfig({ noteColorScheme: target.value });
     getSequencers().forEach(seq => seq.grid?.scheduleRedraw());
   });
 }

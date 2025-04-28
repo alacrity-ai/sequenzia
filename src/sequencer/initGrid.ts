@@ -358,6 +358,7 @@ export function initGrid(
     getSelectedNotes,
     setSelectedNotes,
     destroy,
+    resizeAndRedraw,
   };  
   
   // Sync with current mode at init

@@ -18,7 +18,7 @@ import { setupControlModeSwitch } from './setup/controlModeSwitch.js';
 import { setupSelectModeUI } from './sequencer/grid/interaction/selectModeButtonHandlers.js';
 import { onStateUpdated } from './appState/onStateUpdated.js';
 import { resyncFromState } from './appState/resyncFromState.js';
-import { recordDiff } from './appState/appState.js';
+import { getAppState, recordDiff } from './appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './appState/diffEngine/types/sequencer/createSequencer.js';
 import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/diffEngine/types/internal/checkpoint.js';
 
@@ -126,38 +126,33 @@ setupUI({
     updateTempo(tempo);
   },
   onSave: async (format: string) => {
-    // const appState = {
-    //   tempo: getTempo(),
-    //   timeSignature: getTimeSignature(),
-    //   totalMeasures: getTotalMeasures(),
-    //   sequencers: sequencers.map(seq => seq.getState())
-    // };
-
-    // if (format === 'json') {
-    //   const { url, filename } = exportSessionToJSON(appState);
-    //   const a = document.createElement('a');
-    //   a.href = url;
-    //   a.download = filename;
-    //   a.click();
-    //   URL.revokeObjectURL(url);
-    // } else if (format === 'wav') {
-    //   const session = {
-    //     globalConfig: {
-    //       bpm: appState.tempo,
-    //       beatsPerMeasure: appState.timeSignature[0],
-    //       totalMeasures: appState.totalMeasures
-    //     },
-    //     tracks: appState.sequencers.map(seq => ({
-    //       notes: seq.notes,
-    //       instrument: seq.instrument,
-    //       config: seq.config
-    //     }))
-    //   };
-    //   await exportSessionToWAV(session);
-    // } else if (format === 'midi') {
-    //   alert("MIDI export not implemented yet.");
-    // }
-  },
+    const appState = getAppState(); // ✅
+  
+    if (format === 'json') {
+      const { url, filename } = exportSessionToJSON(appState);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else if (format === 'wav') {
+      const session = {
+        globalConfig: {
+          bpm: appState.tempo,
+          beatsPerMeasure: appState.timeSignature[0],
+          totalMeasures: appState.totalMeasures
+        },
+        tracks: sequencers.map(seq => ({
+          notes: seq.notes,
+          instrument: seq.instrumentName,
+          config: seq.config // Pull config from live sequencer
+        }))
+      };
+      await exportSessionToWAV(session);
+    } else if (format === 'midi') {
+      alert("MIDI export not implemented yet.");
+    }
+  },  
   onLoad: async (file: File) => {
     try {
       const { tracks, globalConfig } = await importSessionFromJSON(file);

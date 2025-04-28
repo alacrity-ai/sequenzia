@@ -1,27 +1,44 @@
-// js/visualizer.js
+// src/visualizer.js
 
-export function startWaveformVisualizer(analyserNode, canvas) {
+export type VisualizerMode = 'waveform' | 'frequency' | 'spectrogram';
+
+interface SpectrogramCanvas extends HTMLCanvasElement {
+  initialized?: boolean;
+}
+
+/**
+ * Starts the waveform visualizer on a given analyser node and canvas.
+ */
+export function startWaveformVisualizer(
+  analyserNode: AnalyserNode,
+  canvas: HTMLCanvasElement
+): { setMode: (mode: VisualizerMode) => void } {
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  if (!ctx) throw new Error("Canvas 2D context not available");
 
-  // time-domain buffer
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Time-domain buffer
   const timeData = new Uint8Array(analyserNode.fftSize);
-  // frequency-domain buffer
+  // Frequency-domain buffer
   const freqData = new Uint8Array(analyserNode.frequencyBinCount);
 
-  // off-screen for spectrogram history
-  const specCanvas = document.createElement('canvas');
-  specCanvas.width  = W;
+  // Off-screen canvas for spectrogram history
+  const specCanvas = document.createElement('canvas') as SpectrogramCanvas;
+  specCanvas.width = W;
   specCanvas.height = H;
   const specCtx = specCanvas.getContext('2d');
+  if (!specCtx) throw new Error("Offscreen canvas 2D context not available");
 
-  let mode = 'frequency'; // default
+  let mode: VisualizerMode = 'frequency'; // default mode
 
-  function drawWaveform() {
+  function drawWaveform(): void {
+    if (!ctx) return;
     analyserNode.getByteTimeDomainData(timeData);
-    ctx.fillStyle   = '#000';
+    ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
-    ctx.lineWidth   = 2;
+    ctx.lineWidth = 2;
     ctx.strokeStyle = '#00ffcc';
     ctx.beginPath();
 
@@ -29,7 +46,7 @@ export function startWaveformVisualizer(analyserNode, canvas) {
     let x = 0;
     for (let i = 0; i < timeData.length; i++) {
       const v = timeData[i] / 128.0;
-      const y = v * H / 2;
+      const y = (v * H) / 2;
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       x += sliceW;
     }
@@ -37,125 +54,92 @@ export function startWaveformVisualizer(analyserNode, canvas) {
     ctx.stroke();
   }
 
-  function drawFrequencyBars() {
+  function drawFrequencyBars(): void {
     analyserNode.getByteFrequencyData(freqData);
-    
+    if (!ctx) return;
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
-    
-    // For debugging - draw edge markers
+
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    ctx.fillRect(0, 0, 1, H);      // Left edge
-    ctx.fillRect(W-1, 0, 1, H);    // Right edge
-    
+    ctx.fillRect(0, 0, 1, H);    // Left edge
+    ctx.fillRect(W - 1, 0, 1, H); // Right edge
+
     const barCount = 128;
     const spacing = 2;
-    
-    // Pre-calculate all bar positions to ensure we use the full width
-    const positions = [];
-    
+    const positions: number[] = [];
+
     for (let i = 0; i < barCount; i++) {
-      // Position each bar using the full width
-      positions.push(i * W / (barCount - 1));
+      positions.push((i * W) / (barCount - 1));
     }
-    
-    // Make sure the last position is exactly at the canvas width
-    positions[positions.length - 1] = W - 1;
-    
-    // Now draw each bar
+    positions[positions.length - 1] = W - 1; // exact width
+
     for (let i = 0; i < barCount; i++) {
       const x = positions[i];
-      
-      // Calculate next position (or end of canvas for last bar)
-      const nextX = (i < barCount - 1) ? positions[i + 1] : W;
-      
-      // Calculate bar width with spacing
+      const nextX = i < barCount - 1 ? positions[i + 1] : W;
       const barWidth = Math.max(1, (nextX - x) - spacing);
-      
-      // Use logarithmic scaling for frequency bin selection
+
       const minFreq = 20;
       const maxFreq = 20000;
       const logPosition = i / (barCount - 1);
       const freq = minFreq * Math.pow(maxFreq / minFreq, logPosition);
-      
+
       const nyquist = 22050;
-      const dataIndex = Math.min(freqData.length - 1, 
-                               Math.floor(freq / nyquist * freqData.length));
-      
+      const dataIndex = Math.min(freqData.length - 1, Math.floor((freq / nyquist) * freqData.length));
       const v = freqData[dataIndex] / 255;
       const h = Math.max(1, v * H);
-      
-      // Color based on frequency
+
       const hue = 240 - (logPosition * 240);
       ctx.fillStyle = `hsl(${hue}, ${80 + v * 20}%, ${40 + v * 40}%)`;
-      
-      // Draw the bar
+
       ctx.fillRect(x, H - h, barWidth, h);
     }
   }
 
-  function drawSpectrogram() {
+  function drawSpectrogram(): void {
     analyserNode.getByteFrequencyData(freqData);
-    
-    // IMPORTANT: Make sure the off-screen canvas background is properly initialized
-    // This happens only once when the visualization first starts
+    if (!specCtx) return;
     if (!specCanvas.initialized) {
       specCtx.fillStyle = '#000';
       specCtx.fillRect(0, 0, W, H);
       specCanvas.initialized = true;
     }
-    
-    // Shift existing content left
+
     specCtx.drawImage(specCanvas, -1, 0);
-    
-    // Clear the rightmost column with BLACK (not transparent)
+
     specCtx.fillStyle = '#000';
     specCtx.fillRect(W - 1, 0, 1, H);
-    
-    // Apply logarithmic frequency scaling
+
     const frequencyBands = 128;
     const minFreq = 20;
     const maxFreq = 20000;
-    
-    // Draw newest column
+
     for (let i = 0; i < frequencyBands; i++) {
-      // Map to logarithmic frequency scale
       const logPos = i / (frequencyBands - 1);
       const freq = minFreq * Math.pow(maxFreq / minFreq, logPos);
-      
-      // Map to frequency data index
+
       const nyquist = 22050;
-      const dataIndex = Math.min(freqData.length - 1, 
-                                Math.floor(freq / nyquist * freqData.length));
-      
-      // Get amplitude value
+      const dataIndex = Math.min(freqData.length - 1, Math.floor((freq / nyquist) * freqData.length));
       const amplitude = freqData[dataIndex] / 255;
-      
-      // Calculate y position (invert so lower frequencies at bottom)
-      const y = H - 1 - Math.floor(i * H / frequencyBands);
-      
-      // Only draw if signal is strong enough
+      const y = H - 1 - Math.floor((i * H) / frequencyBands);
+
       if (amplitude < 0.05) continue;
-      
-      // Create colors based on frequency and amplitude
+
       const r = Math.floor(amplitude * 255);
       const g = Math.floor(amplitude * (255 - (logPos * 200)));
       const b = Math.floor(amplitude * (100 + (logPos * 155)));
-      
-      // Draw pixel
+
       specCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
       specCtx.fillRect(W - 1, y, 1, 1);
     }
-    
-    // Clear main canvas with BLACK
+
+    if (!ctx) return;
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
-    
-    // Draw the spectrogram onto main canvas
+
     ctx.drawImage(specCanvas, 0, 0);
   }
 
-  function tick() {
+  function tick(): void {
     requestAnimationFrame(tick);
     switch (mode) {
       case 'frequency':
@@ -169,19 +153,17 @@ export function startWaveformVisualizer(analyserNode, canvas) {
         drawWaveform();
     }
   }
+
   tick();
 
   return {
-    /** 
-     * Switch to one of 'waveform' | 'frequency' | 'spectrogram'.
-     * Clears previous visuals so no artifacts remain.
+    /**
+     * Switch visualizer mode ('waveform', 'frequency', or 'spectrogram')
      */
-    setMode(newMode) {
+    setMode(newMode: VisualizerMode): void {
       if (!['waveform', 'frequency', 'spectrogram'].includes(newMode)) return;
       mode = newMode;
-      // clear main canvas immediately
       ctx.clearRect(0, 0, W, H);
-      // reset history if switching to spectrogram
       if (mode === 'spectrogram') {
         specCtx.clearRect(0, 0, W, H);
       }
