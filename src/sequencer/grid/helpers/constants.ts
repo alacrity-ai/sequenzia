@@ -1,4 +1,17 @@
 // src/sequencer/grid/helpers/constants.ts
+import { GridConfig } from '../../interfaces/GridConfig.js';
+
+export const GRID_CONFIG: GridConfig = {
+  cellWidth: 40,
+  cellHeight: 20,
+  visibleNotes: 36,
+  noteRange: ['C1', 'B9'],
+  currentDuration: 1,
+  snapResolution: 1,
+  isTripletMode: false,
+  loopEnabled: false,
+  useEqualTemperament: true,
+};
 
 export const labelWidth = 64 as const;
 
@@ -16,6 +29,25 @@ export const PITCH_COLOR_MAP: Record<string, string> = {
   'A#': '#FFB6C1',
   'B': '#4B0082'
 };
+
+export const SNAP_RESOLUTIONS: Record<string, string> = {
+  "4": "𝅝",
+  "2": "𝅗𝅥",
+  "1": "𝅘𝅥",
+  "0.5": "♪",
+  "0.25": "♬",
+  "0.125": "𝅘𝅥𝅰"
+};
+
+// Hotkeys 1–6 to change note duration
+export const durationHotkeys: Record<string, number> = {
+    'Digit1': 4,
+    'Digit2': 2,
+    'Digit3': 1,
+    'Digit4': 0.5,
+    'Digit5': 0.25,
+    'Digit6': 0.125
+  };
 
 export const HEIGHT_RATIO = 0.15;
 export const MIN_CELL_WIDTH = 100;

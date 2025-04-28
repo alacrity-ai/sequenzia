@@ -1,5 +1,7 @@
 // src/sequencer/grid/helpers/note-finder.ts
 
+import { pitchToMidi } from "../../../audio/pitch-utils";
+
 export function findNoteAt(
   x: number,
   y: number,
@@ -16,4 +18,21 @@ export function findNoteAt(
     beat < n.start + n.duration &&
     getPitchRow(n.pitch) === row
   );
+}
+
+/**
+ * Computes the MIDI interval between two pitch strings, throwing if invalid.
+ * @param highPitch Higher pitch (e.g., "B9")
+ * @param lowPitch Lower pitch (e.g., "C1")
+ * @returns Difference in semitones
+ */
+export function midiRangeBetween(highPitch: string, lowPitch: string): number {
+  const high = pitchToMidi(highPitch);
+  const low = pitchToMidi(lowPitch);
+
+  if (high === null || low === null) {
+    throw new Error(`Invalid pitches provided: ${highPitch}, ${lowPitch}`);
+  }
+
+  return high - low;
 }

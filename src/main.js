@@ -75,7 +75,7 @@ setupUI({
       endBeat: globalEndBeat,
       startBeat,
       onLoop: () => {
-        // ✅ Clear all active notes on loop
+        // Clear all active notes on loop
         sequencers.forEach(seq => seq.onTransportLoop?.());
       }
     });

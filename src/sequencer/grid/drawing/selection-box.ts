@@ -1,17 +1,7 @@
 // src/sequencer/grid/drawing/selection-box.ts
 
 import { drawRoundedRect } from './rounded-rect.js';
-
-interface SelectionBox {
-  startX: number;
-  startY: number;
-  currentX: number;
-  currentY: number;
-}
-
-interface HandlerContext {
-  selectionBox: SelectionBox | null;
-}
+import { HandlerContext } from '../../interfaces/HandlerContext.js';
 
 /**
  * Draws the marquee selection box during note selection.

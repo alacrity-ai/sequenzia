@@ -5,15 +5,7 @@ import { initConfigModal } from '../userconfig/initUserConfig.js';
 import { getEditMode, EditModes } from '../setup/editModeStore.js';
 import { getTimeSignature, getTotalMeasures } from './transport.js';
 import { undo, redo } from '../appState/stateHistory.js';
-
-const SNAP_RESOLUTIONS = {
-  "4": "𝅝",      // whole note
-  "2": "𝅗𝅥",    // half note
-  "1": "𝅘𝅥",   // quarter note
-  "0.5": "♪",  // eighth note
-  "0.25": "♬", // sixteenth note
-  "0.125": "𝅘𝅥𝅰" // thirty-second note
-};
+import { SNAP_RESOLUTIONS, durationHotkeys } from './grid/helpers/constants.js';
 
 let isInitialized = false;
 let isPlaying = false;
@@ -92,16 +84,7 @@ export function setupUI({
     playBtnIcon.setAttribute('href', '#icon-play');
   });
 
-  // Hotkeys 1–6 to change note duration
-  const durationHotkeys = {
-    'Digit1': 4,
-    'Digit2': 2,
-    'Digit3': 1,
-    'Digit4': 0.5,
-    'Digit5': 0.25,
-    'Digit6': 0.125
-  };
-  
+  // Transport Hotkeys
   window.addEventListener('keydown', (e) => {
     // Skip if any AI modal is open
     const modalOpen = document.querySelector('.ai-modal:not(.hidden)');

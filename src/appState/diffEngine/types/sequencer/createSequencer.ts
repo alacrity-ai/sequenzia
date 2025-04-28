@@ -28,12 +28,12 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
   if (!existing) {
     const { seq, wrapper } = createSequencer({
       config: {
-        id: diff.id,
+        id: parseInt(diff.id, 10),
         ...(diff.config as Partial<SequencerConfig>),
       },
       notes: diff.notes ?? [],
       instrument: diff.instrument,
-    });
+    });    
     toggleZoomControls(wrapper, true);
   }
 

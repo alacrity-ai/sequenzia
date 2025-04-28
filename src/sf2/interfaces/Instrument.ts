@@ -1,3 +1,5 @@
+// src/sf2/interfaces/Instrument.ts
+
 export interface Instrument {
   start(options: {
     note: number | string;

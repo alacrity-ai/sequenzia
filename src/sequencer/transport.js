@@ -15,8 +15,8 @@ let endBeat = Infinity;
 let listeners = [];
 let onEndCallback = null;
 let currentBeat = 0;
-let beatsPerMeasure = 4; // default fallback
-let totalMeasures = 8; // default fallback
+let beatsPerMeasure = 4;
+let totalMeasures = 8;
 
 export function onBeatUpdate(listener) {
     listeners.push(listener);
@@ -154,7 +154,7 @@ export function startTransport(bpm, opts = {}) {
       if (loop) {
         startTime = performance.now();
         setCurrentBeat(0);
-        if (onLoop) onLoop(); // ✅ 🔁 Notifies all subscribers
+        if (onLoop) onLoop();
       } else {
         stopTransport();
         return;
@@ -187,7 +187,6 @@ export function isTransportRunning() {
 export function pauseTransport() {
   if (animationId) cancelAnimationFrame(animationId);
   animationId = null;
-  // listeners and currentBeat are preserved
 }
 
 export function resumeTransport() {

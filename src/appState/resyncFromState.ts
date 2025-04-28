@@ -6,12 +6,20 @@ import { createSequencer, toggleZoomControls, sequencers } from '../setup/sequen
 import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { AppState, SequencerState } from './interfaces/AppState.js';
 import { NotePosition } from '../sequencer/interfaces/Grid.js';
-
+import { GRID_CONFIG } from '../sequencer/grid/helpers/constants.js';
+import { GridConfig } from '../sequencer/interfaces/GridConfig.js';
 
 interface SerializedSequencer extends SequencerState {
   config?: { [key: string]: any }; // optional loose config
 }
 
+function sequencerIdsMatch(liveId: number | undefined, serializedId: string | undefined): boolean {
+  return liveId !== undefined && serializedId !== undefined && String(liveId) === serializedId;
+}
+
+function hydrateGridConfig(serializedConfig?: Partial<GridConfig>): GridConfig {
+  return { ...GRID_CONFIG, ...(serializedConfig || {}) };
+}
 
 /**
  * Resyncs all live sequencers and transport to match the current app state.
@@ -27,21 +35,24 @@ export function resyncFromState(state: AppState = getAppState()): void {
 
   // Update grid width of each live sequencer
   for (const seq of sequencers) {
-    seq.updateTotalMeasures(state.totalMeasures);
+    seq.updateTotalMeasures();
   }
 
   // 🔁 Sync each serialized sequencer
   for (const serialized of state.sequencers as SerializedSequencer[]) {
-    let live = sequencers.find(seq => seq.id === serialized.id);
+    let live = sequencers.find(seq => sequencerIdsMatch(seq.id, serialized.id));
 
     if (!live) {
-      // ⬇️ Create new sequencer if missing
+      // Create new sequencer if missing
       const { wrapper } = createSequencer({
-        id: serialized.id,
+        config: {
+          id: parseInt(serialized.id, 10),
+          ...hydrateGridConfig(serialized.config),
+        },
         instrument: serialized.instrument,
-        config: serialized.config ? { ...serialized.config } : {},
         notes: serialized.notes,
       });
+      
 
       const zoomWrapper = wrapper.querySelector('.sequencer') as HTMLElement | null;
       if (zoomWrapper) {

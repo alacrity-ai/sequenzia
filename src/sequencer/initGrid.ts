@@ -1,3 +1,5 @@
+// src/sequencer/initGrid.js
+
 import { getSnappedBeatFromX } from './grid/helpers/geometry.js';
 import { pitchToMidi, midiToPitch, getPitchClass } from '../audio/pitch-utils.js';
 import { drawRoundedRect } from './grid/drawing/rounded-rect.js';
@@ -19,29 +21,54 @@ import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
 import { drawResizeArrow } from './grid/drawing/resize-arrow.js';
 import { ZOOM_LEVELS, labelWidth } from './grid/helpers/constants.js';
 import { getTrackColorFromSequencer } from './grid/helpers/sequencerColors.js';
+import { midiRangeBetween } from './grid/helpers/note-finder.js';
 
-export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContainer, notes, config, sequencer) {
-  let previewNote = null;
-  let pastePreviewNote = null;
-  let pastePreviewNotes = null;
-  let hoveredNote = null;
-  let selectedNote = null;
+import { EditMode } from './interfaces/EditMode.js';
+import { Grid } from './interfaces/Grid.js';
+import { HandlerContext } from './interfaces/HandlerContext.js';
+import { MouseHandler } from './interfaces/MouseHandler.js';
+import { GridConfig } from './interfaces/GridConfig.js';
+import { Note } from './interfaces/Note.js';
+
+
+export function initGrid(
+  canvas: HTMLCanvasElement,
+  playheadCanvas: HTMLCanvasElement,
+  animationCanvas: HTMLCanvasElement,
+  scrollContainer: HTMLElement,
+  notes: Note[],
+  config: GridConfig,
+  sequencer: any
+): Grid {  
+  let previewNote: Note | null = null;
+  let pastePreviewNote: Note | null = null;
+  let pastePreviewNotes: Note[] | null = null;
+  let hoveredNote: Note | null = null;
+  let selectedNote: Note | null = null;
+  let selectedNotes: Note[] = [];
 
   let playheadX = null;
   
   let zoomIndex = 2; // start at default level  
 
-  // Main canvas
+  // Contexts
   const ctx = canvas.getContext('2d');
-  // Playhead canvas
   const playheadCtx = playheadCanvas.getContext('2d');
-  // Animation canvas
   const animCtx = animationCanvas.getContext('2d');
-
+  
+  if (!ctx || !playheadCtx || !animCtx) {
+    throw new Error('Failed to acquire required canvas contexts');
+  }
+  
+  // Caste for safety
+  const safeCtx = ctx as CanvasRenderingContext2D;
+  const safePlayheadCtx = playheadCtx as CanvasRenderingContext2D;
+  const safeAnimCtx = animCtx as CanvasRenderingContext2D;
+  
   let cellWidth = ZOOM_LEVELS[zoomIndex].cellWidth;
   let cellHeight = ZOOM_LEVELS[zoomIndex].cellHeight;  
 
-  const visibleNotes = pitchToMidi(config.noteRange[1]) - pitchToMidi(config.noteRange[0]) + 1;
+  const visibleNotes = midiRangeBetween(config.noteRange[1], config.noteRange[0]) + 1;
   const fullHeight = visibleNotes * cellHeight;
   const totalBeats = getTotalBeats();  
   const fullWidth = totalBeats * cellWidth + labelWidth;
@@ -63,7 +90,7 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
   animationCanvas.style.width = `${fullWidth}px`;
   animationCanvas.style.height = `${fullHeight}px`;
 
-  let frameId = null;
+  let frameId: number | null = null;
   function scheduleRedraw() {
     if (frameId !== null) cancelAnimationFrame(frameId);
     frameId = requestAnimationFrame(drawGrid);
@@ -71,22 +98,22 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
 
   function drawGrid() {
     // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
+    safeCtx.clearRect(0, 0, canvas.width, canvas.height);
+    safeCtx.save();
 
     // Translate the canvas for the note label (piano roll)
-    ctx.translate(labelWidth, 0);
+    safeCtx.translate(labelWidth, 0);
 
     // Draw the grid itself
-    drawGridBackground(ctx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow);
+    drawGridBackground(safeCtx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow);
 
     // Draw the notes on the grid
-    drawNotes(ctx, notes, {
+    drawNotes(safeCtx, notes, {
       previewNotes: pastePreviewNotes ?? (previewNote ? [previewNote] : null),
       hoveredNote,
       selectedNote,
       selectedNotes,
-      highlightedNotes: handlerContext.getHighlightedNotes(),
+      highlightedNotes: handlerContext.getHighlightedNotes?.() ?? [],
       cellWidth,
       cellHeight,
       visibleStartBeat: 0,
@@ -99,7 +126,7 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
 
     // Draw the resize handles
     for (const note of selectedNotes) {
-      drawResizeArrow(ctx, note, {
+      drawResizeArrow(safeCtx, note, {
         cellWidth,
         cellHeight,
         getPitchRow,
@@ -109,10 +136,10 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
 
     // Draw the marquee selection
     if (handlerContext.selectionBox?.active) {
-        drawMarqueeSelectionBox(ctx, handlerContext);
+        drawMarqueeSelectionBox(safeCtx, handlerContext);
     }
   
-    ctx.restore();
+    safeCtx.restore();
   }
   
   function zoomIn() {
@@ -144,7 +171,7 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
   function resizeAndRedraw() {
     const totalBeats = getTotalBeats();
     const fullWidth = totalBeats * cellWidth + labelWidth;
-    const visibleNotes = pitchToMidi(config.noteRange[1]) - pitchToMidi(config.noteRange[0]) + 1;
+    const visibleNotes = midiRangeBetween(config.noteRange[1], config.noteRange[0]) + 1;
     const fullHeight = visibleNotes * cellHeight;
   
     canvas.width = fullWidth;
@@ -162,47 +189,61 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     animationCanvas.style.width = `${fullWidth}px`;
     animationCanvas.style.height = `${fullHeight}px`;
 
-    animCtx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+    safeAnimCtx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
 
     scheduleRedraw();
   }
   
-  function drawPlayheadWrapper(x) {
+  function drawPlayheadWrapper(x: number) {
     playheadX = x;
-    drawPlayhead(playheadCtx, x, labelWidth, canvas.height);
+    drawPlayhead(safePlayheadCtx, x, labelWidth, canvas.height);
   }
 
   initZoomControls(sequencer.container, zoomIn, zoomOut, resetZoom);
 
-  function getPitchRow(pitch) {
-    return pitchToMidi(config.noteRange[1]) - pitchToMidi(pitch);
+  function getPitchRow(pitch: string): number {
+    const topMidi = pitchToMidi(config.noteRange[1]);
+    const pitchMidi = pitchToMidi(pitch);
+  
+    if (topMidi === null || pitchMidi === null) {
+      console.warn(`Invalid pitch encountered: ${pitch}`);
+      return 0; // fallback to 0th row if something went wrong
+    }
+  
+    return topMidi - pitchMidi;
   }
 
-  function getPitchFromRow(row) {
-    const top = pitchToMidi(config.noteRange[1]);
-    const targetMidi = top - row;
-    const clamped = Math.max(pitchToMidi(config.noteRange[0]), Math.min(pitchToMidi(config.noteRange[1]), targetMidi));
-    return midiToPitch(clamped);
-  }
+  function getPitchFromRow(row: number): string {
+    const topMidi = pitchToMidi(config.noteRange[1]);
+    const bottomMidi = pitchToMidi(config.noteRange[0]);
+  
+    if (topMidi === null || bottomMidi === null) {
+      console.warn(`Invalid pitch range configured: ${config.noteRange}`);
+      return 'C4'; // Fallback to a safe pitch
+    }
+  
+    const targetMidi = topMidi - row;
+    const clamped = Math.max(bottomMidi, Math.min(topMidi, targetMidi));
+    return midiToPitch(clamped) ?? 'C4';
+  }  
 
   // Refresh the global mini-contour from within this instance
-  function refreshGlobalMiniContour() {
+  function refreshGlobalMiniContour(): void {
     const globalCanvas = document.getElementById('global-mini-contour');
-    if (globalCanvas) {
+    if (globalCanvas instanceof HTMLCanvasElement) {
       drawGlobalMiniContour(globalCanvas, sequencers);
     }
-  }
+  }  
 
-  let activeMouseHandler = null;
-  let selectedNotes = [];
+  let activeMouseHandler: MouseHandler | null = null;
 
-  const handlerContext = {
+  const handlerContext: HandlerContext = {
     sequencer,
     grid: null,
     config,
     notes,
     canvas,
-    animationCtx: animCtx,
+    animationCtx: safeAnimCtx,
     getCellHeight: () => cellHeight,
     getCellWidth: () => cellWidth,
     getCanvasPos: (e) => getCanvasPos(canvas, e, scrollContainer, labelWidth),
@@ -228,11 +269,11 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
     onNotesChanged: refreshGlobalMiniContour,
   };
   
-  function setMouseHandler(handler) {
-    if (activeMouseHandler) activeMouseHandler.detach(canvas);
+  function setMouseHandler(handler: MouseHandler | null): void {
+    activeMouseHandler?.detach(canvas);
     activeMouseHandler = handler;
-    if (activeMouseHandler) activeMouseHandler.attach(canvas);
-  }
+    activeMouseHandler?.attach(canvas);
+  }  
   
   // Clear selection of notes
   function clearSelection() {
@@ -245,59 +286,79 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
   }
 
   // Subscribe to mode changes
-  let unsubscribe = subscribeEditMode(mode => {
-    // Clear previews
+  const modeHandlers: Record<EditMode, (() => void) | null> = {
+    'note-placement': () => setMouseHandler(getNotePlacementHandlers(handlerContext)),
+    'select': () => setMouseHandler(getSelectModeHandlers(handlerContext)),
+    'none': () => setMouseHandler(null),
+  };
+  
+  let unsubscribe = subscribeEditMode((mode: EditMode) => {
+    // Reset all previews and selections
     previewNote = null;
     pastePreviewNotes = null;
     highlightedNotesDuringMarquee = [];
     handlerContext.clearPreview?.();
     handlerContext.setPastePreviewNotes?.(null);
   
-    // Clear any in-progress selectionBox
     if (handlerContext.selectionBox) {
-        handlerContext.selectionBox.active = false;
-        handlerContext.selectionBox = null;
+      handlerContext.selectionBox.active = false;
+      handlerContext.selectionBox = null;
     }
-
-    // Clear selection
+  
     clearSelection();
   
-    // Set interaction handler
-    if (mode === 'note-placement') {
-      setMouseHandler(getNotePlacementHandlers(handlerContext));
-    } else if (mode === 'select') {
-      setMouseHandler(getSelectModeHandlers(handlerContext));
-    } else {
-      setMouseHandler(null);
-    }
+    modeHandlers[mode]?.();
   
-    // Full redraw
     scheduleRedraw();
-  });  
+  });
 
-  const grid = {
+  function getSelectedNote(): Note | null {
+    return selectedNote;
+  }
+  
+  function getPreviewNote(): Note | null {
+    return previewNote;
+  }
+  
+  function getXForBeat(beat: number): number {
+    return beat * cellWidth;
+  }
+  
+  function setCursor(cursor: string): void {
+    canvas.style.cursor = cursor;
+  }
+  
+  function getSelectedNotes(): Note[] {
+    return selectedNotes;
+  }
+  
+  function setSelectedNotes(ns: Note[]): void {
+    selectedNotes = ns;
+    selectedNote = ns.length === 1 ? ns[0] : null;
+  }
+  
+  function destroy(): void {
+    unsubscribe();
+    clearSelectionTracker();
+  }  
+
+  const grid: Grid = {
     canvas,
     scheduleRedraw,
     drawPlayhead: drawPlayheadWrapper,
-    getSelectedNote: () => selectedNote,
+    getSelectedNote,
     clearSelection,
-    getPreviewNote: () => previewNote,
+    getPreviewNote,
     zoomIn,
     zoomOut,
-    getXForBeat: beat => beat * cellWidth,
+    getXForBeat,
     setMouseHandler,
-    setCursor: (cursor) => { canvas.style.cursor = cursor; },
+    setCursor,
     gridContext: handlerContext,
-    getSelectedNotes: () => selectedNotes,
-    setSelectedNotes: ns => {
-      selectedNotes = ns;
-      selectedNote = ns.length === 1 ? ns[0] : null;
-    },
-    destroy() {
-      unsubscribe();
-      clearSelectionTracker();
-    },
-  };
+    getSelectedNotes,
+    setSelectedNotes,
+    destroy,
+  };  
   
   // Sync with current mode at init
   const currentMode = getEditMode();
@@ -320,13 +381,13 @@ export function initGrid(canvas, playheadCanvas, animationCanvas, scrollContaine
   };
 
   // Add a method to get the highlighted notes during marquee selection
-  let highlightedNotesDuringMarquee = [];
+  let highlightedNotesDuringMarquee: Note[] = [];
   handlerContext.getHighlightedNotes = () => highlightedNotesDuringMarquee;
   handlerContext.setHighlightedNotes = (notes) => {
     highlightedNotesDuringMarquee = notes;
   };
 
-  // ✅ Now wire up the back-reference
+  // Now wire up the back-reference
   handlerContext.grid = grid;
   
   return grid;
