@@ -1,28 +1,36 @@
-import { getKeyMap } from '../keyboard/keys.js';
-import { drawKeys } from '../keyboard/renderer.js';
-import { attachInputListeners } from '../keyboard/interactions.js';
-import { attachKeyboardListeners, detachKeyboardListeners } from '../keyboard/keyboard-interaction.js';
-import { WHITE_KEYS, BLACK_KEYS } from '../keyboard/constants.js';
-import { setActiveInstrument, getActiveInstrumentName } from '../sf2/sf2-player.js';
-import { getSequencerById } from './sequencers.js';
-import { getMalletInstruments, getDrumMachineInstruments, getSmolkenInstruments, getSoundfontInstruments, getElectricPianoInstruments, getSplendidGrandPianoInstruments } from '../sf2/sf2-loader.js';
-import { recordDiff } from '../appState/appState.js';
-import { createSetInstrumentDiff, createReverseSetInstrumentDiff } from '../appState/diffEngine/types/sequencer/setInstrument.js';
+// src/setup/setupKeyboard.ts
+
+import { getKeyMap } from '../../keyboard/keys.js';
+import { drawKeys } from '../../keyboard/renderer.js';
+import { attachInputListeners } from '../../keyboard/interactions.js';
+import { attachKeyboardListeners, detachKeyboardListeners } from '../../keyboard/keyboard-interaction.js';
+import { WHITE_KEYS, BLACK_KEYS } from '../../keyboard/constants.js';
+import { setActiveInstrument, getActiveInstrumentName } from '../../sf2/sf2-player.js';
+import { getSequencerById } from '../sequencers.js';
+import { getMalletInstruments, getDrumMachineInstruments, getSmolkenInstruments, getSoundfontInstruments, getElectricPianoInstruments, getSplendidGrandPianoInstruments } from '../../sf2/sf2-loader.js';
+import { recordDiff } from '../../appState/appState.js';
+import { createSetInstrumentDiff, createReverseSetInstrumentDiff } from '../../appState/diffEngine/types/sequencer/setInstrument.js';
+
+import type { KeyMap } from '../../keyboard/keys.js'; // Assuming you have a KeyMap type (otherwise can define)
 
 let currentOctave = 3;
-let keyMap = getKeyMap(currentOctave);
+let keyMap: KeyMap = getKeyMap(currentOctave);
 let keyboardInputEnabled = false;
 
-export async function setupKeyboard(canvas) {
+interface InstrumentLibraries {
+  [libraryName: string]: 'soundfont' | 'builtin';
+}
+
+export async function setupKeyboard(canvas: HTMLCanvasElement): Promise<void> {
   const ctx = canvas.getContext('2d');
-  
-  // ✅ Load default instrument for virtual keyboard
+  if (!ctx) throw new Error('Failed to get 2D context for keyboard canvas.');
+
   await setActiveInstrument('fluidr3-gm/acoustic_grand_piano');
 
   const whiteKeys = WHITE_KEYS;
   const blackKeys = BLACK_KEYS;
 
-  function buildKeyToNoteMap() {
+  function buildKeyToNoteMap(): Record<string, string> {
     const whiteNotes = Object.values(keyMap)
       .filter(k => !k.isBlack)
       .sort((a, b) => a.x - b.x)
@@ -33,39 +41,39 @@ export async function setupKeyboard(canvas) {
       .sort((a, b) => a.x - b.x)
       .map(k => k.note);
 
-    const map = {};
+    const map: Record<string, string> = {};
     whiteKeys.forEach((k, i) => { if (whiteNotes[i]) map[k] = whiteNotes[i]; });
     blackKeys.forEach((k, i) => { if (blackNotes[i]) map[k] = blackNotes[i]; });
     return map;
   }
 
-  function refreshKeyboard() {
+  function refreshKeyboard(): void {
+    if (!ctx) return;
     keyMap = getKeyMap(currentOctave);
     const keyToNoteMap = keyboardInputEnabled ? buildKeyToNoteMap() : null;
     drawKeys(ctx, keyMap, new Set(), keyToNoteMap);
   }
 
-  // Attach only mouse/touch input by default
   attachInputListeners(canvas, () => keyMap);
   refreshKeyboard();
 
-  document.getElementById('octave-up').addEventListener('click', () => {
+  document.getElementById('octave-up')?.addEventListener('click', () => {
     if (currentOctave < 7) {
       currentOctave++;
       refreshKeyboard();
     }
   });
 
-  document.getElementById('octave-down').addEventListener('click', () => {
+  document.getElementById('octave-down')?.addEventListener('click', () => {
     if (currentOctave > 1) {
       currentOctave--;
       refreshKeyboard();
     }
   });
 
-  const toggleBtn = document.getElementById('disable-keyboard-inputs');
+  const toggleBtn = document.getElementById('disable-keyboard-inputs') as HTMLElement;
   toggleBtn.classList.remove('bg-purple-600');
-  toggleBtn.classList.add('bg-gray-700'); // show disabled on load
+  toggleBtn.classList.add('bg-gray-700');
 
   toggleBtn.addEventListener('click', () => {
     keyboardInputEnabled = !keyboardInputEnabled;
@@ -83,15 +91,14 @@ export async function setupKeyboard(canvas) {
     refreshKeyboard();
   });
 
-  // Add instrument select modal handlers
-  const instrumentSelectBtn = document.getElementById('instrument-select-btn');
-  const instrumentSelectModal = document.getElementById('instrument-select-modal');
-  const instrumentSelect = document.getElementById('instrument-select');
-  const instrumentSelectConfirm = document.getElementById('instrument-select-confirm');
-  const instrumentCancelBtn = document.getElementById('instrument-cancel-btn');
-  const instrumentLibrarySelect = document.getElementById('instrument-library-select');
+  const instrumentSelectBtn = document.getElementById('instrument-select-btn') as HTMLElement;
+  const instrumentSelectModal = document.getElementById('instrument-select-modal') as HTMLElement;
+  const instrumentSelect = document.getElementById('instrument-select') as HTMLSelectElement;
+  const instrumentSelectConfirm = document.getElementById('instrument-select-confirm') as HTMLElement;
+  const instrumentCancelBtn = document.getElementById('instrument-cancel-btn') as HTMLElement;
+  const instrumentLibrarySelect = document.getElementById('instrument-library-select') as HTMLSelectElement;
 
-  const instrumentLibraries = {
+  const instrumentLibraries: InstrumentLibraries = {
     'fluidr3-gm': 'soundfont',
     'musyngkite': 'soundfont',
     'fatboy': 'soundfont',
@@ -101,26 +108,21 @@ export async function setupKeyboard(canvas) {
     'drummachines': 'builtin',
     'smolken': 'builtin'
   };
-  
 
-  // Populate the library dropdown dynamically
-  Object.entries(instrumentLibraries).forEach(([key, _]) => {
+  Object.entries(instrumentLibraries).forEach(([key]) => {
     const option = document.createElement('option');
     option.value = key;
-    option.textContent = key
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, c => c.toUpperCase()); // Capitalize
+    option.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     instrumentLibrarySelect.appendChild(option);
   });
 
-  instrumentLibrarySelect.addEventListener('change', async (e) => {
+  instrumentLibrarySelect.addEventListener('change', async (e: Event) => {
     const selectedLibrary = instrumentLibrarySelect.value;
-    const instrumentSelect = document.getElementById('instrument-select');
-
-    const preselected = e.detail?.preselect || null;
+    const preselected = (e as CustomEvent).detail?.preselect ?? null;
 
     try {
-      let instruments;
+      let instruments: string[];
+
       if (selectedLibrary === 'mallets') {
         instruments = await getMalletInstruments();
       } else if (selectedLibrary === 'electricpiano') {
@@ -132,62 +134,53 @@ export async function setupKeyboard(canvas) {
       } else if (selectedLibrary === 'smolken') {
         instruments = await getSmolkenInstruments();
       } else if (['fluidr3-gm', 'musyngkite', 'fatboy'].includes(selectedLibrary)) {
-        // Use getSoundfontInstruments for all soundfont libraries
-        const kitMap = {
+        const kitMap: Record<'fluidr3-gm' | 'fatboy' | 'musyngkite', string> = {
           'fluidr3-gm': 'FluidR3_GM',
           'fatboy': 'FatBoy',
           'musyngkite': 'MusyngKite'
         };
-        instruments = await getSoundfontInstruments(kitMap[selectedLibrary]);
+        if (selectedLibrary in kitMap) {
+          instruments = await getSoundfontInstruments(kitMap[selectedLibrary as keyof typeof kitMap]);
+        } else {
+          console.warn(`[setupKeyboard] Unknown soundfont library: ${selectedLibrary}, using fallback.`);
+          instruments = await getSoundfontInstruments('MusyngKite');
+        }
       } else {
-        // For remaining libraries that still use JSON
         const response = await fetch(`/static/${selectedLibrary}.json`);
         instruments = await response.json();
       }
 
-      // Clear current options
       instrumentSelect.innerHTML = '';
 
-      // Populate new options
       instruments.forEach(instrument => {
         const option = document.createElement('option');
         option.value = `${selectedLibrary}/${instrument}`;
-        option.textContent = instrument
-          .split('_')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
+        option.textContent = instrument.split('_').map(word => word[0].toUpperCase() + word.slice(1)).join(' ');
         instrumentSelect.appendChild(option);
       });
 
-      // Set the selected instrument properly
       instrumentSelect.value = preselected || `${selectedLibrary}/${instruments[0]}`;
     } catch (err) {
       console.error(`Failed to load instruments for library: ${selectedLibrary}`, err);
     }
   });
-  
 
-  // Trigger the handler once on load to populate with the initial library
   instrumentLibrarySelect.dispatchEvent(new Event('change'));
 
-
-  // Open modal for global piano keyboard
   instrumentSelectBtn.addEventListener('click', async () => {
     const fullName = getActiveInstrumentName() || 'fluidr3-gm/acoustic_grand_piano';
-    const [library, instrument] = fullName.split('/');
-  
+    const [library] = fullName.split('/');
+
     instrumentLibrarySelect.value = library;
-  
-    // Pass selected instrument via CustomEvent `detail`
+
     await instrumentLibrarySelect.dispatchEvent(new CustomEvent('change', {
       detail: { preselect: fullName }
     }));
-  
+
     instrumentSelectModal.classList.remove('hidden');
     delete instrumentSelectModal.dataset.currentSequencer;
-  });  
+  });
 
-  // Open modal for sequencer track
   instrumentSelectConfirm.addEventListener('click', async () => {
     const selectedInstrument = instrumentSelect.value;
     instrumentSelectModal.classList.add('hidden');
@@ -196,20 +189,17 @@ export async function setupKeyboard(canvas) {
     const seqId = seqIdRaw !== undefined ? parseInt(seqIdRaw, 10) : undefined;
 
     if (seqId !== undefined && !isNaN(seqId)) {
-      console.log('[Modal] Looking up sequencer with id:', seqId);
       const seq = getSequencerById(seqId);
-      console.log('[Modal] Lookup result:', seq);
 
       if (seq) {
         recordDiff(
           createSetInstrumentDiff(seq.id, selectedInstrument),
-          createReverseSetInstrumentDiff(seq.id, seq.instrumentName) // Save old instrument for undo
+          createReverseSetInstrumentDiff(seq.id, seq.instrumentName)
         );
         seq.setInstrument(selectedInstrument);
       }
-      instrumentSelectModal.dataset.currentSequencer = ''; // cleanup
+      instrumentSelectModal.dataset.currentSequencer = '';
     } else {
-      // Fall back to global keyboard instrument
       try {
         await setActiveInstrument(selectedInstrument);
       } catch (err) {
@@ -218,21 +208,16 @@ export async function setupKeyboard(canvas) {
     }
   });
 
-  // Loop toggle
-  let sf2LoopEnabled = false;
-  const loopToggle = document.getElementById('instrument-loop-toggle');
+  const loopToggle = document.getElementById('instrument-loop-toggle') as HTMLInputElement;
   loopToggle.addEventListener('change', () => {
-    sf2LoopEnabled = loopToggle.checked;
-    console.log('[UI] Loop mode:', sf2LoopEnabled);
+    console.log('[UI] Loop mode:', loopToggle.checked);
   });
-  
-  // Handle cancel button
+
   instrumentCancelBtn.addEventListener('click', () => {
     instrumentSelectModal.classList.add('hidden');
   });
 }
 
-export function isKeyboardLoopEnabled() {
-  return document.getElementById('instrument-loop-toggle')?.checked || false;
+export function isKeyboardLoopEnabled(): boolean {
+  return (document.getElementById('instrument-loop-toggle') as HTMLInputElement)?.checked || false;
 }
-

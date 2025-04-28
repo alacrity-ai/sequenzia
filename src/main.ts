@@ -1,6 +1,6 @@
 // src/main.ts
 
-import { setupKeyboard } from './setup/keyboard.js';
+import { setupKeyboard } from './setup/setupKeyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
 import { collapseAllSequencers } from './helpers.js';
 import { sequencers, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';

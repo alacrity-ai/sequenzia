@@ -1,7 +1,7 @@
 import { playSF2Note, stopNoteByPitch } from '../sf2/sf2-player.js';
 import { drawKeys } from './renderer.js';
 import { WHITE_KEYS, BLACK_KEYS } from './constants.js';
-import { isKeyboardLoopEnabled } from '../setup/keyboard.js';
+import { isKeyboardLoopEnabled } from '../setup/keyboard/keyboardInstrumentState.js';
 import { KeyMap } from './keys.js';
 
 let listenersAttached = false;

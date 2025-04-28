@@ -93,20 +93,29 @@ const NOTE_TO_MIDI: Record<string, number> = {
  * Convert a pitch like "C4" or "Eb3" to a MIDI note number (e.g., 60)
  */
 export function pitchToMidi(pitch: string | null | undefined): number | null {
-  const match = pitch?.match(/^([A-Ga-g][#b]?)(-?\d+)$/);
+  const match = pitch?.match(/^([A-Ga-g])([#b]*)(-?\d+)$/);
   if (!match) return null;
 
-  const [, letter, octaveStr] = match;
-  const normalized = letter.toUpperCase();
-  const semitone = NOTE_TO_MIDI[normalized];
-  if (semitone === undefined) return null;
+  const [, base, accidentals, octaveStr] = match;
+  const normalized = base.toUpperCase();
+  const baseSemitone = NOTE_TO_MIDI[normalized];
+  if (baseSemitone === undefined) return null;
+
+  const accidentalShift = [...accidentals].reduce((acc, char) => {
+    if (char === '#') return acc + 1;
+    if (char === 'b') return acc - 1;
+    return acc;
+  }, 0);
 
   const octave = parseInt(octaveStr, 10);
-  return 12 * (octave + 1) + semitone;
+  return 12 * (octave + 1) + (baseSemitone + accidentalShift);
 }
 
-export function midiToPitch(midi: number): string {
-  const semis = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const SEMIS_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const SEMIS_FLAT  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+export function midiToPitch(midi: number, preferFlats = false): string {
+  const semis = preferFlats ? SEMIS_FLAT : SEMIS_SHARP;
   const pitchClass = semis[midi % 12];
   const octave = Math.floor(midi / 12) - 1;
   return `${pitchClass}${octave}`;
