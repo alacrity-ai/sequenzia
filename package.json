@@ -20,5 +20,8 @@
     "vite": "^6.3.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.2"
+  },
+  "dependencies": {
+    "@tonejs/midi": "^2.0.28"
   }
 }

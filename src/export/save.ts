@@ -4,6 +4,7 @@ import { Session } from '../sequencer/interfaces/Session.js';
 import Sequencer from '../sequencer/sequencer.js';
 import { getTempo, getTimeSignature, getTotalMeasures } from '../sequencer/transport.js';
 import { AppState } from '../appState/interfaces/AppState.js';
+import { exportSessionToMIDI } from './midi/exportToMidi.js';
 
 
 /**
