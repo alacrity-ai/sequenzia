@@ -57,7 +57,6 @@ export function setupUI({
   const tempoInput = document.getElementById('tempo-input') as HTMLInputElement;
   const saveBtn = document.getElementById('save-button') as HTMLElement;
   const loadBtn = document.getElementById('load-button') as HTMLElement;
-  const loadInput = document.getElementById('load-input') as HTMLInputElement;
   const measuresInput = document.getElementById('measures-input') as HTMLInputElement;
   const beatsPerMeasureInput = document.getElementById('beats-per-measure-input') as HTMLInputElement;
   const configBtn = document.getElementById('config-button') as HTMLElement;
@@ -71,6 +70,55 @@ export function setupUI({
   durationSelect.value = String(config.currentDuration || 1);
   snapSelect.value = String(config.snapResolution || 0.25);
 
+  // === Loading Midi / Json ===
+  const importModal = document.getElementById('import-modal') as HTMLElement | null;
+  const importJsonBtn = document.getElementById('import-json') as HTMLElement | null;
+  const importMidiBtn = document.getElementById('import-midi') as HTMLElement | null;
+  const importCancelBtn = document.getElementById('import-cancel') as HTMLElement | null;
+  const loadInput = document.getElementById('load-input') as HTMLInputElement | null; // already defined
+  
+  loadBtn.addEventListener('click', () => {
+    importModal?.classList.remove('hidden');
+  });
+
+  if (loadInput) {
+    loadInput.addEventListener('change', (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (file) {
+        onLoad(file); // 🚀 Now actually load the selected file
+      }
+      target.value = ''; // Clear input for future reuse
+    });
+  }  
+
+  if (importJsonBtn) {
+    importJsonBtn.addEventListener('click', () => {
+      importModal?.classList.add('hidden');
+      if (loadInput) {
+        loadInput.setAttribute('accept', '.json');
+        loadInput.click();
+      }
+    });
+  }
+  
+  if (importMidiBtn) {
+    importMidiBtn.addEventListener('click', () => {
+      importModal?.classList.add('hidden');
+      if (loadInput) {
+        loadInput.setAttribute('accept', '.mid,.midi');
+        loadInput.click();
+      }
+    });
+  }
+  
+  if (importCancelBtn) {
+    importCancelBtn.addEventListener('click', () => {
+      importModal?.classList.add('hidden');
+    });
+  }
+
+  // === Play/Stop/Pause Buttons ===
   playBtnIcon.setAttribute('href', '#icon-play');
 
   playBtn.addEventListener('click', () => {
@@ -205,19 +253,6 @@ export function setupUI({
     } else {
       onSave('json');
     }
-  });
-
-  loadBtn.addEventListener('click', () => {
-    loadInput.click();
-  });
-
-  loadInput.addEventListener('change', (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (file) {
-      onLoad(file);
-    }
-    target.value = '';
   });
 
 // Continuing inside setupUI()...

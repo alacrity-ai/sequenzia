@@ -3,12 +3,15 @@
 import { setupKeyboard } from './setup/setupKeyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
 import { collapseAllSequencers } from './helpers.js';
-import { sequencers, destroyAllSequencers, setupAddTrackButton, toggleZoomControls } from './setup/sequencers.js';
+import { sequencers, destroyAllSequencers, setupAddTrackButton } from './setup/sequencers.js';
 import { GRID_CONFIG as config } from './sequencer/grid/helpers/constants.js';
 import { setupUI, resetPlayButtonState } from './sequencer/ui.js';
 import { initFooterUI } from './setup/footerUI.js';
 import { exportSessionToJSON, exportSessionToWAV } from './export/save.js';
+import { exportSessionToMIDI } from './export/midi/exportToMidi.js';
 import { importSessionFromJSON } from './export/load.js';
+import { importSessionFromMIDI } from './export/midi/loadFromMidi.js';
+import { loadSession } from './export/loadSession.js';
 import { getTotalBeats, startTransport, stopTransport, pauseTransport, resumeTransport, onTransportEnd, onBeatUpdate, getCurrentBeat, setCurrentBeat, updateTotalMeasures, updateTimeSignature, updateTempo, getTempo, getTimeSignature, getTotalMeasures } from './sequencer/transport.js';
 import { setupNoteDurationButtons } from './setup/noteDurationButtons.js';
 import { drawGlobalMiniContour } from './sequencer/grid/drawing/mini-contour.js';
@@ -152,51 +155,27 @@ setupUI({
       };
       await exportSessionToWAV(session);
     } else if (format === 'midi') {
-      alert("MIDI export not implemented yet.");
-    }
+      const { url, filename } = await exportSessionToMIDI(appState);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }    
   },  
   onLoad: async (file: File) => {
     try {
-      const { tracks, globalConfig } = await importSessionFromJSON(file);
-
-      updateTempo(globalConfig.bpm);
-      updateTimeSignature(globalConfig.beatsPerMeasure);
-      updateTotalMeasures(globalConfig.totalMeasures);
-
-      const tempoInput = document.getElementById('tempo-input') as HTMLInputElement | null;
-      if (tempoInput) tempoInput.value = String(getTempo());
-
-      const measuresInput = document.getElementById('measures-input') as HTMLInputElement | null;
-      if (measuresInput) measuresInput.value = String(getTotalMeasures());
-
-      destroyAllSequencers();
-
-      for (const [i, state] of tracks.entries()) {
-        const id = i;
-        const instrument = state.instrument || 'fluidr3-gm/acoustic_grand_piano';
-        const notes = state.notes || [];
-
-        recordDiff(
-          {
-            type: 'CREATE_SEQUENCER',
-            id,
-            instrument,
-            notes: structuredClone(notes),
-            config: state.config || {}
-          },
-          createReverseCreateSequencerDiff(id)
-        );
+      const extension = file.name.split('.').pop()?.toLowerCase();
+  
+      if (extension === 'json') {
+        const { tracks, globalConfig } = await importSessionFromJSON(file);
+        await loadSession(tracks, globalConfig);
+      } else if (extension === 'mid' || extension === 'midi') {
+        const { tracks, globalConfig } = await importSessionFromMIDI(file);
+        await loadSession(tracks, globalConfig);
+      } else {
+        throw new Error('Unsupported file type.');
       }
-
-      recordDiff(
-        createCheckpointDiff('Session Loaded'),
-        createReverseCheckpointDiff('Session Loaded')
-      );
-
-      collapseAllSequencers();
-      refreshGlobalMiniContour();
-      setCurrentBeat(0);
-      drawGlobalPlayhead(0);
     } catch (err) {
       if (err instanceof Error) {
         alert('Failed to load file: ' + err.message);
