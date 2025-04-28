@@ -1,6 +1,6 @@
 // setup/selectionTracker.js
 
-import type { Grid } from '../sequencer/interfaces/Grid.js';
+import type { Grid } from '../../sequencer/interfaces/Grid.js';
 
 let activeGrid: Grid | null = null;
 

@@ -1,6 +1,6 @@
 // src/setup/pasteModeStore.js
 
-import type { Grid } from '../sequencer/interfaces/Grid.js';
+import type { Grid } from '../../sequencer/interfaces/Grid.js';
 
 type PasteCallback = (grid: Grid, event: MouseEvent) => void;
 

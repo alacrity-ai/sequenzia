@@ -1,35 +1,35 @@
-// src/sequencer/grid/interaction/selectModeMouseHandlers.js
+// src/sequencer/grid/interaction/selectModeMouseHandlers.ts
 
 import { pitchToMidi, midiToPitch } from '../../../audio/pitch-utils.js';
-import { EditModes, setEditMode, setSuppressNextNotePlacement, shouldAutoExitSelectMode, clearTemporarySelectModeFlag } from '../../../setup/editModeStore.js';
-import { getTotalBeats } from '../../transport.js'
-import { registerSelectionStart } from '../../../setup/selectionTracker.js';
+import { EditModes, setEditMode, setSuppressNextNotePlacement, shouldAutoExitSelectMode, clearTemporarySelectModeFlag } from '../../../setup/stores/editModeStore.js';
+import { getTotalBeats } from '../../transport.js';
+import { registerSelectionStart } from '../../../setup/stores/selectionTracker.js';
 import { getNotesInMarquee } from '../helpers/marquee.js';
-import { updatePasteHoverGrid } from '../../../setup/pasteModeStore.js';
+import { updatePasteHoverGrid } from '../../../setup/stores/pasteModeStore.js';
 import { recordDiff } from '../../../appState/appState.js';
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../appState/diffEngine/types/grid/deleteNotes.js';
 import { createMoveNotesDiff, createReverseMoveNotesDiff } from '../../../appState/diffEngine/types/grid/moveNotes.js';
 import { interceptPasteClickIfActive, updatePastePreview, clearPastePreviewIfNeeded } from './sharedMouseListeners.js';
 
-export function getSelectModeHandlers(ctx) {
-  let dragState = null;
+import type { MouseHandler } from '../../interfaces/MouseHandler.js';
+import type { HandlerContext } from '../../interfaces/HandlerContext.js';
+import type { DragState } from '../../interfaces/DragState.js';
 
-  // Right click to delete a note
-  function contextHandler(e) {
+export function getSelectModeHandlers(ctx: HandlerContext): MouseHandler {
+  let dragState: DragState | null = null;
+
+  function contextHandler(e: MouseEvent): void {
     e.preventDefault();
     const { x, y } = ctx.getCanvasPos(e);
     const clicked = ctx.findNoteAt(x, y);
     if (!clicked) return;
-  
+
     const selected = ctx.getSelectedNotes();
     const notesToDelete = selected.includes(clicked) ? selected : [clicked];
-  
     if (!notesToDelete.length) return;
-  
-    // 👇 Do NOT mutate ctx.notes directly — let the state engine drive it
-    ctx.setSelectedNotes([]); // Just update selection state (visual)
-  
-    // Trigger diff (which will call resyncFromState automatically)
+
+    ctx.setSelectedNotes([]);
+
     recordDiff(
       createDeleteNotesDiff(ctx.sequencer.id, notesToDelete),
       createReverseDeleteNotesDiff(ctx.sequencer.id, notesToDelete)
@@ -38,26 +38,23 @@ export function getSelectModeHandlers(ctx) {
     if (shouldAutoExitSelectMode()) {
       clearTemporarySelectModeFlag();
       setEditMode(EditModes.NOTE_PLACEMENT);
-    }    
+    }
   }
 
-  // Hold down to drag a marquee box over a set of notes (if we don't have paste mode enabled), or to drag around pasted notes, if we have just pasted
-  function downHandler(e) {
-    // Allow paste to hijack this click and short-circuit normal selection
+  function downHandler(e: MouseEvent): void {
+    if (!ctx.grid) return;
     if (interceptPasteClickIfActive(ctx, e)) return;
 
     const { x, y } = ctx.getCanvasPos(e);
     if (x < 0) return;
 
     const hovered = ctx.findNoteAt(x, y);
-    ctx.setHoveredNote(hovered);
+    ctx.setHoveredNote(hovered ?? null);
 
-    // Register this sequencer as the active one
     registerSelectionStart(ctx.grid);
 
     const selectedNotes = ctx.getSelectedNotes();
 
-    // Begin drag if clicking on a selected note
     if (hovered && selectedNotes.includes(hovered)) {
       dragState = {
         startX: x,
@@ -66,13 +63,12 @@ export function getSelectModeHandlers(ctx) {
         initialNotes: selectedNotes.map(n => ({
           note: n,
           start: n.start,
-          midi: pitchToMidi(n.pitch)
+          midi: pitchToMidi(n.pitch) ?? 0
         }))
       };
       return;
     }
 
-    // Otherwise: initiate marquee box selection
     ctx.selectionBox = {
       active: true,
       startX: x,
@@ -85,23 +81,23 @@ export function getSelectModeHandlers(ctx) {
     ctx.setSelectedNote(null);
   }
 
-  // Handles dragging of note(s) while mouse is held down
-  function moveHandler(e) {
+  function moveHandler(e: MouseEvent): void {
+    if (!ctx.grid) return;
     updatePasteHoverGrid(ctx.grid);
     const { x, y } = ctx.getCanvasPos(e);
-
+  
     const hovered = ctx.findNoteAt(x, y);
-    ctx.setHoveredNote(hovered);
-
+    ctx.setHoveredNote(hovered ?? null);
+  
     updatePastePreview(ctx, x, y);
-
+  
     if (ctx.selectionBox?.active) {
+      if (!ctx.setHighlightedNotes) return;
       ctx.selectionBox.currentX = x;
       ctx.selectionBox.currentY = y;
-
+  
       const box = ctx.selectionBox;
-
-      // const overlap extra pixels
+  
       const highlightCandidates = getNotesInMarquee(ctx.notes, {
         startX: box.startX,
         currentX: box.currentX,
@@ -113,67 +109,67 @@ export function getSelectModeHandlers(ctx) {
       });
       ctx.setHighlightedNotes(highlightCandidates);
       ctx.scheduleRedraw();
-      
       return;
     }
-
-    if (dragState) {
-      const deltaX = x - dragState.startX;
-      const beatDelta = ctx.getSnappedBeatFromX(deltaX) - ctx.getSnappedBeatFromX(0);
-      const deltaY = y - dragState.startY;
-      const pitchOffset = Math.round(deltaY / ctx.getCellHeight());
-
-      const totalBeats = getTotalBeats();
-      const minMidi = pitchToMidi(ctx.config.noteRange[0]);
-      const maxMidi = pitchToMidi(ctx.config.noteRange[1]);
-      
-      for (const { note, start, midi } of dragState.initialNotes) {
-        const newStart = Math.max(0, start + beatDelta);
-        const newMidi = Math.max(minMidi, Math.min(maxMidi, midi - pitchOffset));
-        const newPitch = midiToPitch(newMidi);
-      
-        if (newStart + note.duration <= totalBeats) {
-          note.start = newStart;
-          note.pitch = newPitch;
-        }
+  
+    if (!dragState) return; // 💡 Move this guard up early
+  
+    // From here down, dragState is guaranteed not null
+    const ds = dragState;
+  
+    const deltaX = x - ds.startX;
+    const beatDelta = ctx.getSnappedBeatFromX(deltaX) - ctx.getSnappedBeatFromX(0);
+    const deltaY = y - ds.startY;
+    const pitchOffset = Math.round(deltaY / ctx.getCellHeight());
+  
+    const totalBeats = getTotalBeats();
+    const minMidi = pitchToMidi(ctx.config.noteRange[0]) ?? 0;
+    const maxMidi = pitchToMidi(ctx.config.noteRange[1]) ?? 127;
+  
+    for (const { note, start, midi } of ds.initialNotes) {
+      const newStart = Math.max(0, start + beatDelta);
+      const newMidi = Math.max(minMidi, Math.min(maxMidi, midi - pitchOffset));
+      const newPitch = midiToPitch(newMidi) ?? note.pitch;
+  
+      if (newStart + note.duration <= totalBeats) {
+        note.start = newStart;
+        note.pitch = newPitch;
       }
-      
-      // Only play the anchor note's new pitch
-      const anchor = dragState.initialNotes.find(n => n.note === dragState.anchorNote);
-      if (anchor) {
-        const previewPitch = anchor.note.pitch;
-        if (dragState.lastPreviewPitch !== previewPitch) {
-          dragState.lastPreviewPitch = previewPitch;
-          ctx.sequencer.playNote(previewPitch, 0.5);
-        }
-      }        
-
-      ctx.scheduleRedraw();
-      ctx.onNotesChanged?.();
     }
-  }
+  
+    const anchor = ds.initialNotes.find(n => n.note === ds.anchorNote);
+    if (anchor) {
+      const previewPitch = anchor.note.pitch;
+      if (ds.lastPreviewPitch !== previewPitch) {
+        ds.lastPreviewPitch = previewPitch;
+        ctx.sequencer.playNote(previewPitch, 0.5);
+      }
+    }
+  
+    ctx.scheduleRedraw();
+    ctx.onNotesChanged?.();
+  }  
 
-  // Handles releasing dragged note(s)
-  function upHandler(e) {
+  function upHandler(e: MouseEvent): void {
     if (dragState?.initialNotes?.length) {
       const { initialNotes } = dragState;
-  
+
       const from = initialNotes.map(({ start, midi, note }) => ({
-        pitch: midiToPitch(midi),
+        pitch: midiToPitch(midi) ?? note.pitch,
         start,
         duration: note.duration
       }));
-  
+
       const to = initialNotes.map(({ note }) => ({
         pitch: note.pitch,
         start: note.start,
         duration: note.duration
       }));
-  
-      const wasMoved = from.some((f, i) =>
+
+      const wasMoved = from.some((f, i) => 
         f.pitch !== to[i].pitch || f.start !== to[i].start
       );
-  
+
       if (wasMoved) {
         recordDiff(
           createMoveNotesDiff(ctx.sequencer.id, from, to),
@@ -183,20 +179,19 @@ export function getSelectModeHandlers(ctx) {
         if (shouldAutoExitSelectMode()) {
           clearTemporarySelectModeFlag();
           setEditMode(EditModes.NOTE_PLACEMENT);
-        }        
+        }
       }
-
     }
-  
+
     dragState = null;
-  
-    // Marquee selection logic
+
     if (ctx.selectionBox?.active) {
+      if (!ctx.setHighlightedNotes) return;
       const { x, y } = ctx.getCanvasPos(e);
       ctx.selectionBox.currentX = x;
       ctx.selectionBox.currentY = y;
       ctx.selectionBox.active = false;
-      
+
       const selected = getNotesInMarquee(ctx.notes, {
         startX: ctx.selectionBox.startX,
         currentX: ctx.selectionBox.currentX,
@@ -206,42 +201,41 @@ export function getSelectModeHandlers(ctx) {
         getSnappedBeatFromX: ctx.getSnappedBeatFromX,
         getPitchFromRow: ctx.getPitchFromRow
       });
-  
+
       ctx.setHighlightedNotes([]);
       ctx.setSelectedNotes(selected);
       ctx.scheduleRedraw();
 
       if (shouldAutoExitSelectMode()) {
-        console.log('AUTO EXITED MODE')
-        const selected = ctx.getSelectedNotes();
-        if (selected.length === 0) {
+        const selectedNow = ctx.getSelectedNotes();
+        if (selectedNow.length === 0) {
           e.stopPropagation();
           clearTemporarySelectModeFlag();
           setEditMode(EditModes.NOTE_PLACEMENT);
           setSuppressNextNotePlacement();
         }
       }
-      setSuppressNextNotePlacement();    
+      setSuppressNextNotePlacement();
     }
   }
 
-  // Handles mouse leaving the grid canvas area
-  function leaveHandler() {
+  function leaveHandler(): void {
+    if (!ctx.setHighlightedNotes) return;
     ctx.setHoveredNote(null);
     ctx.setHighlightedNotes([]);
     clearPastePreviewIfNeeded(ctx);
     ctx.scheduleRedraw();
-  }  
+  }
 
   return {
-    attach(canvas) {
+    attach(canvas: HTMLCanvasElement): void {
       canvas.addEventListener('mousedown', downHandler);
       canvas.addEventListener('mousemove', moveHandler);
       canvas.addEventListener('mouseup', upHandler);
       canvas.addEventListener('mouseleave', leaveHandler);
       canvas.addEventListener('contextmenu', contextHandler);
     },
-    detach(canvas) {
+    detach(canvas: HTMLCanvasElement): void {
       canvas.removeEventListener('mousedown', downHandler);
       canvas.removeEventListener('mousemove', moveHandler);
       canvas.removeEventListener('mouseup', upHandler);

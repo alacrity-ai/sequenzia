@@ -2,7 +2,7 @@
 
 import { GRID_CONFIG as config } from './grid/helpers/constants.js';
 import { initConfigModal } from '../userconfig/initUserConfig.js';
-import { getEditMode, EditModes } from '../setup/editModeStore.js';
+import { getEditMode, EditModes } from '../setup/stores/editModeStore.js';
 import { getTimeSignature, getTotalMeasures } from './transport.js';
 import { undo, redo } from '../appState/stateHistory.js';
 import { SNAP_RESOLUTIONS, durationHotkeys } from './grid/helpers/constants.js';

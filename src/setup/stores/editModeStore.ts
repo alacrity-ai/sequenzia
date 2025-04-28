@@ -1,12 +1,12 @@
 // src/setup/editModeStore.js
 
 import { endPasteMode } from './pasteModeStore.js';
-import { EditMode } from '../sequencer/interfaces/EditMode.js';
+import { EditMode } from '../../sequencer/interfaces/EditMode.js';
 
 export const EditModes = {
   NOTE_PLACEMENT: 'note-placement',
   SELECT: 'select',
-  NONE: 'none', // ✅ Include NONE here, matches EditMode definition
+  NONE: 'none',
 } as const;
 
 let currentMode: EditMode = EditModes.NOTE_PLACEMENT;

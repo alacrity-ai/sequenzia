@@ -1,13 +1,14 @@
-// src/sequencer/grid/interaction/globalEditHotkeys.js
+// src/sequencer/grid/interaction/globalEditHotkeys.ts
 
 import { performCopy, performCut, performPaste, performDelete } from './editActions.js';
 
-
-export function setupGlobalEditHotkeys() {
-  document.addEventListener('keydown', (e) => {
+export function setupGlobalEditHotkeys(): void {
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
     const isMac = navigator.platform.toUpperCase().includes('MAC');
     const ctrlKey = isMac ? e.metaKey : e.ctrlKey;
-    const tag = document.activeElement?.tagName;
+    const activeElement = document.activeElement;
+    const tag = activeElement instanceof HTMLElement ? activeElement.tagName : null;
+
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
     switch (true) {

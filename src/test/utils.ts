@@ -91,7 +91,7 @@ export function mockDependencies() {
     getTotalBeats: () => 16
   }));
 
-  vi.mock('../setup/editModeStore.js', () => ({
+  vi.mock('../setup/stores/editModeStore.js', () => ({
     subscribeEditMode: (callback: any) => {
       callback('note-placement');
       return () => {};
@@ -99,7 +99,7 @@ export function mockDependencies() {
     getEditMode: () => 'note-placement'
   }));
 
-  vi.mock('../setup/selectionTracker.js', () => ({
+  vi.mock('../setup/stores/selectionTracker.js', () => ({
     clearSelectionTracker: vi.fn()
   }));
 

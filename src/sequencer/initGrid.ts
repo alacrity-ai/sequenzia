@@ -15,8 +15,8 @@ import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.j
 import { getNotePlacementHandlers } from './grid/interaction/noteModeMouseHandlers.js';
 import { getSelectModeHandlers } from './grid/interaction/selectModeMouseHandlers.js';
 import { getHoveredResizeNote } from './grid/interaction/sharedMouseListeners.js';
-import { subscribeEditMode, getEditMode } from '../setup/editModeStore.js';
-import { clearSelectionTracker } from '../setup/selectionTracker.js';
+import { subscribeEditMode, getEditMode } from '../setup/stores/editModeStore.js';
+import { clearSelectionTracker } from '../setup/stores/selectionTracker.js';
 import { drawMarqueeSelectionBox } from './grid/drawing/selection-box.js';
 import { drawResizeArrow } from './grid/drawing/resize-arrow.js';
 import { ZOOM_LEVELS, labelWidth } from './grid/helpers/constants.js';
@@ -43,7 +43,7 @@ export function initGrid(
   let previewNote: Note | null = null;
   let pastePreviewNote: Note | null = null;
   let pastePreviewNotes: Note[] | null = null;
-  let hoveredNote: Note | null = null;
+  let hoveredNote: Note | null = null; // defined here as Note | null
   let selectedNote: Note | null = null;
   let selectedNotes: Note[] = [];
 
