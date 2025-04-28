@@ -7,10 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "GITHUB_PAGES=true vite build && gh-pages -d dist"
+    "deploy": "GITHUB_PAGES=true vite build && gh-pages -d dist",
+    "dev:clean": "rm -rf node_modules/.vite && vite",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
+    "@types/node": "^22.15.2",
     "gh-pages": "^6.3.0",
-    "vite": "^6.3.1"
+    "jsdom": "^26.1.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.1",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.1.2"
   }
 }
