@@ -23,7 +23,6 @@ jobs:
 
     - name: Build the app
       run: |
-        export GITHUB_PAGES=true
         npm run build
 
     - name: Deploy to GitHub Pages
