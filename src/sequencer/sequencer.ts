@@ -292,13 +292,28 @@ export default class Sequencer {
       const durationSec = note.duration * beatToSec;
       const midi = pitchToMidi(note.pitch);
       if (midi == null) continue;
-      instrument.start({
-        note: midi,
-        duration: durationSec,
-        velocity: 100,
-        time: startSec,
-        loop: false,
-      });
+
+      // Add check for drum machines and use sample names
+      if (this.instrumentName.startsWith('drummachines/') && instrument.__midiMap) {
+        const sampleName = instrument.__midiMap.get(midi);
+        if (sampleName) {
+          instrument.start({
+            note: sampleName,  // Use sample name instead of MIDI note
+            duration: durationSec,
+            velocity: 100,
+            time: startSec,
+            loop: false,
+          });
+        }
+      } else {
+        instrument.start({
+          note: midi,
+          duration: durationSec,
+          velocity: 100,
+          time: startSec,
+          loop: false,
+        });
+      }
     }
   }
 }
