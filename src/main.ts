@@ -1,5 +1,7 @@
 // src/main.ts
-import { hideSplashScreen } from './sequencer/ui.js';
+import { hideSplashScreen } from './global/splashscreen.js';
+import { setupWhatsNewButton } from './global/whatsnew.js';
+import { setupHelpButton } from './global/helpbutton.js';
 import { setupKeyboard } from './setup/setupKeyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
 import { sequencers, setupAddTrackButton } from './setup/sequencers.js';
@@ -86,7 +88,8 @@ setupAddTrackButton();
 setupNoteDurationButtons();
 setupControlModeSwitch();
 initFooterUI();
-
+setupWhatsNewButton();
+setupHelpButton();
 
 // === UI Wiring ===
 setupUI({

@@ -185,7 +185,29 @@
     </div>
 
     <div id="transport-ui"
-         class="w-[1260px] mx-auto bg-gray-900 border-t border-purple-800">
+    class="relative w-[1260px] mx-auto bg-gray-900 border-t border-purple-800">
+
+      <!-- Left Side Button Column -->
+      <div class="absolute left-0 top-[60px] z-40 -translate-x-[50px] flex flex-col gap-2">
+        <!-- Help -->
+        <button id="footer-help-btn"
+                class="side-button side-button-info"
+                title="Help / Documentation">
+          <svg class="w-6 h-6" aria-hidden="true">
+            <use href="#icon-lightbulb"></use>
+          </svg>
+        </button>
+
+        <!-- What's New -->
+        <button id="footer-whats-new-btn"
+                class="side-button side-button-info"
+                title="What’s New / Release Notes">
+          <svg class="w-6 h-6" aria-hidden="true">
+            <use href="#icon-chart-mixed"></use>
+          </svg>
+        </button>
+
+      </div>
 
       <!-- Mode Selection and Note Duration Buttons Row -->
       <div class="flex justify-left gap-3 p-2 pl-32 border-b border-purple-800">
@@ -475,6 +497,7 @@
       await loadHTML('modal-mount-root', 'web/modals/loading-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/import-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/splash-modal.html');
+      await loadHTML('modal-mount-root', 'web/modals/whats-new-modal.html');
 
       // ✅ Only load the app after modals and icons are present
       await import('/src/main.js');

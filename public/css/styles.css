@@ -55,6 +55,15 @@
     background-color: rgb(126, 34, 206);   /* Tailwind hover:bg-purple-700 */
   }
   
+  /* Blue variant for info buttons (Help, What's New, Reload) */
+  .side-button-info {
+    background-color: rgb(37, 99, 235);   /* Tailwind bg-blue-600 */
+  }
+
+  .side-button-info:hover {
+    background-color: rgb(29, 78, 216);   /* Tailwind hover:bg-blue-700 */
+  }
+  
   /* Hide the main content until fully loaded */
   .content-hidden {
     opacity: 0;
