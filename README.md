@@ -9,15 +9,48 @@ Sequenzia is a modern, web-based Digital Audio Workstation (DAW) with integrated
 <img src="screenshot.PNG" alt="Sequenzia DAW Interface" width="800" style="border-radius: 8px; margin: 20px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
 
 ## Features
-- 🎹 Multi-track piano roll sequencer
-- 🎨 Real-time waveform visualization with multiple view modes
-- 🤖 AI-powered music generation and extension
-- 🎵 Multiple instrument support
-- 📊 Global mini-contour view
-- ⚡ Built with Vite for optimal performance
-- 🎚️ Transport controls with loop functionality
-- 🎼 Variable note durations and snap resolutions
-- 💾 Export to WAV, MIDI, and JSON formats
+
+### Core Functionality
+- 🎹 Multi-track piano roll sequencer with customizable grid
+- 🎨 Real-time waveform visualization with three modes:
+  - Waveform view
+  - Frequency analyzer
+  - Spectrogram
+- 🎼 Variable grid snap settings and note durations
+- 🎚️ Transport controls with loop functionality and metronome
+- 🔍 Zoom controls for detailed editing
+- 📊 Global mini-contour view with expandable timeline
+
+### Sound & Instruments
+- 🎹 1000+ instruments via WebAudioFont integration
+- 🥁 Built-in drum kit with standard MIDI mapping
+- 🎵 Real-time audio preview during note editing
+- 🎛️ Per-track volume and pan controls
+
+### Import/Export
+- 💾 Project save/load functionality
+- 📥 MIDI file import support
+- 📤 Export to:
+  - MIDI files
+  - WAV audio (Note: WebAudioFont export currently has limitations)
+  - Project files (JSON)
+
+### User Interface
+- 🎨 Customizable display settings:
+  - Note styles
+  - Grid color schemes
+  - Track heights
+- 🌊 Animated notes during playback
+- 🎞️ Expandable timeline view
+- 🖱️ Intuitive drag-and-drop note editing
+
+### Coming Soon
+- 🎚️ Per-note velocity control
+- 🤖 AI-assisted music generation and track extension
+- 🎨 Additional visualization modes
+- 🎼 Advanced MIDI editing features
+
+Note: Some features are still in development. Check the "What's New" section in the app for the latest updates.
 
 ## Getting Started
 
@@ -94,6 +127,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
 
 
 
