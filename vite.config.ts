@@ -19,7 +19,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
+      '@': path.resolve(__dirname, 'src'),
+      '/static': path.resolve(__dirname, 'public/static'),
     }
   },
   test: {
