@@ -1,6 +1,6 @@
 // src/setup/instrumentSelector.ts
 
-import type { EngineName } from '../sounds/instrument-loader.js';
+import type { EngineName } from '../sounds/interfaces/Engine.js';
 import { setGlobalActiveInstrument } from '../sounds/instrument-player.js';
 import { getSequencerById } from './sequencers.js';
 import { recordDiff } from '../appState/appState.js';

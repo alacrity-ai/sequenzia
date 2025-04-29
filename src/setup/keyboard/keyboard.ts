@@ -1,6 +1,6 @@
 // src/setup/keyboard.ts
 
-import type { EngineName } from '../../sounds/instrument-loader.js';
+import type { EngineName } from '../../sounds/interfaces/Engine.js';
 import { getKeyMap } from '../../keyboard/keys.js';
 import { drawKeys } from '../../keyboard/renderer.js';
 import { attachInputListeners } from '../../keyboard/interactions.js';

@@ -1,13 +1,15 @@
-import { Instrument } from './interfaces/Instrument.js';
+// src/sounds/instrument-player.ts
+
 import { getSf2Player } from './players/sf2-player.js';
+import { getWebAudioFontPlayer } from './players/webaudiofont-player.js';
+import { EngineName, EnginePlayer } from './interfaces/Engine.js';
 
-type EngineName = 'sf2'; // Expandable later
 
-// Registry of available players
-const enginePlayers = {
-  sf2: getSf2Player(),
-  // webaudiofont: getWebaudiofontPlayer(), (to be added)
-};
+// // Registry of available players
+const enginePlayers: Record<EngineName, EnginePlayer> = {
+    sf2: getSf2Player(),
+    webaudiofont: getWebAudioFontPlayer()
+};  
 
 // Default engine
 const DEFAULT_ENGINE: EngineName = 'sf2';
@@ -17,7 +19,7 @@ const DEFAULT_ENGINE: EngineName = 'sf2';
 // Only for GLOBAL keyboard piano
 let activeGlobalInstrumentFullName: string | null = null;
 
-// 🛠 Used by GLOBAL VIRTUAL PIANO only
+// Used by GLOBAL VIRTUAL PIANO only
 export async function setGlobalActiveInstrument(
   fullName: string,
   engineName: EngineName = DEFAULT_ENGINE
@@ -29,12 +31,12 @@ export async function setGlobalActiveInstrument(
   activeGlobalInstrumentFullName = fullName; // ✅ Only when global
 }
 
-// 🛠 Used to get GLOBAL VIRTUAL PIANO instrument
+// Used to get GLOBAL VIRTUAL PIANO instrument
 export function getGlobalActiveInstrumentName(): string | null {
   return activeGlobalInstrumentFullName;
 }
 
-// 🛠 Used when loading notes normally
+// Used when loading notes normally
 export async function setInstrumentForPlayback(
   fullName: string,
   engineName: EngineName = DEFAULT_ENGINE

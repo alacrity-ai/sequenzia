@@ -2,14 +2,14 @@
 
 import { Instrument } from './interfaces/Instrument.js';
 import { getSf2Engine } from './loaders/sf2-loader.js';
-
-export type EngineName = 'sf2'; // expand when adding more engines
+import { getWebAudioFontEngine } from './loaders/webaudiofont-loader.js';
+import { EngineName } from './interfaces/Engine.js';
 
 // Registry of available loaders
 const engineLoaders = {
-  sf2: getSf2Engine(),
-  // webaudiofont: getWebaudiofontEngine(), (to be added)
-};
+    sf2: getSf2Engine(),
+    webaudiofont: getWebAudioFontEngine(),
+};  
 
 // Current default engine
 const DEFAULT_ENGINE: EngineName = 'sf2';
