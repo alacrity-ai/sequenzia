@@ -90,9 +90,6 @@ export async function loadInstrument(
     };
 
     const kit = kitMap[libraryRaw.toLowerCase()] || 'MusyngKite';
-    const availableKits = await getAvailableSoundfontKits();
-    console.log(`[SF2] Available kits: ${availableKits.join(', ')}`);
-    console.log(`[SF2] Loading from kit=${kit}, instrument=${instrumentName}`);
 
     const format = 'ogg';
     const url = `https://gleitz.github.io/midi-js-soundfonts/${kit}/${instrumentName}-${format}.js`;
@@ -150,8 +147,6 @@ export function getAvailableSoundfontKits(): string[] {
 }
 
 export async function getAvailableInstruments(library: string): Promise<string[]> {
-  console.log(`[SF2] Getting available instruments for library: ${library}`);
-
   const libraryNormalized = library.toLowerCase();
 
   if (libraryNormalized === 'splendidgrandpiano') {
@@ -171,7 +166,6 @@ export async function getAvailableInstruments(library: string): Promise<string[]
   const dummyInstrument = 'acoustic_grand_piano'; // preload safe assumption
   await loadInstrument(`${library}/${dummyInstrument}`);
   const instruments = smplr.getSoundfontNames();
-  console.log(`[SF2] Instruments in library "${library}":`, instruments);
   return instruments ?? [];
 }
 

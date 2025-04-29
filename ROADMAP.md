@@ -1,12 +1,17 @@
 # Roadmap
 
 
+## Bugs
+- Critical Bugs:
+  - [ ] webaudiofont instrument wav export is silent. OfflineAudioContext issue. (related to currentTime?)
+- Small Bugs:
+  - [x] Drum tracks on Wav export throw: Sample not found: '50', Sample not found: '53', etc
+  - [x] Double check that we aren't loading instruments/updating state when every note is played. The playhead looks a bit stuttery on playback
+  - [ ] When pasting a cluster of notes, it's possible for some of those notes to be pasted out of bounds (into the piano roll label on the left)
+
 ## Phase 0: Refactor to TS
-- Complete all js -> ts refactoring
-- Fix bugs:
-  - Drum tracks on Wav export throw: Sample not found: '50', Sample not found: '53', etc
-  - Double check that we aren't loading instruments/updating state when every note is played. The playhead looks a bit stuttery on playback
-  - When pasting a cluster of notes, it's possible for some of those notes to be pasted out of bounds (into the piano roll label on the left)
+- [x] Complete all js -> ts refactoring
+
 
 ## Phase 1: Core Functionality
 

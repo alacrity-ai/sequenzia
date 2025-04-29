@@ -4,6 +4,7 @@ import { loadInstrument } from '../loaders/sf2-loader.js';
 import { getAudioContext } from '../../audio/audio.js';
 import { pitchToMidi } from '../../audio/pitch-utils.js';
 import { Instrument } from '../interfaces/Instrument.js';
+import { EnginePlayer } from '../interfaces/Engine.js';
 
 // State
 let activeInstrument: Instrument | null = null;
@@ -90,7 +91,7 @@ async function loadAndPlayNote(
   return null;
 }
 
-export function getSf2Player() {
+export function getSf2Player(): EnginePlayer {
   return {
     name: 'sf2',
     setActiveInstrument,

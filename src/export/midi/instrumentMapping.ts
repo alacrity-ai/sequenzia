@@ -38,23 +38,31 @@ export const GM_INSTRUMENTS: string[] = [
     "telephone_ring", "helicopter", "applause", "gunshot"
   ];
   
-  /**
-   * Maps an instrument name to its General MIDI program number.
-   * Defaults to 0 (Acoustic Grand Piano) if not found.
-   */
-  export function mapInstrumentNameToProgramNumber(name: string): number {
-    const normalized = name.trim().toLowerCase().replace(/\s+/g, '_');
+/**
+ * Maps an instrument name to its General MIDI program number.
+ * Defaults to 0 (Acoustic Grand Piano) if not found.
+ */
+export function mapInstrumentNameToProgramNumber(name: string): number {
+    console.log('MIDI MAP GOT INSTRUMENT NAME: ', name);
+  
+    // Strip leading engine/library path
+    const parts = name.split('/');
+    const rawName = parts[parts.length - 1]; // Last segment is always the instrument name
+  
+    // Normalize: lowercase, replace whitespace with underscores
+    const normalized = rawName.trim().toLowerCase().replace(/\s+/g, '_');
   
     const index = GM_INSTRUMENTS.findIndex(inst => inst === normalized);
     if (index !== -1) {
       return index;
     }
   
-    // fallback smart mapping
+    // Fallback for anything drum-related
     if (normalized.includes('drum') || normalized.includes('drummachine')) {
-      return 0; // Drums are usually on channel 9 (10 in 1-based indexing), but program still 0
+      return 0; // Channel 9 is what matters for drums; program still set to 0
     }
   
-    return 0; // default to acoustic grand piano
+    return 0; // Default to acoustic grand piano
   }
+  
   

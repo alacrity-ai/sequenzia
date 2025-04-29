@@ -1,6 +1,6 @@
 // src/setup/instrumentSelector.ts
 
-import type { EngineName } from '../sounds/instrument-loader.js';
+import type { EngineName } from '../sounds/interfaces/Engine.js';
 import { setGlobalActiveInstrument } from '../sounds/instrument-player.js';
 import { getSequencerById } from './sequencers.js';
 import { recordDiff } from '../appState/appState.js';
@@ -141,7 +141,7 @@ export async function refreshInstrumentSelectorModal(fullName: string, sequencer
   
 
 // PUBLIC: Confirm selection
-export async function confirmInstrumentSelection(): Promise<void> {
+export async function confirmInstrumentSelection(): Promise<string | void> {
   const selectedInstrumentFull = instrumentSelect.value;
   instrumentSelectModal.classList.add('hidden');
 
@@ -162,10 +162,14 @@ export async function confirmInstrumentSelection(): Promise<void> {
     return; // Exit if sequencer not found instead of updating global
   }
   
-  // Only update global if we explicitly don't have a sequencer ID
-  if (instrumentSelectModal.dataset.currentSequencer === undefined) {
+ // Global instrument
+ if (instrumentSelectModal.dataset.currentSequencer === undefined) {
     try {
       await setGlobalActiveInstrument(selectedInstrumentFull);
+      window.dispatchEvent(new CustomEvent('global-instrument-selected', {
+        detail: { fullName: selectedInstrumentFull }
+      }));
+      return selectedInstrumentFull;
     } catch (err) {
       console.error('Failed to load global instrument:', selectedInstrumentFull, err);
     }

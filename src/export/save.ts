@@ -89,6 +89,7 @@ export async function exportSessionToWAV(session: Session): Promise<void> {
   // Process each track
   for (const state of session.tracks) {
     const instrumentName = state.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
+    console.log('Exporting track with instrument: ', instrumentName);
     // @ts-ignore | Fix this after refactoring Sequencer to ts
     const seq = new Sequencer(null, state.config, offlineCtx, offlineCtx.destination, instrumentName);
     seq.setState(state);
