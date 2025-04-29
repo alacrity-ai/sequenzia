@@ -55,3 +55,12 @@
     background-color: rgb(126, 34, 206);   /* Tailwind hover:bg-purple-700 */
   }
   
+  /* Hide the main content until fully loaded */
+  .content-hidden {
+    opacity: 0;
+  }
+  
+  .content-visible {
+    opacity: 1;
+    transition: opacity 0.5s ease-in;
+  }
