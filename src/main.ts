@@ -1,5 +1,5 @@
 // src/main.ts
-
+import { hideSplashScreen } from './sequencer/ui.js';
 import { setupKeyboard } from './setup/setupKeyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
 import { sequencers, setupAddTrackButton } from './setup/sequencers.js';
@@ -216,3 +216,5 @@ setupUI({
     if (canvas) drawGlobalMiniContour(canvas, sequencers);
   }
 });
+
+hideSplashScreen();
