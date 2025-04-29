@@ -64,7 +64,7 @@ export default class Sequencer {
 
   async initInstrument(): Promise<void> {
     try {
-      await loadInstrument(this.instrumentName, this.context, this.destination);
+      loadInstrument(this.instrumentName, this.context, this.destination);
       console.log(`[SEQ:${this.id}] Instrument '${this.instrumentName}' loaded`);
     } catch (err) {
       console.error(`[SEQ:${this.id}] Failed to load instrument '${this.instrumentName}':`, err);

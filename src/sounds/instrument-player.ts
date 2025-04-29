@@ -21,15 +21,19 @@ let activeGlobalInstrumentFullName: string | null = null;
 
 // Used by GLOBAL VIRTUAL PIANO only
 export async function setGlobalActiveInstrument(
-  fullName: string,
-  engineName: EngineName = DEFAULT_ENGINE
-): Promise<void> {
-  const engine = enginePlayers[engineName];
-  if (!engine) throw new Error(`Engine "${engineName}" not available`);
-
-  await engine.setActiveInstrument(fullName);
-  activeGlobalInstrumentFullName = fullName; // ✅ Only when global
-}
+    fullName: string
+  ): Promise<void> {
+    if (!fullName.includes('/')) {
+        throw new Error(`Invalid instrument name: "${fullName}". Expected "<engine>/<library>/<instrument>"`);
+    }
+      
+    const engineName = fullName.split('/')[0] as EngineName;
+    const engine = enginePlayers[engineName];
+    if (!engine) throw new Error(`Engine "${engineName}" not available`);
+  
+    await engine.setActiveInstrument(fullName);
+    activeGlobalInstrumentFullName = fullName;
+}  
 
 // Used to get GLOBAL VIRTUAL PIANO instrument
 export function getGlobalActiveInstrumentName(): string | null {
@@ -47,53 +51,61 @@ export async function setInstrumentForPlayback(
   await engine.setActiveInstrument(fullName);
 }
 
-// Used by the virtual piano primarily
+// Used by the virtual piano
 export function playNote(
-  pitch: string,
-  velocity: number = 100,
-  loop: boolean = false,
-  engineName: EngineName = DEFAULT_ENGINE
-): (() => void) | null {
-  const engine = enginePlayers[engineName];
-  if (!engine) throw new Error(`Engine "${engineName}" not available`);
-  return engine.playNote(pitch, velocity, loop);
-}
+    pitch: string,
+    velocity: number = 100,
+    loop: boolean = false
+  ): (() => void) | null {
+    if (!activeGlobalInstrumentFullName) return null;
+  
+    const engineName = activeGlobalInstrumentFullName.split('/')[0] as EngineName;
+    const engine = enginePlayers[engineName];
+    if (!engine) throw new Error(`Engine "${engineName}" not available`);
+  
+    return engine.playNote(pitch, velocity, loop);
+  }
+  
 
-// Crucial for stopping a sustained note, this is used by the virtual piano primarily though
-export function stopNoteByPitch(
-  pitch: string,
-  engineName: EngineName = DEFAULT_ENGINE
-): void {
-  const engine = enginePlayers[engineName];
-  if (!engine) throw new Error(`Engine "${engineName}" not available`);
-  return engine.stopNoteByPitch(pitch);
-}
+// Crucial for stopping a sustained note, this is used by the virtual piano
+export function stopNoteByPitch(pitch: string): void {
+    if (!activeGlobalInstrumentFullName) return;
+  
+    const engineName = activeGlobalInstrumentFullName.split('/')[0] as EngineName;
+    const engine = enginePlayers[engineName];
+    if (!engine) throw new Error(`Engine "${engineName}" not available`);
+  
+    engine.stopNoteByPitch(pitch);
+  }
+  
 
 // This is used by the sequencer to play notes for an instrument
 export async function loadAndPlayNote(
-  instrumentName: string,
-  pitch: string,
-  durationSec: number,
-  velocity: number = 100,
-  loop: boolean = false,
-  startTime: number | null = null,
-  context: AudioContext | null = null,
-  destination: AudioNode | null = null,
-  engineName: EngineName = DEFAULT_ENGINE
-): Promise<null> {
-  const engine = enginePlayers[engineName];
-  if (!engine) throw new Error(`Engine "${engineName}" not available`);
-  return await engine.loadAndPlayNote(
-    instrumentName,
-    pitch,
-    durationSec,
-    velocity,
-    loop,
-    startTime,
-    context,
-    destination
-  );
-}
+    instrumentName: string,
+    pitch: string,
+    durationSec: number,
+    velocity: number = 100,
+    loop: boolean = false,
+    startTime: number | null = null,
+    context: AudioContext | null = null,
+    destination: AudioNode | null = null
+  ): Promise<null> {
+    const engineName = instrumentName.split('/')[0] as EngineName;
+    const engine = enginePlayers[engineName];
+    if (!engine) throw new Error(`Engine "${engineName}" not available`);
+    
+    return await engine.loadAndPlayNote(
+      instrumentName,
+      pitch,
+      durationSec,
+      velocity,
+      loop,
+      startTime,
+      context,
+      destination
+    );
+  }
+  
 
 export function getAvailableEngines(): EngineName[] {
   return Object.keys(enginePlayers) as EngineName[];

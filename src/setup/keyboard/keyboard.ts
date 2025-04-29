@@ -7,7 +7,7 @@ import { attachInputListeners } from '../../keyboard/interactions.js';
 import { attachKeyboardListeners, detachKeyboardListeners } from '../../keyboard/keyboard-interaction.js';
 import { WHITE_KEYS, BLACK_KEYS } from '../../keyboard/constants.js';
 import { setGlobalActiveInstrument, getGlobalActiveInstrumentName } from '../../sounds/instrument-player.js';
-import { refreshInstrumentSelectorModal, confirmInstrumentSelection, cancelInstrumentSelection } from '../../setup/instrumentSelector.js';
+import { refreshInstrumentSelectorModal } from '../../setup/instrumentSelector.js';
 
 import type { KeyMap } from '../../keyboard/keys.js';
 
@@ -94,28 +94,11 @@ export async function setupKeyboard(canvas: HTMLCanvasElement): Promise<void> {
     const fullName = getGlobalActiveInstrumentName() || 'sf2/fluidr3-gm/acoustic_grand_piano';
   
     const instrumentSelectModal = document.getElementById('instrument-select-modal') as HTMLElement;
-    delete instrumentSelectModal.dataset.currentSequencer; // 🛠 critical fix
+    delete instrumentSelectModal.dataset.currentSequencer;
   
     await refreshInstrumentSelectorModal(fullName);
     instrumentSelectModal.classList.remove('hidden');
   });
-  
-
-  // Confirm instrument selection
-  const instrumentSelectConfirm = document.getElementById('instrument-select-confirm') as HTMLElement;
-  instrumentSelectConfirm.addEventListener('click', async () => {
-    await confirmInstrumentSelection();
-    refreshKeyboard(); // 🔥 After setting a new active instrument, redraw keys
-  });
-
-  // Cancel instrument selection
-  const instrumentCancelBtn = document.getElementById('instrument-cancel-btn') as HTMLElement;
-  instrumentCancelBtn.addEventListener('click', () => {
-    cancelInstrumentSelection();
-  });
-
-  // Initial refresh of libraries (optional but safe)
-  // await refreshLibraries();
 }
 
 export function isKeyboardLoopEnabled(): boolean {
