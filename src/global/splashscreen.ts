@@ -1,22 +1,51 @@
+import { getAssetPath } from './assetHelpers.js';
+
 export function showSplashScreen(): void {
-    document.getElementById('splash-modal')?.classList.remove('hidden');
-  }
-  
-  export function hideSplashScreen(): void {
     const splashModal = document.getElementById('splash-modal');
+    const splashLogo = document.getElementById('splash-logo') as HTMLImageElement | null;
+  
+    if (splashLogo) {
+      splashLogo.src = getAssetPath('static/logo.png');
+    }
+  
+    splashModal?.classList.remove('hidden');
+}
+  
+export function hideSplashScreen(delayBeforeFadeMs = 1000): void {
+    const splashModal = document.getElementById('splash-modal');
+    const footerMain = document.getElementById('footer-main');
+    const contentMain = document.getElementById('content-main');
+  
     if (splashModal) {
-      splashModal.style.opacity = '0';
-      splashModal.style.transition = 'opacity 0.5s ease-out';
+      // Wait before starting the fade
       setTimeout(() => {
-        splashModal.classList.add('hidden');
-        splashModal.style.opacity = '1';
-      }, 500);
+        splashModal.style.opacity = '0';
+        splashModal.style.transition = 'opacity 0.5s ease-out';
+  
+        // After fade-out is done
+        setTimeout(() => {
+          splashModal.classList.add('hidden');
+          splashModal.style.opacity = '1';
+  
+          // Reveal the main content
+          if (footerMain) {
+            footerMain.classList.remove('content-hidden');
+            footerMain.classList.add('content-visible');
+          }
+          if (contentMain) {
+            contentMain.classList.remove('content-hidden');
+            contentMain.classList.add('content-visible');
+          }
+  
+        }, 500); // matches the fade duration
+      }, delayBeforeFadeMs);
     }
   }
   
-  // Add a helper function to check if splash screen is visible
-  export function isSplashScreenVisible(): boolean {
+  
+
+export function isSplashScreenVisible(): boolean {
     const splashModal = document.getElementById('splash-modal');
     return splashModal ? !splashModal.classList.contains('hidden') : false;
-  }
+}
   

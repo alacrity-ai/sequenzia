@@ -1,5 +1,7 @@
 // src/global/whatsnew.ts
 
+import { getAssetPath } from './assetHelpers.js';
+
 // ====== Metadata (update these in PRs) ======
 export const WHATS_NEW_VERSION = 'v0.0.7';
 export const WHATS_NEW_DATE = 'April 29, 2025';
@@ -28,6 +30,7 @@ export function showWhatsNewModal(): void {
     const modal = document.getElementById('whats-new-modal');
     const listContainer = modal?.querySelector('ul');
     const metadataContainer = document.getElementById('whats-new-metadata');
+    const logoImg = modal?.querySelector('img') as HTMLImageElement | null; // target the logo inside modal
   
     if (modal && listContainer && metadataContainer) {
       // Clear existing list (but not the metadata div)
@@ -36,31 +39,33 @@ export function showWhatsNewModal(): void {
       // Update metadata contents
       metadataContainer.textContent = `${WHATS_NEW_VERSION} — Updated ${WHATS_NEW_DATE}`;
   
+      // Dynamically set the logo src path
+      if (logoImg) {
+        logoImg.src = getAssetPath('static/logo.png');
+      }
+  
       let currentSectionUl: HTMLUListElement | null = null;
   
       for (const item of WHATS_NEW_CONTENT) {
         if (item.startsWith("✨") || item.startsWith("🐞") || item.startsWith("🛣️")) {
-          // Create a section header (big title)
           const sectionTitle = document.createElement('li');
           sectionTitle.textContent = item;
           sectionTitle.classList.add('font-bold', 'mt-6', 'text-lg');
           listContainer.appendChild(sectionTitle);
   
-          // Create a new sub-UL under this section
           currentSectionUl = document.createElement('ul');
           currentSectionUl.classList.add('list-disc', 'list-inside', 'ml-6', 'mt-2', 'space-y-1');
           listContainer.appendChild(currentSectionUl);
         } else if (currentSectionUl) {
           const li = document.createElement('li');
-          li.textContent = item.replace(/^- /, ''); // remove leading "- "
+          li.textContent = item.replace(/^- /, '');
           currentSectionUl.appendChild(li);
         }
       }
   
       modal.classList.remove('hidden');
     }
-  }
-  
+}  
 
 // Hide with fade
 export function hideWhatsNewModal(): void {

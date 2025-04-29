@@ -1,6 +1,7 @@
 // src/main.ts
 import { hideSplashScreen } from './global/splashscreen.js';
 import { setupWhatsNewButton } from './global/whatsnew.js';
+import { showSplashScreen } from './global/splashscreen.js';
 import { setupHelpButton } from './global/helpbutton.js';
 import { setupKeyboard } from './setup/setupKeyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
@@ -40,6 +41,9 @@ import {
   updateTempo, 
   getTempo, 
   setLoopEnabled } from './sequencer/transport.js';
+
+// === Immediately show splash screen //
+showSplashScreen();
 
 // === State Sync ===
 onStateUpdated(resyncFromState);
