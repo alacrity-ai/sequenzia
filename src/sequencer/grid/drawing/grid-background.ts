@@ -5,17 +5,19 @@ import { labelWidth } from '../helpers/constants.js';
 import { getTotalBeats, getTimeSignature } from '../../transport.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
 import { GRID_COLOR_SCHEMES } from './color-schemes/grid-colors.js';
+import { DRUM_PITCH_TO_NAME } from '../../../sounds/loaders/constants/drums.js';
 
 /**
  * Renders the piano roll grid using the user-selected color scheme.
  */
 export function drawGridBackground(
   ctx: CanvasRenderingContext2D,
-  config: any, // 🔥 discussed below
+  config: any,
   visibleNotes: number,
   cellWidth: number,
   cellHeight: number,
-  getPitchFromRow: (row: number) => string
+  getPitchFromRow: (row: number) => string,
+  drumMode: boolean = false
 ): void {
   const { gridColorScheme } = getUserConfig();
   const gridColors = GRID_COLOR_SCHEMES[gridColorScheme] || GRID_COLOR_SCHEMES['Darkroom'];
@@ -29,21 +31,32 @@ export function drawGridBackground(
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
 
+  // 
   for (let row = 0; row < visibleNotes; row++) {
     const y = row * cellHeight;
     const pitch = getPitchFromRow(row);
     const isBlack = isBlackKey(pitch);
 
+    // Draw the key row background
     ctx.fillStyle = isBlack ? gridColors.blackKey : gridColors.whiteKey;
     ctx.fillRect(0, y, gridWidth, cellHeight);
 
+    // Draw the label background
     ctx.fillStyle = isBlack ? gridColors.labelBlack : gridColors.labelWhite;
     ctx.fillRect(-labelWidth, y, labelWidth, cellHeight);
 
-    ctx.fillStyle = isBlack ? gridColors.textBlack : gridColors.textWhite;
-    ctx.fillText(pitch, -8, y + cellHeight / 2);
+    // Draw the pitch label
+    if (drumMode) {
+      const drumName = DRUM_PITCH_TO_NAME[pitch] || pitch;
+      ctx.fillStyle = isBlack ? gridColors.textBlack : gridColors.textWhite;
+      ctx.fillText(drumName, -8, y + cellHeight / 2);
+    } else {
+      ctx.fillStyle = isBlack ? gridColors.textBlack : gridColors.textWhite;
+      ctx.fillText(pitch, -8, y + cellHeight / 2);
+    }
   }
 
+  // Draw the horizontal grid lines
   ctx.strokeStyle = gridColors.gridLine;
   ctx.lineWidth = 1;
   for (let row = 0; row < visibleNotes; row++) {
@@ -54,6 +67,7 @@ export function drawGridBackground(
     ctx.stroke();
   }
 
+  // Draw the vertical beat lines
   for (let beat = 0; beat <= totalBeats; beat++) {
     const x = beat * cellWidth;
     const isMeasureStart = (beat % beatsPerMeasure === 0);

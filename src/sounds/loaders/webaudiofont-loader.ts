@@ -3,8 +3,7 @@ import { Instrument } from '../interfaces/Instrument.js';
 import { showLoadingModal, hideLoadingModal } from '../../sequencer/ui.js';
 import { pitchToMidi } from '../../audio/pitch-utils.js';
 import { webAudioFontCatalogue } from './catalogues/webaudiofont-catalogue.js';
-
-const DRUM_MIDI_RANGE = Array.from({ length: 47 }, (_, i) => 35 + i); // MIDI 35–81
+import { DRUM_MIDI_RANGE } from './constants/drums.js';
 
 // Declare global access to the dynamically injected player
 declare global {

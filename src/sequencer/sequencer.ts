@@ -11,6 +11,7 @@ import { labelWidth } from './grid/helpers/constants.js';
 import type { Note } from './interfaces/Note.js';
 import type { Grid } from './interfaces/Grid.js';
 import type { GridConfig } from './interfaces/GridConfig.js';
+import { midiRangeBetween } from './grid/helpers/note-finder.js';
 
 interface NoteHandler {
   stop?: () => void;
@@ -65,6 +66,7 @@ export default class Sequencer {
   async initInstrument(): Promise<void> {
     try {
       loadInstrument(this.instrumentName, this.context, this.destination);
+      this.updateToDrumNoteRange();
       console.log(`[SEQ:${this.id}] Instrument '${this.instrumentName}' loaded`);
     } catch (err) {
       console.error(`[SEQ:${this.id}] Failed to load instrument '${this.instrumentName}':`, err);
@@ -317,6 +319,75 @@ export default class Sequencer {
           loop: false,
         });
       }      
+    }
+  }
+
+  /**
+   * Updates the note range for this sequencer and refreshes the UI
+   * @param range Tuple of [lowNote, highNote] (e.g., ['C3', 'C5'])
+   */
+  updateNoteRange(range: [string, string]): void {
+    // Validate the range
+    const [lowNote, highNote] = range;
+    const lowMidi = pitchToMidi(lowNote);
+    const highMidi = pitchToMidi(highNote);
+
+    if (lowMidi === null || highMidi === null) {
+      console.warn(`Invalid note range: ${range}`);
+      return;
+    }
+
+    if (lowMidi >= highMidi) {
+      console.warn(`Invalid note range: low note must be lower than high note`);
+      return;
+    }
+
+    // Update the config
+    this.config.noteRange = range;
+    this.config.visibleNotes = midiRangeBetween(highNote, lowNote) + 1;
+
+    // Update canvases and redraw
+    const noteCanvas = this.container?.querySelector('canvas.note-grid') as HTMLCanvasElement;
+    const playheadCanvas = this.container?.querySelector('.playhead-canvas') as HTMLCanvasElement;
+    const animationCanvas = this.container?.querySelector('.note-animate-canvas') as HTMLCanvasElement;
+    const miniCanvas = this.container?.querySelector('.mini-contour') as HTMLCanvasElement;
+
+    if (noteCanvas && playheadCanvas && animationCanvas) {
+      const fullHeight = this.config.visibleNotes * this.config.cellHeight;
+      
+      // Update canvas heights
+      [noteCanvas, playheadCanvas, animationCanvas].forEach(canvas => {
+        canvas.height = fullHeight;
+        canvas.style.height = `${fullHeight}px`;
+      });
+
+      // Redraw mini contour
+      if (miniCanvas) {
+        drawMiniContour(miniCanvas, this.notes, this.config, this.colorIndex);
+      }
+
+      // Trigger grid redraw
+      this.redraw();
+    }
+
+    // Clamp existing notes to new range if needed
+    this.notes.forEach(note => {
+      const noteMidi = pitchToMidi(note.pitch);
+      if (noteMidi === null) return;
+
+      if (noteMidi < lowMidi) {
+        note.pitch = lowNote;
+      } else if (noteMidi > highMidi) {
+        note.pitch = highNote;
+      }
+    });
+  }
+
+  updateToDrumNoteRange(): void {
+    if (!this.instrumentName.toLowerCase().includes('drum kit')) {
+      this.updateNoteRange(['C1', 'B9']);
+    } else {
+      this.updateNoteRange(['B1', 'A5']);
     }
   }
 }

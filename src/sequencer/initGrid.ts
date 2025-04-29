@@ -104,8 +104,9 @@ export function initGrid(
     // Translate the canvas for the note label (piano roll)
     safeCtx.translate(labelWidth, 0);
 
-    // Draw the grid itself
-    drawGridBackground(safeCtx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow);
+    // Draw the grid background (different amount of rows/labels for drums)
+    let drumMode = sequencer.instrumentName.toLowerCase().includes('drum kit ') ? true : false;
+    drawGridBackground(safeCtx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow, drumMode);
 
     // Draw the notes on the grid
     drawNotes(safeCtx, notes, {
