@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/styles.css" />
   <link rel="shortcut icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
   <link rel="icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
-  <script type="module" crossorigin src="/sequenzia/assets/index-DEUFLgrq.js"></script>
+  <script type="module" crossorigin src="/sequenzia/assets/index-1U0WA9Pa.js"></script>
 </head>
 
 <body class="bg-black text-gray-200 font-sans pb-36">
@@ -186,7 +186,29 @@
     </div>
 
     <div id="transport-ui"
-         class="w-[1260px] mx-auto bg-gray-900 border-t border-purple-800">
+    class="relative w-[1260px] mx-auto bg-gray-900 border-t border-purple-800">
+
+      <!-- Left Side Button Column -->
+      <div class="absolute left-0 top-[60px] z-40 -translate-x-[50px] flex flex-col gap-2">
+        <!-- Help -->
+        <button id="footer-help-btn"
+                class="side-button side-button-info"
+                title="Help / Documentation">
+          <svg class="w-6 h-6" aria-hidden="true">
+            <use href="#icon-lightbulb"></use>
+          </svg>
+        </button>
+
+        <!-- What's New -->
+        <button id="footer-whats-new-btn"
+                class="side-button side-button-info"
+                title="What’s New / Release Notes">
+          <svg class="w-6 h-6" aria-hidden="true">
+            <use href="#icon-chart-mixed"></use>
+          </svg>
+        </button>
+
+      </div>
 
       <!-- Mode Selection and Note Duration Buttons Row -->
       <div class="flex justify-left gap-3 p-2 pl-32 border-b border-purple-800">
