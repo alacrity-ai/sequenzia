@@ -1,6 +1,7 @@
 // vitest.setup.ts
 import { vi } from 'vitest';
 
+// Mock AudioContext
 if (typeof globalThis.AudioContext === 'undefined') {
     (globalThis as any).AudioContext = class {
       createGain() {
@@ -22,7 +23,15 @@ if (typeof globalThis.AudioContext === 'undefined') {
       suspend = async () => {};
     };
   }
+
+// Mock AudioNode
+if (typeof globalThis.AudioNode === 'undefined') {
+  (globalThis as any).AudioNode = class {
+    connect() {}
+  };
+}
   
+
 // Create a comprehensive mock of CanvasRenderingContext2D
 const createCanvasContextMock = () => {
   return {

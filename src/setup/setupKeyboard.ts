@@ -1,14 +1,11 @@
 // src/setup/setupKeyboard.js
 
 import { setupKeyboardUI } from './keyboard/keyboardUI.js';
-import { setupInstrumentSelector } from './instrumentSelector.js';
+import { setupKeyboard as rigKeyboard } from './keyboard/keyboard.js';
 import { initKeyboardInstrumentState } from './keyboard/keyboardInstrumentState.js'
-import { setActiveInstrument } from '../sf2/sf2-player.js';
 
 export async function setupKeyboard(canvas: HTMLCanvasElement) {
-  await setActiveInstrument('fluidr3-gm/acoustic_grand_piano');
-  
+  await rigKeyboard(canvas);
   const { refreshKeyboard } = await setupKeyboardUI(canvas);
-  await setupInstrumentSelector();
   initKeyboardInstrumentState();
 }

@@ -59,13 +59,12 @@ export function updateTempo(bpm: number, record: boolean = true): void {
     return;
   }
 
-  if (isTransportRunning()) {
-    const now = performance.now();
-    const currentBeat = (now - (startTime ?? now)) / beatDuration;
-    beatDuration = (60 / bpm) * 1000;
-    startTime = now - (currentBeat * beatDuration);
-  } else {
-    beatDuration = (60 / bpm) * 1000;
+  const now = performance.now();
+  const beat = (now - (startTime ?? now)) / beatDuration;
+  beatDuration = (60 / bpm) * 1000;
+
+  if (startTime !== null) {
+    startTime = now - beat * beatDuration;
   }
 
   const tempoInput = document.getElementById('tempo-input') as HTMLInputElement | null;
@@ -149,9 +148,10 @@ export function getSnapResolution(): number {
 export function startTransport(bpm: number, opts: TransportOptions = {}): void {
   beatDuration = (60 / bpm) * 1000;
   loop = opts.loop ?? false;
-  endBeat = opts.endBeat ?? Infinity;
+  endBeat = opts.endBeat ?? getTotalBeats();
   const startBeat = opts.startBeat ?? 0;
   startTime = performance.now() - startBeat * beatDuration;
+  setCurrentBeat(startBeat);
 
   const onLoop = opts.onLoop;
 
@@ -202,16 +202,17 @@ export function pauseTransport(): void {
 export function resumeTransport(): void {
   if (animationId !== null) return;
 
-  const resumeStartTime = performance.now() - getCurrentBeat() * beatDuration;
+  const now = performance.now();
+  startTime = now - getCurrentBeat() * beatDuration;
 
   function tick(now: number): void {
-    const elapsedMs = now - resumeStartTime;
+    const elapsedMs = now - (startTime ?? now);
     const beat = elapsedMs / beatDuration;
 
     setCurrentBeat(beat);
     listeners.forEach(fn => fn(beat));
 
-    if (beat >= endBeat) {
+    if (beat >= getTotalBeats()) {
       if (loop) {
         startTime = performance.now();
         setCurrentBeat(0);

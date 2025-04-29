@@ -6,7 +6,7 @@ import { TrackData } from '../../sequencer/interfaces/Track.js';
 import { GlobalConfig } from '../../userconfig/interfaces/GlobalConfig.js';
 import { Note } from '../../sequencer/interfaces/Note.js';
 import { GM_INSTRUMENTS } from './instrumentMapping.js';
-import { getDrumMachineInstruments } from '../../sf2/sf2-loader.js';
+import { getDrumMachineInstruments } from '../../sounds/loaders/sf2-loader.js';
 
 /**
  * Imports a session from a MIDI file.
@@ -65,8 +65,8 @@ export async function importSessionFromMIDI(file: File): Promise<Session> {
     
     // Special handling for channel 9 (drums): remap to a known drum machine if you want
     const fullInstrumentName = track.channel === 9
-      ? `drummachines/${drumKit}` // generic default drums
-      : `fluidr3-gm/${gmInstrumentName}`;
+      ? `sf2/drummachines/${drumKit}` // generic default drums
+      : `sf2/fluidr3-gm/${gmInstrumentName}`;
   
     return {
       notes,

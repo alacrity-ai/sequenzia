@@ -1,9 +1,9 @@
 // src/sequencer/sequencer.ts
 import { initGrid } from './initGrid.js';
-import { audioCtx, masterGain } from '../audio/audio.js';
+import { getAudioContext, getMasterGain } from '../audio/audio.js';
 import { onBeatUpdate, getTempo, getTotalBeats } from './transport.js';
-import { loadInstrument } from '../sf2/sf2-loader.js';
-import { loadAndPlayNote } from '../sf2/sf2-player.js';
+import { loadInstrument } from '../sounds/instrument-loader.js';
+import { loadAndPlayNote } from '../sounds/instrument-player.js'; // Changed from sf2-player.js
 import { pitchToMidi } from '../audio/pitch-utils.js';
 import { drawMiniContour } from './grid/drawing/mini-contour.js';
 import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
@@ -44,9 +44,9 @@ export default class Sequencer {
   constructor(
     containerEl: HTMLElement | null,
     config: GridConfig,
-    context: AudioContext = audioCtx,
-    destination: AudioNode = masterGain,
-    instrument: string = 'fluidr3-gm/acoustic_grand_piano'
+    context: AudioContext = getAudioContext(),
+    destination: AudioNode = getMasterGain(),
+    instrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano'
   ) {
     this.container = containerEl;
     this.config = { ...config };
@@ -64,7 +64,7 @@ export default class Sequencer {
 
   async initInstrument(): Promise<void> {
     try {
-      await loadInstrument(this.instrumentName);
+      await loadInstrument(this.instrumentName, this.context, this.destination);
       console.log(`[SEQ:${this.id}] Instrument '${this.instrumentName}' loaded`);
     } catch (err) {
       console.error(`[SEQ:${this.id}] Failed to load instrument '${this.instrumentName}':`, err);
@@ -294,11 +294,14 @@ export default class Sequencer {
       if (midi == null) continue;
 
       // Add check for drum machines and use sample names
-      if (this.instrumentName.startsWith('drummachines/') && instrument.__midiMap) {
+      const parts = this.instrumentName.split('/');
+      const library = parts.length >= 3 ? parts[1] : parts[0];
+      
+      if (library === 'drummachines' && instrument.__midiMap) {
         const sampleName = instrument.__midiMap.get(midi);
         if (sampleName) {
           instrument.start({
-            note: sampleName,  // Use sample name instead of MIDI note
+            note: sampleName,
             duration: durationSec,
             velocity: 100,
             time: startSec,
@@ -313,7 +316,7 @@ export default class Sequencer {
           time: startSec,
           loop: false,
         });
-      }
+      }      
     }
   }
 }

@@ -1,9 +1,10 @@
 // src/setup/sequencers.ts
 import Sequencer from '../sequencer/sequencer.js';
+import { refreshInstrumentSelectorModal } from './instrumentSelector.js';
 import { setupSequencerGripHandler } from '../sequencer/ui.js';
 import { drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
-import { audioCtx, masterGain } from '../audio/audio.js';
+import { getAudioContext as audioCtx, getMasterGain } from '../audio/audio.js';
 import { recordDiff } from '../appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
 import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../appState/diffEngine/types/sequencer/deleteSequencer.js';
@@ -28,8 +29,8 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
 
   const mergedConfig = { id: newId, ...config };
 
-  const instrument = initialState?.instrument || 'fluidr3-gm/acoustic_grand_piano';
-  const seq = new Sequencer(wrapper, mergedConfig, audioCtx, masterGain, instrument);
+  const instrument = initialState?.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
+  const seq = new Sequencer(wrapper, mergedConfig, audioCtx(), getMasterGain(), instrument);
   seq.id = newId;
   seq.colorIndex = newId;
   seq.mute = false;
@@ -91,6 +92,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     cancelBtn.addEventListener('click', handleCancel);
   });
 
+  // Buttons on the sequencer, mute, solo, and select instrument
   const muteBtn = wrapper.querySelector('.mute-btn') as HTMLElement;
   const soloBtn = wrapper.querySelector('.solo-btn') as HTMLElement;
   const instrumentBtn = wrapper.querySelector('.instrument-select-btn') as HTMLElement;
@@ -123,21 +125,13 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   });
 
   instrumentBtn.addEventListener('click', async () => {
+    const fullName = seq.instrumentName || 'sf2/fluidr3-gm/acoustic_grand_piano';
+  
+    await refreshInstrumentSelectorModal(fullName, seq.id);
+  
     const instrumentSelectModal = document.getElementById('instrument-select-modal') as HTMLElement;
-    const instrumentLibrarySelect = document.getElementById('instrument-library-select') as HTMLSelectElement;
-    const instrumentSelect = document.getElementById('instrument-select') as HTMLSelectElement;
-
-    const fullName = seq.instrumentName || 'fluidr3-gm/acoustic_grand_piano';
-    const [library] = fullName.split('/');
-
-    instrumentLibrarySelect.value = library;
-    instrumentLibrarySelect.dispatchEvent(new CustomEvent('change', {
-      detail: { preselect: fullName }
-    }));
-
-    instrumentSelectModal.dataset.currentSequencer = String(seq.id);
     instrumentSelectModal.classList.remove('hidden');
-  });
+  });  
 
   setupSequencerGripHandler(wrapper);
 
@@ -202,7 +196,7 @@ export function setupAddTrackButton(): void {
 
   addBtn.addEventListener('click', () => {
     const newId = sequencers.length;
-    const instrument = 'fluidr3-gm/acoustic_grand_piano';
+    const instrument = 'sf2/fluidr3-gm/acoustic_grand_piano';
     recordDiff(
       createCreateSequencerDiff(newId, instrument),
       createReverseCreateSequencerDiff(newId)

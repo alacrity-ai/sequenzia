@@ -36,7 +36,7 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
   // Create new sequencers from imported tracks
   for (const [i, state] of tracks.entries()) {
     const id = i;
-    const instrument = state.instrument || 'fluidr3-gm/acoustic_grand_piano';
+    const instrument = state.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
     const notes = state.notes || [];
 
     recordDiff(

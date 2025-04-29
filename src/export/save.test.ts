@@ -6,7 +6,8 @@ import { exportSessionToJSON } from './save';
 import type { AppState } from '../appState/interfaces/AppState.js';
 
 describe('exportSessionToJSON', () => {
-  // Mock URL.createObjectURL
+      
+    // Mock URL.createObjectURL
   beforeEach(() => {
     global.URL.createObjectURL = vi.fn((blob: Blob) => {
       (blob as any).arrayBuffer = async () => {
@@ -22,7 +23,6 @@ describe('exportSessionToJSON', () => {
       return 'blob:http://localhost/fake-url';
     });
   });
-  
 
   const mockAppState: AppState = {
     tempo: 120,

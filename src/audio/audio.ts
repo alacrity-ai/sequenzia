@@ -1,18 +1,38 @@
 // audio/audio.ts
 
-import { playSF2Note } from '../sf2/sf2-player.js';
+import { playNote as genericPlayNote } from '../sounds/instrument-player.js';
 
 // — Audio context —
-export const audioCtx: AudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+let _audioCtx: AudioContext | null = null;
+
+export function getAudioContext(): AudioContext {
+  if (!_audioCtx) {
+    _audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  return _audioCtx;
+}
 
 // — Visualization chain —
-export const analyserNode: AnalyserNode = audioCtx.createAnalyser();
-analyserNode.fftSize = 2048;
+// (initialize later, not at module load)
+let _analyserNode: AnalyserNode | null = null;
+let _masterGain: GainNode | null = null;
 
-// — Master output gain (now exported!) —
-export const masterGain: GainNode = audioCtx.createGain();
-masterGain.connect(analyserNode);
-analyserNode.connect(audioCtx.destination);
+export function getAnalyserNode(): AnalyserNode {
+  if (!_analyserNode) {
+    _analyserNode = getAudioContext().createAnalyser();
+    _analyserNode.fftSize = 2048;
+  }
+  return _analyserNode;
+}
+
+export function getMasterGain(): GainNode {
+  if (!_masterGain) {
+    _masterGain = getAudioContext().createGain();
+    getAnalyserNode().connect(getAudioContext().destination);
+    _masterGain.connect(getAnalyserNode());
+  }
+  return _masterGain;
+}
 
 /**
  * Handle returned by playNote, allowing early stop.
@@ -23,13 +43,12 @@ export interface NoteHandle {
 }
 
 /**
- * Play a note using the active SF2 instrument.
- * Returns a handle with stop() to end it early, or null if failed.
+ * Play a note using the active instrument (any engine).
  */
 export function playNote(note: string): NoteHandle | null {
-  audioCtx.resume();
+  getAudioContext().resume();
   try {
-    const stopFn = playSF2Note(note, 100, false);
+    const stopFn = genericPlayNote(note, 100, false);
     if (!stopFn) return null;
 
     return {
@@ -41,8 +60,3 @@ export function playNote(note: string): NoteHandle | null {
     return null;
   }
 }
-
-// Try resuming AudioContext on startup
-audioCtx.resume().catch(err => {
-  console.warn('Failed to resume AudioContext:', err);
-});

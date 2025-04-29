@@ -10,8 +10,8 @@ export interface Instrument {
     duration?: number;
   }): void;
   stop(options: { stopId: number | string }): void;
-  load: Promise<void>;
+  load: Promise<unknown>;
   __midiMap?: Map<number, number | string>;
 
-  getSampleNames?(): string[];  // ✅ Added optional method
+  getSampleNames?(): string[];
 }

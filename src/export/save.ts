@@ -2,10 +2,8 @@
 
 import { Session } from '../sequencer/interfaces/Session.js';
 import Sequencer from '../sequencer/sequencer.js';
-import { getTempo, getTimeSignature, getTotalMeasures } from '../sequencer/transport.js';
+import { getTempo } from '../sequencer/transport.js';
 import { AppState } from '../appState/interfaces/AppState.js';
-import { exportSessionToMIDI } from './midi/exportToMidi.js';
-
 
 /**
  * Exports the complete session to JSON format (current format - v3).
@@ -44,7 +42,7 @@ export function exportSessionToJSON(appState: AppState): { url: string, filename
       bpm: beatsPerMeasure,
       tm: totalMeasures
     },
-    i: appState.sequencers.map(s => s.instrument || 'fluidr3-gm/acoustic_grand_piano'),
+    i: appState.sequencers.map(s => s.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano'),
     tr: appState.sequencers.map(s => ({
       n: s.notes.map(n => [n.pitch, n.start, n.duration])
     }))
@@ -90,7 +88,7 @@ export async function exportSessionToWAV(session: Session): Promise<void> {
 
   // Process each track
   for (const state of session.tracks) {
-    const instrumentName = state.instrument || 'fluidr3-gm/acoustic_grand_piano';
+    const instrumentName = state.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
     // @ts-ignore | Fix this after refactoring Sequencer to ts
     const seq = new Sequencer(null, state.config, offlineCtx, offlineCtx.destination, instrumentName);
     seq.setState(state);
@@ -108,7 +106,6 @@ export async function exportSessionToWAV(session: Session): Promise<void> {
   a.click();
   URL.revokeObjectURL(url);
 }
-
 
 
 function audioBufferToWavBlob(buffer: AudioBuffer): Blob {

@@ -3,8 +3,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Sequencer from './sequencer';
 import { setupGridTestElements, mockDependencies } from '../test/utils';
 import { GridConfig } from './interfaces/GridConfig';
-import type { TrackTuple } from './interfaces/TrackTuple.js';
-
+import type { TrackTuple } from './interfaces/TrackTuple';
+import { loadInstrument } from '../sounds/instrument-loader';
+import { loadAndPlayNote } from '../sounds/instrument-player';
 
 interface TestGridConfig extends Partial<GridConfig> {
     noteRange: [string, string];
@@ -36,11 +37,16 @@ vi.mock('./initGrid', () => ({
   })),
 }));
 
-vi.mock('../sf2/sf2-loader', () => ({
-  loadInstrument: vi.fn(() => Promise.resolve()),
-}));
+vi.mock('../sounds/instrument-loader', () => {
+    return {
+      loadInstrument: vi.fn(async () => ({})),  // <-- now spy-enabled
+      getAvailableEngines: () => ['sf2'],
+      getAvailableLibraries: vi.fn(() => Promise.resolve(['fluidr3-gm'])),
+      getAvailableInstruments: vi.fn(() => Promise.resolve(['acoustic_grand_piano'])),
+    };
+});
 
-vi.mock('../sf2/sf2-player', () => ({
+vi.mock('../sounds/instrument-player', () => ({
   loadAndPlayNote: vi.fn(() => Promise.resolve(null)),
 }));
 
@@ -61,9 +67,6 @@ vi.mock('./transport', () => ({
   getTotalBeats: vi.fn(() => 64),
 }));
 
-import { loadInstrument } from '../sf2/sf2-loader';
-import { loadAndPlayNote } from '../sf2/sf2-player';
-
 describe('Sequencer', () => {
   let elements: ReturnType<typeof setupGridTestElements>;
 
@@ -83,7 +86,13 @@ describe('Sequencer', () => {
   it('should load an instrument successfully', async () => {
     const sequencer = new Sequencer(elements.scrollContainer, createTestGridConfig());
     await sequencer.initInstrument();
-    expect(loadInstrument).toHaveBeenCalledWith('fluidr3-gm/acoustic_grand_piano');
+    expect(loadInstrument).toHaveBeenCalledWith(
+        'sf2/fluidr3-gm/acoustic_grand_piano',
+        expect.anything(),
+        expect.anything()
+      );
+      
+      
   });
 
   it('should play a note', async () => {
@@ -109,7 +118,7 @@ describe('Sequencer', () => {
     const state = sequencer.getState();
     expect(state.notes).toEqual([]);
     expect(state.config.noteRange).toEqual(['C3', 'C5']);
-    expect(state.instrument).toBe('fluidr3-gm/acoustic_grand_piano');
+    expect(state.instrument).toBe('sf2/fluidr3-gm/acoustic_grand_piano');
 
     const newNotes = [{ pitch: 'D4', start: 0, duration: 1 }];
     sequencer.setState({ notes: newNotes, config: { cellWidth: 30 }, instrument: 'new-instrument' });

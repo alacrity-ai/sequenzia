@@ -20,7 +20,7 @@ describe('importSessionFromJSON', () => {
   it('should import a valid session JSON correctly', async () => {
     const sessionJSON = JSON.stringify({
       c: { b: 140, bpm: 3, tm: 16 },
-      i: ['fluidr3-gm/acoustic_grand_piano', 'fluidr3-gm/acoustic_bass'],
+      i: ['sf2/fluidr3-gm/acoustic_grand_piano', 'sf2/fluidr3-gm/acoustic_bass'],
       tr: [
         { n: [['C4', 0, 1], ['D4', 1, 1]] },
         { n: [['E4', 2, 2]] }
@@ -39,8 +39,8 @@ describe('importSessionFromJSON', () => {
     expect(session.tracks[0].notes[0]).toEqual({ pitch: 'C4', start: 0, duration: 1 });
     expect(session.tracks[1].notes[0]).toEqual({ pitch: 'E4', start: 2, duration: 2 });
 
-    expect(session.tracks[0].instrument).toBe('fluidr3-gm/acoustic_grand_piano');
-    expect(session.tracks[1].instrument).toBe('fluidr3-gm/acoustic_bass');
+    expect(session.tracks[0].instrument).toBe('sf2/fluidr3-gm/acoustic_grand_piano');
+    expect(session.tracks[1].instrument).toBe('sf2/fluidr3-gm/acoustic_bass');
   });
 
   it('should throw error on invalid JSON', async () => {
@@ -81,7 +81,7 @@ describe('importSessionFromJSON', () => {
     const session = await importSessionFromJSON(file);
 
     expect(session.tracks.length).toBe(1);
-    expect(session.tracks[0].instrument).toBe('fluidr3-gm/acoustic_grand_piano');
+    expect(session.tracks[0].instrument).toBe('sf2/fluidr3-gm/acoustic_grand_piano');
   });
 
   it('should handle empty notes array', async () => {

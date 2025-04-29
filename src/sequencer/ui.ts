@@ -86,9 +86,9 @@ export function setupUI({
       const target = e.target as HTMLInputElement;
       const file = target.files?.[0];
       if (file) {
-        onLoad(file); // 🚀 Now actually load the selected file
+        onLoad(file);
       }
-      target.value = ''; // Clear input for future reuse
+      target.value = '';
     });
   }  
 

@@ -22,6 +22,7 @@
     "vitest": "^3.1.2"
   },
   "dependencies": {
-    "@tonejs/midi": "^2.0.28"
+    "@tonejs/midi": "^2.0.28",
+    "smplr": "^0.16.3"
   }
 }

@@ -1,4 +1,4 @@
-import { playSF2Note, stopNoteByPitch } from '../sf2/sf2-player.js';
+import { playNote, stopNoteByPitch } from '../sounds/instrument-player.js';
 import { drawKeys } from './renderer.js';
 import { WHITE_KEYS, BLACK_KEYS } from './constants.js';
 import { isKeyboardLoopEnabled } from '../setup/keyboard/keyboardInstrumentState.js';
@@ -57,7 +57,7 @@ export function attachKeyboardListeners(canvas: HTMLCanvasElement, getCurrentKey
   
     activeKeys.add(keyChar);
     if (!pressedNotes.has(note)) {
-      const stopFn = playSF2Note(note, 100, isKeyboardLoopEnabled());
+      const stopFn = playNote(note, 100, isKeyboardLoopEnabled());
       if (stopFn) {
         noteHandles.set(note, { stop: stopFn });
         pressedNotes.add(note);

@@ -1,15 +1,17 @@
 // src/sf2/sf2-player.ts
 
-import { loadInstrument, getAudioContext } from './sf2-loader.js';
-import { pitchToMidi } from '../audio/pitch-utils.js';
-import { Instrument } from './interfaces/Instrument.js';
+import { loadInstrument } from '../loaders/sf2-loader.js';
+import { getAudioContext } from '../../audio/audio.js';
+import { pitchToMidi } from '../../audio/pitch-utils.js';
+import { Instrument } from '../interfaces/Instrument.js';
 
-
-// 🔁 For virtual keyboard
+// State
 let activeInstrument: Instrument | null = null;
 let activeName: string | null = null;
 
-export async function setActiveInstrument(name: string): Promise<void> {
+// Public sf2 player object
+
+async function setActiveInstrument(name: string): Promise<void> {
   if (activeName === name) return;
 
   const inst = await loadInstrument(name);
@@ -19,14 +21,11 @@ export async function setActiveInstrument(name: string): Promise<void> {
   console.log(`[SF2] Global keyboard instrument set to: ${name}`);
 }
 
-export function getActiveInstrumentName(): string | null {
+function getActiveInstrumentName(): string | null {
   return activeName;
 }
 
-/**
- * Global keyboard note playback
- */
-export function playSF2Note(
+function playNote(
   pitch: string,
   velocity: number = 100,
   loop: boolean = false
@@ -36,7 +35,6 @@ export function playSF2Note(
   const ctx = getAudioContext();
   const now = ctx.currentTime;
   const midi = pitchToMidi(pitch);
-
   if (midi === null) return null; // defensive
 
   const note = activeInstrument.__midiMap?.get(midi) ?? midi;
@@ -54,23 +52,17 @@ export function playSF2Note(
   };
 }
 
-/**
- * Stop a global keyboard note
- */
-export function stopNoteByPitch(pitch: string): void {
+function stopNoteByPitch(pitch: string): void {
   if (!activeInstrument) return;
 
   const midi = pitchToMidi(pitch);
-  if (midi === null) return; // defensive
+  if (midi === null) return;
 
   const stopId = activeInstrument.__midiMap?.get(midi) ?? midi;
   activeInstrument.stop({ stopId });
 }
 
-/**
- * Per-sequencer playback using named instrument
- */
-export async function loadAndPlayNote(
+async function loadAndPlayNote(
   instrumentName: string,
   pitch: string,
   durationSec: number,
@@ -83,8 +75,7 @@ export async function loadAndPlayNote(
   const ctx = context || getAudioContext();
   const inst = await loadInstrument(instrumentName, ctx, destination);
   const midi = pitchToMidi(pitch);
-
-  if (midi === null) return null; // defensive
+  if (midi === null) return null;
 
   const note = inst.__midiMap?.get(midi) ?? midi;
 
@@ -97,4 +88,15 @@ export async function loadAndPlayNote(
   });
 
   return null;
+}
+
+export function getSf2Player() {
+  return {
+    name: 'sf2',
+    setActiveInstrument,
+    getActiveInstrumentName,
+    playNote,
+    stopNoteByPitch,
+    loadAndPlayNote,
+  };
 }

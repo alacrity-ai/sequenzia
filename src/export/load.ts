@@ -48,7 +48,7 @@ export async function importSessionFromJSON(file: File): Promise<Session> {
       duration
     }));
 
-    const instrument = instrumentNames[idx] || 'fluidr3-gm/acoustic_grand_piano';
+    const instrument = instrumentNames[idx] || 'sf2/fluidr3-gm/acoustic_grand_piano';
 
     return { notes, instrument, config: {} }; // Assuming config is an empty object, you may need to adjust if it has actual values.
   });

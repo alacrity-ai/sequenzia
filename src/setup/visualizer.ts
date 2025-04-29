@@ -1,7 +1,7 @@
 // src/setup/visualizer.js
 
 import { startWaveformVisualizer } from '../visualizer.js';
-import { analyserNode } from '../audio/audio.js';
+import { getAnalyserNode } from '../audio/audio.js';
 
 type VisualizerMode = 'waveform' | 'frequency' | 'spectrogram';
 
@@ -10,7 +10,7 @@ interface VisualizerController {
 }
 
 export function setupVisualizer(canvas: HTMLCanvasElement, button: HTMLButtonElement): void {
-  const visualizer: VisualizerController = startWaveformVisualizer(analyserNode, canvas);
+  const visualizer: VisualizerController = startWaveformVisualizer(getAnalyserNode(), canvas);
 
   const modes: { name: VisualizerMode; emoji: string }[] = [
     { name: 'waveform', emoji: '🌊' },

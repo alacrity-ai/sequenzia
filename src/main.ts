@@ -22,6 +22,7 @@ import { resyncFromState } from './appState/resyncFromState.js';
 import { getAppState, recordDiff } from './appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './appState/diffEngine/types/sequencer/createSequencer.js';
 import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/diffEngine/types/internal/checkpoint.js';
+import { setupInstrumentSelector } from './setup/instrumentSelector.js';
 import { 
   getTotalBeats, 
   startTransport, 
@@ -41,6 +42,9 @@ import {
 // === State Sync ===
 onStateUpdated(resyncFromState);
 
+// === Instrument Selector ===
+setupInstrumentSelector();
+
 // === Playhead ===
 function refreshGlobalMiniContour(): void {
   const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
@@ -52,6 +56,14 @@ initGlobalPlayhead(globalPlayheadCanvas);
 initGlobalPlayheadInteraction(globalPlayheadCanvas, config);
 drawGlobalPlayhead(0);
 
+// === Initial Sequencer ===
+const firstId = 0;
+const firstInstrument = 'sf2/fluidr3-gm/acoustic_grand_piano';
+recordDiff(
+  createCreateSequencerDiff(firstId, firstInstrument),
+  createReverseCreateSequencerDiff(firstId)
+);
+
 // === Virtual Piano Keyboard ===
 const pianoCanvas = document.getElementById('piano') as HTMLCanvasElement;
 setupKeyboard(pianoCanvas);
@@ -60,14 +72,6 @@ setupKeyboard(pianoCanvas);
 const waveform = document.getElementById('waveform') as HTMLCanvasElement;
 const visualizerMode = document.getElementById('visualizer-mode') as HTMLButtonElement;
 const visualizer = setupVisualizer(waveform, visualizerMode);
-
-// === Initial Sequencer ===
-const firstId = 0;
-const firstInstrument = 'fluidr3-gm/acoustic_grand_piano';
-recordDiff(
-  createCreateSequencerDiff(firstId, firstInstrument),
-  createReverseCreateSequencerDiff(firstId)
-);
 
 // Lock in the initial application state so undo never goes before this point
 recordDiff(
@@ -82,6 +86,7 @@ setupAddTrackButton();
 setupNoteDurationButtons();
 setupControlModeSwitch();
 initFooterUI();
+
 
 // === UI Wiring ===
 setupUI({
