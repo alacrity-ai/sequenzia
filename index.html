@@ -9,13 +9,13 @@
   <link rel="stylesheet" href="./css/styles.css" />
   <link rel="shortcut icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
   <link rel="icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
-  <script type="module" crossorigin src="/sequenzia/assets/index-1U0WA9Pa.js"></script>
+  <script type="module" crossorigin src="/sequenzia/assets/index-nDULLltk.js"></script>
 </head>
 
 <body class="bg-black text-gray-200 font-sans pb-36">
   <!-- Modal Mount -->
   <div id="modal-mount-root"></div>
-  <div class="flex flex-col items-center mt-10 space-y-6">
+  <div id="content-main" class="flex flex-col items-center mt-10 space-y-6 content-hidden">
     <!-- MAIN CONTAINER -->
     <div class="flex flex-col w-[1260px] space-y-4">
 
@@ -160,9 +160,9 @@
   <!-- Spacer for fixed footer height -->
   <div class="footer-spacer h-[120px]"></div> 
 
-  <div class="fixed bottom-0 left-0 right-0 z-40">
+  <div id="footer-main" class="fixed bottom-0 left-0 right-0 z-40 content-hidden">
     <!-- 🔁 Global Mini Contour Fixed Above Footer -->
-    <div class="fixed bottom-[170px] left-0 right-0 z-30 bg-black ">
+    <div class="fixed bottom-[170px] left-0 right-0 z-30 bg-black">
       <div class="relative flex items-start gap-2 w-[1260px] mx-auto px-100">
         <!-- Mini Contour -->
         <div class="flex-1">
