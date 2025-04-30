@@ -304,7 +304,9 @@ export default class Sequencer {
     const instrument = await loadInstrument(this.instrumentName, this.context, this.destination);
 
     for (const note of this.notes) {
-      const startSec = note.start * beatToSec;
+      const rawStartSec = note.start * beatToSec;
+      const startSec = Math.max(0.01, rawStartSec); // Avoid 0s
+      
       const durationSec = note.duration * beatToSec;
       const midi = pitchToMidi(note.pitch);
       if (midi == null) continue;

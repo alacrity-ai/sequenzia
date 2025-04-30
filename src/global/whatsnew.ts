@@ -16,7 +16,7 @@ export const WHATS_NEW_CONTENT: string[] = [
   "- 📐 Adjustable sequencer height per track",
 
   "🐞 Known Issues",
-  "- 🚫 WebAudioFont audio export is currently silent",
+  "- 🚫 Scaling groups of notes not functional",
 
   "🛣️ Roadmap",
   "- 🔊 Upcoming: velocity support and per-note volume control",

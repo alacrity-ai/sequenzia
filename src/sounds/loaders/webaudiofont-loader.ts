@@ -73,6 +73,24 @@ export async function loadInstrument(
       if (!preset) throw new Error(`Missing preset: ${varName}`);
       player.loader.decodeAfterLoading(context, varName);
   
+        // 🩹 Monkey-patch to fix async decoding in OfflineAudioContext
+        if (context instanceof OfflineAudioContext) {
+            const zones = preset?.zones ?? [];
+            for (const zone of zones) {
+            if (zone.file && !zone.buffer) {
+                const binary = atob(zone.file);
+                const buf = new ArrayBuffer(binary.length);
+                const view = new Uint8Array(buf);
+                for (let i = 0; i < binary.length; i++) {
+                view[i] = binary.charCodeAt(i);
+                }
+                zone.buffer = await new Promise((resolve, reject) =>
+                context.decodeAudioData(buf, resolve, reject)
+                );
+            }
+            }
+        }
+
       const instrument: WebAudioFontInstrument = {
         _preset: preset,
         start({ note, duration = 1, velocity = 100, time }) {
