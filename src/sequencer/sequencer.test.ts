@@ -89,7 +89,9 @@ describe('Sequencer', () => {
     expect(loadInstrument).toHaveBeenCalledWith(
         'sf2/fluidr3-gm/acoustic_grand_piano',
         expect.anything(),
-        expect.anything()
+        expect.anything(),
+        expect.any(Number),
+        expect.any(Number)
       );
       
       

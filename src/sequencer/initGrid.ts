@@ -105,7 +105,7 @@ export function initGrid(
     safeCtx.translate(labelWidth, 0);
 
     // Draw the grid background (different amount of rows/labels for drums)
-    let drumMode = sequencer.instrumentName.toLowerCase().includes('drum kit ') ? true : false;
+    let drumMode = (sequencer.instrumentName?.toLowerCase().includes('drum kit ') ?? false);
     drawGridBackground(safeCtx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow, drumMode);
 
     // Draw the notes on the grid
