@@ -1,24 +1,34 @@
-<!-- User Configuration Modal -->
-<div id="userconfig-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 w-[500px] relative">
+<!-- Enhanced User Configuration Modal -->
+<div id="userconfig-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] hidden">
+  <div class="relative flex flex-col bg-gradient-to-br from-gray-800 to-gray-900 border border-purple-700 shadow-2xl rounded-2xl px-10 py-8 animate-fade-in w-[500px] max-w-full text-white">
+
+    <!-- Animated Halo Glow -->
+    <div class="absolute inset-0 rounded-2xl border-2 border-purple-500 opacity-30 blur-xl animate-pulse pointer-events-none"></div>
+
     <!-- Top Icon Bar -->
-    <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-      <div class="flex gap-4 text-xl cursor-pointer select-none">
-        <span class="settings-tab hover:text-purple-400" data-tab="global-settings" title="Global Settings">⚙️</span>
-        <span class="settings-tab hover:text-purple-400" data-tab="sequencer-settings" title="Sequencer Settings">🎹</span>
-        <span class="settings-tab hover:text-purple-400 text-purple-500" data-tab="ai-settings" title="AI Settings">🤖</span>
+    <div class="flex justify-between items-center mb-6 border-b border-purple-700 pb-2 z-10">
+      <div class="flex gap-4 text-xl select-none">
+        <span class="settings-tab text-gray-300 hover:text-white hover:scale-110 transition-all duration-150 cursor-pointer"
+              data-tab="global-settings" title="Global Settings">⚙️</span>
+        <span class="settings-tab text-gray-300 hover:text-white hover:scale-110 transition-all duration-150 cursor-pointer"
+              data-tab="sequencer-settings" title="Sequencer Settings">🎹</span>
+        <span class="settings-tab text-purple-500 hover:text-white hover:scale-110 transition-all duration-150 cursor-pointer"
+              data-tab="ai-settings" title="AI Settings">🤖</span>
       </div>
-      <button id="config-close" class="text-sm text-gray-400 hover:text-white">&times;</button>
+      <button id="config-close"
+              class="text-gray-400 hover:text-white text-xl transition-all duration-150 cursor-pointer">
+        &times;
+      </button>
     </div>
 
     <!-- Global Settings -->
-    <div id="global-settings" class="settings-section hidden">
+    <div id="global-settings" class="settings-section hidden z-10">
       <h2 class="text-lg font-semibold mb-4">Global Settings</h2>
       <p class="text-sm text-gray-300">Coming soon: preferences for layout, theming, and behavior.</p>
     </div>
 
-    <!-- Sequencer/Grid Settings -->
-    <div id="sequencer-settings" class="settings-section hidden">
+    <!-- Sequencer Settings -->
+    <div id="sequencer-settings" class="settings-section hidden z-10">
       <h2 class="text-lg font-semibold mb-4">Sequencer/Grid Settings</h2>
 
       <div class="mb-6">
@@ -37,10 +47,9 @@
     </div>
 
     <!-- AI Settings -->
-    <div id="ai-settings" class="settings-section">
+    <div id="ai-settings" class="settings-section z-10">
       <h2 class="text-lg font-semibold mb-4">AI Configuration</h2>
 
-      <!-- OpenAI API Key -->
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">OpenAI API Key</label>
         <input type="password" 
@@ -49,7 +58,6 @@
                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
       </div>
 
-      <!-- OpenAI Model Selection -->
       <div class="mb-8">
         <label class="block text-sm font-medium mb-2">OpenAI Model</label>
         <select id="openai-model-select" 
@@ -65,13 +73,13 @@
     </div>
 
     <!-- Footer Buttons -->
-    <div class="flex gap-3 mt-4">
+    <div class="flex gap-3 mt-4 z-10">
       <button id="config-save" 
-              class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded">
+              class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg transition-all text-sm">
         Save
       </button>
       <button id="config-close-bottom" 
-              class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded">
+              class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded-lg transition-all text-sm">
         Close
       </button>
     </div>

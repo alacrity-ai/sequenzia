@@ -42,6 +42,8 @@ export default class Sequencer {
   private animationCanvas?: HTMLCanvasElement;
   grid?: Grid;
 
+  private _volume: number = 1.0;
+
   constructor(
     containerEl: HTMLElement | null,
     config: GridConfig,
@@ -71,6 +73,18 @@ export default class Sequencer {
     } catch (err) {
       console.error(`[SEQ:${this.id}] Failed to load instrument '${this.instrumentName}':`, err);
     }
+  }
+
+  /** Getter for current track volume (0.0–1.0) */
+  get volume(): number {
+    return this._volume;
+  }
+
+  /** Setter for volume — will apply to gain node when implemented */
+  set volume(val: number) {
+    this._volume = Math.max(0, Math.min(1, val)); // Clamp to [0, 1]
+    
+    // TODO: apply to actual instrument
   }
 
   updateTrackLabel(): void {

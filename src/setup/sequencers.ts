@@ -1,6 +1,7 @@
 // src/setup/sequencers.ts
 import Sequencer from '../sequencer/sequencer.js';
 import { refreshInstrumentSelectorModal } from './instrumentSelector.js';
+import { setupVolumeBar } from './controls/sequencerVolume';
 import { setupSequencerGripHandler } from '../sequencer/ui.js';
 import { drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
@@ -36,6 +37,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   seq.mute = false;
   seq.solo = false;
   seq.shouldPlay = true;
+  seq.volume = 1.0;
 
   const mini = wrapper.querySelector('canvas.mini-contour') as HTMLCanvasElement;
   if (initialState) {
@@ -49,6 +51,9 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
 
   seq.updateTrackLabel();
   seq.initInstrument();
+
+  // Setup the volume bar
+  setupVolumeBar(wrapper, seq);
 
   const collapseBtn = wrapper.querySelector('.collapse-btn') as HTMLElement;
   const collapseIcon = collapseBtn.querySelector('use')!;
@@ -97,32 +102,33 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   const soloBtn = wrapper.querySelector('.solo-btn') as HTMLElement;
   const instrumentBtn = wrapper.querySelector('.instrument-select-btn') as HTMLElement;
 
+  function setButtonState(button: HTMLElement, isActive: boolean): void {
+    button.classList.toggle('side-button-activated', isActive);
+  }  
+
   muteBtn.addEventListener('click', () => {
     seq.mute = !seq.mute;
-    if (seq.mute) {
-      seq.solo = false;
-      soloBtn.classList.remove('bg-yellow-200', 'hover:bg-yellow-400');
-      soloBtn.classList.add('bg-gray-700', 'hover:bg-purple-700');
-      toggleButtonState(soloBtn, false);
-    }
-    toggleButtonState(muteBtn, seq.mute);
+    if (seq.mute) seq.solo = false;
+  
+    // Set based on actual state
+    setButtonState(muteBtn, seq.mute);
+    setButtonState(soloBtn, seq.solo);
+  
     updateSoloStates();
     seq.seekTo(getCurrentBeat());
   });
-
+  
   soloBtn.addEventListener('click', () => {
     seq.solo = !seq.solo;
-    if (seq.solo) {
-      seq.mute = false;
-      toggleButtonState(muteBtn, false);
-    }
-    soloBtn.classList.toggle('bg-yellow-200', seq.solo);
-    soloBtn.classList.toggle('bg-gray-700', !seq.solo);
-    soloBtn.classList.toggle('hover:bg-yellow-400', seq.solo);
-    soloBtn.classList.toggle('hover:bg-purple-700', !seq.solo);
+    if (seq.solo) seq.mute = false;
+  
+    setButtonState(soloBtn, seq.solo);
+    setButtonState(muteBtn, seq.mute);
+  
     updateSoloStates();
     seq.seekTo(getCurrentBeat());
   });
+  
 
   instrumentBtn.addEventListener('click', async () => {
     const fullName = seq.instrumentName || 'sf2/fluidr3-gm/acoustic_grand_piano';
@@ -134,11 +140,6 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   });  
 
   setupSequencerGripHandler(wrapper);
-
-  toggleButtonState(muteBtn, false);
-  toggleButtonState(soloBtn, false);
-  soloBtn.classList.add('hover:bg-purple-700');
-
   sequencers.push(seq);
   return { seq, wrapper };
 }
@@ -171,11 +172,6 @@ function updateSoloStates(): void {
   sequencers.forEach(s => {
     s.shouldPlay = anySoloed ? s.solo : !s.mute;
   });
-}
-
-function toggleButtonState(button: HTMLElement, enabled: boolean): void {
-  button.classList.toggle('opacity-100', enabled);
-  button.classList.toggle('opacity-40', !enabled);
 }
 
 export function destroyAllSequencers(): void {

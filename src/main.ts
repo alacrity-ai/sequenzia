@@ -1,5 +1,6 @@
 // src/main.ts
 import { hideSplashScreen } from './global/splashscreen.js';
+import { setupHeaderModeToggler } from './global/headerModeToggler.js';
 import { setupWhatsNewButton } from './global/whatsnew.js';
 import { showSplashScreen } from './global/splashscreen.js';
 import { setupHelpButton } from './global/helpbutton.js';
@@ -94,6 +95,7 @@ setupControlModeSwitch();
 initFooterUI();
 setupWhatsNewButton();
 setupHelpButton();
+setupHeaderModeToggler();
 
 // === UI Wiring ===
 setupUI({

@@ -40,11 +40,11 @@
   }
   
   .side-button-primary {
-    background-color: rgb(147, 51, 234);   /* Tailwind bg-purple-600 */
+    background-color: rgb(126 34 206);     /* Tailwind bg-purple-600 */
   }
   
   .side-button-primary:hover {
-    background-color: rgb(126, 34, 206);   /* Tailwind hover:bg-purple-700 */
+    background-color: rgb(199, 41, 238);    /* Tailwind hover:bg-purple-700 */
   }
   
   .side-button-secondary {
@@ -52,16 +52,38 @@
   }
   
   .side-button-secondary:hover {
-    background-color: rgb(126, 34, 206);   /* Tailwind hover:bg-purple-700 */
+    background-color: rgb(215, 68, 255);   /* Tailwind hover:bg-purple-700 */
+  }
+
+  .side-button-activated {
+    background-color: rgb(255, 155, 25);   /* Tailwind bg-purple-600 */
+  }
+  
+  .side-button-activated:hover {
+    background-color: rgb(255, 200, 129);  /* Tailwind hover:bg-purple-700 */
   }
   
   /* Blue variant for info buttons (Help, What's New, Reload) */
   .side-button-info {
-    background-color: rgb(37, 99, 235);   /* Tailwind bg-blue-600 */
+    background-color: rgb(0, 21, 66);   /* Tailwind bg-blue-600 */
+    border: 1px solid rgb(88, 177, 255);
   }
 
   .side-button-info:hover {
-    background-color: rgb(29, 78, 216);   /* Tailwind hover:bg-blue-700 */
+    background-color: rgb(88, 177, 255);   /* Tailwind hover:bg-blue-700 */
+    border: 1px solid rgb(88, 177, 255);
+  }
+
+  /* Blue variant for info buttons (Help, What's New, Reload) */
+  .side-button-load {
+    background-color: rgb(0, 0, 0);   
+    /* beautiful pink border */
+    border: 1px solid rgb(215, 68, 255);
+  }
+
+  .side-button-load:hover {
+    background-color: rgb(215, 68, 255);;
+    border: 1px solid rgb(255, 213, 88);
   }
   
   /* Hide the main content until fully loaded */
