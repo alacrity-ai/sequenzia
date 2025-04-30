@@ -49,7 +49,6 @@ export function performDelete(): void {
 }
 
 export function performCopy(): void {
-  console.log('performCopy called');
   const grid = getActiveGrid();
   if (!grid) return;
 
@@ -83,10 +82,8 @@ export function performCut(): void {
 }
 
 export function performPaste(): void {
-  console.log('performPaste called');
   const clipboard = getClipboard();
   if (!clipboard.notes.length) {
-    console.log('No notes in clipboard');
     return;
   }
 

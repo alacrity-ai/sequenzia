@@ -37,10 +37,6 @@ export function resyncFromState(state: AppState = getAppState()): void {
   for (const serialized of state.sequencers as SerializedSequencer[]) {
     const live = sequencers.find(seq => sequencerIdsMatch(seq.id, serialized.id));
 
-    // ADDED LOGGING HERE
-    console.log('WITHIN RESYNC FROM STATE: Serialized volume and pan: ', serialized.volume, serialized.pan);
-    console.log('SERIALIZED FULL OBJECT: ', serialized);
-
     if (!live) {
       // Create new sequencer if missing
       const initialState: SequencerState = {

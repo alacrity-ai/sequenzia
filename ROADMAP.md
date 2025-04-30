@@ -24,6 +24,12 @@
     - [ ] Wav export
     - [ ] Project file import/export
 
+## Future Todos
+- Note Editing:
+  - [ ] Add Quantize Modal for Quantizing groups of selected notes
+  - [ ] Add Recording for keyboard
+    - [ ] Support live quantization
+
 ## Bugs
 - Critical Bugs:
   - [x] webaudiofont instrument wav export is silent. OfflineAudioContext issue. (related to currentTime?)

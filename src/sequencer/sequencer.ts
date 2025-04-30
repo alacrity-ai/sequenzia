@@ -80,9 +80,8 @@ export default class Sequencer {
     try {
       this._instrument = await loadInstrument(this.instrumentName, this.context, this.destination, this._volume, this._pan);
       this.updateToDrumNoteRange();
-      console.log(`[SEQ:${this.id}] Instrument '${this.instrumentName}' loaded`);
     } catch (err) {
-      console.error(`[SEQ:${this.id}] Failed to load instrument '${this.instrumentName}':`, err);
+      console.warn(`[SEQ:${this.id}] Failed to load instrument '${this.instrumentName}':`, err);
     }
   }
 

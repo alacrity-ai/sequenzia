@@ -40,7 +40,6 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
     const notes = state.notes || [];
     const volume = state.volume
     const pan = state.pan
-    console.log('Got volume, and pan: ', volume, pan);
     recordDiff(
         {
           type: 'CREATE_SEQUENCER',

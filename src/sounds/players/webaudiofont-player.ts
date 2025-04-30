@@ -19,8 +19,6 @@ async function setActiveInstrument(name: string): Promise<void> {
     const inst = await loadInstrument(`${library}/${displayName}`);
     activeInstrument = inst;
     activeName = name;
-  
-    console.log(`[WebAudioFont] Global keyboard instrument set to: ${name}`);
   }
   
   function getActiveInstrumentName(): string | null {
@@ -66,7 +64,6 @@ async function loadAndPlayNote(
     volume?: number,
     pan?: number
   ): Promise<null> {
-    console.log('NOTE VOLUME AT: ', volume);
     const ctx = context || getAudioContext();
   
     const [, library, displayName] = instrumentName.split('/');

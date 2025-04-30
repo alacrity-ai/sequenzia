@@ -42,9 +42,7 @@ export const GM_INSTRUMENTS: string[] = [
  * Maps an instrument name to its General MIDI program number.
  * Defaults to 0 (Acoustic Grand Piano) if not found.
  */
-export function mapInstrumentNameToProgramNumber(name: string): number {
-    console.log('MIDI MAP GOT INSTRUMENT NAME: ', name);
-  
+export function mapInstrumentNameToProgramNumber(name: string): number {  
     // Strip leading engine/library path
     const parts = name.split('/');
     const rawName = parts[parts.length - 1]; // Last segment is always the instrument name

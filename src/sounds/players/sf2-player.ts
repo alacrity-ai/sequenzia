@@ -18,8 +18,6 @@ async function setActiveInstrument(name: string): Promise<void> {
   const inst = await loadInstrument(name);
   activeInstrument = inst as Instrument;
   activeName = name;
-
-  console.log(`[SF2] Global keyboard instrument set to: ${name}`);
 }
 
 function getActiveInstrumentName(): string | null {

@@ -28,7 +28,6 @@ export function getNotePlacementHandlers(ctx: HandlerContext): MouseHandler {
 
   // Left click to place a note
   function clickHandler(e: MouseEvent): void {
-    console.log('ClickHandler called');
     registerSelectionStart(ctx.grid!);
 
     // If we're suppressing note placement, clear the flag and avoid placing
@@ -129,7 +128,6 @@ export function getNotePlacementHandlers(ctx: HandlerContext): MouseHandler {
       // Check if clicking on a resize handle
       const resizeHandleHit = isOnResizeHandle(ctx, note, x, y);
       if (resizeHandleHit) {
-        console.log('Resize mode started!');
         startResizeMode(note, x, y);
         return;
       }
@@ -278,7 +276,6 @@ export function getNotePlacementHandlers(ctx: HandlerContext): MouseHandler {
   }
 
   function upHandler(e: MouseEvent): void {
-    console.log('UpHandler called');
     resetMouseGestureState();
     hasActivatedMarquee = false;
   

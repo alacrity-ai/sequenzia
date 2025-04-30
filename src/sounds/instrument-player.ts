@@ -93,7 +93,6 @@ export async function loadAndPlayNote(
     const engineName = instrumentName.split('/')[0] as EngineName;
     const engine = enginePlayers[engineName];
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
-    console.log('Calling LoadAndPlayNote with pan: ', pan);
     return await engine.loadAndPlayNote(
       instrumentName,
       pitch,

@@ -39,7 +39,6 @@ export async function getAvailableLibraries(engineName: EngineName = DEFAULT_ENG
   const engine = engineLoaders[engineName];
   if (!engine) throw new Error(`Engine "${engineName}" not available`);
   const libraries = await engine.getAvailableLibraries();
-  console.log('getAvailableLibraries was called!: ', libraries);
   return libraries;
 }
 

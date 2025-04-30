@@ -127,10 +127,8 @@ export async function loadInstrument(
 }
 
 export async function getAvailableLibraries(): Promise<string[]> {
-  console.log('[SF2] Getting available libraries');
-
+  // Get all available kits
   const kits = getAvailableSoundfontKits();
-  console.log('[SF2] Available kits:', kits);
 
   // Map smplr kits to lowercase names
   const mappedKits = kits.map(kit => {

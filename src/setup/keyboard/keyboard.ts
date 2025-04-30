@@ -90,7 +90,6 @@ export async function setupKeyboard(canvas: HTMLCanvasElement): Promise<void> {
   // Handle global instrument selection
   const instrumentSelectBtn = document.getElementById('global-instrument-select-btn') as HTMLElement;
   instrumentSelectBtn.addEventListener('click', async () => {
-    console.log('GLOBAL KEYBOARD BUTTON CLICKED');
     const fullName = getGlobalActiveInstrumentName() || 'sf2/fluidr3-gm/acoustic_grand_piano';
   
     const instrumentSelectModal = document.getElementById('instrument-select-modal') as HTMLElement;

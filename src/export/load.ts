@@ -63,7 +63,6 @@ export async function importSessionFromJSON(file: File): Promise<Session> {
     };
   });
 
-  console.log('Imported session:', { globalConfig, tracks }); // ADDED LOGGING HERE
   return { globalConfig, tracks };
 }
 
