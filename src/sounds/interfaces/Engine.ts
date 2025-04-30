@@ -28,6 +28,7 @@ export interface EnginePlayer {
     loop?: boolean,
     startTime?: number | null,
     context?: AudioContext | null,
-    destination?: AudioNode | null
+    destination?: AudioNode | null,
+    volume?: number
   ): Promise<null>;
 }

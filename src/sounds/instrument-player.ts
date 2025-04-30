@@ -88,8 +88,9 @@ export async function loadAndPlayNote(
     loop: boolean = false,
     startTime: number | null = null,
     context: AudioContext | null = null,
-    destination: AudioNode | null = null
-  ): Promise<null> {
+    destination: AudioNode | null = null,
+    volume?: number // <-- new param
+  ): Promise<null> {  
     const engineName = instrumentName.split('/')[0] as EngineName;
     const engine = enginePlayers[engineName];
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
@@ -102,7 +103,8 @@ export async function loadAndPlayNote(
       loop,
       startTime,
       context,
-      destination
+      destination,
+      volume
     );
   }
   

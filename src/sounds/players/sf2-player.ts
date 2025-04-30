@@ -71,10 +71,14 @@ async function loadAndPlayNote(
   loop: boolean = false,
   startTime: number | null = null,
   context: AudioContext | null = null,
-  destination: AudioNode | null = null
+  destination: AudioNode | null = null,
+  volume?: number
 ): Promise<null> {
   const ctx = context || getAudioContext();
-  const inst = await loadInstrument(instrumentName, ctx, destination);
+  const inst = await loadInstrument(instrumentName, ctx, destination, volume);
+  if (volume !== undefined && inst.setVolume) {
+    inst.setVolume(volume);
+  }
   const midi = pitchToMidi(pitch);
   if (midi === null) return null;
 

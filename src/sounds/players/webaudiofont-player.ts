@@ -62,12 +62,19 @@ async function loadAndPlayNote(
     loop: boolean = false,
     startTime: number | null = null,
     context: AudioContext | null = null,
-    destination: AudioNode | null = null
+    destination: AudioNode | null = null,
+    volume?: number
   ): Promise<null> {
+    console.log('NOTE VOLUME AT: ', volume);
     const ctx = context || getAudioContext();
   
     const [, library, displayName] = instrumentName.split('/');
-    const inst = await loadInstrument(`${library}/${displayName}`, ctx, destination);
+    const inst = await loadInstrument(`${library}/${displayName}`, ctx, destination, volume);
+  
+    // Ensure volume is set (for cached instruments)
+    if (volume !== undefined && inst.setVolume) {
+      inst.setVolume(volume);
+    }
   
     const midi = pitchToMidi(pitch);
     if (midi === null) return null;
@@ -81,8 +88,7 @@ async function loadAndPlayNote(
     });
   
     return null;
-  }
-  
+}
 
 export function getWebAudioFontPlayer(): EnginePlayer {
   return {

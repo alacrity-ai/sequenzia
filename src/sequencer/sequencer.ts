@@ -12,6 +12,7 @@ import type { Note } from './interfaces/Note.js';
 import type { Grid } from './interfaces/Grid.js';
 import type { GridConfig } from './interfaces/GridConfig.js';
 import { midiRangeBetween } from './grid/helpers/note-finder.js';
+import { Instrument } from '../sounds/interfaces/Instrument.js';
 
 interface NoteHandler {
   stop?: () => void;
@@ -42,7 +43,7 @@ export default class Sequencer {
   private animationCanvas?: HTMLCanvasElement;
   grid?: Grid;
 
-  private _volume: number = 1.0;
+  private _volume: number = 100 / 127; // ≈ 0.7874
 
   constructor(
     containerEl: HTMLElement | null,
@@ -65,9 +66,11 @@ export default class Sequencer {
     }
   }
 
+  private _instrument: Instrument | null = null;
+
   async initInstrument(): Promise<void> {
     try {
-      loadInstrument(this.instrumentName, this.context, this.destination);
+      this._instrument = await loadInstrument(this.instrumentName, this.context, this.destination, this._volume);
       this.updateToDrumNoteRange();
       console.log(`[SEQ:${this.id}] Instrument '${this.instrumentName}' loaded`);
     } catch (err) {
@@ -80,11 +83,13 @@ export default class Sequencer {
     return this._volume;
   }
 
-  /** Setter for volume — will apply to gain node when implemented */
+  /** Setter for volume */
   set volume(val: number) {
     this._volume = Math.max(0, Math.min(1, val)); // Clamp to [0, 1]
-    
-    // TODO: apply to actual instrument
+  
+    if (this._instrument?.setVolume) {
+      this._instrument.setVolume(this._volume);
+    }
   }
 
   updateTrackLabel(): void {
@@ -101,8 +106,18 @@ export default class Sequencer {
   }
 
   playNote(pitch: string, durationSec: number, velocity = 100, loop = false): Promise<null> {
-    return loadAndPlayNote(this.instrumentName, pitch, durationSec, velocity, loop);
-  }  
+    return loadAndPlayNote(
+      this.instrumentName,
+      pitch,
+      durationSec,
+      velocity,
+      loop,
+      null,
+      this.context,
+      this.destination,
+      this.volume
+    );
+  }
 
   private _initCanvases(): void {
     if (!this.container) return;

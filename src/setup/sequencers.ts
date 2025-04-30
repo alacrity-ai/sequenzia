@@ -37,7 +37,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   seq.mute = false;
   seq.solo = false;
   seq.shouldPlay = true;
-  seq.volume = 1.0;
+  seq.volume = 100 / 127;
 
   const mini = wrapper.querySelector('canvas.mini-contour') as HTMLCanvasElement;
   if (initialState) {

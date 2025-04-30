@@ -13,13 +13,14 @@ const contextInstrumentMap: Map<AudioContext, Map<string, Instrument>> = new Map
 export async function loadInstrument(
   fullName: string,
   context: AudioContext = getAudioContext(),
-  destination: AudioNode | null = null
+  destination: AudioNode | null = null,
+  volume?: number // float 0.0–1.0
 ): Promise<Instrument> {
   const parts = fullName.split('/');
   let engine = 'sf2';
   let libraryRaw = 'musyngkite';
   let instrumentName = 'acoustic_grand_piano';
-  
+
   if (parts.length === 3) {
     [engine, libraryRaw, instrumentName] = parts;
   } else if (parts.length === 2) {
@@ -40,40 +41,35 @@ export async function loadInstrument(
     return instrumentMap.get(cacheKey)!;
   }
 
-  let instrument: Instrument;
+  const midiVolume = Math.max(0, Math.min(127, Math.round((volume ?? 1) * 127)));
+
+  let instrument: any;
+
+  const commonOptions = {
+    instrument: instrumentName,
+    volume: midiVolume,
+    destination: destination || getMasterGain(),
+    disableScheduler: isOffline,
+  };
 
   if (libraryRaw === 'smolken') {
-    instrument = new smplr.Smolken(context, {
-      instrument: instrumentName,
-      destination: destination || getMasterGain(),
-      disableScheduler: isOffline,
-    });
+    instrument = new smplr.Smolken(context, commonOptions);
     await withLoading(instrument.load);
 
   } else if (libraryRaw === 'splendidgrandpiano') {
     instrument = new smplr.SplendidGrandPiano(context, {
-      destination: destination || getMasterGain(),
-      disableScheduler: isOffline,
+      ...commonOptions,
     });
     await withLoading(instrument.load);
 
   } else if (libraryRaw === 'mallets') {
-    instrument = new smplr.Mallet(context, {
-      instrument: instrumentName,
-      destination: destination || getMasterGain(),
-      disableScheduler: isOffline,
-    });
+    instrument = new smplr.Mallet(context, commonOptions);
     await withLoading(instrument.load);
 
   } else if (libraryRaw === 'drummachines') {
-    instrument = new smplr.DrumMachine(context, {
-      instrument: instrumentName,
-      destination: destination || getMasterGain(),
-      disableScheduler: isOffline,
-    });
+    instrument = new smplr.DrumMachine(context, commonOptions);
     await withLoading(instrument.load);
 
-    // Build __midiMap for drum samples
     const sampleNames: string[] = instrument.getSampleNames?.() ?? [];
     const midiMap = new Map<number, string>();
     sampleNames.forEach((name, i) => {
@@ -90,22 +86,31 @@ export async function loadInstrument(
     };
 
     const kit = kitMap[libraryRaw.toLowerCase()] || 'MusyngKite';
-
     const format = 'ogg';
     const url = `https://gleitz.github.io/midi-js-soundfonts/${kit}/${instrumentName}-${format}.js`;
 
+    
     instrument = new smplr.Soundfont(context, {
-      instrument: instrumentName,
+      ...commonOptions,
       instrumentUrl: url,
       kit,
-      destination: destination || getMasterGain(),
-      disableScheduler: isOffline,
     });
     await withLoading(instrument.load);
   }
+  
+  // Cast to your extended interface so you can safely assign setVolume
+  const inst = instrument as Instrument;
 
-  instrumentMap.set(cacheKey, instrument);
-  return instrument;
+  inst.setVolume = (normalizedVolume: number) => {
+    const midiVolume = Math.max(0, Math.min(127, Math.round(normalizedVolume * 127)));
+  
+    if ('output' in inst && typeof (inst as any).output?.setVolume === 'function') {
+      (inst as any).output.setVolume(midiVolume);
+    }
+  };  
+
+  instrumentMap.set(cacheKey, inst);
+  return inst;
 }
 
 export async function getAvailableLibraries(): Promise<string[]> {

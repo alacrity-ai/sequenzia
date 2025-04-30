@@ -1,3 +1,5 @@
+// src/sounds/loaders/webaudiofont-loader.ts
+
 import { getAudioContext, getMasterGain } from '../../audio/audio.js';
 import { Instrument } from '../interfaces/Instrument.js';
 import { showLoadingModal, hideLoadingModal } from '../../sequencer/ui.js';
@@ -12,12 +14,26 @@ declare global {
   }
 }
 
+type StartOptions = {
+    note: number | string;
+    stopId?: number | string;
+    velocity?: number;
+    time?: number;
+    loop?: boolean;
+    duration?: number;
+  };
+  
+
 const contextInstrumentMap: Map<AudioContext, Map<string, Instrument>> = new Map();
 let player: any | null = null;
 
 interface WebAudioFontInstrument extends Instrument {
   _preset: any;
 }
+
+function getSafeWebAudioFontVolume(volume: number): number {
+    return Math.max(volume, 0.0001); // WAF treats 0 as "use default (1.0)"
+}  
 
 async function loadScript(url: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -38,7 +54,8 @@ async function loadWebAudioFontPlayer(): Promise<void> {
 export async function loadInstrument(
     fullName: string,
     context: AudioContext = getAudioContext(),
-    destination: AudioNode | null = null
+    destination: AudioNode | null = null,
+    volume?: number // Just added this here
   ): Promise<Instrument> {
     const [libraryRaw, instrumentDisplayName] = fullName.split('/');
     const cacheKey = `${libraryRaw}/${instrumentDisplayName}`;
@@ -73,32 +90,33 @@ export async function loadInstrument(
       if (!preset) throw new Error(`Missing preset: ${varName}`);
       player.loader.decodeAfterLoading(context, varName);
   
-        // 🩹 Monkey-patch to fix async decoding in OfflineAudioContext
-        if (context instanceof OfflineAudioContext) {
-            const zones = preset?.zones ?? [];
-            for (const zone of zones) {
-            if (zone.file && !zone.buffer) {
-                const binary = atob(zone.file);
-                const buf = new ArrayBuffer(binary.length);
-                const view = new Uint8Array(buf);
-                for (let i = 0; i < binary.length; i++) {
-                view[i] = binary.charCodeAt(i);
-                }
-                zone.buffer = await new Promise((resolve, reject) =>
-                context.decodeAudioData(buf, resolve, reject)
-                );
+      // 🩹 Monkey-patch to fix async decoding in OfflineAudioContext
+      if (context instanceof OfflineAudioContext) {
+        const zones = preset?.zones ?? [];
+        for (const zone of zones) {
+        if (zone.file && !zone.buffer) {
+            const binary = atob(zone.file);
+            const buf = new ArrayBuffer(binary.length);
+            const view = new Uint8Array(buf);
+            for (let i = 0; i < binary.length; i++) {
+            view[i] = binary.charCodeAt(i);
             }
-            }
+            zone.buffer = await new Promise((resolve, reject) =>
+            context.decodeAudioData(buf, resolve, reject)
+            );
+          }
         }
+      }
 
-      const instrument: WebAudioFontInstrument = {
+      const instrument: any = {
         _preset: preset,
-        start({ note, duration = 1, velocity = 100, time }) {
+        _volume: volume ?? 1.0,
+        start({ note, duration = 1, velocity = 100, time }: StartOptions) {
           const midi = typeof note === 'string' ? pitchToMidi(note) : note;
           if (midi == null || typeof midi !== 'number') return;
-  
+      
           const when = typeof time === 'number' ? time : 0;
-  
+      
           player.queueWaveTable(
             context,
             destination || getMasterGain(),
@@ -106,12 +124,16 @@ export async function loadInstrument(
             when,
             midi,
             duration,
-            velocity / 127
+            getSafeWebAudioFontVolume(instrument._volume)
           );
         },
         stop() {},
         load: Promise.resolve(),
+        setVolume(vol: number) {
+          instrument._volume = Math.max(0, Math.min(1, vol));
+        }
       };
+      
   
       instrumentMap.set(cacheKey, instrument);
       return instrument;
@@ -144,39 +166,44 @@ export async function loadInstrument(
       })()
     );
   
-    const instrument: WebAudioFontInstrument = {
-      _preset: drumPresets,
-      start({ note, duration = 1, velocity = 100, time }) {
-        const midi = typeof note === 'string' ? pitchToMidi(note) : note;
-        if (midi == null || typeof midi !== 'number') {
-          console.warn(`Invalid MIDI pitch: ${note}`);
-          return;
+    const instrument: any = {
+        _preset: drumPresets,
+        _volume: volume ?? 1.0,
+        start({ note, duration = 1, velocity = 100, time }: StartOptions) {
+          const midi = typeof note === 'string' ? pitchToMidi(note) : note;
+          if (midi == null || typeof midi !== 'number') {
+            console.warn(`Invalid MIDI pitch: ${note}`);
+            return;
+          }
+      
+          const preset = drumPresets[midi];
+          if (!preset) {
+            console.warn(`No drum preset loaded for MIDI ${midi}`);
+            return;
+          }
+      
+          const when = typeof time === 'number' ? time : 0;
+      
+          player.queueWaveTable(
+            context,
+            destination || getMasterGain(),
+            preset,
+            when,
+            midi,
+            duration,
+            getSafeWebAudioFontVolume(instrument._volume)
+          );
+        },
+        stop() {},
+        load: Promise.resolve(),
+        setVolume(vol: number) {
+          instrument._volume = Math.max(0, Math.min(1, vol)); // DO WE NEED TO UPDATE THIS AS WELL?
         }
-  
-        const preset = drumPresets[midi];
-        if (!preset) {
-          console.warn(`No drum preset loaded for MIDI ${midi}`);
-          return;
-        }
-  
-        const when = typeof time === 'number' ? time : 0;
-  
-        player.queueWaveTable(
-          context,
-          destination || getMasterGain(),
-          preset,
-          when,
-          midi,
-          duration,
-          velocity / 127
-        );
-      },
-      stop() {},
-      load: Promise.resolve(),
     };
+      
   
-    instrumentMap.set(cacheKey, instrument);
-    return instrument;
+    instrumentMap.set(cacheKey, instrument as Instrument);
+    return instrument as Instrument;      
   }
   
   

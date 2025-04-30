@@ -14,4 +14,5 @@ export interface Instrument {
   __midiMap?: Map<number, number | string>;
 
   getSampleNames?(): string[];
+  setVolume(volume: number): void;
 }
