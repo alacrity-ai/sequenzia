@@ -7,21 +7,23 @@ export const WHATS_NEW_VERSION = 'v0.0.7';
 export const WHATS_NEW_DATE = 'April 29, 2025';
 
 // ====== Content ======
+// ====== Content ======
 export const WHATS_NEW_CONTENT: string[] = [
-  "✨ New Features",
-  "- 🎹 Added support for WebAudioFont (1000+ new instruments)",
-  "- 📥 Added MIDI export and import functionality",
-  "- ⚙️ Introduced display customization in Userconfig (note styles, grid color schemes)",
-  "- 🎞️ Added animated notes during playback and editing",
-  "- 📐 Adjustable sequencer height per track",
-
-  "🐞 Known Issues",
-  "- 🚫 Scaling groups of notes not functional",
-
-  "🛣️ Roadmap",
-  "- 🔊 Upcoming: velocity support and per-note volume control",
-  "- 🧠 Upcoming: AI-assisted generation and extension tools",
-];
+    "✨ New Features",
+    "- 🎹 Added support for WebAudioFont (1000+ new instruments)",
+    "- 🎧 Added partial support for per-instrument panning",
+    "- 🔊 Added partial support for per-instrument volume",
+    "- 🎨 Major UI visual enhancements",
+  
+    "🐞 Known Issues",
+    "- 🚫 Scaling groups of notes not functional",
+    "- 🎚️ Panning and volume not fully implemented for saving/loading",
+  
+    "🛣️ Roadmap",
+    "- 🔊 Upcoming: velocity support and per-note volume control",
+    "- 🧠 Upcoming: AI-assisted generation and extension tools",
+  ];
+  
 
 // ====== Handlers ======
 
