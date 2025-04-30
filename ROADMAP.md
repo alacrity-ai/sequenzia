@@ -3,16 +3,16 @@
 
 ## Immediate Todos
 - Volume:
-  - [ ] Add volume to json (project file) configuration
-  - [ ] Handle volume in json import / export
-  - [ ] Handle volume in midi import/export
-  - [ ] Handle volume in wav export
+  - [x] Add volume to json (project file) configuration
+  - [x] Handle volume in json import / export
+  - [x] Handle volume in midi import/export
+  - [x] Handle volume in wav export
 - Panning:
-  - [ ] Add pan to json (project file) configuration
-  - [ ] Handle panning in json import / export
+  - [x] Add pan to json (project file) configuration
+  - [x] Handle panning in json import / export
   - [ ] Handle panning in sf2 engine
-  - [ ] Handle panning in midi import/export
-  - [ ] Handle panning in wav export
+  - [x] Handle panning in midi import/export
+  - [x] Handle panning in wav export
 - Velocity:
   - [ ] Add velocity to json (project file) notes
   - [ ] Support velocity in loadAndPlayNote for sf2

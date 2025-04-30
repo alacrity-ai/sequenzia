@@ -25,23 +25,25 @@ export async function importSessionFromJSON(file: File): Promise<Session> {
     throw new Error("Missing or invalid `tr` (tracks) array.");
   }
 
-  // Define the global configuration
+  // Build globalConfig
   const globalConfig: GlobalConfig = {
     bpm: data.c?.b ?? 120,
     beatsPerMeasure: data.c?.bpm ?? 4,
     totalMeasures: data.c?.tm ?? 8,
   };
 
-  // Map instrument names
+  // Handle optional arrays
   const instrumentNames = Array.isArray(data.i) ? data.i : [];
+  const volumes = Array.isArray(data.vlm) ? data.vlm : [];
+  const pans = Array.isArray(data.pan) ? data.pan : [];
 
-  // Map the tracks with explicit typing for track and idx
+  // Convert tracks
   const tracks: TrackData[] = data.tr.map((track: TrackTuple, idx: number) => {
     if (!Array.isArray(track.n)) {
       throw new Error(`Track ${idx} missing \`n\` (notes) array.`);
     }
 
-    // Explicit type cast from NoteTuple[] to Note[]
+    // Convert notes array
     const notes: Note[] = (track.n as NoteTuple[]).map(([pitch, start, duration]: NoteTuple) => ({
       pitch,
       start,
@@ -49,9 +51,19 @@ export async function importSessionFromJSON(file: File): Promise<Session> {
     }));
 
     const instrument = instrumentNames[idx] || 'sf2/fluidr3-gm/acoustic_grand_piano';
+    const volume = volumes[idx];
+    const pan = pans[idx];
 
-    return { notes, instrument, config: {} }; // Assuming config is an empty object, you may need to adjust if it has actual values.
+    return {
+      notes,
+      instrument,
+      volume: typeof volume === 'number' ? volume : undefined,
+      pan: typeof pan === 'number' ? pan : undefined,
+      config: {}
+    };
   });
 
+  console.log('Imported session:', { globalConfig, tracks }); // ADDED LOGGING HERE
   return { globalConfig, tracks };
 }
+

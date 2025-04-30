@@ -9,6 +9,8 @@ export { applySET_TOTAL_MEASURES as SET_TOTAL_MEASURES } from './global/changeMe
 export { applyCREATE_SEQUENCER as CREATE_SEQUENCER } from './sequencer/createSequencer.js';
 export { applyDELETE_SEQUENCER as DELETE_SEQUENCER } from './sequencer/deleteSequencer.js';
 export { applySET_INSTRUMENT as SET_INSTRUMENT } from './sequencer/setInstrument.js';
+export { applySET_VOLUME as SET_VOLUME } from './sequencer/setVolume.js';
+export { applySET_PAN as SET_PAN } from './sequencer/setPan.js';
 
 // GRID
 export { applyPLACE_NOTES as PLACE_NOTES } from './grid/placeNotes.js';

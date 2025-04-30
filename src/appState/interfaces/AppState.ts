@@ -7,6 +7,8 @@ export interface SequencerState {
   id: number;
   instrument: string;
   notes: Note[];
+  volume?: number;
+  pan?: number;
 }
 
 export interface AppState {
@@ -21,4 +23,6 @@ export interface CreateSequencerOptions {
   config: GridConfig;
   notes: Note[];
   instrument: string;
+  volume?: number;
+  pan?: number;
 }

@@ -14,8 +14,8 @@ export function applyDELETE_SEQUENCER(state: AppState, diff: Diff): AppState {
   const index = sequencers.findIndex(seq => seq.id === diff.id);
   if (index !== -1) {
     const seq = sequencers[index];
-    seq.destroy();             // ✅ Remove DOM/UI elements
-    sequencers.splice(index, 1); // ✅ Remove from live model
+    seq.destroy();
+    sequencers.splice(index, 1); 
   }
 
   return newState;
@@ -24,23 +24,39 @@ export function applyDELETE_SEQUENCER(state: AppState, diff: Diff): AppState {
 /**
  * Creates a diff to delete a sequencer.
  */
-export function createDeleteSequencerDiff(id: number, instrument: string, notes: any[] = []): Diff {
+export function createDeleteSequencerDiff(
+  id: number,
+  instrument: string,
+  notes: any[] = [],
+  volume?: number,
+  pan?: number
+): Diff {
   return {
     type: 'DELETE_SEQUENCER',
     id,
     instrument,
     notes: structuredClone(notes),
+    volume,
+    pan,
   };
 }
 
 /**
  * Creates a reverse diff to recreate a deleted sequencer.
  */
-export function createReverseDeleteSequencerDiff(id: number, instrument: string, notes: any[] = []): Diff {
+export function createReverseDeleteSequencerDiff(
+  id: number,
+  instrument: string,
+  notes: any[] = [],
+  volume?: number,
+  pan?: number
+): Diff {
   return {
     type: 'CREATE_SEQUENCER',
     id,
     instrument,
     notes: structuredClone(notes),
+    volume,
+    pan,
   };
 }

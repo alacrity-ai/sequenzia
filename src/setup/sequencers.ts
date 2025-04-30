@@ -46,6 +46,8 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
       notes: initialState.notes,
       config: {},
       instrument: initialState.instrument,
+      volume: initialState.volume,
+      pan: initialState.pan,
     });
   }
   drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);  
@@ -78,8 +80,8 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     modal.classList.remove('hidden');
 
     const handleConfirm = () => {
-      const forwardDiff = createDeleteSequencerDiff(seq.id, seq.instrumentName, seq.notes);
-      const reverseDiff = createReverseDeleteSequencerDiff(seq.id, seq.instrumentName, seq.notes);
+      const forwardDiff = createDeleteSequencerDiff(seq.id, seq.instrumentName, seq.notes, seq.volume, seq.pan);
+      const reverseDiff = createReverseDeleteSequencerDiff(seq.id, seq.instrumentName, seq.notes, seq.volume, seq.pan);
     
       recordDiff(forwardDiff, reverseDiff);
       cleanup();
@@ -117,7 +119,6 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     setButtonState(soloBtn, seq.solo);
   
     updateSoloStates();
-    seq.seekTo(getCurrentBeat());
   });
   
   soloBtn.addEventListener('click', () => {
@@ -128,7 +129,6 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     setButtonState(muteBtn, seq.mute);
   
     updateSoloStates();
-    seq.seekTo(getCurrentBeat());
   });
   
 

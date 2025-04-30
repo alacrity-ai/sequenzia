@@ -10,4 +10,6 @@ export interface TrackData {
     notes: Note[];
     instrument: string;
     config: { [key: string]: any };
+    volume?: number;
+    pan?: number;
 }

@@ -43,6 +43,8 @@ export function exportSessionToJSON(appState: AppState): { url: string, filename
       tm: totalMeasures
     },
     i: appState.sequencers.map(s => s.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano'),
+    vlm: appState.sequencers.map(s => s.volume ?? (100 / 127)), // Default ≈ 0.787
+    pan: appState.sequencers.map(s => s.pan ?? 0.0),
     tr: appState.sequencers.map(s => ({
       n: s.notes.map(n => [n.pitch, n.start, n.duration])
     }))
@@ -54,6 +56,7 @@ export function exportSessionToJSON(appState: AppState): { url: string, filename
     filename: `session-${Date.now()}.json`
   };
 }
+
 
 
 /**

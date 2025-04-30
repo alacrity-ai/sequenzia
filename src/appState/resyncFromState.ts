@@ -37,12 +37,18 @@ export function resyncFromState(state: AppState = getAppState()): void {
   for (const serialized of state.sequencers as SerializedSequencer[]) {
     const live = sequencers.find(seq => sequencerIdsMatch(seq.id, serialized.id));
 
+    // ADDED LOGGING HERE
+    console.log('WITHIN RESYNC FROM STATE: Serialized volume and pan: ', serialized.volume, serialized.pan);
+    console.log('SERIALIZED FULL OBJECT: ', serialized);
+
     if (!live) {
       // Create new sequencer if missing
       const initialState: SequencerState = {
         id: serialized.id,
         instrument: serialized.instrument,
         notes: structuredClone(serialized.notes),
+        volume: serialized.volume,
+        pan: serialized.pan,
       };
 
       const { wrapper } = createSequencer(initialState);
@@ -54,6 +60,14 @@ export function resyncFromState(state: AppState = getAppState()): void {
     } else {
       // 🔁 Update existing live sequencer
       live.instrumentName = serialized.instrument;
+
+      // Update the volume and pan
+      if (typeof serialized.volume === 'number') {
+        live.volume = serialized.volume;
+      }
+      if (typeof serialized.pan === 'number') {
+        live.pan = serialized.pan;
+      }
 
       const miniCanvas = live.container?.querySelector('canvas.mini-contour') as HTMLCanvasElement | null;
       if (miniCanvas) {

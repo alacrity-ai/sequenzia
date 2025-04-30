@@ -33,8 +33,9 @@ export default class Sequencer {
   solo: boolean = false;
   shouldPlay: boolean = true;
 
-  private _activeNotes: Set<Note> = new Set();
-  private _noteHandlers: Map<Note, NoteHandler> = new Map();
+  // private _activeNotes: Set<Note> = new Set();
+  private _activeNoteKeys: Set<string> = new Set();
+  private _noteHandlers: Map<string, NoteHandler> = new Map();
   private _beatHandler: ((beat: number) => void) | null = null;
   private _unsub: (() => void) | null = null;
 
@@ -43,6 +44,8 @@ export default class Sequencer {
   private animationCanvas?: HTMLCanvasElement;
   grid?: Grid;
 
+  refreshPanUI?: () => void;
+  refreshVolumeUI?: () => void;
   private _volume: number = 100 / 127; // ≈ 0.7874
   private _pan: number = 0.0; // Centered by default (-1.0 = left, 1.0 = right)
 
@@ -66,6 +69,10 @@ export default class Sequencer {
       this._initCanvases();
     }
   }
+
+  private _noteKey(note: Note): string {
+    return `${note.pitch}:${note.start}:${note.duration}`;
+  }  
 
   private _instrument: Instrument | null = null;
 
@@ -146,8 +153,8 @@ export default class Sequencer {
   }
 
   onTransportLoop(): void {
-    this._activeNotes.clear();
-  }
+    this._activeNoteKeys.clear();
+  }  
 
   updateTotalMeasures(): void {
     const totalBeats = getTotalBeats();
@@ -190,8 +197,8 @@ export default class Sequencer {
   play(): void {
     this.stop();
     this.clampNotesToGrid();
-    this._activeNotes.clear();
     this._noteHandlers.clear();
+    this._activeNoteKeys.clear();
 
     const bpm = getTempo();
     const beatToSec = 60 / bpm;
@@ -203,7 +210,9 @@ export default class Sequencer {
       for (const note of this.notes) {
         const noteStart = note.start;
         const noteEnd = note.start + note.duration;
-        if (!this._activeNotes.has(note) && noteStart <= beat && beat <= noteEnd) {
+        const key = this._noteKey(note);
+
+        if (!this._activeNoteKeys.has(key) && noteStart < beat && beat <= noteEnd) {
           const durationSec = note.duration * beatToSec;
           this.playNote(note.pitch, durationSec);
 
@@ -217,7 +226,7 @@ export default class Sequencer {
             });
           }
 
-          this._activeNotes.add(note);
+          this._activeNoteKeys.add(key);
         }
       }
     };
@@ -232,32 +241,31 @@ export default class Sequencer {
       this._unsub = null;
     }
     this._beatHandler = null;
-
-    for (const note of this._activeNotes) {
-      const handle = this._noteHandlers.get(note);
-      handle?.forceStop?.();
-      handle?.stop?.();
+  
+    for (const handler of this._noteHandlers.values()) {
+      handler?.forceStop?.();
+      handler?.stop?.();
     }
-
-    this._activeNotes.clear();
+  
+    this._activeNoteKeys.clear();
     this._noteHandlers.clear();
-
+  
     this.grid?.drawPlayhead(0);
     this.redraw();
-  }
+  }  
 
   pause(): void {
-    for (const note of this._activeNotes) {
-      const handle = this._noteHandlers.get(note);
+    for (const key of this._activeNoteKeys) {
+      const handle = this._noteHandlers.get(key);
       handle?.stop?.();
     }
-    this._activeNotes.clear();
-
+    this._activeNoteKeys.clear();
+  
     if (this._unsub) {
       this._unsub();
       this._unsub = null;
     }
-  }
+  }  
 
   resume(): void {
     if (this._beatHandler && !this._unsub) {
@@ -311,15 +319,42 @@ export default class Sequencer {
     };
   }
 
-  setState({ notes, config, instrument }: { notes: Note[]; config: Partial<GridConfig>; instrument?: string }): void {
+  setState({
+    notes,
+    config,
+    instrument,
+    volume,
+    pan,
+  }: {
+    notes: Note[];
+    config: Partial<GridConfig>;
+    instrument?: string;
+    volume?: number;
+    pan?: number;
+  }): void {
+    // Replace note array efficiently
     this.notes.length = 0;
     this.notes.push(...notes);
+  
+    // Update config (note grid layout only)
     Object.assign(this.config, config);
+  
+    // Apply volume and pan
+    if (typeof volume === 'number') {
+      this.volume = volume;
+    }
+    if (typeof pan === 'number') {
+      this.pan = pan;
+    }
+  
+    // Update instrument name (doesn't load it here)
     if (instrument) {
       this.instrumentName = instrument;
     }
+  
+    // Trigger visual update
     this.redraw();
-  }
+  }   
 
   updateNotesFromTrackMap(trackMap: { n: [string, number, number][] }): void {
     this.notes.splice(0, this.notes.length, ...trackMap.n.map(([pitch, start, duration]) => ({
@@ -331,7 +366,7 @@ export default class Sequencer {
 
   async exportToOffline(): Promise<void> {
     const beatToSec = 60 / getTempo();
-    const instrument = await loadInstrument(this.instrumentName, this.context, this.destination);
+    const instrument = await loadInstrument(this.instrumentName, this.context, this.destination, this._volume, this._pan);
 
     for (const note of this.notes) {
       const rawStartSec = note.start * beatToSec;

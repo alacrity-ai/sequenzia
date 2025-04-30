@@ -38,18 +38,24 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
     const id = i;
     const instrument = state.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
     const notes = state.notes || [];
-
+    const volume = state.volume
+    const pan = state.pan
+    console.log('Got volume, and pan: ', volume, pan);
     recordDiff(
-      {
-        type: 'CREATE_SEQUENCER',
-        id,
-        instrument,
-        notes: structuredClone(notes),
-        config: state.config || {},
-      },
-      createReverseCreateSequencerDiff(id)
-    );
-  }
+        {
+          type: 'CREATE_SEQUENCER',
+          id,
+          instrument,
+          notes: structuredClone(notes),
+          volume: state.volume,
+          pan: state.pan,
+          config: {
+            ...(state.config || {})
+          },
+        },
+        createReverseCreateSequencerDiff(id)
+      );      
+  }  
 
   recordDiff(
     createCheckpointDiff('Session Loaded'),

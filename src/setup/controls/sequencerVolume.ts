@@ -1,6 +1,6 @@
-// src/setup/controls/sequencerVolume.js
-
 import Sequencer from '../../sequencer/sequencer.js';
+import { recordDiff } from '../../appState/appState.js';
+import { createSetVolumeDiff, createReverseSetVolumeDiff } from '../../appState/diffEngine/types/sequencer/setVolume.js';
 
 export function setupVolumeBar(wrapper: HTMLElement, seq: Sequencer): void {
   const volumeBar = wrapper.querySelector('.volume-fill')?.parentElement as HTMLElement;
@@ -10,6 +10,7 @@ export function setupVolumeBar(wrapper: HTMLElement, seq: Sequencer): void {
   let hasSnapped = false;
   let isShiftDown = false;
   let isDragging = false;
+  let oldVolume: number | null = null;
 
   if (!volumeBar || !volumeFill) {
     console.warn('[setupVolumeBar] Volume bar or fill element missing.');
@@ -53,35 +54,38 @@ export function setupVolumeBar(wrapper: HTMLElement, seq: Sequencer): void {
       volumeThumb.classList.remove('precise');
     }
   }
-  
+
+  seq.refreshVolumeUI = updateVisualBar;
+
   requestAnimationFrame(updateVisualBar);
 
-  function handleVolumeInput(clientX: number): void {
+  function handleVolumeInput(clientX: number): number {
     const rect = volumeBar.getBoundingClientRect();
     const relativeX = clientX - rect.left;
 
     const normalizedTarget = 100 / 127;
     const epsilon = 0.1;
 
-    let ratio = Math.max(0, Math.min(1, relativeX / rect.width));
+    let newVolume = Math.max(0, Math.min(1, relativeX / rect.width));
 
-    if (!isShiftDown && Math.abs(ratio - normalizedTarget) < epsilon) {
-      ratio = normalizedTarget;
-      if (!hasSnapped && navigator.vibrate) {
-        navigator.vibrate(10);
-      }
+    if (!isShiftDown && Math.abs(newVolume - normalizedTarget) < epsilon) {
+      newVolume = normalizedTarget;
+      if (!hasSnapped && navigator.vibrate) navigator.vibrate(10);
       hasSnapped = true;
     } else {
       hasSnapped = false;
     }
 
-    seq.volume = ratio;
+    seq.volume = newVolume;
     updateVisualBar();
+
+    return newVolume;
   }
 
   volumeBar.addEventListener('mousedown', (e) => {
     isDragging = true;
     isShiftDown = e.shiftKey;
+    oldVolume = seq.volume;
     applyModifierStyles();
     handleVolumeInput(e.clientX);
     e.preventDefault();
@@ -90,23 +94,29 @@ export function setupVolumeBar(wrapper: HTMLElement, seq: Sequencer): void {
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     isShiftDown = e.shiftKey;
-    applyModifierStyles(); 
+    applyModifierStyles();
     handleVolumeInput(e.clientX);
   });
-  
+
   window.addEventListener('mouseup', (e) => {
     if (!isDragging) return;
     isDragging = false;
-  
-    handleVolumeInput(e.clientX);
-  
+
+    const finalVolume = handleVolumeInput(e.clientX);
+
+    if (oldVolume !== null && finalVolume !== oldVolume) {
+      recordDiff(
+        createSetVolumeDiff(seq.id, finalVolume),
+        createReverseSetVolumeDiff(seq.id, oldVolume)
+      );
+    }
+
     isShiftDown = false;
     applyModifierStyles();
-  
     volumeFill.classList.remove('precise');
     volumeThumb.classList.remove('precise');
-  
     updateVisualBar();
-  });  
-  
+
+    oldVolume = null;
+  });
 }

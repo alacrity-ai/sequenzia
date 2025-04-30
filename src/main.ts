@@ -178,7 +178,9 @@ setupUI({
         tracks: sequencers.map(seq => ({
           notes: seq.notes,
           instrument: seq.instrumentName,
-          config: seq.config // Pull config from live sequencer
+          config: seq.config,
+          volume: seq.volume,
+          pan: seq.pan
         }))
       };
       await exportSessionToWAV(session);
@@ -197,10 +199,10 @@ setupUI({
   
       if (extension === 'json') {
         const { tracks, globalConfig } = await importSessionFromJSON(file);
-        await loadSession(tracks, globalConfig);
+        loadSession(tracks, globalConfig);
       } else if (extension === 'mid' || extension === 'midi') {
         const { tracks, globalConfig } = await importSessionFromMIDI(file);
-        await loadSession(tracks, globalConfig);
+        loadSession(tracks, globalConfig);
       } else {
         throw new Error('Unsupported file type.');
       }

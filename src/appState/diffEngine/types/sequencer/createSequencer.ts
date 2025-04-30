@@ -14,6 +14,8 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
     id: diff.id,
     instrument: diff.instrument,
     notes: diff.notes ?? [],
+    volume: diff.volume,
+    pan: diff.pan,
   });
 
   const existing = sequencers.find(s => s.id === diff.id);
@@ -22,7 +24,9 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
       id: diff.id,
       instrument: diff.instrument,
       notes: diff.notes ?? [],
-    };
+      volume: diff.volume,
+      pan: diff.pan,
+    };    
 
     const { seq, wrapper } = createSequencer(initialState);
     toggleZoomControls(wrapper, true);
@@ -34,11 +38,18 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
 /**
  * Creates a diff to create a sequencer.
  */
-export function createCreateSequencerDiff(id: number, instrument: string): Diff {
+export function createCreateSequencerDiff(
+  id: number,
+  instrument: string,
+  volume?: number,
+  pan?: number
+): Diff {
   return {
     type: 'CREATE_SEQUENCER',
     id,
     instrument,
+    volume,
+    pan,
   };
 }
 
