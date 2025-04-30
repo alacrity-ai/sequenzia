@@ -1,10 +1,15 @@
-<!-- Instrument Select Modal -->
-<div id="instrument-select-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 w-96">
-    <h2 class="text-lg font-semibold mb-4">Select Instrument</h2>
+<!-- Enhanced Instrument Select Modal -->
+<div id="instrument-select-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] hidden">
+  <div class="relative flex flex-col bg-gradient-to-br from-gray-800 to-gray-900 border border-purple-700 shadow-2xl rounded-2xl px-10 py-8 animate-fade-in w-[420px] max-w-full text-white">
+
+    <!-- Animated Halo Glow -->
+    <div class="absolute inset-0 rounded-2xl border-2 border-purple-500 opacity-30 blur-xl animate-pulse pointer-events-none"></div>
+
+    <!-- Header -->
+    <h2 class="text-2xl font-semibold mb-6 z-10 tracking-wide text-center">Select Instrument</h2>
 
     <!-- Engine Selection -->
-    <div class="mb-4">
+    <div class="mb-4 z-10">
       <label class="block text-sm font-medium mb-2">Engine</label>
       <select id="instrument-engine-select"
               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
@@ -13,7 +18,7 @@
     </div>
 
     <!-- Instrument Library Selection -->
-    <div class="mb-4">
+    <div class="mb-4 z-10">
       <label class="block text-sm font-medium mb-2">Instrument Library</label>
       <select id="instrument-library-select"
               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
@@ -22,7 +27,7 @@
     </div>
 
     <!-- Instrument Selection -->
-    <div class="mb-6">
+    <div class="mb-6 z-10">
       <label class="block text-sm font-medium mb-2">Instrument</label>
       <select id="instrument-select"
               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
@@ -31,7 +36,7 @@
     </div>
 
     <!-- Loop Toggle -->
-    <div class="mb-6">
+    <div class="mb-6 z-10">
       <label class="flex items-center gap-2">
         <input type="checkbox"
                id="instrument-loop-toggle"
@@ -41,9 +46,15 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex gap-3">
-      <button id="instrument-select-confirm" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded">Select</button>
-      <button id="instrument-cancel-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded">Cancel</button>
+    <div class="flex gap-3 z-10">
+      <button id="instrument-select-confirm"
+              class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg text-sm transition-all">
+        Select
+      </button>
+      <button id="instrument-cancel-btn"
+              class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded-lg text-sm transition-all">
+        Cancel
+      </button>
     </div>
   </div>
 </div>
