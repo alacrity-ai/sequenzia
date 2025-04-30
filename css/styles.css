@@ -142,3 +142,12 @@
   background-color: #22c55e;
   border-color: #22c55e;
 }
+
+.pan-fill.precise {
+  background: linear-gradient(to right, #22c55e, #a3e635); /* lime/green gradient */
+}
+
+.pan-thumb.precise {
+  background-color: #22c55e;
+  border-color: #22c55e;
+}
