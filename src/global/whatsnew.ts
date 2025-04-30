@@ -11,13 +11,12 @@ export const WHATS_NEW_DATE = 'April 29, 2025';
 export const WHATS_NEW_CONTENT: string[] = [
     "✨ New Features",
     "- 🎹 Added support for WebAudioFont (1000+ new instruments)",
-    "- 🎧 Added partial support for per-instrument panning",
-    "- 🔊 Added partial support for per-instrument volume",
+    "- 🎧 Added per-instrument panning",
+    "- 🔊 Added per-instrument volume",
     "- 🎨 Major UI visual enhancements",
   
     "🐞 Known Issues",
     "- 🚫 Scaling groups of notes not functional",
-    "- 🎚️ Panning and volume not fully implemented for saving/loading",
   
     "🛣️ Roadmap",
     "- 🔊 Upcoming: velocity support and per-note volume control",

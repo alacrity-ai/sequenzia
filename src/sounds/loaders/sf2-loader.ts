@@ -14,7 +14,8 @@ export async function loadInstrument(
   fullName: string,
   context: AudioContext = getAudioContext(),
   destination: AudioNode | null = null,
-  volume?: number // float 0.0–1.0
+  volume?: number, // float 0.0–1.0
+  pan?: number // Value -1.0 to 1.0
 ): Promise<Instrument> {
   const parts = fullName.split('/');
   let engine = 'sf2';
@@ -43,14 +44,24 @@ export async function loadInstrument(
 
   const midiVolume = Math.max(0, Math.min(127, Math.round((volume ?? 1) * 127)));
 
-  let instrument: any;
+  // === Panning Node Setup ===
+  const pannerNode = context.createStereoPanner();
+  if (pan !== undefined) {
+    pannerNode.pan.value = pan;
+  }
+
+  const gainProxy = context.createGain();
+  gainProxy.connect(pannerNode);
+  pannerNode.connect(destination || getMasterGain());
 
   const commonOptions = {
     instrument: instrumentName,
     volume: midiVolume,
-    destination: destination || getMasterGain(),
+    destination: gainProxy,
     disableScheduler: isOffline,
   };
+
+  let instrument: any;
 
   if (libraryRaw === 'smolken') {
     instrument = new smplr.Smolken(context, commonOptions);
@@ -89,7 +100,6 @@ export async function loadInstrument(
     const format = 'ogg';
     const url = `https://gleitz.github.io/midi-js-soundfonts/${kit}/${instrumentName}-${format}.js`;
 
-    
     instrument = new smplr.Soundfont(context, {
       ...commonOptions,
       instrumentUrl: url,
@@ -97,17 +107,20 @@ export async function loadInstrument(
     });
     await withLoading(instrument.load);
   }
-  
-  // Cast to your extended interface so you can safely assign setVolume
+
+  // === Augment with volume and pan setters ===
   const inst = instrument as Instrument;
 
   inst.setVolume = (normalizedVolume: number) => {
     const midiVolume = Math.max(0, Math.min(127, Math.round(normalizedVolume * 127)));
-  
     if ('output' in inst && typeof (inst as any).output?.setVolume === 'function') {
       (inst as any).output.setVolume(midiVolume);
     }
-  };  
+  };
+
+  inst.setPan = (newPan: number) => {
+    pannerNode.pan.value = Math.max(-1, Math.min(1, newPan));
+  };
 
   instrumentMap.set(cacheKey, inst);
   return inst;

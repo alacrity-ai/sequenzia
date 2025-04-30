@@ -10,7 +10,7 @@
 - Panning:
   - [x] Add pan to json (project file) configuration
   - [x] Handle panning in json import / export
-  - [ ] Handle panning in sf2 engine
+  - [x] Handle panning in sf2 engine
   - [x] Handle panning in midi import/export
   - [x] Handle panning in wav export
 - Velocity:

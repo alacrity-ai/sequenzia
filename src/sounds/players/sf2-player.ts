@@ -72,18 +72,27 @@ async function loadAndPlayNote(
   startTime: number | null = null,
   context: AudioContext | null = null,
   destination: AudioNode | null = null,
-  volume?: number
+  volume?: number,
+  pan?: number
 ): Promise<null> {
   const ctx = context || getAudioContext();
-  const inst = await loadInstrument(instrumentName, ctx, destination, volume);
+  const inst = await loadInstrument(instrumentName, ctx, destination, volume, pan);
+
+  // Ensure volume is set (in case instrument is cached)
   if (volume !== undefined && inst.setVolume) {
     inst.setVolume(volume);
   }
+
+  // Ensure pan is set BEFORE scheduling the note
+  if (pan !== undefined && inst.setPan) {
+    inst.setPan(pan);
+  }
+  
   const midi = pitchToMidi(pitch);
   if (midi === null) return null;
-
   const note = inst.__midiMap?.get(midi) ?? midi;
 
+  // Schedule AFTER setting pan
   inst.start({
     note,
     duration: durationSec,
@@ -91,6 +100,7 @@ async function loadAndPlayNote(
     loop,
     time: startTime ?? ctx.currentTime,
   });
+
 
   return null;
 }

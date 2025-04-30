@@ -64,9 +64,8 @@ export function playNote(
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
   
     return engine.playNote(pitch, velocity, loop);
-  }
+}
   
-
 // Crucial for stopping a sustained note, this is used by the virtual piano
 export function stopNoteByPitch(pitch: string): void {
     if (!activeGlobalInstrumentFullName) return;
@@ -76,8 +75,7 @@ export function stopNoteByPitch(pitch: string): void {
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
   
     engine.stopNoteByPitch(pitch);
-  }
-  
+}
 
 // This is used by the sequencer to play notes for an instrument
 export async function loadAndPlayNote(
@@ -89,12 +87,13 @@ export async function loadAndPlayNote(
     startTime: number | null = null,
     context: AudioContext | null = null,
     destination: AudioNode | null = null,
-    volume?: number // <-- new param
+    volume?: number,
+    pan?: number
   ): Promise<null> {  
     const engineName = instrumentName.split('/')[0] as EngineName;
     const engine = enginePlayers[engineName];
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
-    
+    console.log('Calling LoadAndPlayNote with pan: ', pan);
     return await engine.loadAndPlayNote(
       instrumentName,
       pitch,
@@ -104,11 +103,11 @@ export async function loadAndPlayNote(
       startTime,
       context,
       destination,
-      volume
+      volume,
+      pan
     );
-  }
+}
   
-
 export function getAvailableEngines(): EngineName[] {
   return Object.keys(enginePlayers) as EngineName[];
 }

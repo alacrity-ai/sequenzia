@@ -137,7 +137,8 @@ export default class Sequencer {
       null,
       this.context,
       this.destination,
-      this.volume
+      this.volume,
+      this.pan
     );
   }
 

@@ -29,12 +29,9 @@ export async function loadInstrument(
     }
   
     const [engineName, libraryName, instrumentName] = parts;
-  
     const engine = engineLoaders[engineName as EngineName];
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
-  
-    console.log('Calling instrument-loader.ts LoadInstrument with:', fullName, engineName, context, destination, volume, pan);
-  
+
     return await engine.loadInstrument(`${libraryName}/${instrumentName}`, context, destination, volume, pan);
 }
   

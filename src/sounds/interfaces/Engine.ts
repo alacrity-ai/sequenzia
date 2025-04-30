@@ -8,7 +8,9 @@ export interface Engine {
   loadInstrument(
     fullName: string,
     context?: AudioContext,
-    destination?: AudioNode
+    destination?: AudioNode,
+    volume?: number,
+    pan?: number
   ): Promise<Instrument>;
 }
 
@@ -29,6 +31,7 @@ export interface EnginePlayer {
     startTime?: number | null,
     context?: AudioContext | null,
     destination?: AudioNode | null,
-    volume?: number
+    volume?: number,
+    pan?: number
   ): Promise<null>;
 }
