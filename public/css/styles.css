@@ -96,7 +96,7 @@
     transition: opacity 0.5s ease-in;
   }
 
-  /* Entire scrollbar */
+/* Entire scrollbar */
 ::-webkit-scrollbar {
   width: 16px;
   height: 16px;
@@ -117,4 +117,10 @@
 /* Thumb on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #ec4899; /* Tailwind 'pink-500' */
+}
+
+/* Scrollbar corner (bottom-right box when both scrollbars appear) */
+::-webkit-scrollbar-corner {
+  background: #292929; /* Match your track color or background */
+  border-radius: 6px;
 }
