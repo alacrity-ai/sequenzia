@@ -92,36 +92,21 @@ export function setupVolumeBar(wrapper: HTMLElement, seq: Sequencer): void {
     isShiftDown = e.shiftKey;
     applyModifierStyles(); 
     handleVolumeInput(e.clientX);
-  });  
-
+  });
+  
   window.addEventListener('mouseup', (e) => {
     if (!isDragging) return;
     isDragging = false;
   
-    // Do NOT change isShiftDown here — let keyup control it
     handleVolumeInput(e.clientX);
   
-    // Remove visual only — not logical state
+    isShiftDown = false;
+    applyModifierStyles();
+  
     volumeFill.classList.remove('precise');
     volumeThumb.classList.remove('precise');
   
     updateVisualBar();
-  });
-  
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Shift') {
-      isShiftDown = true;
-      applyModifierStyles();
-    }
-  });
-  
-  window.addEventListener('keyup', (e) => {
-    if (e.key === 'Shift') {
-      isShiftDown = false;
-      applyModifierStyles();
-      updateVisualBar(); // Ensure snapped visuals if necessary
-    }
-  });
+  });  
   
 }

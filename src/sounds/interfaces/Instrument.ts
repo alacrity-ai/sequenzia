@@ -15,4 +15,7 @@ export interface Instrument {
 
   getSampleNames?(): string[];
   setVolume(volume: number): void;
+
+  /** Optional method for panning, if supported by engine */
+  setPan?(pan: number): void;
 }

@@ -115,7 +115,7 @@
                 <span class="track-name text-white font-semibold">Track</span>
               </div>
         
-              <!-- Right Group: Volume, Zoom, Mute, Solo, Collapse, Delete -->
+              <!-- Right Group: Volume, Pan, Zoom, Mute, Solo, Collapse, Delete -->
               <div class="flex items-center gap-3">
                 <!-- Volume Bar -->
                 <div class="volume-bar relative w-[140px] h-[16px] rounded-full bg-gray-700 overflow-hidden shadow-inner border border-purple-700 group cursor-pointer">
@@ -130,6 +130,18 @@
                        style="left: calc(60% - 5px);"></div>
                 </div>
                 
+                <!-- Pan Bar -->
+                <div class="pan-bar relative w-[140px] h-[16px] rounded-full bg-gray-700 overflow-hidden shadow-inner border border-blue-700 group cursor-pointer">
+                  <!-- Fill -->
+                  <div class="pan-fill absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-blue-300" style="width: 50%;"></div>
+
+                  <!-- Snap Line (center) -->
+                  <div class="pan-snap-marker absolute top-0 bottom-0 w-[2px] bg-cyan-400/50 pointer-events-none" style="left: 50%;"></div>
+
+                  <!-- Thumb -->
+                  <div class="pan-thumb absolute top-1/2 -translate-y-1/2 w-[14px] h-[14px] border-blue-700 bg-blue-700 rounded-full shadow-md border group-hover:scale-110"
+                      style="left: calc(50% - 5px);"></div>
+                </div>
 
                 <div class="border-l border-purple-800 mx-2 h-6"></div>
 
@@ -177,7 +189,7 @@
             </div>
         
             <!-- Mini Contour (hidden by default) -->
-            <canvas class="mini-contour w-full h-10 mb-2 hidden"></canvas>
+            <canvas class="mini-contour w-full h-10 mb-2 bg-gray-800 rounded hidden"></canvas>
         
             <!-- Main Body: Scrollable canvas area -->
             <div class="sequencer-body flex border-t border-purple-700 pt-2 h-[720px]">

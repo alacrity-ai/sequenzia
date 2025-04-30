@@ -55,7 +55,8 @@ export async function loadInstrument(
     fullName: string,
     context: AudioContext = getAudioContext(),
     destination: AudioNode | null = null,
-    volume?: number // Just added this here
+    volume?: number,
+    pan?: number
   ): Promise<Instrument> {
     const [libraryRaw, instrumentDisplayName] = fullName.split('/');
     const cacheKey = `${libraryRaw}/${instrumentDisplayName}`;
@@ -77,7 +78,11 @@ export async function loadInstrument(
     if (!matched) {
       throw new Error(`Could not find WebAudioFont entry for library=${libraryRaw} and instrument=${instrumentDisplayName}`);
     }
-  
+
+    // Setup the panner node
+    const pannerNode = context.createStereoPanner();
+    pannerNode.pan.value = pan ?? 0;
+    pannerNode.connect(destination || getMasterGain());
     const isDrumKit = matched.displayName.startsWith('Drum Kit');
   
     if (!isDrumKit) {
@@ -87,6 +92,7 @@ export async function loadInstrument(
       await withLoading(loadScript(url));
   
       const preset = (window as any)[varName];
+      
       if (!preset) throw new Error(`Missing preset: ${varName}`);
       player.loader.decodeAfterLoading(context, varName);
   
@@ -119,7 +125,7 @@ export async function loadInstrument(
       
           player.queueWaveTable(
             context,
-            destination || getMasterGain(),
+            pannerNode || getMasterGain(),
             preset,
             when,
             midi,
@@ -131,7 +137,10 @@ export async function loadInstrument(
         load: Promise.resolve(),
         setVolume(vol: number) {
           instrument._volume = Math.max(0, Math.min(1, vol));
-        }
+        },
+        setPan(value: number) {
+          pannerNode.pan.value = Math.max(-1, Math.min(1, value));
+        }          
       };
       
   
@@ -186,7 +195,7 @@ export async function loadInstrument(
       
           player.queueWaveTable(
             context,
-            destination || getMasterGain(),
+            pannerNode || getMasterGain(),
             preset,
             when,
             midi,
@@ -197,16 +206,16 @@ export async function loadInstrument(
         stop() {},
         load: Promise.resolve(),
         setVolume(vol: number) {
-          instrument._volume = Math.max(0, Math.min(1, vol)); // DO WE NEED TO UPDATE THIS AS WELL?
-        }
+          instrument._volume = Math.max(0, Math.min(1, vol));
+        },
+        setPan(value: number) {
+          pannerNode.pan.value = Math.max(-1, Math.min(1, value));
+        }   
     };
-      
   
     instrumentMap.set(cacheKey, instrument as Instrument);
     return instrument as Instrument;      
-  }
-  
-  
+}  
 
 export async function getAvailableLibraries(): Promise<string[]> {
   const libraries = new Set<string>();

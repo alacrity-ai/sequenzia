@@ -44,6 +44,7 @@ export default class Sequencer {
   grid?: Grid;
 
   private _volume: number = 100 / 127; // ≈ 0.7874
+  private _pan: number = 0.0; // Centered by default (-1.0 = left, 1.0 = right)
 
   constructor(
     containerEl: HTMLElement | null,
@@ -70,7 +71,7 @@ export default class Sequencer {
 
   async initInstrument(): Promise<void> {
     try {
-      this._instrument = await loadInstrument(this.instrumentName, this.context, this.destination, this._volume);
+      this._instrument = await loadInstrument(this.instrumentName, this.context, this.destination, this._volume, this._pan);
       this.updateToDrumNoteRange();
       console.log(`[SEQ:${this.id}] Instrument '${this.instrumentName}' loaded`);
     } catch (err) {
@@ -89,6 +90,20 @@ export default class Sequencer {
   
     if (this._instrument?.setVolume) {
       this._instrument.setVolume(this._volume);
+    }
+  }
+
+  /** Getter for current track pan (-1.0 to 1.0) */
+  get pan(): number {
+    return this._pan;
+  }
+
+  /** Setter for track pan */
+  set pan(val: number) {
+    this._pan = Math.max(-1, Math.min(1, val)); // Clamp to [-1.0, 1.0]
+
+    if (this._instrument?.setPan) {
+      this._instrument.setPan(this._pan);
     }
   }
 

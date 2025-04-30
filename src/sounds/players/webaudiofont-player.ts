@@ -63,17 +63,23 @@ async function loadAndPlayNote(
     startTime: number | null = null,
     context: AudioContext | null = null,
     destination: AudioNode | null = null,
-    volume?: number
+    volume?: number,
+    pan?: number
   ): Promise<null> {
     console.log('NOTE VOLUME AT: ', volume);
     const ctx = context || getAudioContext();
   
     const [, library, displayName] = instrumentName.split('/');
-    const inst = await loadInstrument(`${library}/${displayName}`, ctx, destination, volume);
+    const inst = await loadInstrument(`${library}/${displayName}`, ctx, destination, volume, pan);
   
     // Ensure volume is set (for cached instruments)
     if (volume !== undefined && inst.setVolume) {
       inst.setVolume(volume);
+    }
+    
+    // Ensure pan is set (for cached instruments)
+    if (pan !== undefined && inst.setPan) {
+      inst.setPan(pan);
     }
   
     const midi = pitchToMidi(pitch);

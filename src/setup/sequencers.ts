@@ -2,6 +2,7 @@
 import Sequencer from '../sequencer/sequencer.js';
 import { refreshInstrumentSelectorModal } from './instrumentSelector.js';
 import { setupVolumeBar } from './controls/sequencerVolume';
+import { setupPanBar } from './controls/sequencerPan';
 import { setupSequencerGripHandler } from '../sequencer/ui.js';
 import { drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
@@ -52,8 +53,9 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   seq.updateTrackLabel();
   seq.initInstrument();
 
-  // Setup the volume bar
+  // Setup the volume and panner bars
   setupVolumeBar(wrapper, seq);
+  setupPanBar(wrapper, seq);
 
   const collapseBtn = wrapper.querySelector('.collapse-btn') as HTMLElement;
   const collapseIcon = collapseBtn.querySelector('use')!;
