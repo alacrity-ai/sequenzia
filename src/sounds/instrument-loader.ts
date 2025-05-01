@@ -21,7 +21,8 @@ export async function loadInstrument(
     context?: AudioContext,
     destination?: AudioNode,
     volume?: number, // float 0.0–1.0
-    pan?: number
+    pan?: number,
+    squelchLoadingScreen?: boolean
   ): Promise<Instrument> {
     const parts = fullName.split('/');
     if (parts.length !== 3) {
@@ -32,7 +33,7 @@ export async function loadInstrument(
     const engine = engineLoaders[engineName as EngineName];
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
     console.log('Calling loadInstrument with ', `engine: ${engineName} at ${libraryName}/${instrumentName}`);
-    return await engine.loadInstrument(`${libraryName}/${instrumentName}`, context, destination, volume, pan);
+    return await engine.loadInstrument(`${libraryName}/${instrumentName}`, context, destination, volume, pan, squelchLoadingScreen);
 }
   
 export async function getAvailableLibraries(engineName: EngineName = DEFAULT_ENGINE): Promise<string[]> {

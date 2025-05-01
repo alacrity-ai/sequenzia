@@ -10,7 +10,8 @@ export interface Engine {
     context?: AudioContext,
     destination?: AudioNode,
     volume?: number,
-    pan?: number
+    pan?: number,
+    squelchLoadingScreen?: boolean
   ): Promise<Instrument>;
 }
 

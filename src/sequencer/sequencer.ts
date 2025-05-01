@@ -1,18 +1,20 @@
 // src/sequencer/sequencer.ts
 import { initGrid } from './initGrid.js';
 import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
-import { onBeatUpdate, getTempo, getTotalBeats } from './transport.js';
+import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
+import { getTempo, getTotalBeats } from './transport.js';
 import { loadInstrument } from '../sounds/instrument-loader.js';
 import { loadAndPlayNote } from '../sounds/instrument-player.js'; // Changed from sf2-player.js
 import { pitchToMidi } from '../sounds/audio/pitch-utils.js';
 import { drawMiniContour } from './grid/drawing/mini-contour.js';
-import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
 import { labelWidth } from './grid/helpers/constants.js';
 import type { Note } from './interfaces/Note.js';
 import type { Grid } from './interfaces/Grid.js';
 import type { GridConfig } from './interfaces/GridConfig.js';
 import { midiRangeBetween } from './grid/helpers/note-finder.js';
 import { Instrument } from '../sounds/interfaces/Instrument.js';
+import { HandlerContext as GridContext } from './interfaces/HandlerContext.js';
+import { engine as playbackEngine } from '../main.js';
 
 interface NoteHandler {
   stop?: () => void;
@@ -25,6 +27,7 @@ export default class Sequencer {
   context: AudioContext;
   destination: AudioNode;
   instrumentName: string;
+  squelchLoadingScreen: boolean;
   notes: Note[] = [];
   colorIndex: number = 0;
 
@@ -32,6 +35,8 @@ export default class Sequencer {
   mute: boolean = false;
   solo: boolean = false;
   shouldPlay: boolean = true;
+
+  collapsed: boolean = false;
 
   // private _activeNotes: Set<Note> = new Set();
   private _activeNoteKeys: Set<string> = new Set();
@@ -44,6 +49,15 @@ export default class Sequencer {
   private animationCanvas?: HTMLCanvasElement;
   grid?: Grid;
 
+  private _scheduledAnimations: {
+    time: number;
+    note: Note;
+    context: GridContext;
+  }[] = [];
+  
+  private _animationLoopRunning: boolean = false;
+  private _animationCursor: number = 0;
+
   refreshPanUI?: () => void;
   refreshVolumeUI?: () => void;
   private _volume: number = 100 / 127; // ≈ 0.7874
@@ -54,13 +68,15 @@ export default class Sequencer {
     config: GridConfig,
     context: AudioContext = getAudioContext(),
     destination: AudioNode = getMasterGain(),
-    instrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano'
+    instrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano',
+    squelchLoadingScreen: boolean = false
   ) {
     this.container = containerEl;
     this.config = { ...config };
     this.context = context;
     this.destination = destination;
     this.instrumentName = instrument;
+    this.squelchLoadingScreen = squelchLoadingScreen;
 
     if (this.container) {
       this.pianoRollCanvas = this.container.querySelector('.piano-roll') as HTMLCanvasElement;
@@ -70,11 +86,18 @@ export default class Sequencer {
     }
   }
 
-  private _noteKey(note: Note): string {
-    return `${note.pitch}:${note.start}:${note.duration}`;
-  }  
-
   private _instrument: Instrument | null = null;
+
+  private _initCanvases(): void {
+    if (!this.container) return;
+    const noteCanvas = this.container.querySelector('canvas.note-grid') as HTMLCanvasElement;
+    const playheadCanvas = this.container.querySelector('canvas.playhead-canvas') as HTMLCanvasElement;
+    const scrollContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
+    const animationCanvas = this.container.querySelector('canvas.note-animate-canvas') as HTMLCanvasElement;
+
+    this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, this.notes, this.config, this);
+    this.grid.scheduleRedraw();
+  }
 
   async initInstrument(): Promise<void> {
     try {
@@ -83,34 +106,12 @@ export default class Sequencer {
     } catch (err) {
       console.warn(`[SEQ:${this.id}] Failed to load instrument '${this.instrumentName}':`, err);
     }
-  }
+  }  
 
-  /** Getter for current track volume (0.0–1.0) */
-  get volume(): number {
-    return this._volume;
-  }
-
-  /** Setter for volume */
-  set volume(val: number) {
-    this._volume = Math.max(0, Math.min(1, val)); // Clamp to [0, 1]
-  
-    if (this._instrument?.setVolume) {
-      this._instrument.setVolume(this._volume);
-    }
-  }
-
-  /** Getter for current track pan (-1.0 to 1.0) */
-  get pan(): number {
-    return this._pan;
-  }
-
-  /** Setter for track pan */
-  set pan(val: number) {
-    this._pan = Math.max(-1, Math.min(1, val)); // Clamp to [-1.0, 1.0]
-
-    if (this._instrument?.setPan) {
-      this._instrument.setPan(this._pan);
-    }
+  setInstrument(name: string): void {
+    this.instrumentName = name;
+    this.updateTrackLabel();
+    this.initInstrument();
   }
 
   updateTrackLabel(): void {
@@ -120,12 +121,267 @@ export default class Sequencer {
     }
   }
 
-  setInstrument(name: string): void {
-    this.instrumentName = name;
-    this.updateTrackLabel();
-    this.initInstrument();
+  get volume(): number {
+    return this._volume;
   }
 
+  set volume(val: number) {
+    this._volume = Math.max(0, Math.min(1, val)); // Clamp to [0, 1]
+  
+    if (this._instrument?.setVolume) {
+      this._instrument.setVolume(this._volume);
+    }
+  }
+
+  get pan(): number {
+    return this._pan;
+  }
+
+  set pan(val: number) {
+    this._pan = Math.max(-1, Math.min(1, val)); // Clamp to [-1.0, 1.0]
+
+    if (this._instrument?.setPan) {
+      this._instrument.setPan(this._pan);
+    }
+  }
+
+  toggleMute(): void {
+    this.mute = !this.mute;
+    if (this.mute) this.solo = false;
+    this.updateTrackStyle();
+  }
+
+  toggleSolo(): void {
+    this.solo = !this.solo;
+    if (this.solo) this.mute = false;
+    this.updateTrackStyle();
+  }
+
+  async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {
+    if (!this._instrument) {
+      await this.initInstrument();
+    }
+  
+    this.stopScheduledNotes();
+  
+    if (!this._instrument?.start) {
+      console.warn(`[SEQ:${this.id}] Instrument does not support scheduled playback.`);
+      return;
+    }
+  
+    const bpm = getTempo();
+    const beatDuration = 60 / bpm;
+    const notes = this.notes;
+    notes.sort((a, b) => a.start - b.start);
+  
+    let i = 0;
+    while (i < notes.length && notes[i].start < startBeat) {
+      i++;
+    }
+  
+    for (; i < notes.length; i++) {
+      const note = notes[i];
+      const midi = pitchToMidi(note.pitch);
+      if (midi === null) continue;
+  
+      const noteTime = startAt + (note.start - startBeat) * beatDuration;
+      const duration = note.duration * beatDuration;
+      const velocity = note.velocity ?? 100;
+  
+      try {
+        this._instrument.start({
+          note: midi,
+          time: noteTime,
+          duration,
+          velocity
+        });
+  
+        // Schedule note animation
+        if (!this.collapsed && this.grid?.gridContext?.animationCtx) {
+          this._scheduledAnimations.push({
+            time: noteTime,
+            note,
+            context: this.grid.gridContext
+          });
+        
+          this._startAnimationLoop(); // ensures this instance animates
+        }        
+  
+      } catch (err) {
+        console.warn(`[SEQ:${this.id}] Failed to schedule note`, note, err);
+      }
+    }
+  }
+
+  stopScheduledNotes(): void {
+    if (this._instrument) {
+      this._instrument.stop();
+    }
+  
+    this._scheduledAnimations = [];
+    this._animationCursor = 0;
+    this._animationLoopRunning = false;      
+  }
+
+  private _startAnimationLoop(): void {
+    if (this._animationLoopRunning) return;
+    this._animationLoopRunning = true;
+  
+    const loop = () => {
+      const now = getAudioContext().currentTime;
+      const lookahead = 0.05;
+      const len = this._scheduledAnimations.length;
+  
+      while (
+        this._animationCursor < len &&
+        this._scheduledAnimations[this._animationCursor].time < now + lookahead
+      ) {
+        const { note, context } = this._scheduledAnimations[this._animationCursor++];
+
+        animateNotePlay(context, note, {
+          getPitchRow: context.getPitchRow,
+          cellWidth: context.getCellWidth(),
+          cellHeight: context.getCellHeight(),
+          labelWidth
+        });
+      }
+  
+      if (this._animationCursor >= len) {
+        this._scheduledAnimations = [];
+        this._animationCursor = 0;
+        this._animationLoopRunning = false;
+      } else {
+        requestAnimationFrame(loop);
+      }
+    };
+  
+    requestAnimationFrame(loop);
+  }  
+
+  resumeAnimationsFromCurrentTime(startAt: number, startBeat: number): void {
+    if (!this.grid?.gridContext || this.collapsed) return;
+  
+    const bpm = getTempo();
+    const beatDuration = 60 / bpm;
+    const now = getAudioContext().currentTime;
+  
+    for (const note of this.notes) {
+      const noteTime = startAt + (note.start - startBeat) * beatDuration;
+  
+      if (noteTime >= now) {
+        this._scheduledAnimations.push({
+          time: noteTime,
+          note,
+          context: this.grid.gridContext
+        });
+      }
+    }
+  
+    this._scheduledAnimations.sort((a, b) => a.time - b.time);
+    this._startAnimationLoop();
+  }  
+
+  async reschedulePlayback(startAt: number, startBeat: number = 0): Promise<void> {
+    // Stop all currently scheduled notes and animations
+    this.stopScheduledNotes();
+  
+    // Reinitialize the instrument if needed (should be fast if cached)
+    if (!this._instrument) {
+      await this.initInstrument();
+    }
+  
+    // Skip re-scheduling if muted or shouldn't play
+    if (this.mute || !this.shouldPlay || !this._instrument?.start) return;
+  
+    const bpm = getTempo();
+    const beatDuration = 60 / bpm;
+    const now = getAudioContext().currentTime;
+  
+    // Re-schedule notes and animations from current beat
+    const notes = this.notes.filter(n => n.start >= startBeat);
+    for (const note of notes) {
+      const midi = pitchToMidi(note.pitch);
+      if (midi === null) continue;
+  
+      const noteTime = startAt + (note.start - startBeat) * beatDuration;
+      const duration = note.duration * beatDuration;
+      const velocity = note.velocity ?? 100;
+  
+      try {
+        this._instrument.start({
+          note: midi,
+          time: noteTime,
+          duration,
+          velocity
+        });
+  
+        // Schedule animation
+        if (!this.collapsed && this.grid?.gridContext?.animationCtx && noteTime >= now) {
+          this._scheduledAnimations.push({
+            time: noteTime,
+            note,
+            context: this.grid.gridContext
+          });
+  
+          this._startAnimationLoop();
+        }
+  
+      } catch (err) {
+        console.warn(`[SEQ:${this.id}] Failed to re-schedule note`, note, err);
+      }
+    }
+  }
+  
+
+  async exportToOffline(signal?: AbortSignal): Promise<void> {
+    const beatToSec = 60 / getTempo();
+  
+    // Check if operation was cancelled before even loading the instrument
+    if (signal?.aborted) return;
+  
+    const instrument = await loadInstrument(
+      this.instrumentName,
+      this.context,
+      this.destination,
+      this._volume,
+      this._pan
+    );
+  
+    // Abort right after loading, if triggered
+    if (signal?.aborted) return;
+  
+    for (const note of this.notes) {
+      if (signal?.aborted) return;
+  
+      const rawStartSec = note.start * beatToSec;
+      const startSec = Math.max(0.01, rawStartSec);
+      const durationSec = note.duration * beatToSec;
+      const velocity = note.velocity ?? 100;
+      const midi = pitchToMidi(note.pitch);
+      if (midi == null) continue;
+  
+      const parts = this.instrumentName.split('/');
+      const library = parts.length >= 3 ? parts[1] : parts[0];
+  
+      const mappedNote = (library === 'drummachines' && instrument.__midiMap)
+        ? instrument.__midiMap.get(midi) ?? midi
+        : midi;
+  
+      try {
+        instrument.start({
+          note: mappedNote,
+          duration: durationSec,
+          velocity: velocity,
+          time: startSec,
+          loop: false,
+        });
+      } catch (err) {
+        console.warn(`[SEQ:${this.id}] Failed to start note in export:`, note, err);
+      }
+    }
+  }
+
+  // Used by grid when placing/manipulating notes
   playNote(pitch: string, durationSec: number, velocity = 100, loop = false): Promise<null> {
     return loadAndPlayNote(
       this.instrumentName,
@@ -140,21 +396,6 @@ export default class Sequencer {
       this.pan
     );
   }
-
-  private _initCanvases(): void {
-    if (!this.container) return;
-    const noteCanvas = this.container.querySelector('canvas.note-grid') as HTMLCanvasElement;
-    const playheadCanvas = this.container.querySelector('canvas.playhead-canvas') as HTMLCanvasElement;
-    const scrollContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
-    const animationCanvas = this.container.querySelector('canvas.note-animate-canvas') as HTMLCanvasElement;
-
-    this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, this.notes, this.config, this);
-    this.grid.scheduleRedraw();
-  }
-
-  onTransportLoop(): void {
-    this._activeNoteKeys.clear();
-  }  
 
   updateTotalMeasures(): void {
     const totalBeats = getTotalBeats();
@@ -194,103 +435,6 @@ export default class Sequencer {
     this.notes.splice(0, this.notes.length, ...clamped);
   }
 
-  play(): void {
-    this.stop();
-    this.clampNotesToGrid();
-    this._noteHandlers.clear();
-    this._activeNoteKeys.clear();
-
-    const bpm = getTempo();
-    const beatToSec = 60 / bpm;
-
-    this._beatHandler = (beat) => {
-      this.grid?.drawPlayhead(this.grid.getXForBeat(beat));
-      if (!this.shouldPlay) return;
-
-      for (const note of this.notes) {
-        const noteStart = note.start;
-        const noteEnd = note.start + note.duration;
-        const key = this._noteKey(note);
-
-        if (!this._activeNoteKeys.has(key) && noteStart < beat && beat <= noteEnd) {
-          const durationSec = note.duration * beatToSec;
-          const velocity = note.velocity ?? 100;
-          this.playNote(note.pitch, durationSec, velocity);
-
-          if (this.grid?.gridContext) {
-            const gctx = this.grid.gridContext;
-            animateNotePlay(gctx, note, {
-              getPitchRow: gctx.getPitchRow,
-              cellWidth: gctx.getCellWidth(),
-              cellHeight: gctx.getCellHeight(),
-              labelWidth
-            });
-          }
-
-          this._activeNoteKeys.add(key);
-        }
-      }
-    };
-
-    this._unsub = onBeatUpdate(this._beatHandler);
-    this._beatHandler(0);
-  }
-
-  stop(): void {
-    if (this._unsub) {
-      this._unsub();
-      this._unsub = null;
-    }
-    this._beatHandler = null;
-  
-    for (const handler of this._noteHandlers.values()) {
-      handler?.forceStop?.();
-      handler?.stop?.();
-    }
-  
-    this._activeNoteKeys.clear();
-    this._noteHandlers.clear();
-  
-    this.grid?.drawPlayhead(0);
-    this.redraw();
-  }  
-
-  pause(): void {
-    for (const key of this._activeNoteKeys) {
-      const handle = this._noteHandlers.get(key);
-      handle?.stop?.();
-    }
-    this._activeNoteKeys.clear();
-  
-    if (this._unsub) {
-      this._unsub();
-      this._unsub = null;
-    }
-  }  
-
-  resume(): void {
-    if (this._beatHandler && !this._unsub) {
-      this._unsub = onBeatUpdate(this._beatHandler);
-    }
-  }
-
-  seekTo(beat: number): void {
-    this.stop();
-    this.play();
-  }
-
-  toggleMute(): void {
-    this.mute = !this.mute;
-    if (this.mute) this.solo = false;
-    this.updateTrackStyle();
-  }
-
-  toggleSolo(): void {
-    this.solo = !this.solo;
-    if (this.solo) this.mute = false;
-    this.updateTrackStyle();
-  }
-
   updateTrackStyle(): void {
     if (!this.container) return;
     const muteBtn = this.container.querySelector('.mute-btn');
@@ -305,11 +449,6 @@ export default class Sequencer {
 
   redraw(): void {
     this.grid?.scheduleRedraw();
-  }
-
-  destroy(): void {
-    this.stop();
-    this.container?.remove();
   }
 
   getState(): { notes: Note[]; config: GridConfig; instrument: string } {
@@ -369,45 +508,6 @@ export default class Sequencer {
       }))
     );
   }  
-
-  async exportToOffline(): Promise<void> {
-    const beatToSec = 60 / getTempo();
-    const instrument = await loadInstrument(this.instrumentName, this.context, this.destination, this._volume, this._pan);
-
-    for (const note of this.notes) {
-      const rawStartSec = note.start * beatToSec;
-      const startSec = Math.max(0.01, rawStartSec); // Avoid 0s
-      const velocity = note.velocity ?? 100;
-      const durationSec = note.duration * beatToSec;
-      const midi = pitchToMidi(note.pitch);
-      if (midi == null) continue;
-
-      // Add check for drum machines and use sample names
-      const parts = this.instrumentName.split('/');
-      const library = parts.length >= 3 ? parts[1] : parts[0];
-      
-      if (library === 'drummachines' && instrument.__midiMap) {
-        const sampleName = instrument.__midiMap.get(midi);
-        if (sampleName) {
-          instrument.start({
-            note: sampleName,
-            duration: durationSec,
-            velocity: velocity,
-            time: startSec,
-            loop: false,
-          });
-        }
-      } else {
-        instrument.start({
-          note: midi,
-          duration: durationSec,
-          velocity: velocity,
-          time: startSec,
-          loop: false,
-        });
-      }      
-    }
-  }
 
   /**
    * Updates the note range for this sequencer and refreshes the UI
@@ -477,74 +577,39 @@ export default class Sequencer {
       this.updateNoteRange(['B1', 'A5']);
     }
   }
-
-  // NEW METHODS FOR EFFICIENCY
-  async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {
-    if (!this._instrument) {
-      await this.initInstrument();
-    }
   
-    if (!this._instrument?.start) {
-      console.warn(`[SEQ:${this.id}] Instrument does not support scheduled playback.`);
-      return;
-    }
+  setCollapsed(val: boolean): void {
+    this.collapsed = val;
   
-    const bpm = getTempo(); // assume global tempo accessor
-    const beatDuration = 60 / bpm;
-    const ctxStart = this.context.currentTime;
-    const notes = this.notes;
+    if (val) {
+      this._scheduledAnimations = [];
+      this._animationCursor = 0;
+      this._animationLoopRunning = false;
   
-    // Optional: sort notes once
-    notes.sort((a, b) => a.start - b.start);
+      // Hide canvas element
+      this.animationCanvas?.classList.add('hidden');
   
-    // Find the first note index to play
-    let i = 0;
-    while (i < notes.length && notes[i].start < startBeat) {
-      i++;
-    }
-  
-    for (; i < notes.length; i++) {
-      const note = notes[i];
-      const midi = pitchToMidi(note.pitch);
-      if (midi === null) continue;
-  
-      const noteTime = startAt + (note.start - startBeat) * beatDuration;
-      const duration = note.duration * beatDuration;
-      const velocity = note.velocity ?? 100;
-      const noteKey = this._noteKey(note);
-  
-      try {
-        const handle = this._instrument.start({
-          note: midi,
-          time: noteTime,
-          duration,
-          velocity,
-        });
-  
-        // // Optionally schedule animation here
-        // if (this.grid?.gridContext) {
-        //   const gctx = this.grid.gridContext;
-        //   const visualDelayMs = (noteTime - ctxStart) * 1000;
-        //   setTimeout(() => {
-        //     animateNotePlay(gctx, note, {
-        //       getPitchRow: gctx.getPitchRow,
-        //       cellWidth: gctx.getCellWidth(),
-        //       cellHeight: gctx.getCellHeight(),
-        //       labelWidth,
-        //     });
-        //   }, visualDelayMs);
-        // }
-      } catch (err) {
-        console.warn(`[SEQ:${this.id}] Failed to schedule note`, note, err);
+      // Disable drawing context
+      if (this.grid?.gridContext) {
+        this.grid.gridContext.animationCtx = null; // <-- requires nullable typing
       }
-    }
-  }
+  
+    } else {
+      this.animationCanvas?.classList.remove('hidden');
+    
+      if (this.animationCanvas && this.grid?.gridContext) {
+        this.grid.gridContext.animationCtx = this.animationCanvas.getContext('2d');
+      }
+    
+      // Attempt to resume animation from current playback position
+      if (playbackEngine.isActive()) {
+        this.resumeAnimationsFromCurrentTime(playbackEngine.getStartTime(), playbackEngine.getStartBeat());
+      }
+    }    
+  }  
 
-  runPreparedPlayback(): void {
-    if (this.context.state === 'suspended') {
-      this.context.resume();
-    }
+  destroy(): void {
+    this.stopScheduledNotes();
+    this.container?.remove();
   }
-  
-  
 }

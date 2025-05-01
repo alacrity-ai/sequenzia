@@ -9,7 +9,7 @@ export interface HandlerContext {
   config: any;
   notes: Note[];
   canvas: HTMLCanvasElement;
-  animationCtx: CanvasRenderingContext2D;
+  animationCtx: CanvasRenderingContext2D | null;
   getCellHeight: () => number;
   getCellWidth: () => number;
   getCanvasPos: (e: MouseEvent) => { x: number, y: number };

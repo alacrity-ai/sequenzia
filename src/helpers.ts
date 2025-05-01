@@ -21,6 +21,7 @@ export function collapseAllSequencers(): void {
       body.classList.add('hidden');
       mini.classList.remove('hidden');
       collapseIcon?.setAttribute('href', '#icon-caret-up');
+      seq.setCollapsed(true);
       toggleZoomControls(wrapper, false);
       drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
     }

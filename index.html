@@ -574,8 +574,9 @@
       await loadHTML('modal-mount-root', 'web/modals/feature-not-implemented-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/error-generic-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/velocity-adjust-modal.html');
+      await loadHTML('modal-mount-root', 'web/modals/save-wav-menu-modal.html');
 
-      // ✅ Only load the app after modals and icons are present
+      // Only load the app after modals and icons are present
       await import('/src/main.js');
     })();
   </script>

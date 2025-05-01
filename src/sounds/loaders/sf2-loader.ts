@@ -2,7 +2,7 @@
 
 import { getAudioContext, getMasterGain } from '../audio/audio.js';
 import { Instrument } from '../interfaces/Instrument.js';
-import { showLoadingModal, hideLoadingModal } from '../../sequencer/ui.js';
+import { showLoadingModal, hideLoadingModal } from '../../global/loadingModal.js';
 import * as smplr from 'smplr';
 
 let activeInstrumentLoads = 0;
@@ -10,12 +10,24 @@ let activeInstrumentLoads = 0;
 // Cache instruments per AudioContext
 const contextInstrumentMap: Map<AudioContext, Map<string, Instrument>> = new Map();
 
+async function loadInstrumentWithOptionalLoading(
+  instrument: Instrument,
+  squelchLoadingScreen: boolean
+): Promise<void> {
+  if (squelchLoadingScreen) {
+    await instrument.load;
+  } else {
+    await withLoading(instrument.load);
+  }
+}
+
 export async function loadInstrument(
   fullName: string,
   context: AudioContext = getAudioContext(),
   destination: AudioNode | null = null,
   volume?: number, // float 0.0–1.0
-  pan?: number // Value -1.0 to 1.0
+  pan?: number, // Value -1.0 to 1.0
+  squelchLoadingScreen?: boolean
 ): Promise<Instrument> {
   const parts = fullName.split('/');
   let engine = 'sf2';
@@ -65,22 +77,33 @@ export async function loadInstrument(
 
   if (libraryRaw === 'smolken') {
     instrument = new smplr.Smolken(context, commonOptions);
-    await withLoading(instrument.load);
-
   } else if (libraryRaw === 'splendidgrandpiano') {
-    instrument = new smplr.SplendidGrandPiano(context, {
-      ...commonOptions,
-    });
-    await withLoading(instrument.load);
-
+    instrument = new smplr.SplendidGrandPiano(context, commonOptions);
   } else if (libraryRaw === 'mallets') {
     instrument = new smplr.Mallet(context, commonOptions);
-    await withLoading(instrument.load);
-
   } else if (libraryRaw === 'drummachines') {
     instrument = new smplr.DrumMachine(context, commonOptions);
-    await withLoading(instrument.load);
-
+  } else {
+    const kitMap: Record<string, string> = {
+      'fluidr3-gm': 'FluidR3_GM',
+      'fatboy': 'FatBoy',
+      'musyngkite': 'MusyngKite',
+    };
+  
+    const kit = kitMap[libraryRaw.toLowerCase()] || 'MusyngKite';
+    const format = 'ogg';
+    const url = `https://gleitz.github.io/midi-js-soundfonts/${kit}/${instrumentName}-${format}.js`;
+  
+    instrument = new smplr.Soundfont(context, {
+      ...commonOptions,
+      instrumentUrl: url,
+      kit,
+    });
+  }
+  
+  await loadInstrumentWithOptionalLoading(instrument, squelchLoadingScreen ?? false);
+  
+  if (libraryRaw === 'drummachines') {
     const sampleNames: string[] = instrument.getSampleNames?.() ?? [];
     const midiMap = new Map<number, string>();
     sampleNames.forEach((name, i) => {
@@ -88,25 +111,8 @@ export async function loadInstrument(
       midiMap.set(midi, name);
     });
     instrument.__midiMap = midiMap;
-
-  } else {
-    const kitMap: Record<string, string> = {
-      'fluidr3-gm': 'FluidR3_GM',
-      'fatboy': 'FatBoy',
-      'musyngkite': 'MusyngKite',
-    };
-
-    const kit = kitMap[libraryRaw.toLowerCase()] || 'MusyngKite';
-    const format = 'ogg';
-    const url = `https://gleitz.github.io/midi-js-soundfonts/${kit}/${instrumentName}-${format}.js`;
-
-    instrument = new smplr.Soundfont(context, {
-      ...commonOptions,
-      instrumentUrl: url,
-      kit,
-    });
-    await withLoading(instrument.load);
   }
+  
 
   // === Augment with volume and pan setters ===
   const inst = instrument as Instrument;
@@ -200,7 +206,7 @@ function onInstrumentLoadEnd(): void {
   activeInstrumentLoads--;
   if (activeInstrumentLoads <= 0) {
     activeInstrumentLoads = 0;
-    hideLoadingModal();
+    // hideLoadingModal();
   }
 }
 

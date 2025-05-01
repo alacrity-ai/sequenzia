@@ -99,7 +99,6 @@ async function loadAndPlayNote(
     time: startTime ?? ctx.currentTime,
   });
 
-
   return null;
 }
 

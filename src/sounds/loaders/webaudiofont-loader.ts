@@ -2,7 +2,7 @@
 
 import { getAudioContext, getMasterGain } from '../audio/audio.js';
 import { Instrument } from '../interfaces/Instrument.js';
-import { showLoadingModal, hideLoadingModal } from '../../sequencer/ui.js';
+import { showLoadingModal, hideLoadingModal } from '../../global/loadingModal.js';
 import { pitchToMidi } from '../audio/pitch-utils.js';
 import { webAudioFontCatalogue } from './catalogues/webaudiofont-catalogue.js';
 import { DRUM_MIDI_RANGE } from './constants/drums.js';
@@ -25,10 +25,6 @@ type StartOptions = {
 
 const contextInstrumentMap: Map<AudioContext, Map<string, Instrument>> = new Map();
 let player: any | null = null;
-
-interface WebAudioFontInstrument extends Instrument {
-  _preset: any;
-}
 
 function getSafeWebAudioFontVolume(volume: number): number {
     return Math.max(volume, 0.0001); // WAF treats 0 as "use default (1.0)"
@@ -55,7 +51,8 @@ export async function loadInstrument(
     context: AudioContext = getAudioContext(),
     destination: AudioNode | null = null,
     volume?: number,
-    pan?: number
+    pan?: number,
+    squelchLoadingScreen?: boolean
   ): Promise<Instrument> {
     const [libraryRaw, instrumentDisplayName] = fullName.split('/');
     const cacheKey = `${libraryRaw}/${instrumentDisplayName}`;
@@ -88,7 +85,11 @@ export async function loadInstrument(
       // Melodic instrument branch
       const varName = `_tone_${matched.id}`;
       const url = `https://surikov.github.io/webaudiofontdata/sound/${matched.id}.js`;
-      await withLoading(loadScript(url));
+      if (squelchLoadingScreen) {
+        await loadScript(url);
+      } else {
+        await withLoading(loadScript(url));
+      }
   
       const preset = (window as any)[varName];
       
@@ -113,41 +114,60 @@ export async function loadInstrument(
         }
       }
 
+      // Define the melodic instrument
       const instrument: any = {
         _preset: preset,
         _volume: volume ?? 1.0,
+        _activeEnvelopes: [] as Array<{ cancel?: () => void; audioBufferSourceNode?: AudioBufferSourceNode }>,
+      
         start({ note, duration = 1, velocity = 100, time }: StartOptions) {
-            const midi = typeof note === 'string' ? pitchToMidi(note) : note;
-            if (midi == null || typeof midi !== 'number') return;
-          
-            const when = typeof time === 'number' ? time : 0;
-          
-            // Synthesize velocity by scaling volume
-            const normalizedVelocity = Math.max(0.01, Math.min(1.0, velocity / 127));
-            const baseVolume = getSafeWebAudioFontVolume(instrument._volume);
-            const rawVolume = baseVolume * normalizedVelocity;
-            const finalVolume = Math.max(0.01, Math.min(1.0, rawVolume)); // clamp to [0.01, 1.0]            
-          
-            player.queueWaveTable(
-              context,
-              pannerNode || getMasterGain(),
-              preset,
-              when,
-              midi,
-              duration,
-              finalVolume
-            );
+          const midi = typeof note === 'string' ? pitchToMidi(note) : note;
+          if (midi == null || typeof midi !== 'number') return;
+      
+          const when = typeof time === 'number' ? time : 0;
+          const normalizedVelocity = Math.max(0.01, Math.min(1.0, velocity / 127));
+          const baseVolume = getSafeWebAudioFontVolume(instrument._volume);
+          const finalVolume = Math.max(0.01, Math.min(1.0, baseVolume * normalizedVelocity));
+      
+          const envelope = player.queueWaveTable(
+            context,
+            pannerNode || getMasterGain(),
+            preset,
+            when,
+            midi,
+            duration,
+            finalVolume
+          );
+      
+          // Track the envelope for future cancellation
+          instrument._activeEnvelopes.push(envelope);
         },
-        stop() {},
-        load: Promise.resolve(),
+      
+        stop() {
+          for (const envelope of instrument._activeEnvelopes) {
+            try {
+              if (envelope.cancel) {
+                envelope.cancel();
+              } else if (envelope.audioBufferSourceNode?.stop) {
+                envelope.audioBufferSourceNode.stop();
+              }
+            } catch (e) {
+              console.warn("Failed to stop envelope:", e);
+            }
+          }
+          instrument._activeEnvelopes = [];
+        },
+      
         setVolume(vol: number) {
           instrument._volume = Math.max(0, Math.min(1, vol));
         },
+      
         setPan(value: number) {
           pannerNode.pan.value = Math.max(-1, Math.min(1, value));
-        }          
-      };
+        },
       
+        load: Promise.resolve()
+      };      
   
       instrumentMap.set(cacheKey, instrument);
       return instrument;
@@ -163,66 +183,94 @@ export async function loadInstrument(
     console.log('Regex got kit number: ', kitNumber);
     const drumPresets: Record<number, any> = {};
   
-    await withLoading(
-      (async () => {
-        for (const midi of DRUM_MIDI_RANGE) {
-          const varName = `_drum_${midi}_${kitNumber}_${libraryName}_sf2_file`;
-          console.log('varName is: ', varName);
-          const url = `https://surikov.github.io/webaudiofontdata/sound/${12800 + midi}_${kitNumber}_${libraryName}_sf2_file.js`;
-  
+    const loadDrumPresets = async () => {
+      for (const midi of DRUM_MIDI_RANGE) {
+        const varName = `_drum_${midi}_${kitNumber}_${libraryName}_sf2_file`;
+        console.log('varName is: ', varName);
+        const url = `https://surikov.github.io/webaudiofontdata/sound/${12800 + midi}_${kitNumber}_${libraryName}_sf2_file.js`;
+    
+        try {
+          await loadScript(url);
+          const preset = (window as any)[varName];
+          if (!preset) {
+            console.warn(`Missing drum preset: ${varName}`);
+            continue;
+          }
+          player.loader.decodeAfterLoading(context, varName);
+          drumPresets[midi] = preset;
+        } catch (e) {
+          console.warn(`Failed to load drum preset ${midi}: ${e}`);
+        }
+      }
+    };
+    
+    if (squelchLoadingScreen ?? false) {
+      await loadDrumPresets();
+    } else {
+      await withLoading(loadDrumPresets());
+    }
+    
+    // Define the drum kit instrument
+    const instrument: any = {
+      _preset: drumPresets,
+      _volume: volume ?? 1.0,
+      _activeEnvelopes: [] as Array<{ cancel?: () => void; audioBufferSourceNode?: AudioBufferSourceNode }>,
+
+      start({ note, duration = 1, velocity = 100, time }: StartOptions) {
+        const midi = typeof note === 'string' ? pitchToMidi(note) : note;
+        if (midi == null || typeof midi !== 'number') {
+          console.warn(`Invalid MIDI pitch: ${note}`);
+          return;
+        }
+
+        const preset = drumPresets[midi];
+        if (!preset) {
+          console.warn(`No drum preset loaded for MIDI ${midi}`);
+          return;
+        }
+
+        const when = typeof time === 'number' ? time : 0;
+        const baseVolume = getSafeWebAudioFontVolume(instrument._volume);
+
+        const envelope = player.queueWaveTable(
+          context,
+          pannerNode || getMasterGain(),
+          preset,
+          when,
+          midi,
+          duration,
+          baseVolume
+        );
+
+        instrument._activeEnvelopes.push(envelope);
+      },
+
+      stop() {
+        for (const envelope of instrument._activeEnvelopes) {
           try {
-            await loadScript(url);
-            const preset = (window as any)[varName];
-            if (!preset) {
-              console.warn(`Missing drum preset: ${varName}`);
-              continue;
+            if (envelope.cancel) {
+              envelope.cancel();
+            } else if (envelope.audioBufferSourceNode?.stop) {
+              envelope.audioBufferSourceNode.stop();
             }
-            player.loader.decodeAfterLoading(context, varName);
-            drumPresets[midi] = preset;
           } catch (e) {
-            console.warn(`Failed to load drum preset ${midi}: ${e}`);
+            console.warn("Failed to stop envelope:", e);
           }
         }
-      })()
-    );
-  
-    const instrument: any = {
-        _preset: drumPresets,
-        _volume: volume ?? 1.0,
-        start({ note, duration = 1, velocity = 100, time }: StartOptions) {
-          const midi = typeof note === 'string' ? pitchToMidi(note) : note;
-          if (midi == null || typeof midi !== 'number') {
-            console.warn(`Invalid MIDI pitch: ${note}`);
-            return;
-          }
-      
-          const preset = drumPresets[midi];
-          if (!preset) {
-            console.warn(`No drum preset loaded for MIDI ${midi}`);
-            return;
-          }
-      
-          const when = typeof time === 'number' ? time : 0;
-      
-          player.queueWaveTable(
-            context,
-            pannerNode || getMasterGain(),
-            preset,
-            when,
-            midi,
-            duration,
-            getSafeWebAudioFontVolume(instrument._volume)
-          );
-        },
-        stop() {},
-        load: Promise.resolve(),
-        setVolume(vol: number) {
-          instrument._volume = Math.max(0, Math.min(1, vol));
-        },
-        setPan(value: number) {
-          pannerNode.pan.value = Math.max(-1, Math.min(1, value));
-        }   
+        instrument._activeEnvelopes = [];
+      },
+
+      load: Promise.resolve(),
+
+      setVolume(vol: number) {
+        instrument._volume = Math.max(0, Math.min(1, vol));
+      },
+
+      setPan(value: number) {
+        pannerNode.pan.value = Math.max(-1, Math.min(1, value));
+      }
     };
+
   
     instrumentMap.set(cacheKey, instrument as Instrument);
     return instrument as Instrument;      
@@ -250,6 +298,13 @@ async function withLoading<T>(promise: Promise<T>): Promise<T> {
     hideLoadingModal();
   }
 }
+
+// // Attach event listener ESCAPE key to hide loading modal
+// document.addEventListener('keydown', (event) => {
+//   if (event.key === 'Escape') {
+//     hideLoadingModal();
+//   }
+// });
 
 export function getWebAudioFontEngine() {
   return {

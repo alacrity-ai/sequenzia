@@ -7,6 +7,7 @@ import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/grid/drawin
 import { AppState, SequencerState } from './interfaces/AppState.js';
 import { NotePosition } from '../sequencer/interfaces/Grid.js';
 import { GridConfig } from '../sequencer/interfaces/GridConfig.js';
+import { engine as playbackEngine } from '../main.js';
 
 interface SerializedSequencer extends SequencerState {
   config?: Partial<GridConfig>; // optional loose config, typed better
@@ -104,6 +105,11 @@ export function resyncFromState(state: AppState = getAppState()): void {
           }
         }
 
+        if (playbackEngine?.isActive()) {
+          const startAt = playbackEngine.getStartTime();
+          const startBeat = playbackEngine.getStartBeat();
+          void live.reschedulePlayback(startAt, startBeat);
+        }
         live.grid?.scheduleRedraw();
       }
     }

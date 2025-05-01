@@ -1,9 +1,12 @@
 // src/export/save.ts
 
 import { Session } from '../sequencer/interfaces/Session.js';
-import Sequencer from '../sequencer/sequencer.js';
 import { getTempo } from '../sequencer/transport.js';
 import { AppState } from '../appState/interfaces/AppState.js';
+import { showLoadingModal, hideLoadingModal, setGlobalLoading } from '../global/loadingModal.js';
+import Sequencer from '../sequencer/sequencer.js';
+
+let globalLoading: boolean = false;
 
 /**
  * Exports the complete session to JSON format (current format - v3).
@@ -57,50 +60,46 @@ export function exportSessionToJSON(appState: AppState): { url: string, filename
   };
 }
 
-/**
- * Exports the complete session to WAV format.
- * @param {Session} session - The session object containing tracks
- * @returns {Promise<void>} Resolves when the WAV file has been generated and download triggered
- * @description Renders all tracks to an audio buffer using Web Audio API's OfflineAudioContext,
- *             then converts to WAV format and triggers download
- */
-export async function exportSessionToWAV(session: Session): Promise<void> {
-  // Check if the session has tracks
-  if (!session.tracks || session.tracks.length === 0) {
-    throw new Error("No tracks to export.");
-  }
-
+// Exports using workers: Experimental
+export async function exportSessionToWAVWorkers(session: Session): Promise<void> {
   const bpm = getTempo();
   const beatDuration = 60 / bpm;
+  const sampleRate = 44100;
 
-  // Calculate the total duration of the session in seconds
   const totalSeconds = Math.max(
     ...session.tracks.flatMap(t =>
       t.notes.map(n => (n.start + n.duration) * beatDuration + 0.2)
     )
   );
 
-  const sampleRate = 44100;
-  const offlineCtx = new OfflineAudioContext(
-    2, // Two channels (stereo)
-    Math.ceil(sampleRate * totalSeconds),
-    sampleRate
+  // Dynamically import main-thread renderer
+  const { renderTrackInMainThread } = await import('./wav/renderTrackInMainThread.js');
+
+  const bufferPromises = session.tracks.map(track =>
+    renderTrackInMainThread(
+      track,
+      track.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano',
+      bpm,
+      sampleRate,
+      totalSeconds
+    )
   );
 
-  // Process each track
-  for (const state of session.tracks) {
-    const instrumentName = state.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
-    // @ts-ignore | Fix this after refactoring Sequencer to ts
-    const seq = new Sequencer(null, state.config, offlineCtx, offlineCtx.destination, instrumentName);
-    seq.setState(state);
-    await seq.exportToOffline();
+  const trackBuffers = await Promise.all(bufferPromises);
+
+  const finalCtx = new OfflineAudioContext(2, Math.ceil(sampleRate * totalSeconds), sampleRate);
+
+  for (const buffer of trackBuffers) {
+    const src = finalCtx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(finalCtx.destination);
+    src.start();
   }
 
-  const renderedBuffer = await offlineCtx.startRendering();
-  const wavBlob = audioBufferToWavBlob(renderedBuffer);
-  const url = URL.createObjectURL(wavBlob);
+  const mixed = await finalCtx.startRendering();
+  const wavBlob = audioBufferToWavBlob(mixed);
 
-  // Create a download link and trigger the download
+  const url = URL.createObjectURL(wavBlob);
   const a = document.createElement('a');
   a.href = url;
   a.download = `session-${Date.now()}.wav`;
@@ -108,6 +107,82 @@ export async function exportSessionToWAV(session: Session): Promise<void> {
   URL.revokeObjectURL(url);
 }
 
+export async function exportSessionToWAV(
+    session: Session, 
+    options: { sampleRate: number; includePan: boolean } = { sampleRate: 44100, includePan: true }
+  ): Promise<void> {
+  if (!session.tracks || session.tracks.length === 0) {
+    throw new Error("No tracks to export.");
+  }
+  const sampleRate = options.sampleRate;
+  const numChannels = options.includePan ? 2 : 1;
+
+  const abortController = new AbortController();
+  let aborted = false;
+
+  showLoadingModal(
+    "Exporting Session",
+    "Rendering your session offline...",
+    () => {
+      aborted = true;
+      abortController.abort();
+    },
+    true
+  );
+
+  try {
+    const bpm = getTempo();
+    const beatDuration = 60 / bpm;
+
+    const totalSeconds = Math.max(
+      ...session.tracks.flatMap(t =>
+        t.notes.map(n => (n.start + n.duration) * beatDuration + 0.2)
+      )
+    );
+
+    const offlineCtx = new OfflineAudioContext(
+      numChannels,
+      Math.ceil(sampleRate * totalSeconds),
+      sampleRate
+    );
+
+    for (const state of session.tracks) {
+      if (aborted) return;
+      const instrumentName = state.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
+      // @ts-ignore
+      const squelchLoadingScreen = true;
+      const seq = new Sequencer(null, state.config as any, offlineCtx as any, offlineCtx.destination, instrumentName, squelchLoadingScreen);
+      seq.setState(state);
+      await seq.exportToOffline(abortController.signal);
+
+      if (aborted) return;
+    }
+
+    if (aborted) return;
+    showLoadingModal("Rendering Audio", "Rendering audio buffer…", undefined, true); // without cancel
+    const renderedBuffer = await offlineCtx.startRendering();
+
+    showLoadingModal("Converting to WAV", "Converting to WAV format…", undefined, true); // without cancel
+    const wavBlob = audioBufferToWavBlob(renderedBuffer);
+    
+    showLoadingModal("Downloading WAV", "Please wait...", undefined, true); // without cancel
+    const url = URL.createObjectURL(wavBlob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `session-${Date.now()}.wav`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    if (aborted) {
+      console.warn("Export operation was cancelled by the user.");
+    } else {
+      console.error("Error during export:", e);
+    }
+  } finally {
+    hideLoadingModal(true);
+  }
+}
 
 function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
   const numChannels = buffer.numberOfChannels;
@@ -143,4 +218,8 @@ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
   }
 
   return new Blob([result.buffer], { type: 'audio/wav' });
+}
+
+export function isGlobalLoading(): boolean {
+  return globalLoading;
 }

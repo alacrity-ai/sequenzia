@@ -9,6 +9,7 @@ import { getTimeSignature, getTotalMeasures } from './transport.js';
 import { showVelocityModal } from './grid/interaction/velocity/velocityModeMenu.js';
 import { showErrorModal } from '../global/errorGeneric.js';
 import { SNAP_RESOLUTIONS, durationHotkeys } from './grid/helpers/constants.js';
+import { isGlobalLoading } from '../export/save.js';
 import Sequencer from './sequencer.js';
 
 let isInitialized = false;
@@ -204,6 +205,7 @@ export function setupUI({
     }
   });
 
+  // === Note Duration Select ===
   durationSelect.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLSelectElement;
     const newDuration = parseFloat(target.value);
@@ -222,6 +224,7 @@ export function setupUI({
     });
   });
 
+  // === Highlight Active Duration ===
   function highlightActiveDuration(duration: number): void {
     const buttons = document.querySelectorAll<HTMLElement>('.note-duration-btn');
     buttons.forEach(btn => {
@@ -236,6 +239,7 @@ export function setupUI({
     });
   }
 
+  // === Snap Resolution Select ===
   snapSelect.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLSelectElement;
     const newValue = target.value;
@@ -246,11 +250,13 @@ export function setupUI({
     }
   });
 
+  // === Loop Toggle ===
   loopToggle.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLInputElement;
     onToggleLoop(target.checked);
   });
 
+  // === Tempo Input ===
   tempoInput.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLInputElement;
     const bpm = parseInt(target.value, 10);
@@ -261,6 +267,7 @@ export function setupUI({
     }
   });
 
+  // === Save Button ===
   saveBtn.addEventListener('click', () => {
     if (exportModal) {
       exportModal.classList.remove('hidden');
@@ -269,8 +276,8 @@ export function setupUI({
     }
   });
 
-// Continuing inside setupUI()...
 
+// === Export Type Modal Buttons ===
 if (exportJsonBtn) {
   exportJsonBtn.addEventListener('click', () => {
     exportModal?.classList.add('hidden');
@@ -281,7 +288,9 @@ if (exportJsonBtn) {
 if (exportWavBtn) {
   exportWavBtn.addEventListener('click', () => {
     exportModal?.classList.add('hidden');
-    onSave?.('wav');
+    requestAnimationFrame(() => {
+      onSave?.('wav');
+    });
   });
 }
 
@@ -298,6 +307,7 @@ if (exportCancelBtn) {
   });
 }
 
+// === User Config Button ===
 configBtn?.addEventListener('click', () => {
   const configModal = document.getElementById('userconfig-modal') as HTMLElement | null;
   configModal?.classList.remove('hidden');
@@ -357,15 +367,6 @@ export function updateMeasuresInput(measures: number): void {
   if (measuresInput) {
     measuresInput.value = String(measures);
   }
-}
-
-export function showLoadingModal(): void {
-  if (isSplashScreenVisible()) return;
-  document.getElementById('loading-modal')?.classList.remove('hidden');
-}
-
-export function hideLoadingModal(): void {
-  document.getElementById('loading-modal')?.classList.add('hidden');
 }
 
 export function setupSequencerGripHandler(sequencerElement: HTMLElement): void {

@@ -1,4 +1,4 @@
 // Define the AnimationContext type
 export interface AnimationContext {
-    animationCtx: CanvasRenderingContext2D;
+    animationCtx: CanvasRenderingContext2D | null;
 }

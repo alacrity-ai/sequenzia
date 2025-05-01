@@ -30,6 +30,8 @@ export function animateNotePlacement(
     labelWidth: number;
   }
 ): void {
+  if (!ctx.animationCtx) return;
+
   const x = note.start * cellWidth + labelWidth;
   const y = getPitchRow(note.pitch) * cellHeight;
   const w = note.duration * cellWidth;

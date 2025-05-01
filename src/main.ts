@@ -10,18 +10,21 @@ import { showSplashScreen } from './global/splashscreen.js';
 import { setupHelpButton } from './global/helpbutton.js';
 import { setupKeyboard } from './setup/setupKeyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
-import { sequencers, setupAddTrackButton } from './setup/sequencers.js';
+import { getSequencers, sequencers, setupAddTrackButton } from './setup/sequencers.js';
 import { GRID_CONFIG as config } from './sequencer/grid/helpers/constants.js';
-import { setupUI, resetPlayButtonState } from './sequencer/ui.js';
+import { setupUI } from './sequencer/ui.js';
 import { initFooterUI } from './setup/footerUI.js';
-import { exportSessionToJSON, exportSessionToWAV } from './export/save.js';
+import { showSaveWavOptionsModal } from './export/interaction/saveWavMenu.js';
+import { registerSaveWavMenuHandlers } from './export/interaction/saveWavMenuHandlers.js';
+import { exportSessionToJSON } from './export/save.js';
 import { exportSessionToMIDI } from './export/midi/exportToMidi.js';
 import { importSessionFromJSON } from './export/load.js';
 import { importSessionFromMIDI } from './export/midi/loadFromMidi.js';
 import { loadSession } from './export/loadSession.js';
 import { setupNoteDurationButtons } from './setup/noteDurationButtons.js';
 import { drawGlobalMiniContour } from './sequencer/grid/drawing/mini-contour.js';
-import { drawGlobalPlayhead, initGlobalPlayhead } from './playhead/global-playhead.js';
+import { initGlobalPlayhead } from './playhead/global-playhead.js';
+import { startMasterPlayheadLoop, cancelMasterPlayheadLoop, resetPlayheads } from './playhead/playhead-engine.js';
 import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';
 import { setupControlModeSwitch } from './setup/controlModeSwitch.js';
 import { setupSelectModeUI } from './sequencer/grid/interaction/selectModeButtonHandlers.js';
@@ -32,27 +35,18 @@ import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './a
 import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/diffEngine/types/internal/checkpoint.js';
 import { setupInstrumentSelector } from './setup/instrumentSelector.js';
 import { 
-  getTotalBeats, 
-  startTransport, 
-  stopTransport, 
-  pauseTransport, 
-  resumeTransport, 
-  onTransportEnd, 
-  onBeatUpdate, 
-  getCurrentBeat, 
-  setCurrentBeat, 
   updateTotalMeasures, 
   updateTimeSignature, 
   updateTempo, 
-  getTempo, 
   setLoopEnabled } from './sequencer/transport.js';
-
-// Testing imports
-import { getAudioContext } from './sounds/audio/audio.js';
-import Sequencer from './sequencer/sequencer.js';
 
 // === Immediately show splash screen //
 showSplashScreen();
+
+// === Playback Engine
+import { PlaybackEngine } from './sequencer/playback.js';
+export const engine = new PlaybackEngine(getSequencers());
+engine.setOnResumeCallback(() => startMasterPlayheadLoop(engine));
 
 // === State Sync ===
 onStateUpdated(resyncFromState);
@@ -69,7 +63,6 @@ const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLC
 const globalPlayheadCanvas = document.getElementById('global-mini-playhead') as HTMLCanvasElement;
 initGlobalPlayhead(globalPlayheadCanvas);
 initGlobalPlayheadInteraction(globalPlayheadCanvas, config);
-drawGlobalPlayhead(0);
 
 // === Initial Sequencer ===
 const firstId = 0;
@@ -102,78 +95,31 @@ setupAddTrackButton();
 setupNoteDurationButtons();
 registerVelocityModeHandlers();
 registerVelocityMenuHandlers();
+registerSaveWavMenuHandlers();
 setupControlModeSwitch();
 initFooterUI();
 setupWhatsNewButton();
 setupHelpButton();
 setupHeaderModeToggler();
 
-async function playPreparedSequencers(sequencers: Sequencer[]): Promise<void> {
-  const ctx = getAudioContext();
-  const bpm = getTempo();
-  const beatDuration = 60 / bpm;
-  const startBeat = 0;
-  const startAt = ctx.currentTime + 0.1; // slight delay to ensure time buffer
-
-  // Prepare all sequencers
-  for (const seq of sequencers) {
-    await seq.preparePlayback(startAt, startBeat);
-  }
-
-  // Resume AudioContext to begin playback
-  if (ctx.state === 'suspended') {
-    await ctx.resume();
-  }
-
-  console.log(`[Playback] All sequencers scheduled from beat ${startBeat} at time ${startAt.toFixed(3)}s`);
-}
-
-
 // === UI Wiring ===
 setupUI({
   getSequencers: () => sequencers,
-  onPlay: () => {
-    playPreparedSequencers(sequencers);
-    // stopTransport();
-
-    // const globalEndBeat = getTotalBeats();
-    // const startBeat = getCurrentBeat();
-
-    // startTransport(getTempo(), {
-    //   loop: config.loopEnabled,
-    //   endBeat: globalEndBeat,
-    //   startBeat,
-    //   onLoop: () => {
-    //     sequencers.forEach(seq => seq.onTransportLoop?.());
-    //   }
-    // });
-
-    // onBeatUpdate((beat: number) => {
-    //   const x = (beat / globalEndBeat) * globalPlayheadCanvas.width;
-    //   drawGlobalPlayhead(x);
-    // });
-
-    // sequencers.forEach(seq => seq.play());
-
-    // onTransportEnd(() => {
-    //   resetPlayButtonState();
-    //   setCurrentBeat(0);
-    //   drawGlobalPlayhead(0);
-    // });
+  onPlay: async () => {
+    await engine.start();
+    startMasterPlayheadLoop(engine);
   },
-  onPause: () => {
-    pauseTransport();
-    sequencers.forEach(seq => seq.pause());
+  onPause: async () => {
+    await engine.pause();
+    cancelMasterPlayheadLoop();
   },
-  onResume: () => {
-    resumeTransport();
-    sequencers.forEach(seq => seq.resume());
-  },
+  onResume: async () => {
+    await engine.resume();
+  },  
   onStop: () => {
-    stopTransport();
-    setCurrentBeat(0);
-    sequencers.forEach(seq => seq.stop());
-    drawGlobalPlayhead(0);
+    engine.stop();
+    cancelMasterPlayheadLoop();
+    resetPlayheads(engine);
   },
   onDurationChange: (val: number) => {
     config.currentDuration = val;
@@ -202,21 +148,7 @@ setupUI({
       a.click();
       URL.revokeObjectURL(url);
     } else if (format === 'wav') {
-      const session = {
-        globalConfig: {
-          bpm: appState.tempo,
-          beatsPerMeasure: appState.timeSignature[0],
-          totalMeasures: appState.totalMeasures
-        },
-        tracks: sequencers.map(seq => ({
-          notes: seq.notes,
-          instrument: seq.instrumentName,
-          config: seq.config,
-          volume: seq.volume,
-          pan: seq.pan
-        }))
-      };
-      await exportSessionToWAV(session);
+      showSaveWavOptionsModal();
     } else if (format === 'midi') {
       const { url, filename } = await exportSessionToMIDI(appState);
       const a = document.createElement('a');

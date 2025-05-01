@@ -5,7 +5,6 @@ import { setupVolumeBar } from './controls/sequencerVolume';
 import { setupPanBar } from './controls/sequencerPan';
 import { setupSequencerGripHandler } from '../sequencer/ui.js';
 import { drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
-import { getCurrentBeat } from '../sequencer/transport.js';
 import { getAudioContext as audioCtx, getMasterGain } from '../sounds/audio/audio.js';
 import { recordDiff } from '../appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
@@ -68,6 +67,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     collapseIcon.setAttribute('href', hidden ? '#icon-caret-up' : '#icon-caret-down');
     mini.classList.toggle('hidden', !hidden);
     toggleZoomControls(wrapper, !hidden);
+    seq.setCollapsed(hidden);
     if (hidden) drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
   });
 
@@ -146,11 +146,11 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   return { seq, wrapper };
 }
 
-export function refreshPlaybackAt(currentBeat: number): void {
-  sequencers.forEach(seq => {
-    seq.seekTo(currentBeat);
-  });
-}
+// export function refreshPlaybackAt(currentBeat: number): void {
+//   sequencers.forEach(seq => {
+//     seq.seekTo(currentBeat);
+//   });
+// }
 
 export function toggleZoomControls(wrapper: HTMLElement, show: boolean): void {
   wrapper.querySelector('.zoom-in-btn')?.classList.toggle('hidden', !show);

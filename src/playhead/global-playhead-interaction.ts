@@ -1,10 +1,10 @@
 // src/playhead/global-playhead-interaction.ts
 
 import { drawGlobalPlayhead } from './global-playhead.js';
-import { getTotalBeats, setCurrentBeat, isTransportRunning, pauseTransport, resumeTransport } from '../sequencer/transport.js';
-import { sequencers } from '../setup/sequencers.js';
+import { getTotalBeats } from '../sequencer/transport.js';
 import { getSnappedBeat } from '../sequencer/grid/helpers/geometry.js';
 import type { GridConfig } from '../sequencer/interfaces/GridConfig.js';
+import { engine as playbackEngine } from '../main.js';
 
 let isDragging = false;
 let canvas: HTMLCanvasElement | null = null;
@@ -12,7 +12,7 @@ let globalConfig: GridConfig | null = null;
 let wasAutoPaused = false;
 
 /**
- * Initializes global playhead dragging interaction.
+ * Initializes global playhead dragging interaction on a given canvas.
  */
 export function initGlobalPlayheadInteraction(targetCanvas: HTMLCanvasElement, targetConfig: GridConfig): void {
   canvas = targetCanvas;
@@ -24,9 +24,8 @@ export function initGlobalPlayheadInteraction(targetCanvas: HTMLCanvasElement, t
 }
 
 function onMouseDown(e: MouseEvent): void {
-  if (isTransportRunning()) {
-    pauseTransport();
-    sequencers.forEach(s => s.pause?.());
+  if (playbackEngine.isActive()) {
+    playbackEngine.pause(); // will suspend context + stop playhead loop
     wasAutoPaused = true;
   }
 
@@ -39,13 +38,16 @@ function onMouseMove(e: MouseEvent): void {
   updatePlayheadFromEvent(e);
 }
 
-function onMouseUp(): void {
+function onMouseUp(e: MouseEvent): void {
   if (!isDragging) return;
+
+  // ✅ Always update on mouse up — even if no move occurred
+  updatePlayheadFromEvent(e);
+
   isDragging = false;
 
   if (wasAutoPaused) {
-    resumeTransport();
-    sequencers.forEach(s => s.resume?.());
+    playbackEngine.resume(); // restart from paused position
     wasAutoPaused = false;
   }
 }
@@ -54,23 +56,16 @@ function updatePlayheadFromEvent(e: MouseEvent): void {
   if (!canvas || !globalConfig) return;
 
   const rect = canvas.getBoundingClientRect();
-
-  // ✅ Device-pixel aware scaling
   const scaleX = canvas.width / rect.width;
   let x = (e.clientX - rect.left) * scaleX;
 
-  // Clamp x to canvas width
   x = Math.max(0, Math.min(canvas.width, x));
 
   const totalBeats = getTotalBeats();
   const unsnappedBeat = (x / canvas.width) * totalBeats;
-
-  // Apply snapping using the current config settings
   const snappedBeat = getSnappedBeat(unsnappedBeat, globalConfig);
-
-  // Convert snapped beat back to x position
   const snappedX = (snappedBeat / totalBeats) * canvas.width;
 
-  setCurrentBeat(snappedBeat);
-  drawGlobalPlayhead(snappedX);
+  playbackEngine.seek(snappedBeat); // actual transport update
+  drawGlobalPlayhead(snappedX);     // visual update
 }

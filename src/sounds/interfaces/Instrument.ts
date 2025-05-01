@@ -9,6 +9,7 @@ export interface Instrument {
     loop?: boolean;
     duration?: number;
   }): void;
+  stop(): void;
   stop(options: { stopId: number | string }): void;
   load: Promise<unknown>;
   __midiMap?: Map<number, number | string>;

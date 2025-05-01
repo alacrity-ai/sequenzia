@@ -17,7 +17,7 @@ import { pitchToMidi } from "../../../sounds/audio/pitch-utils.js";
  * @param options.labelWidth - Width of the label area (for offset).
  */
 export function animateNotePlay(
-  ctx: AnimationContext,
+  ctx: AnimationContext | null,
   note: Note,
   {
     getPitchRow,
@@ -31,6 +31,7 @@ export function animateNotePlay(
     labelWidth: number;
   }
 ): void {
+  if (!ctx) return;
   if (!ctx?.animationCtx) {
     console.warn('Missing animationCtx in animateNotePlay');
     return;

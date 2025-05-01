@@ -33,4 +33,22 @@ export default defineConfig({
       reportsDirectory: 'coverage',
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        format: 'es',
+      },
+    },
+  },
+  worker: {
+    format: 'es',
+    rollupOptions: {
+      output: {
+        format: 'es'
+      }
+    }
+  },
+  optimizeDeps: {
+    exclude: ['track-renderer.worker.ts'] // ✅ ensure it's not optimized into node context
+  }
 });

@@ -63,7 +63,7 @@ export function initGrid(
   // Caste for safety
   const safeCtx = ctx as CanvasRenderingContext2D;
   const safePlayheadCtx = playheadCtx as CanvasRenderingContext2D;
-  const safeAnimCtx = animCtx as CanvasRenderingContext2D;
+  const safeAnimCtx = animCtx as CanvasRenderingContext2D | null;
   
   let cellWidth = ZOOM_LEVELS[zoomIndex].cellWidth;
   let cellHeight = ZOOM_LEVELS[zoomIndex].cellHeight;  
@@ -190,7 +190,9 @@ export function initGrid(
     animationCanvas.style.width = `${fullWidth}px`;
     animationCanvas.style.height = `${fullHeight}px`;
 
-    safeAnimCtx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+    if (safeAnimCtx) {
+      safeAnimCtx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+    }
 
     scheduleRedraw();
   }
@@ -244,7 +246,7 @@ export function initGrid(
     config,
     notes,
     canvas,
-    animationCtx: safeAnimCtx,
+    animationCtx: safeAnimCtx ?? null,
     getCellHeight: () => cellHeight,
     getCellWidth: () => cellWidth,
     getCanvasPos: (e) => getCanvasPos(canvas, e, scrollContainer, labelWidth),

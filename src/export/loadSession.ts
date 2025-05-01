@@ -4,7 +4,6 @@ import { updateTempo, updateTimeSignature, updateTotalMeasures, getTempo, getTot
 import { destroyAllSequencers, sequencers } from '../setup/sequencers.js';
 import { collapseAllSequencers } from '../helpers.js';
 import { refreshGlobalMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
-import { setCurrentBeat } from '../sequencer/transport.js';
 import { drawGlobalPlayhead } from '../playhead/global-playhead.js';
 import { recordDiff } from '../appState/appState.js';
 import { createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
@@ -64,6 +63,5 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
   collapseAllSequencers();
   const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
   if (canvas) refreshGlobalMiniContour(canvas, sequencers);
-  setCurrentBeat(0);
   drawGlobalPlayhead(0);
 }

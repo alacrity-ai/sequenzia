@@ -3,6 +3,11 @@
 import { getUserConfig, updateUserConfig } from './userConfig.js';
 import { OpenAISettings } from '../interfaces/OpenAISettings.js';
 
+function isBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+}
+
+
 export function resetUserConfigToDefaults(): void {
   const defaultConfig: Partial<OpenAISettings> = {
     openaiApiKey: '',
@@ -14,11 +19,13 @@ export function resetUserConfigToDefaults(): void {
 }
 
 export function saveToLocalStorage(): void {
+  if (!isBrowser()) return;
   const config = getUserConfig();
   localStorage.setItem('userConfig', JSON.stringify(config));
 }
 
 export function loadFromLocalStorage(): void {
+  if (!isBrowser()) return;
   const stored = localStorage.getItem('userConfig');
   if (stored) {
     try {
@@ -31,4 +38,7 @@ export function loadFromLocalStorage(): void {
 }
 
 // Initialize from localStorage if available
-loadFromLocalStorage();
+if (isBrowser()) {
+  loadFromLocalStorage();
+}
+
