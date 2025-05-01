@@ -1,7 +1,8 @@
 // src/sequencer/grid/drawing/color-schemes/note-colors.ts
 
 import { PITCH_COLOR_MAP } from '../../helpers/constants.js';
-import { pitchToMidi } from '../../../../audio/pitch-utils.js';
+import { hexToHSL } from '../utility/colorConversion.js';
+import { pitchToMidi } from '../../../../sounds/audio/pitch-utils.js';
 import { Note } from '../../../interfaces/Note.js';
 
 export interface NoteContext {
@@ -19,7 +20,20 @@ export const NOTE_COLOR_SCHEMES: Record<string, NoteColorFunction> = {
 
   'Track Color': (_note: Note, { getTrackColor }: NoteContext = {}) => {
     return getTrackColor?.() || '#999';
-  },  
+  },
+  
+  'Note Velocity': (note: Note, { getTrackColor }: NoteContext = {}) => {
+    const velocity = note.velocity ?? 100; // default if undefined
+    const base = getTrackColor?.() || '#ff0000'; // fallback color
+
+    // Convert base hex to HSL for brightness manipulation
+    const hsl = hexToHSL(base);
+    if (!hsl) return '#999';
+
+    const scaledLightness = 10 + (velocity / 127) * 50; // 10%–60% lightness
+    return `hsl(${hsl.h}, ${hsl.s}%, ${scaledLightness}%)`;
+  },
+
 
   'Octave Bands': (note: Note) => {
     const midi = pitchToMidi(note.pitch);

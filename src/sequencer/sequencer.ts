@@ -214,7 +214,8 @@ export default class Sequencer {
 
         if (!this._activeNoteKeys.has(key) && noteStart < beat && beat <= noteEnd) {
           const durationSec = note.duration * beatToSec;
-          this.playNote(note.pitch, durationSec);
+          const velocity = note.velocity ?? 100;
+          this.playNote(note.pitch, durationSec, velocity);
 
           if (this.grid?.gridContext) {
             const gctx = this.grid.gridContext;
@@ -376,7 +377,7 @@ export default class Sequencer {
     for (const note of this.notes) {
       const rawStartSec = note.start * beatToSec;
       const startSec = Math.max(0.01, rawStartSec); // Avoid 0s
-      
+      const velocity = note.velocity ?? 100;
       const durationSec = note.duration * beatToSec;
       const midi = pitchToMidi(note.pitch);
       if (midi == null) continue;
@@ -391,7 +392,7 @@ export default class Sequencer {
           instrument.start({
             note: sampleName,
             duration: durationSec,
-            velocity: 100,
+            velocity: velocity,
             time: startSec,
             loop: false,
           });
@@ -400,7 +401,7 @@ export default class Sequencer {
         instrument.start({
           note: midi,
           duration: durationSec,
-          velocity: 100,
+          velocity: velocity,
           time: startSec,
           loop: false,
         });

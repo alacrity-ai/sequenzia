@@ -2,6 +2,8 @@
 import { hideSplashScreen } from './global/splashscreen.js';
 import { setupHeaderModeToggler } from './global/headerModeToggler.js';
 import { setupGlobalUndoRedo } from './global/undo-redo.js';
+import { registerVelocityModeHandlers } from './sequencer/grid/interaction/velocity/velocityModeHandlers.js';
+import { registerVelocityMenuHandlers } from './sequencer/grid/interaction/velocity/velocityModeMenu.js';
 import { undo, redo } from './appState/stateHistory';
 import { setupWhatsNewButton } from './global/whatsnew.js';
 import { showSplashScreen } from './global/splashscreen.js';
@@ -94,6 +96,8 @@ setupSelectModeUI();
 refreshGlobalMiniContour();
 setupAddTrackButton();
 setupNoteDurationButtons();
+registerVelocityModeHandlers();
+registerVelocityMenuHandlers();
 setupControlModeSwitch();
 initFooterUI();
 setupWhatsNewButton();

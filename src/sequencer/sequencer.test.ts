@@ -163,10 +163,10 @@ describe('Sequencer', () => {
 
   it('should update notes from track map', () => {
     const sequencer = new Sequencer(elements.scrollContainer, createTestGridConfig());
-    const trackMap: TrackTuple = { n: [['C4', 0, 2, 100], ['D4', 2, 2, 100]] };
+    const trackMap: TrackTuple = { n: [['C4', 0, 2, 110], ['D4', 2, 2, 110]] };
     sequencer.updateNotesFromTrackMap(trackMap);
     expect(sequencer.notes.length).toBe(2);
-    expect(sequencer.notes[0]).toEqual({ pitch: 'C4', start: 0, duration: 2 });
+    expect(sequencer.notes[0]).toEqual({ pitch: 'C4', start: 0, duration: 2, 'velocity': 110 });
   });
 
   it('should destroy and remove container', () => {

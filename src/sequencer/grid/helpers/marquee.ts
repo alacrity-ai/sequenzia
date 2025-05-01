@@ -1,6 +1,6 @@
 // src/sequencer/grid/helpers/marquee.ts
 
-import { pitchToMidi } from '../../../audio/pitch-utils.js';
+import { pitchToMidi } from '../../../sounds/audio/pitch-utils.js';
 
 interface MarqueeParams {
   startX: number;

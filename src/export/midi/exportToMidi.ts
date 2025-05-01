@@ -52,6 +52,7 @@ export async function exportSessionToMIDI(appState: AppState): Promise<{ url: st
   
       for (const note of seq.notes) {
         const midiNumber = pitchToMidi(note.pitch);
+        const velocity = Math.max(0.01, Math.min(1, (note.velocity ?? 100) / 127));
         if (midiNumber === null) continue;
   
         const startSeconds = beatsToSeconds(note.start, appState.tempo);
@@ -61,7 +62,7 @@ export async function exportSessionToMIDI(appState: AppState): Promise<{ url: st
           midi: midiNumber,
           time: startSeconds,
           duration: durationSeconds,
-          velocity: 0.8, // Placeholder velocity
+          velocity: velocity, // Normalized from 0-1
         });
       }
     }

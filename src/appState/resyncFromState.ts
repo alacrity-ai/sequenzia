@@ -79,6 +79,7 @@ export function resyncFromState(state: AppState = getAppState()): void {
           pitch: note.pitch,
           start: note.start,
           duration: note.duration,
+          velocity: note.velocity,
         }));
 
         gridCtx.notes.length = 0;
@@ -89,7 +90,8 @@ export function resyncFromState(state: AppState = getAppState()): void {
             gridCtx.notes.find((note: any) =>
               note.pitch === pos.pitch &&
               note.start === pos.start &&
-              note.duration === pos.duration
+              note.duration === pos.duration &&
+              note.velocity === pos.velocity
             )
           ).filter(Boolean);
 

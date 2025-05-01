@@ -3,7 +3,7 @@
 import { getTempo } from "../../transport.js";
 import { Note } from '../../interfaces/Note.js';
 import { AnimationContext } from './interfaces/AnimationContext.js';
-import { pitchToMidi } from "../../../audio/pitch-utils.js";
+import { pitchToMidi } from "../../../sounds/audio/pitch-utils.js";
 
 /**
  * Animates the playing of a note with pulsing and ripple effects.

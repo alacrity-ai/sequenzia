@@ -46,8 +46,8 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
           id,
           instrument,
           notes: structuredClone(notes),
-          volume: state.volume,
-          pan: state.pan,
+          volume: volume,
+          pan: pan,
           config: {
             ...(state.config || {})
           },

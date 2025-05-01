@@ -1,6 +1,6 @@
 // sequencer/clipboard.js — shared clipboard across sequencers
 
-import { pitchToMidi } from '../audio/pitch-utils.js';
+import { pitchToMidi } from '../sounds/audio/pitch-utils.js';
 import { Clipboard } from './interfaces/Clipboard.js';
 import { Note } from './interfaces/Note.js';
 

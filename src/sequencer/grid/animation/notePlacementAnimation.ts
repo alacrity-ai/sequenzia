@@ -1,6 +1,6 @@
 // src/sequencer/grid/animation/notePlacementAnimation.ts
 
-import { pitchToMidi } from '../../../audio/pitch-utils.js';
+import { pitchToMidi } from '../../../sounds/audio/pitch-utils.js';
 import { Note } from '../../interfaces/Note.js';
 import { AnimationContext } from './interfaces/AnimationContext.js';
 

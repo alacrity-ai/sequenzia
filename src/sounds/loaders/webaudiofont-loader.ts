@@ -117,20 +117,26 @@ export async function loadInstrument(
         _preset: preset,
         _volume: volume ?? 1.0,
         start({ note, duration = 1, velocity = 100, time }: StartOptions) {
-          const midi = typeof note === 'string' ? pitchToMidi(note) : note;
-          if (midi == null || typeof midi !== 'number') return;
-      
-          const when = typeof time === 'number' ? time : 0;
-      
-          player.queueWaveTable(
-            context,
-            pannerNode || getMasterGain(),
-            preset,
-            when,
-            midi,
-            duration,
-            getSafeWebAudioFontVolume(instrument._volume)
-          );
+            const midi = typeof note === 'string' ? pitchToMidi(note) : note;
+            if (midi == null || typeof midi !== 'number') return;
+          
+            const when = typeof time === 'number' ? time : 0;
+          
+            // Synthesize velocity by scaling volume
+            const normalizedVelocity = Math.max(0.01, Math.min(1.0, velocity / 127));
+            const baseVolume = getSafeWebAudioFontVolume(instrument._volume);
+            const rawVolume = baseVolume * normalizedVelocity;
+            const finalVolume = Math.max(0.01, Math.min(1.0, rawVolume)); // clamp to [0.01, 1.0]            
+          
+            player.queueWaveTable(
+              context,
+              pannerNode || getMasterGain(),
+              preset,
+              when,
+              midi,
+              duration,
+              finalVolume
+            );
         },
         stop() {},
         load: Promise.resolve(),

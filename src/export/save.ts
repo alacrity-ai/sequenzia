@@ -46,7 +46,7 @@ export function exportSessionToJSON(appState: AppState): { url: string, filename
     vlm: appState.sequencers.map(s => s.volume ?? (100 / 127)), // Default ≈ 0.787
     pan: appState.sequencers.map(s => s.pan ?? 0.0),
     tr: appState.sequencers.map(s => ({
-      n: s.notes.map(n => [n.pitch, n.start, n.duration])
+      n: s.notes.map(n => [n.pitch, n.start, n.duration, n.velocity ?? 100])
     }))
   };
 
@@ -56,8 +56,6 @@ export function exportSessionToJSON(appState: AppState): { url: string, filename
     filename: `session-${Date.now()}.json`
   };
 }
-
-
 
 /**
  * Exports the complete session to WAV format.

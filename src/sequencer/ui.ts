@@ -3,9 +3,11 @@
 import { GRID_CONFIG as config } from './grid/helpers/constants.js';
 import { isSplashScreenVisible } from '../global/splashscreen.js';
 import { initConfigModal } from '../userconfig/initUserConfig.js';
+import { getActiveSelection } from '../setup/stores/selectionTracker.js';
 import { getEditMode, EditModes } from '../setup/stores/editModeStore.js';
 import { getTimeSignature, getTotalMeasures } from './transport.js';
-import { undo, redo } from '../appState/stateHistory.js';
+import { showVelocityModal } from './grid/interaction/velocity/velocityModeMenu.js';
+import { showErrorModal } from '../global/errorGeneric.js';
 import { SNAP_RESOLUTIONS, durationHotkeys } from './grid/helpers/constants.js';
 import Sequencer from './sequencer.js';
 
@@ -166,12 +168,26 @@ export function setupUI({
       return;
     }
 
+    // === VELOCITY SHORTCUT ===
+    if (e.key === '1' && getEditMode() === EditModes.SELECT) {
+      const selection = getActiveSelection();
+      if (!selection || selection.selectedNotes.length === 0) {
+        showErrorModal('No notes selected. Please select notes before adjusting velocity.');
+        return;
+      }
+
+      e.preventDefault();
+      showVelocityModal(selection.selectedNotes);
+      return;
+    }
+
+    // Note duration hotkeys
     if (getEditMode() !== EditModes.NOTE_PLACEMENT) return;
 
     if (Object.prototype.hasOwnProperty.call(durationHotkeys, e.code)) {
       e.preventDefault();
       const duration = durationHotkeys[e.code];
-      durationSelect.value = String(duration); // 👈 Fix here
+      durationSelect.value = String(duration);
       durationSelect.dispatchEvent(new Event('change'));
     }    
 

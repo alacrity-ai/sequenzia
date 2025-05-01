@@ -14,15 +14,21 @@
   - [x] Handle panning in midi import/export
   - [x] Handle panning in wav export
 - Velocity:
-  - [ ] Add velocity to json (project file) notes
-  - [ ] Support velocity in loadAndPlayNote for sf2
-  - [ ] Support velocity in loadAndPlayNote for webaudiofont
-  - [ ] Add UI Elements for adjusting velocity
-  - [ ] Verify velocity works for:
-    - [ ] Midi export
-    - [ ] Midi import
-    - [ ] Wav export
-    - [ ] Project file import/export
+  - [x] Add velocity to json (project file) notes
+  - [x] Support velocity in loadAndPlayNote for sf2
+  - [x] Support velocity in loadAndPlayNote for webaudiofont
+  - [x] Add UI Elements for adjusting velocity
+  - [x] Verify velocity works for:
+    - [x] Midi export
+    - [x] Midi import
+    - [x] Wav export
+    - [x] Project file import/export
+- Selection:
+  - [ ] Be able to resize groups of notes
+  - [ ] Be able to hold CTRL and then left click on notes to select them (multiple unconnected)
+  - [ ] Remove select mode entirely, and put velocity mode within it
+  - [ ] Holding down V should show note velocities regardless of the note render mode
+  - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats
 
 ## Future Todos
 - Note Editing:

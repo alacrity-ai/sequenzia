@@ -28,4 +28,5 @@ export interface Grid {
     setSelectedNotes: (notes: Note[]) => void;
     destroy: () => void;
     resizeAndRedraw: () => void;
+    applyVelocityChange(notes: Note[], mode: 'set' | 'increase' | 'decrease', value: number): void;
 }

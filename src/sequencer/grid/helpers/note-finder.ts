@@ -1,6 +1,6 @@
 // src/sequencer/grid/helpers/note-finder.ts
 
-import { pitchToMidi } from "../../../audio/pitch-utils";
+import { pitchToMidi } from "../../../sounds/audio/pitch-utils";
 
 export function findNoteAt(
   x: number,

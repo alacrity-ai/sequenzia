@@ -44,10 +44,11 @@ export async function importSessionFromJSON(file: File): Promise<Session> {
     }
 
     // Convert notes array
-    const notes: Note[] = (track.n as NoteTuple[]).map(([pitch, start, duration]: NoteTuple) => ({
+    const notes: Note[] = (track.n as NoteTuple[]).map(([pitch, start, duration, velocity]: NoteTuple) => ({
       pitch,
       start,
-      duration
+      duration,
+      velocity: velocity ?? 100
     }));
 
     const instrument = instrumentNames[idx] || 'sf2/fluidr3-gm/acoustic_grand_piano';

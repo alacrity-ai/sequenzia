@@ -61,7 +61,7 @@ export function setupGridTestData() {
 // Mock the modules that initGrid depends on
 export function mockDependencies() {
   // Mock all required imports
-  vi.mock('../audio/pitch-utils.js', () => ({
+  vi.mock('../sounds/audio/pitch-utils.js', () => ({
     pitchToMidi: (pitch: string) => {
       // Simple mock implementation that works for tests
       if (pitch === 'C2') return 36;

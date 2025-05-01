@@ -46,6 +46,7 @@ export async function importSessionFromMIDI(file: File): Promise<Session> {
         pitch: n.name,
         start: n.time * (bpm / 60),
         duration: n.duration * (bpm / 60),
+        velocity: Math.max(1, Math.min(127, Math.round(n.velocity * 127)))
       }));
   
       let instrumentProgram = track.instrument.number;

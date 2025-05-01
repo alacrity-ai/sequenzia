@@ -6,14 +6,13 @@ export function setupEditModeControls(): void {
   // Mode buttons
   const notePlacementModeBtn = document.getElementById('note-placement-mode-btn') as HTMLElement | null;
   const selectModeBtn = document.getElementById('select-mode-btn') as HTMLElement | null;
-  const velocityModeBtn = document.getElementById('velocity-mode-btn') as HTMLElement | null;
 
   // Control panels
   const noteDurationControls = document.getElementById('note-duration-controls') as HTMLElement | null;
   const selectModeControls = document.getElementById('select-mode-controls') as HTMLElement | null;
   const velocityModeControls = document.getElementById('velocity-mode-controls') as HTMLElement | null;
 
-  if (!notePlacementModeBtn || !selectModeBtn || !velocityModeBtn || 
+  if (!notePlacementModeBtn || !selectModeBtn || 
       !noteDurationControls || !selectModeControls || !velocityModeControls) {
     console.error("Missing essential UI elements for edit mode switching.");
     return;
@@ -21,7 +20,7 @@ export function setupEditModeControls(): void {
 
   // Helper function to update button states
   function updateButtonStates(activeButton: HTMLElement): void {
-    [notePlacementModeBtn, selectModeBtn, velocityModeBtn].forEach(btn => {
+    [notePlacementModeBtn, selectModeBtn].forEach(btn => {
       if (!btn) return;
       btn.classList.remove('bg-purple-600');
       btn.classList.add('bg-gray-800');
@@ -54,12 +53,6 @@ export function setupEditModeControls(): void {
     setEditMode('select');
   });
 
-  velocityModeBtn.addEventListener('click', () => {
-    updateButtonStates(velocityModeBtn);
-    updateControlPanels(velocityModeControls);
-    setEditMode('none');
-  });
-
   window.addEventListener('keydown', (e: KeyboardEvent) => {
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -74,9 +67,6 @@ export function setupEditModeControls(): void {
         break;
       case 'w':
         selectModeBtn.click();
-        break;
-      case 'e':
-        velocityModeBtn.click();
         break;
       default:
         return;

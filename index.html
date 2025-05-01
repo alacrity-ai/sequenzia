@@ -307,13 +307,6 @@
                 <use href="#icon-draw-square"></use>
               </svg>
             </button>
-            <button id="velocity-mode-btn"
-                    class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    title="Velocity Mode (E)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-chart"></use>
-              </svg>
-            </button>
           </div>
 
           <!-- Note Duration Controls -->
@@ -341,6 +334,26 @@
 
           <!-- Select Mode Controls (Initially Hidden) -->
           <div id="select-mode-controls" class="flex gap-2 hidden">
+            <!-- Velocity and Quantize Buttons -->
+            <button id="velocity-mode-menu-btn"
+                    class="select-mode-velocity bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Adjust Velocity (1)">
+              <svg class="w-6 h-6" aria-hidden="true">
+                <use href="#icon-chart-bar"></use>
+              </svg>
+            </button>
+            <button id="quantize-mode-menu-btn"
+                    class="select-mode-quantize bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Quantize Notes (2)">
+              <svg class="w-6 h-6" aria-hidden="true">
+                <use href="#icon-clock"></use>
+              </svg>
+            </button>
+            
+            <!-- Divider -->
+            <div class="border-l border-purple-800 mx-2"></div>
+            
+            <!-- Existing Copy/Cut/Paste Buttons -->
             <button class="select-mode-copy bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Copy (CTRL+C)">
               <svg class="w-6 h-6" aria-hidden="true">
@@ -559,6 +572,8 @@
       await loadHTML('modal-mount-root', 'web/modals/splash-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/whats-new-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/feature-not-implemented-modal.html');
+      await loadHTML('modal-mount-root', 'web/modals/error-generic-modal.html');
+      await loadHTML('modal-mount-root', 'web/modals/velocity-adjust-modal.html');
 
       // ✅ Only load the app after modals and icons are present
       await import('/src/main.js');

@@ -338,6 +338,29 @@ export function initGrid(
     selectedNote = ns.length === 1 ? ns[0] : null;
   }
   
+  function applyVelocityChange(
+    targetNotes: Note[],
+    mode: 'set' | 'increase' | 'decrease',
+    value: number
+  ): void {
+    for (const note of targetNotes) {
+      switch (mode) {
+        case 'set':
+          note.velocity = Math.max(1, Math.min(127, value));
+          break;
+        case 'increase':
+          note.velocity = Math.max(1, Math.min(127, (note.velocity ?? 100) + value));
+          break;
+        case 'decrease':
+          note.velocity = Math.max(1, Math.min(127, (note.velocity ?? 100) - value));
+          break;
+      }
+    }
+  
+    handlerContext.onNotesChanged?.(); // Update global contour
+    scheduleRedraw();
+  }  
+
   function destroy(): void {
     unsubscribe();
     clearSelectionTracker();
@@ -360,6 +383,7 @@ export function initGrid(
     setSelectedNotes,
     destroy,
     resizeAndRedraw,
+    applyVelocityChange,
   };  
   
   // Sync with current mode at init

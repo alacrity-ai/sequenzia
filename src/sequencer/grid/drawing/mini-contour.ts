@@ -1,6 +1,6 @@
 // src/sequencer/grid/drawing/mini-contour.ts
 
-import { pitchToMidi } from '../../../audio/pitch-utils.js';
+import { pitchToMidi } from '../../../sounds/audio/pitch-utils.js';
 import { TRACK_COLORS } from '../helpers/sequencerColors.js';
 import { getTotalBeats, getTimeSignature, getTotalMeasures } from '../../transport.js';
 import { Note } from '../../interfaces/Note.js';
