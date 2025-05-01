@@ -2,7 +2,7 @@
 
 import { isPasteModeActive, handlePasteEvent } from '../../../setup/stores/pasteModeStore.js';
 import { getClipboard } from '../../clipboard.js';
-import { pitchToMidi, midiToPitch } from '../../../audio/pitch-utils.js';
+import { pitchToMidi, midiToPitch } from '../../../sounds/audio/pitch-utils.js';
 
 import type { Note } from '../../interfaces/Note.js';
 import type { HandlerContext } from '../../interfaces/HandlerContext.js';

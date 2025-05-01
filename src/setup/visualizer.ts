@@ -1,7 +1,7 @@
 // src/setup/visualizer.js
 
 import { startWaveformVisualizer } from '../visualizer.js';
-import { getAnalyserNode } from '../audio/audio.js';
+import { getAnalyserNode } from '../sounds/audio/audio.js';
 
 type VisualizerMode = 'waveform' | 'frequency' | 'spectrogram';
 

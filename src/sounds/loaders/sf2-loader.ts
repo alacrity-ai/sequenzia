@@ -1,6 +1,6 @@
 // src/sounds/loaders/sf2-loader.ts
 
-import { getAudioContext, getMasterGain } from '../../audio/audio.js';
+import { getAudioContext, getMasterGain } from '../audio/audio.js';
 import { Instrument } from '../interfaces/Instrument.js';
 import { showLoadingModal, hideLoadingModal } from '../../sequencer/ui.js';
 import * as smplr from 'smplr';

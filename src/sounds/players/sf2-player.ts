@@ -1,8 +1,8 @@
 // src/sf2/sf2-player.ts
 
 import { loadInstrument } from '../loaders/sf2-loader.js';
-import { getAudioContext } from '../../audio/audio.js';
-import { pitchToMidi } from '../../audio/pitch-utils.js';
+import { getAudioContext } from '../audio/audio.js';
+import { pitchToMidi } from '../audio/pitch-utils.js';
 import { Instrument } from '../interfaces/Instrument.js';
 import { EnginePlayer } from '../interfaces/Engine.js';
 

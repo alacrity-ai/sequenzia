@@ -1,6 +1,6 @@
 // audio/audio.ts
 
-import { playNote as genericPlayNote } from '../sounds/instrument-player.js';
+import { playNote as genericPlayNote } from '../instrument-player.js';
 
 // — Audio context —
 let _audioCtx: AudioContext | null = null;

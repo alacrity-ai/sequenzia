@@ -6,7 +6,7 @@ import { setupPanBar } from './controls/sequencerPan';
 import { setupSequencerGripHandler } from '../sequencer/ui.js';
 import { drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { getCurrentBeat } from '../sequencer/transport.js';
-import { getAudioContext as audioCtx, getMasterGain } from '../audio/audio.js';
+import { getAudioContext as audioCtx, getMasterGain } from '../sounds/audio/audio.js';
 import { recordDiff } from '../appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
 import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../appState/diffEngine/types/sequencer/deleteSequencer.js';

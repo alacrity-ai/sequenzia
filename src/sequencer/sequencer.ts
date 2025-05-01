@@ -1,10 +1,10 @@
 // src/sequencer/sequencer.ts
 import { initGrid } from './initGrid.js';
-import { getAudioContext, getMasterGain } from '../audio/audio.js';
+import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
 import { onBeatUpdate, getTempo, getTotalBeats } from './transport.js';
 import { loadInstrument } from '../sounds/instrument-loader.js';
 import { loadAndPlayNote } from '../sounds/instrument-player.js'; // Changed from sf2-player.js
-import { pitchToMidi } from '../audio/pitch-utils.js';
+import { pitchToMidi } from '../sounds/audio/pitch-utils.js';
 import { drawMiniContour } from './grid/drawing/mini-contour.js';
 import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
 import { labelWidth } from './grid/helpers/constants.js';
@@ -356,12 +356,17 @@ export default class Sequencer {
     this.redraw();
   }   
 
-  updateNotesFromTrackMap(trackMap: { n: [string, number, number][] }): void {
-    this.notes.splice(0, this.notes.length, ...trackMap.n.map(([pitch, start, duration]) => ({
-      pitch,
-      start,
-      duration
-    })));
+  updateNotesFromTrackMap(trackMap: { n: [string, number, number, number?][] }): void {
+    this.notes.splice(
+      0,
+      this.notes.length,
+      ...trackMap.n.map(([pitch, start, duration, velocity = 100]) => ({
+        pitch,
+        start,
+        duration,
+        velocity
+      }))
+    );
   }  
 
   async exportToOffline(): Promise<void> {

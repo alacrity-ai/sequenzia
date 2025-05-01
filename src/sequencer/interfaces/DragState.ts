@@ -10,6 +10,7 @@ export interface DragState {
     note: Note;
     start: number;
     midi: number;
+    velocity?: number;
   }[];
   lastPreviewPitch?: string;
 }

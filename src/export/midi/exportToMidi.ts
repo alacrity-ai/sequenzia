@@ -2,7 +2,7 @@
 
 import { AppState } from '../../appState/interfaces/AppState.js';
 import { Midi } from '@tonejs/midi';
-import { pitchToMidi } from '../../audio/pitch-utils.js';
+import { pitchToMidi } from '../../sounds/audio/pitch-utils.js';
 import { mapInstrumentNameToProgramNumber } from './instrumentMapping.js';
 
 /**

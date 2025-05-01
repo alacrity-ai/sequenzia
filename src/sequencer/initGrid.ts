@@ -1,7 +1,7 @@
 // src/sequencer/initGrid.js
 
 import { getSnappedBeatFromX } from './grid/helpers/geometry.js';
-import { pitchToMidi, midiToPitch, getPitchClass } from '../audio/pitch-utils.js';
+import { pitchToMidi, midiToPitch, getPitchClass } from '../sounds/audio/pitch-utils.js';
 import { drawRoundedRect } from './grid/drawing/rounded-rect.js';
 import { drawGridBackground } from './grid/drawing/grid-background.js';
 import { drawNotes } from './grid/drawing/note-renderer.js';

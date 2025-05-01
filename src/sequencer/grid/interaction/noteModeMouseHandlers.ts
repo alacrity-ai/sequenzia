@@ -1,6 +1,6 @@
 // src/sequencer/grid/interaction/noteModeMouseHandlers.js
 
-import { pitchToMidi, midiToPitch } from '../../../audio/pitch-utils.js';
+import { pitchToMidi, midiToPitch } from '../../../sounds/audio/pitch-utils.js';
 import { getSnapResolution, getTotalBeats } from '../../transport.js';
 import { enterTemporarySelectMode, setSuppressNextNotePlacement, shouldSuppressNotePlacement, clearSuppressNotePlacementFlag } from '../../../setup/stores/editModeStore.js';
 import { recordDiff } from '../../../appState/appState.js';

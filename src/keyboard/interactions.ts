@@ -1,6 +1,6 @@
 // src/keyboard/interactions.ts
 
-import { playNote } from '../audio/audio.js';
+import { playNote } from '../sounds/audio/audio.js';
 import { drawKeys } from './renderer.js';
 import { KeyInfo } from './keys.js';
 

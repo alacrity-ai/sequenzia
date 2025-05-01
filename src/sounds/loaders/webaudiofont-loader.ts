@@ -1,9 +1,9 @@
 // src/sounds/loaders/webaudiofont-loader.ts
 
-import { getAudioContext, getMasterGain } from '../../audio/audio.js';
+import { getAudioContext, getMasterGain } from '../audio/audio.js';
 import { Instrument } from '../interfaces/Instrument.js';
 import { showLoadingModal, hideLoadingModal } from '../../sequencer/ui.js';
-import { pitchToMidi } from '../../audio/pitch-utils.js';
+import { pitchToMidi } from '../audio/pitch-utils.js';
 import { webAudioFontCatalogue } from './catalogues/webaudiofont-catalogue.js';
 import { DRUM_MIDI_RANGE } from './constants/drums.js';
 
@@ -21,8 +21,7 @@ type StartOptions = {
     time?: number;
     loop?: boolean;
     duration?: number;
-  };
-  
+};
 
 const contextInstrumentMap: Map<AudioContext, Map<string, Instrument>> = new Map();
 let player: any | null = null;
