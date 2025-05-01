@@ -3,17 +3,16 @@
 import { getAssetPath } from './assetHelpers.js';
 
 // ====== Metadata (update these in PRs) ======
-export const WHATS_NEW_VERSION = 'v0.0.7';
-export const WHATS_NEW_DATE = 'April 29, 2025';
+export const WHATS_NEW_VERSION = 'v0.0.8';
+export const WHATS_NEW_DATE = 'May 1, 2025';
 
-// ====== Content ======
 // ====== Content ======
 export const WHATS_NEW_CONTENT: string[] = [
     "✨ New Features",
-    "- 🎹 Added support for WebAudioFont (1000+ new instruments)",
+    "- 🎵 Added support for WebAudioFont (1000+ new instruments)",
+    "- 🎹 Added support for Velocity adjustment",
     "- 🎧 Added per-instrument panning",
     "- 🔊 Added per-instrument volume",
-    "- 🎨 Major UI visual enhancements",
   
     "🐞 Known Issues",
     "- 🚫 Scaling groups of notes not functional",
