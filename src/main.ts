@@ -1,6 +1,8 @@
 // src/main.ts
 import { hideSplashScreen } from './global/splashscreen.js';
 import { setupHeaderModeToggler } from './global/headerModeToggler.js';
+import { setupGlobalUndoRedo } from './global/undo-redo.js';
+import { undo, redo } from './appState/stateHistory';
 import { setupWhatsNewButton } from './global/whatsnew.js';
 import { showSplashScreen } from './global/splashscreen.js';
 import { setupHelpButton } from './global/helpbutton.js';
@@ -87,6 +89,7 @@ recordDiff(
 );
 
 // === Additional UI Setup ===
+setupGlobalUndoRedo(undo, redo);
 setupSelectModeUI();
 refreshGlobalMiniContour();
 setupAddTrackButton();

@@ -161,11 +161,6 @@ export function setupUI({
       return;
     }
 
-    if (e.metaKey || e.ctrlKey) {
-      if (e.key === 'z') undo();
-      if (e.key === 'y') redo();
-    }
-
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'r') {
       e.preventDefault();
       return;
@@ -243,6 +238,8 @@ export function setupUI({
   tempoInput.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLInputElement;
     const bpm = parseInt(target.value, 10);
+    // Blur the input
+    target.blur();
     if (!isNaN(bpm)) {
       onTempoChange(bpm);
     }
