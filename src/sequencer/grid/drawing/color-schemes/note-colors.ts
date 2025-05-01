@@ -1,5 +1,3 @@
-// src/sequencer/grid/drawing/color-schemes/note-colors.ts
-
 import { PITCH_COLOR_MAP } from '../../helpers/constants.js';
 import { hexToHSL } from '../utility/colorConversion.js';
 import { pitchToMidi } from '../../../../sounds/audio/pitch-utils.js';
@@ -12,46 +10,72 @@ export interface NoteContext {
 
 type NoteColorFunction = (note: Note, context?: NoteContext) => string;
 
+/**
+ * Apply velocity-based brightness scaling to a hex color.
+ */
+function applyVelocityBrightness(hex: string, velocity: number | undefined): string {
+  const hsl = hexToHSL(hex);
+  if (!hsl) return '#999';
+
+  const vel = velocity ?? 100;
+  const lightness = 10 + (vel / 127) * 50; // 10–60% lightness
+  return `hsl(${hsl.h}, ${hsl.s}%, ${lightness}%)`;
+}
+
+/**
+ * Factory to wrap any base color function with velocity brightness scaling.
+ */
+function withVelocityBrightness(baseFn: NoteColorFunction): NoteColorFunction {
+  return (note, context) => {
+    const baseColor = baseFn(note, context);
+    return applyVelocityBrightness(baseColor, note.velocity);
+  };
+}
+
+function octaveBandsColor(note: Note): string {
+  const midi = pitchToMidi(note.pitch);
+  if (midi == null) return '#999';
+
+  const hue = (midi * 3) % 360;
+
+  // Fixed color structure
+  const saturation = 100;
+  const lightness = 60;
+
+  // Velocity mapped to alpha (opacity): 0.2 to 1.0
+  const velocity = note.velocity ?? 100;
+  const alpha = 0.2 + (velocity / 127) * 0.8;
+
+  return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+}
+
+
 export const NOTE_COLOR_SCHEMES: Record<string, NoteColorFunction> = {
-  'Scriabin': (note, { getPitchClass }: NoteContext = {}) => {
+  'Scriabin': withVelocityBrightness((note, { getPitchClass }: NoteContext = {}) => {
     const pc = getPitchClass ? getPitchClass(note.pitch) : 0;
     return PITCH_COLOR_MAP[pc] || '#999';
-  },
+  }),
 
-  'Track Color': (_note: Note, { getTrackColor }: NoteContext = {}) => {
+  'Track Color': withVelocityBrightness((_note, { getTrackColor }: NoteContext = {}) => {
     return getTrackColor?.() || '#999';
-  },
-  
-  'Note Velocity': (note: Note, { getTrackColor }: NoteContext = {}) => {
-    const velocity = note.velocity ?? 100; // default if undefined
-    const base = getTrackColor?.() || '#ff0000'; // fallback color
+  }),
 
-    // Convert base hex to HSL for brightness manipulation
-    const hsl = hexToHSL(base);
-    if (!hsl) return '#999';
+  'Note Velocity': withVelocityBrightness((_note, { getTrackColor }: NoteContext = {}) => {
+    return getTrackColor?.() || '#ff0000';
+  }),
 
-    const scaledLightness = 10 + (velocity / 127) * 50; // 10%–60% lightness
-    return `hsl(${hsl.h}, ${hsl.s}%, ${scaledLightness}%)`;
-  },
+  'Octave Bands': octaveBandsColor,
 
-
-  'Octave Bands': (note: Note) => {
+  'Pitch Class Contrast': withVelocityBrightness((note: Note, { getPitchClass }: NoteContext = {}) => {
     const midi = pitchToMidi(note.pitch);
     if (midi == null) return '#999';
-    const hue = (midi * 3) % 360;
-    return `hsl(${hue}, 100%, 60%)`;
-  },
-
-  'Pitch Class Contrast': (note: Note, { getPitchClass }: NoteContext = {}) => {
-    const midi = pitchToMidi(note.pitch);
-    if (midi == null) return '#999'; // Safeguard against null
-  
     const pitchClass = midi % 12;
+
     const contrastMap = [
       '#ff0000', '#ff7f00', '#ffff00', '#7fff00',
       '#00ff00', '#00ff7f', '#00ffff', '#007fff',
       '#0000ff', '#7f00ff', '#ff00ff', '#ff007f'
     ];
     return contrastMap[pitchClass] || '#999';
-  }  
+  }),
 };

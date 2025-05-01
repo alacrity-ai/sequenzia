@@ -32,8 +32,10 @@ function onApply(): void {
   const rampEnabled = (document.getElementById('velocity-ramp-toggle') as HTMLInputElement)?.checked ?? false;
   const randomize = (document.getElementById('velocity-randomize-toggle') as HTMLInputElement)?.checked ?? false;
 
-  const baseValue = parseInt((document.getElementById(valueInputId) as HTMLInputElement)?.value ?? '100', 10);
-  const clampedBase = Math.max(1, Math.min(127, baseValue || 100));
+  const rawValue = parseInt((document.getElementById(valueInputId) as HTMLInputElement)?.value ?? '', 10);
+  const baseValue = isNaN(rawValue) ? 100 : rawValue;
+  const clampedBase = Math.max(1, Math.min(127, baseValue));
+  
 
   const action = setEnabled
     ? (document.getElementById(actionSelectId) as HTMLSelectElement)?.value as 'set' | 'increase' | 'decrease'
