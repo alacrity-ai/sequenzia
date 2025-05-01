@@ -7,6 +7,7 @@ import { GlobalConfig } from '../../userconfig/interfaces/GlobalConfig.js';
 import { Note } from '../../sequencer/interfaces/Note.js';
 import { GM_INSTRUMENTS } from './instrumentMapping.js';
 import { getDrumMachineInstruments } from '../../sounds/loaders/sf2-loader.js';
+import { getWebAudioFontDrumKit } from '../../sounds/loaders/catalogues/webaudiofont-catalogue.js';
 
 /**
  * Imports a session from a MIDI file.
@@ -38,8 +39,7 @@ export async function importSessionFromMIDI(file: File): Promise<Session> {
       totalMeasures: estimatedTotalMeasures,
     };
   
-    const availableDrums = await getDrumMachineInstruments();
-    const drumKit = availableDrums.includes('LM-2') ? 'LM-2' : availableDrums[0] ?? 'TR-808';
+    const availableSf2Drums = await getDrumMachineInstruments();
   
     const tracks: TrackData[] = midi.tracks.map((track) => {
       const notes: Note[] = track.notes.map((n) => ({
@@ -53,17 +53,29 @@ export async function importSessionFromMIDI(file: File): Promise<Session> {
         instrumentProgram = track.channel === 9 ? 0 : track.channel % 128;
       }
   
-      const gmInstrumentName = GM_INSTRUMENTS[instrumentProgram] || 'acoustic_grand_piano';
-      const fullInstrumentName = track.channel === 9
-        ? `sf2/drummachines/${drumKit}`
-        : `sf2/fluidr3-gm/${gmInstrumentName}`;
-  
       // 🟣 Get volume and pan control changes
       const volumeEvents = track.controlChanges[7] || [];
       const panEvents = track.controlChanges[10] || [];
   
       const volume = volumeEvents.length > 0 ? volumeEvents[0].value : undefined; // 0.0–1.0
       const pan = panEvents.length > 0 ? (panEvents[0].value * 2 - 1) : undefined; // 0.0–1.0 → -1.0 to 1.0
+  
+      let fullInstrumentName: string;
+  
+      if (track.channel === 9) {
+        // Try to infer WebAudioFont drum kit first
+        const inferred = getWebAudioFontDrumKit(instrumentProgram);
+        if (inferred) {
+          fullInstrumentName = `webaudiofont/${inferred.library}/${inferred.displayName}`;
+        } else {
+          // Fallback to SF2 drum machine
+          const sf2Fallback = availableSf2Drums.includes('LM-2') ? 'LM-2' : availableSf2Drums[0] ?? 'TR-808';
+          fullInstrumentName = `sf2/drummachines/${sf2Fallback}`;
+        }
+      } else {
+        const gmInstrumentName = GM_INSTRUMENTS[instrumentProgram] || 'acoustic_grand_piano';
+        fullInstrumentName = `sf2/fluidr3-gm/${gmInstrumentName}`;
+      }
   
       return {
         notes,
@@ -76,4 +88,3 @@ export async function importSessionFromMIDI(file: File): Promise<Session> {
   
     return { globalConfig, tracks };
   }
-  

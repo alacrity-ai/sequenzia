@@ -84,7 +84,7 @@ export async function loadInstrument(
     pannerNode.pan.value = pan ?? 0;
     pannerNode.connect(destination || getMasterGain());
     const isDrumKit = matched.displayName.startsWith('Drum Kit');
-  
+    console.log('Is drum kit: ', isDrumKit);
     if (!isDrumKit) {
       // Melodic instrument branch
       const varName = `_tone_${matched.id}`;
@@ -149,14 +149,20 @@ export async function loadInstrument(
     }
   
     // Drum kit branch
-    const [, kitNumberStr, libraryName] = matched.id.match(/^12835_(\d+)_([A-Za-z0-9]+)_sf2_file$/)!;
+    const match = matched.id.match(/^12835_(\d+)_([A-Za-z0-9_]+)_sf2_file$/);
+    if (!match) {
+      throw new Error(`Invalid drum ID format in catalogue: ${matched.id}`);
+    }
+    const [, kitNumberStr, libraryName] = match;    
     const kitNumber = parseInt(kitNumberStr, 10);
+    console.log('Regex got kit number: ', kitNumber);
     const drumPresets: Record<number, any> = {};
   
     await withLoading(
       (async () => {
         for (const midi of DRUM_MIDI_RANGE) {
           const varName = `_drum_${midi}_${kitNumber}_${libraryName}_sf2_file`;
+          console.log('varName is: ', varName);
           const url = `https://surikov.github.io/webaudiofontdata/sound/${12800 + midi}_${kitNumber}_${libraryName}_sf2_file.js`;
   
           try {

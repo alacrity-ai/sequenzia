@@ -1205,4 +1205,21 @@ export const webAudioFontCatalogue = [
     { id: '12835_18_FluidR3_GM_sf2_file', library: 'FluidR3_GM', displayName: 'Drum Kit 18' },
     { id: '12835_18_JCLive_sf2_file', library: 'JCLive', displayName: 'Drum Kit 18' },
   ];
+
+export function getWebAudioFontDrumKit(program: number): { library: string, displayName: string } | null {
+    // GM drum notes are on channel 9; program usually 0 or undefined, so use fallback logic
+    // We'll infer based on MIDI note usage OR just cycle 1..18 based on track index or velocity ranges
+    const kitNumber = 1 + (program % 18); // crude fallback if no better info
+    
+    // Prefer FluidR3_GM, fallback to any
+    const preferred = webAudioFontCatalogue.find(entry =>
+      entry.id.startsWith(`12835_${kitNumber}_`) && entry.library === 'FluidR3_GM'
+    );
+    if (preferred) return { library: preferred.library, displayName: preferred.displayName };
+  
+    const fallback = webAudioFontCatalogue.find(entry =>
+      entry.id.startsWith(`12835_${kitNumber}_`)
+    );
+    return fallback ? { library: fallback.library, displayName: fallback.displayName } : null;
+}
   
