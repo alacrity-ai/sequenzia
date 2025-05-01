@@ -47,6 +47,10 @@ import {
   getTempo, 
   setLoopEnabled } from './sequencer/transport.js';
 
+// Testing imports
+import { getAudioContext } from './sounds/audio/audio.js';
+import Sequencer from './sequencer/sequencer.js';
+
 // === Immediately show splash screen //
 showSplashScreen();
 
@@ -104,36 +108,58 @@ setupWhatsNewButton();
 setupHelpButton();
 setupHeaderModeToggler();
 
+async function playPreparedSequencers(sequencers: Sequencer[]): Promise<void> {
+  const ctx = getAudioContext();
+  const bpm = getTempo();
+  const beatDuration = 60 / bpm;
+  const startBeat = 0;
+  const startAt = ctx.currentTime + 0.1; // slight delay to ensure time buffer
+
+  // Prepare all sequencers
+  for (const seq of sequencers) {
+    await seq.preparePlayback(startAt, startBeat);
+  }
+
+  // Resume AudioContext to begin playback
+  if (ctx.state === 'suspended') {
+    await ctx.resume();
+  }
+
+  console.log(`[Playback] All sequencers scheduled from beat ${startBeat} at time ${startAt.toFixed(3)}s`);
+}
+
+
 // === UI Wiring ===
 setupUI({
   getSequencers: () => sequencers,
   onPlay: () => {
-    stopTransport();
+    playPreparedSequencers(sequencers);
+    // stopTransport();
 
-    const globalEndBeat = getTotalBeats();
-    const startBeat = getCurrentBeat();
+    // const globalEndBeat = getTotalBeats();
+    // const startBeat = getCurrentBeat();
 
-    startTransport(getTempo(), {
-      loop: config.loopEnabled,
-      endBeat: globalEndBeat,
-      startBeat,
-      onLoop: () => {
-        sequencers.forEach(seq => seq.onTransportLoop?.());
-      }
-    });
+    // startTransport(getTempo(), {
+    //   loop: config.loopEnabled,
+    //   endBeat: globalEndBeat,
+    //   startBeat,
+    //   onLoop: () => {
+    //     sequencers.forEach(seq => seq.onTransportLoop?.());
+    //   }
+    // });
 
-    onBeatUpdate((beat: number) => {
-      const x = (beat / globalEndBeat) * globalPlayheadCanvas.width;
-      drawGlobalPlayhead(x);
-    });
+    // onBeatUpdate((beat: number) => {
+    //   const x = (beat / globalEndBeat) * globalPlayheadCanvas.width;
+    //   drawGlobalPlayhead(x);
+    // });
 
-    sequencers.forEach(seq => seq.play());
+    // sequencers.forEach(seq => seq.play());
 
-    onTransportEnd(() => {
-      resetPlayButtonState();
-      setCurrentBeat(0);
-      drawGlobalPlayhead(0);
-    });
+    // onTransportEnd(() => {
+    //   resetPlayButtonState();
+    //   setCurrentBeat(0);
+    //   drawGlobalPlayhead(0);
+    // });
   },
   onPause: () => {
     pauseTransport();

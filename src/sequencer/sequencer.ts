@@ -477,4 +477,74 @@ export default class Sequencer {
       this.updateNoteRange(['B1', 'A5']);
     }
   }
+
+  // NEW METHODS FOR EFFICIENCY
+  async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {
+    if (!this._instrument) {
+      await this.initInstrument();
+    }
+  
+    if (!this._instrument?.start) {
+      console.warn(`[SEQ:${this.id}] Instrument does not support scheduled playback.`);
+      return;
+    }
+  
+    const bpm = getTempo(); // assume global tempo accessor
+    const beatDuration = 60 / bpm;
+    const ctxStart = this.context.currentTime;
+    const notes = this.notes;
+  
+    // Optional: sort notes once
+    notes.sort((a, b) => a.start - b.start);
+  
+    // Find the first note index to play
+    let i = 0;
+    while (i < notes.length && notes[i].start < startBeat) {
+      i++;
+    }
+  
+    for (; i < notes.length; i++) {
+      const note = notes[i];
+      const midi = pitchToMidi(note.pitch);
+      if (midi === null) continue;
+  
+      const noteTime = startAt + (note.start - startBeat) * beatDuration;
+      const duration = note.duration * beatDuration;
+      const velocity = note.velocity ?? 100;
+      const noteKey = this._noteKey(note);
+  
+      try {
+        const handle = this._instrument.start({
+          note: midi,
+          time: noteTime,
+          duration,
+          velocity,
+        });
+  
+        // // Optionally schedule animation here
+        // if (this.grid?.gridContext) {
+        //   const gctx = this.grid.gridContext;
+        //   const visualDelayMs = (noteTime - ctxStart) * 1000;
+        //   setTimeout(() => {
+        //     animateNotePlay(gctx, note, {
+        //       getPitchRow: gctx.getPitchRow,
+        //       cellWidth: gctx.getCellWidth(),
+        //       cellHeight: gctx.getCellHeight(),
+        //       labelWidth,
+        //     });
+        //   }, visualDelayMs);
+        // }
+      } catch (err) {
+        console.warn(`[SEQ:${this.id}] Failed to schedule note`, note, err);
+      }
+    }
+  }
+
+  runPreparedPlayback(): void {
+    if (this.context.state === 'suspended') {
+      this.context.resume();
+    }
+  }
+  
+  
 }
