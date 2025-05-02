@@ -12,14 +12,22 @@
       <div class="w-4 h-4 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
     </div>
 
-    <!-- Loading Text -->
-    <div class="text-xl font-semibold text-white z-10 tracking-wide">
+    <!-- Title -->
+    <div id="loading-modal-title" class="text-xl font-semibold text-white z-10 tracking-wide">
       Loading Sounds...
     </div>
 
     <!-- Subtext -->
-    <div class="text-sm text-gray-400 mt-2 z-10 text-center">
+    <div id="loading-modal-subtext" class="text-sm text-gray-400 mt-2 z-10 text-center">
       Please wait while we dial it in.
     </div>
+
+    <!-- Cancel Button -->
+    <button
+      id="loading-modal-cancel"
+      class="mt-6 z-10 text-sm text-purple-400 hover:text-purple-300 underline hidden"
+    >
+      Cancel
+    </button>
   </div>
 </div>
