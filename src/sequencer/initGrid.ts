@@ -4,7 +4,7 @@ import { getSnappedBeatFromX } from './grid/helpers/geometry.js';
 import { pitchToMidi, midiToPitch, getPitchClass } from '../sounds/audio/pitch-utils.js';
 import { drawRoundedRect } from './grid/drawing/rounded-rect.js';
 import { drawGridBackground } from './grid/drawing/grid-background.js';
-import { drawNotes } from './grid/drawing/note-renderer.js';
+import { drawNotes, drawOverlayNotes } from './grid/drawing/note-renderer.js';
 import { drawPlayhead } from './grid/drawing/playhead-renderer.js';
 import { getCanvasPos } from './grid/helpers/canvas-coords.js';
 import { findNoteAt } from '../sequencer/grid/helpers/note-finder.js';
@@ -96,6 +96,41 @@ export function initGrid(
     frameId = requestAnimationFrame(drawGrid);
   }
 
+  let scrollRedrawQueued = false;
+
+  scrollContainer.addEventListener('scroll', () => {
+    if (scrollRedrawQueued) return;
+  
+    scrollRedrawQueued = true;
+    requestAnimationFrame(() => {
+      scrollRedrawQueued = false;
+      scheduleRedraw(); // Triggers drawGrid
+    });
+  });  
+
+  function getVisibleNotes(
+    notes: Note[],
+    scrollContainer: HTMLElement,
+    labelWidth: number,
+    cellWidth: number,
+    overscan = 2
+  ): Note[] {
+    const scrollLeft = scrollContainer.scrollLeft;
+    const clientWidth = scrollContainer.clientWidth;
+  
+    const visibleStartBeat = Math.floor((scrollLeft - labelWidth) / cellWidth);
+    const visibleEndBeat = Math.ceil((scrollLeft + clientWidth - labelWidth) / cellWidth);
+  
+    const visible: Note[] = [];
+    for (let i = 0; i < notes.length; i++) {
+      const n = notes[i];
+      if (n.start + n.duration >= visibleStartBeat - overscan && n.start <= visibleEndBeat) {
+        visible.push(n);
+      }
+    }
+    return visible;
+  }  
+
   function drawGrid() {
     // Clear the canvas
     safeCtx.clearRect(0, 0, canvas.width, canvas.height);
@@ -104,17 +139,13 @@ export function initGrid(
     // Translate the canvas for the note label (piano roll)
     safeCtx.translate(labelWidth, 0);
 
+    const notesToDraw = getVisibleNotes(notes, scrollContainer, labelWidth, cellWidth);
+
     // Draw the grid background (different amount of rows/labels for drums)
     let drumMode = (sequencer.instrumentName?.toLowerCase().includes('drum kit ') ?? false);
     drawGridBackground(safeCtx, config, visibleNotes, cellWidth, cellHeight, getPitchFromRow, drumMode);
 
-    // Draw the notes on the grid
-    drawNotes(safeCtx, notes, {
-      previewNotes: pastePreviewNotes ?? (previewNote ? [previewNote] : null),
-      hoveredNote,
-      selectedNote,
-      selectedNotes,
-      highlightedNotes: handlerContext.getHighlightedNotes?.() ?? [],
+    drawNotes(safeCtx, notesToDraw, {
       cellWidth,
       cellHeight,
       visibleStartBeat: 0,
@@ -123,7 +154,20 @@ export function initGrid(
       getPitchClass,
       getTrackColor: () => getTrackColorFromSequencer(sequencer),
       drawRoundedRect,
-    });    
+    });
+    
+    drawOverlayNotes(safeCtx, {
+      previewNotes: pastePreviewNotes ?? (previewNote ? [previewNote] : null),
+      hoveredNote,
+      selectedNotes,
+      highlightedNotes: handlerContext.getHighlightedNotes?.() ?? [],
+      cellWidth,
+      cellHeight,
+      getPitchRow,
+      getPitchClass,
+      getTrackColor: () => getTrackColorFromSequencer(sequencer),
+      drawRoundedRect,
+    });
 
     // Draw the resize handles
     for (const note of selectedNotes) {

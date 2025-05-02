@@ -1,5 +1,6 @@
 // src/sequencer/grid/interaction/noteModeMouseHandlers.js
 
+import { queueRedraw } from '../drawing/utility/scheduleRedraw.js';
 import { pitchToMidi, midiToPitch } from '../../../sounds/audio/pitch-utils.js';
 import { getSnapResolution, getTotalBeats } from '../../transport.js';
 import { enterTemporarySelectMode, setSuppressNextNotePlacement, shouldSuppressNotePlacement, clearSuppressNotePlacementFlag } from '../../../setup/stores/editModeStore.js';
@@ -21,10 +22,36 @@ import type { MouseHandler } from '../../interfaces/MouseHandler.js';
 import type { Note } from '../../interfaces/Note.js';
 import type { DragState } from '../../interfaces/DragState.js';
 
+function shouldAnimateNotePlacement(
+  note: Note,
+  scrollContainer: HTMLElement,
+  pitchRow: number,
+  cellWidth: number,
+  cellHeight: number
+): boolean {
+  const x = note.start * cellWidth + labelWidth;
+  const y = pitchRow * cellHeight;
+  const w = note.duration * cellWidth;
+  const h = cellHeight - 1;
+
+  const { scrollLeft, scrollTop, clientWidth, clientHeight } = scrollContainer;
+
+  const isVisible =
+    x + w >= scrollLeft &&
+    x <= scrollLeft + clientWidth &&
+    y + h >= scrollTop &&
+    y <= scrollTop + clientHeight;
+
+  const isBigEnough = w >= 2 && h >= 2;
+
+  return isVisible && isBigEnough;
+}
+
 export function getNotePlacementHandlers(ctx: HandlerContext): MouseHandler {
   let dragState: DragState | null = null;
   let lastPlayedPitch: string | null = null;
-  let hasActivatedMarquee = false;
+  let hasActivatedMarquee: boolean = false;
+  let lastMoveTime: number = 0;
 
   // Left click to place a note
   function clickHandler(e: MouseEvent): void {
@@ -71,12 +98,29 @@ export function getNotePlacementHandlers(ctx: HandlerContext): MouseHandler {
 
     ctx.setSelectedNote(null);
 
-    animateNotePlacement(ctx, newNote, {
-      getPitchRow: ctx.getPitchRow,
-      cellWidth: ctx.getCellWidth(),
-      cellHeight: ctx.getCellHeight(),
-      labelWidth
-    });
+    // Handle animation
+    const cellWidth = ctx.getCellWidth();
+    const cellHeight = ctx.getCellHeight();
+    const pitchRow = ctx.getPitchRow(pitch);
+    
+    if (
+      ctx.canvas.parentElement &&
+      shouldAnimateNotePlacement(
+        newNote,
+        ctx.canvas.parentElement,
+        pitchRow,
+        cellWidth,
+        cellHeight
+      )
+    ) {
+      animateNotePlacement(ctx, newNote, {
+        getPitchRow: ctx.getPitchRow,
+        cellWidth,
+        cellHeight,
+        labelWidth
+      });
+    }
+    
 
     ctx.scheduleRedraw();
     ctx.onNotesChanged?.();
@@ -159,6 +203,9 @@ export function getNotePlacementHandlers(ctx: HandlerContext): MouseHandler {
   }
 
   function moveHandler(e: MouseEvent): void {
+    const now = performance.now();
+    if (now - lastMoveTime < 16) return;
+    lastMoveTime = now;
     ctx.grid!.setCursor('default');
     const { x, y } = ctx.getCanvasPos(e);
 
@@ -177,7 +224,7 @@ export function getNotePlacementHandlers(ctx: HandlerContext): MouseHandler {
 
       resizeState.anchorNote.duration = newDuration;
 
-      ctx.scheduleRedraw();
+      queueRedraw(ctx);
       ctx.onNotesChanged?.();
       return;
     }
@@ -266,13 +313,13 @@ export function getNotePlacementHandlers(ctx: HandlerContext): MouseHandler {
         }
       }
 
-      ctx.scheduleRedraw();
+      queueRedraw(ctx);
       ctx.onNotesChanged?.();
       setSuppressNextNotePlacement();
       return;
     }
 
-    ctx.scheduleRedraw();
+    queueRedraw(ctx);
   }
 
   function upHandler(e: MouseEvent): void {

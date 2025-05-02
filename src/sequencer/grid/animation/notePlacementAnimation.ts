@@ -30,7 +30,8 @@ export function animateNotePlacement(
     labelWidth: number;
   }
 ): void {
-  if (!ctx.animationCtx) return;
+  const animCtx = ctx.animationCtx;
+  if (!animCtx) return;
 
   const x = note.start * cellWidth + labelWidth;
   const y = getPitchRow(note.pitch) * cellHeight;
@@ -43,22 +44,30 @@ export function animateNotePlacement(
   if (midi === null) return;
 
   const baseHue = (midi * 5) % 360;
+  const strokeColor = `hsl(${baseHue}, 100%, 65%)`;
+  const flashColorTemplate = `hsla(${baseHue}, 100%, 80%, `;
 
-  const animCtx = ctx.animationCtx;
   const startTime = performance.now();
   const duration = 500;
+  const pad = 20;
 
-  const ripples = 3;
-  const rippleDelay = 60;
+  const clamp01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v);
 
-  // Function to draw ripples
-  function drawRipple(localT: number, radiusScale: number, alphaScale: number): void {
+  const rippleConfig = Array.from({ length: 3 }, (_, i) => ({
+    radiusScale: 0.1 + i * 0.1,
+    delay: i * 60,
+    alphaScale: 0.2,
+  }));
+
+  function drawRipple(localT: number, { radiusScale, alphaScale }: typeof rippleConfig[0]): void {
+    if (!animCtx) return;
+
     const pulse = Math.sin(localT * Math.PI);
     const scale = 1 + radiusScale * pulse;
     const alpha = (1 - localT) * alphaScale;
 
     animCtx.globalAlpha = alpha;
-    animCtx.strokeStyle = `hsl(${baseHue}, 100%, 65%)`;
+    animCtx.strokeStyle = strokeColor;
     animCtx.lineWidth = 2;
 
     const scaledW = w * scale;
@@ -69,45 +78,38 @@ export function animateNotePlacement(
     animCtx.stroke();
   }
 
-  // Function to draw the flash effect
   function drawFlash(t: number): void {
-    const flashAlpha = Math.sin(t * Math.PI); // Full at t=0.5
-    const fillHue = baseHue;
-    const fillColor = `hsla(${fillHue}, 100%, 80%, ${0.4 * flashAlpha})`;
+    if (!animCtx) return;
 
+    const flashAlpha = Math.sin(t * Math.PI);
     animCtx.globalAlpha = 1.0;
-    animCtx.fillStyle = fillColor;
+    animCtx.fillStyle = flashColorTemplate + (0.4 * flashAlpha) + ')';
 
     animCtx.beginPath();
     animCtx.roundRect(x, y, w, h, 3);
     animCtx.fill();
   }
 
-  // Frame animation function
   function animateFrame(now: number): void {
+    if (!animCtx) return;
     const elapsed = now - startTime;
     const t = elapsed / duration;
 
     if (t > 1) {
-      animCtx.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height);
+      animCtx.clearRect(x - pad, y - pad, w + 2 * pad, h + 2 * pad);
       return;
     }
 
-    animCtx.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height);
-    animCtx.save();
+    animCtx.clearRect(x - pad, y - pad, w + 2 * pad, h + 2 * pad);
 
-    drawFlash(t); // 🌟 The inner glow flash
-
-    for (let i = 0; i < ripples; i++) {
-      const rippleOffset = i * rippleDelay;
-      const localT = Math.max(0, Math.min(1, (elapsed - rippleOffset) / (duration - rippleOffset)));
-      drawRipple(localT, 0.1 + i * 0.1, 0.2);
+    drawFlash(t);
+    for (const ripple of rippleConfig) {
+      const localT = clamp01((elapsed - ripple.delay) / (duration - ripple.delay));
+      drawRipple(localT, ripple);
     }
 
-    animCtx.restore();
     requestAnimationFrame(animateFrame);
   }
 
   requestAnimationFrame(animateFrame);
 }
-
