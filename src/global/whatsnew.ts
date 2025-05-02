@@ -3,22 +3,22 @@
 import { getAssetPath } from './assetHelpers.js';
 
 // ====== Metadata (update these in PRs) ======
-export const WHATS_NEW_VERSION = 'v0.0.8';
+export const WHATS_NEW_VERSION = 'v0.0.9';
 export const WHATS_NEW_DATE = 'May 1, 2025';
 
 // ====== Content ======
 export const WHATS_NEW_CONTENT: string[] = [
     "✨ New Features",
-    "- 🎵 Added support for WebAudioFont (1000+ new instruments)",
-    "- 🎹 Added support for Velocity adjustment",
-    "- 🎧 Added per-instrument panning",
-    "- 🔊 Added per-instrument volume",
+    "- 🖥️ Increased playback performance by over 1000%",
+    "- 🎹 Added additional WAV export options",
+    "- 🛠️ Across the board UI/UX Improvements",
+    "- 🎵 Added velocity menu with various features",
+    "- 🦟 Squashed various bugs",
   
     "🐞 Known Issues",
     "- 🚫 Scaling groups of notes not functional",
   
     "🛣️ Roadmap",
-    "- 🔊 Upcoming: velocity support and per-note volume control",
     "- 🧠 Upcoming: AI-assisted generation and extension tools",
   ];
   
