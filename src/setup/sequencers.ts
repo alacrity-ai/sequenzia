@@ -36,7 +36,6 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   seq.colorIndex = newId;
   seq.mute = false;
   seq.solo = false;
-  seq.shouldPlay = true;
   seq.volume = 100 / 127;
 
   const mini = wrapper.querySelector('canvas.mini-contour') as HTMLCanvasElement;
@@ -102,35 +101,28 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   });
 
   // Buttons on the sequencer, mute, solo, and select instrument
-  const muteBtn = wrapper.querySelector('.mute-btn') as HTMLElement;
-  const soloBtn = wrapper.querySelector('.solo-btn') as HTMLElement;
   const instrumentBtn = wrapper.querySelector('.instrument-select-btn') as HTMLElement;
 
   function setButtonState(button: HTMLElement, isActive: boolean): void {
     button.classList.toggle('side-button-activated', isActive);
   }  
 
+  const muteBtn = wrapper.querySelector('.mute-btn') as HTMLElement;
+  const soloBtn = wrapper.querySelector('.solo-btn') as HTMLElement;
+
   muteBtn.addEventListener('click', () => {
-    seq.mute = !seq.mute;
-    if (seq.mute) seq.solo = false;
+    seq.toggleMute();
   
-    // Set based on actual state
     setButtonState(muteBtn, seq.mute);
     setButtonState(soloBtn, seq.solo);
-  
-    updateSoloStates();
   });
   
   soloBtn.addEventListener('click', () => {
-    seq.solo = !seq.solo;
-    if (seq.solo) seq.mute = false;
+    seq.toggleSolo();
   
-    setButtonState(soloBtn, seq.solo);
     setButtonState(muteBtn, seq.mute);
-  
-    updateSoloStates();
-  });
-  
+    setButtonState(soloBtn, seq.solo);
+  });  
 
   instrumentBtn.addEventListener('click', async () => {
     const fullName = seq.instrumentName || 'sf2/fluidr3-gm/acoustic_grand_piano';
@@ -167,13 +159,6 @@ export function getSequencers(): Sequencer[] {
 export function getSequencerById(id: number): Sequencer | undefined {
   const targetId = id;
   return sequencers.find(seq => seq.id === targetId);
-}
-
-function updateSoloStates(): void {
-  const anySoloed = sequencers.some(s => s.solo);
-  sequencers.forEach(s => {
-    s.shouldPlay = anySoloed ? s.solo : !s.mute;
-  });
 }
 
 export function destroyAllSequencers(): void {

@@ -34,7 +34,26 @@ export default class Sequencer {
   id: number = 0;
   mute: boolean = false;
   solo: boolean = false;
-  shouldPlay: boolean = true;
+
+  static allSequencers: Sequencer[] = [];
+
+  static isAnySoloActive(): boolean {
+    return Sequencer.allSequencers.some(seq => seq.solo);
+  }
+
+  static rescheduleAll(): void {
+    if (!playbackEngine.isActive()) return;
+  
+    const startAt = playbackEngine.getStartTime();
+    const startBeat = playbackEngine.getStartBeat();
+  
+    for (const seq of Sequencer.allSequencers) {
+      seq.stopScheduledNotes();
+      if (seq.shouldPlay) {
+        void seq.reschedulePlayback(startAt, startBeat);
+      }
+    }
+  }  
 
   collapsed: boolean = false;
 
@@ -70,7 +89,10 @@ export default class Sequencer {
     destination: AudioNode = getMasterGain(),
     instrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano',
     squelchLoadingScreen: boolean = false
+    
   ) {
+    Sequencer.allSequencers.push(this);
+
     this.container = containerEl;
     this.config = { ...config };
     this.context = context;
@@ -145,16 +167,35 @@ export default class Sequencer {
     }
   }
 
+  get shouldPlay(): boolean {
+    return Sequencer.isAnySoloActive()
+      ? this.solo
+      : !this.mute;
+  }  
+
   toggleMute(): void {
     this.mute = !this.mute;
-    if (this.mute) this.solo = false;
+    if (this.mute) {
+      this.solo = false;
+    }
+    this.stopScheduledNotes();
     this.updateTrackStyle();
+  
+    if (playbackEngine.isActive()) {
+      Sequencer.rescheduleAll();
+    }
   }
-
+  
   toggleSolo(): void {
     this.solo = !this.solo;
-    if (this.solo) this.mute = false;
+    if (this.solo) {
+      this.mute = false;
+    }
     this.updateTrackStyle();
+  
+    if (playbackEngine.isActive()) {
+      Sequencer.rescheduleAll();
+    }
   }
 
   async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {
@@ -189,6 +230,7 @@ export default class Sequencer {
       const velocity = note.velocity ?? 100;
   
       try {
+        console.log(`[SEQ:${this.id}] Scheduling note ${note.pitch} at ${noteTime.toFixed(3)}`);
         this._instrument.start({
           note: midi,
           time: noteTime,
@@ -307,7 +349,10 @@ export default class Sequencer {
       const duration = note.duration * beatDuration;
       const velocity = note.velocity ?? 100;
   
+      if (noteTime <= now + 0.01) continue;
+
       try {
+        console.log(`[SEQ:${this.id}] Recheduling note ${note.pitch} at ${noteTime.toFixed(3)}`);
         this._instrument.start({
           note: midi,
           time: noteTime,
@@ -331,7 +376,6 @@ export default class Sequencer {
       }
     }
   }
-  
 
   async exportToOffline(signal?: AbortSignal): Promise<void> {
     const beatToSec = 60 / getTempo();
@@ -435,17 +479,33 @@ export default class Sequencer {
     this.notes.splice(0, this.notes.length, ...clamped);
   }
 
+  // Fades the opacity of the track if muted
   updateTrackStyle(): void {
     if (!this.container) return;
+  
     const muteBtn = this.container.querySelector('.mute-btn');
     const soloBtn = this.container.querySelector('.solo-btn');
+    const body = this.container.querySelector('.sequencer-body');
+    const contour = this.container.querySelector('.mini-contour');
+  
+    // Button styles
     muteBtn?.classList.toggle('bg-red-600', this.mute);
     muteBtn?.classList.toggle('bg-gray-700', !this.mute);
+  
     soloBtn?.classList.toggle('bg-yellow-200', this.solo);
     soloBtn?.classList.toggle('bg-gray-700', !this.solo);
-    this.container.classList.toggle('opacity-40', this.mute && !this.solo);
-    this.container.classList.toggle('opacity-100', !(this.mute && !this.solo));
+  
+    const shouldFade = this.mute && !this.solo;
+  
+    // Fade scrollable grid area
+    body?.classList.toggle('opacity-40', shouldFade);
+    body?.classList.toggle('opacity-100', !shouldFade);
+  
+    // Fade mini contour
+    contour?.classList.toggle('opacity-40', shouldFade);
+    contour?.classList.toggle('opacity-100', !shouldFade);
   }
+  
 
   redraw(): void {
     this.grid?.scheduleRedraw();

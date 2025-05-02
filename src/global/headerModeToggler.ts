@@ -44,5 +44,14 @@ export function setupHeaderModeToggler(): void {
         showFeatureModal();
       });
     }
+
+    // Quantize Notes Button
+    const quantizeBtn = document.getElementById('quantize-mode-menu-btn');
+    if (quantizeBtn) {
+      quantizeBtn.addEventListener('click', () => {
+        // Placeholder logic
+        showFeatureModal();
+      });
+    }
   }
   

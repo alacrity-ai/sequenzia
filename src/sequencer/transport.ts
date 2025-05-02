@@ -6,6 +6,7 @@ import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState
 import { createSetTimeSignatureDiff, createReverseSetTimeSignatureDiff } from '../appState/diffEngine/types/global/changeTimeSignature.js';
 import { createSetTotalMeasuresDiff, createReverseSetTotalMeasuresDiff } from '../appState/diffEngine/types/global/changeMeasures.js';
 import { GRID_CONFIG as config } from './grid/helpers/constants.js';
+import { engine as playbackEngine } from '../main.js';
 
 let beatDuration: number = 500; // ms per beat
 let startTime: number | null = null;
@@ -18,8 +19,10 @@ export function getTotalBeats(): number {
 }
 
 export function updateTempo(bpm: number, record: boolean = true): void {
+  // Record the change in tempo if requested
+  const prevBpm = getTempo();
+
   if (record) {
-    const prevBpm = getTempo();
     recordDiff(
       createChangeTempoDiff(bpm),
       createReverseChangeTempoDiff(prevBpm)
@@ -27,14 +30,21 @@ export function updateTempo(bpm: number, record: boolean = true): void {
     return;
   }
 
+  // Update the beat duration based on the new BPM
   const now = performance.now();
-  const beat = (now - (startTime ?? now)) / beatDuration;
+  const beat = playbackEngine.getCurrentBeat();
   beatDuration = (60 / bpm) * 1000;
 
+  // Update the start time based on the new beat duration
   if (startTime !== null) {
     startTime = now - beat * beatDuration;
   }
 
+  if (playbackEngine.isActive()) {
+    playbackEngine.syncAfterTempoChange(prevBpm);
+  }  
+
+  // Update the tempo input field
   const tempoInput = document.getElementById('tempo-input') as HTMLInputElement | null;
   if (tempoInput && tempoInput.value !== String(bpm)) {
     tempoInput.value = String(bpm);

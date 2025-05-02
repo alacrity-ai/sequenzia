@@ -58,9 +58,7 @@ export class PlaybackEngine {
         this.startBeat = 0;
         this.isPlaying = true;
     
-        for (const seq of this.sequencers) {
-          await seq.preparePlayback(scheduleAt, this.startBeat);
-        }
+        await this.scheduleAll(scheduleAt, this.startBeat);
     
         if (this.context.state === 'suspended') {
           await this.context.resume();
@@ -68,7 +66,17 @@ export class PlaybackEngine {
     
         this.animationFrameId = requestAnimationFrame(this.tick);
     }
-  
+
+    syncAfterTempoChange(oldBpm: number): void {
+        const now = this.context.currentTime;
+        const oldBeatDuration = 60 / oldBpm;
+      
+        const currentBeat = ((now - this.startTime) / oldBeatDuration) + this.startBeat;
+      
+        this.startBeat = currentBeat;
+        this.startTime = now;
+    }             
+
     async pause(): Promise<void> {
         if (!this.isPlaying) return;
         const pauseBeat = this.getCurrentBeat();
@@ -92,15 +100,23 @@ export class PlaybackEngine {
         const scheduleAt = actualTime + 0.05;
         this.startTime = scheduleAt;
     
-        for (const seq of this.sequencers) {
-          await seq.preparePlayback(scheduleAt, this.startBeat);
-        }
+        await this.scheduleAll(scheduleAt, this.startBeat);
     
         this.isPlaying = true;
         this.onResumeCallback?.();
         this.animationFrameId = requestAnimationFrame(this.tick);
     } 
-  
+
+    private async scheduleAll(startTime: number, startBeat: number): Promise<void> {
+        for (const seq of this.sequencers) {
+          if (seq.shouldPlay) {
+            await seq.preparePlayback(startTime, startBeat);
+          } else {
+            seq.stopScheduledNotes();
+          }
+        }
+    }      
+
     stop(): void {
         for (const seq of this.sequencers) {
           seq.stopScheduledNotes();
