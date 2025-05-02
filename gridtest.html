@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Scrolling Grid</title>
+  <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: #121212;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+    }
+
+    body {
+        justify-content: center;
+        align-items: center;
+    }
+
+    #controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #1e1e1e;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 1rem; /* add spacing below controls */
+    }
+
+    #container {
+        position: relative;
+        width: 60vw;
+        height: 480px;
+        background: #222;
+        border: 1px solid #333;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    canvas {
+      display: block;
+      background: #181818;
+    }
+    #scrollbars {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      pointer-events: none;
+    }
+    .scrollbar {
+      position: absolute;
+      background: #444;
+      pointer-events: all;
+    }
+    #h-scrollbar {
+        height: 12px;
+        bottom: 0;
+        left: 0;
+        right: 12px; /* make room for vertical scrollbar */
+    }
+    #v-scrollbar {
+        width: 12px;
+        top: 0;
+        bottom: 12px; /* make room for horizontal scrollbar */
+        right: 0;
+    }
+    #scroll-corner {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        bottom: 0;
+        right: 0;
+        background: #333;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .thumb {
+      position: absolute;
+      background: #888;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <label>
+      Measures:
+      <input id="measureInput" type="number" value="4" min="1" />
+    </label>
+    <button onclick="zoomIn()">Zoom In</button>
+    <button onclick="zoomOut()">Zoom Out</button>
+  </div>
+  <div id="container">
+    <canvas id="gridCanvas" width="2000" height="480"></canvas>
+    <div id="scrollbars">
+      <div id="h-scrollbar" class="scrollbar">
+        <div id="h-thumb" class="thumb" style="height: 100%; width: 100px;"></div>
+      </div>
+      <div id="v-scrollbar" class="scrollbar">
+        <div id="v-thumb" class="thumb" style="width: 100%; height: 100px;"></div>
+      </div>
+      <div id="scroll-corner" class="scrollbar"></div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('container');
+    const measureInput = document.getElementById('measureInput');
+    const hThumb = document.getElementById('h-thumb');
+    const vThumb = document.getElementById('v-thumb');
+
+    let cellWidth = 40;
+    let cellHeight = cellWidth / 3;
+    let headerHeight = cellHeight;
+    let zoomLevel = 1;
+    let measures = 4;
+    const beatsPerMeasure = 4;
+    let rows = 88;
+    const labelWidth = 60;
+
+    let scrollX = 0;
+    let scrollY = 0;
+
+    // Drawing inits
+    let needsRedraw = true;
+
+    function drawGrid() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const totalBeats = measures * beatsPerMeasure;
+
+        // Grid lines and highlight need translation
+        ctx.save();
+        ctx.translate(labelWidth - scrollX, -scrollY);
+
+        const visibleStartBeat = Math.floor((scrollX - labelWidth) / cellWidth);
+        const visibleEndBeat = Math.ceil((scrollX + canvas.width - labelWidth) / cellWidth);
+
+        // Vertical grid lines (beats)
+        for (let i = visibleStartBeat; i <= visibleEndBeat; i++) {
+            if (i < 0 || i >= totalBeats) continue;
+            const x = i * cellWidth;
+            ctx.strokeStyle = i % beatsPerMeasure === 0 ? '#888' : '#444';
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, rows * cellHeight);
+            ctx.stroke();
+        }
+
+        // Horizontal grid lines (rows)
+        for (let r = 0; r <= rows; r++) {
+            const y = r * cellHeight;
+            ctx.strokeStyle = '#333';
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(totalBeats * cellWidth, y);
+            ctx.stroke();
+        }
+
+        // Highlight hovered cell
+        if (hoveredCell) {
+            const { x, y } = hoveredCell;
+            const px = x * cellWidth;
+            const py = y * cellHeight + headerHeight; // ← shift down
+            ctx.fillStyle = 'rgba(100, 180, 255, 0.3)';
+            ctx.fillRect(px, py, cellWidth, cellHeight);
+        }
+
+        ctx.restore(); // END GRID TRANSFORM
+
+        // === 📏 Measure Playhead Header ===
+        ctx.save();
+        ctx.translate(labelWidth - scrollX, 0); // horizontal scroll only
+
+        const totalMeasures = measures;
+
+        // Background header bar
+        ctx.fillStyle = '#1e1e1e';
+        ctx.fillRect(-labelWidth + scrollX, 0, canvas.width, cellHeight);
+
+        for (let i = 0; i < totalMeasures; i++) {
+            const x = i * beatsPerMeasure * cellWidth;
+            
+            // Subtle measure divider line
+            ctx.strokeStyle = '#555';
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+
+            // Measure label
+            ctx.fillStyle = '#ccc';
+            ctx.font = `${Math.floor(cellHeight * 0.6)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText(`M${i + 1}`, x + (beatsPerMeasure * cellWidth) / 2, 4);
+        }
+
+        ctx.restore();
+
+        // === 🧱 Label Background Column ===
+        ctx.save();
+        ctx.translate(0, -scrollY); // only vertical scroll
+
+        ctx.fillStyle = '#1e1e1e'; // solid background (dark gray)
+        ctx.fillRect(0, scrollY, labelWidth, canvas.height);
+
+        // === 🔠 Row Labels ===
+        for (let r = 0; r < rows; r++) {
+            const y = r * cellHeight + headerHeight;
+            ctx.fillStyle = '#ccc';
+            ctx.font = `${Math.floor(cellHeight * 0.6)}px sans-serif`;
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText((r + 1).toString(), labelWidth - 8, y + cellHeight / 2);
+        }
+        ctx.restore(); // END LABELS + BG
+    }
+
+    function getMaxScrollY() {
+        const totalHeight = rows * cellHeight;
+        const visibleHeight = canvas.height - headerHeight;
+        return Math.max(0, totalHeight - visibleHeight);
+    }
+
+    function updateScrollbars() {
+        const totalWidth = labelWidth + measures * beatsPerMeasure * cellWidth;
+        const totalHeight = rows * cellHeight;
+
+        const visibleWidth = canvas.width;
+        const visibleHeight = canvas.height;
+
+        const hTrackWidth = visibleWidth - 12; // subtract corner width
+        const vTrackHeight = visibleHeight - 12; // subtract corner height
+
+        // HORIZONTAL
+        const hThumbWidth = Math.max(40, (visibleWidth / totalWidth) * hTrackWidth);
+        hThumb.style.width = hThumbWidth + 'px';
+        hThumb.style.left = (scrollX / (totalWidth - visibleWidth)) * (hTrackWidth - hThumbWidth) + 'px';
+
+        // VERTICAL
+        const maxScrollY = getMaxScrollY();
+        const vThumbHeight = Math.max(40, ((visibleHeight - headerHeight) / totalHeight) * vTrackHeight);
+        vThumb.style.height = vThumbHeight + 'px';
+        vThumb.style.top = (scrollY / maxScrollY) * (vTrackHeight - vThumbHeight) + 'px';
+    }
+
+
+    function attachDrag(thumb, onMove) {
+        const isHorizontal = onMove === updateHScroll;
+        const track = thumb.parentElement;
+
+        thumb.addEventListener('mousedown', e => {
+            e.preventDefault();
+
+            function move(ev) {
+            const trackRect = track.getBoundingClientRect();
+            const trackLength = isHorizontal ? trackRect.width : trackRect.height;
+
+            const clientCoord = isHorizontal ? ev.clientX : ev.clientY;
+            const coordInTrack = clientCoord - (isHorizontal ? trackRect.left : trackRect.top);
+
+            const totalSize = isHorizontal
+                ? labelWidth + measures * beatsPerMeasure * cellWidth
+                : rows * cellHeight;
+
+            const visibleSize = isHorizontal
+                ? canvas.width
+                : canvas.height - headerHeight; // ✅ account for non-scrollable header
+
+            const thumbEl = isHorizontal ? hThumb : vThumb;
+            const thumbSize = isHorizontal
+                ? thumbEl.offsetWidth
+                : thumbEl.offsetHeight;
+
+            const maxTrackTravel = trackLength - thumbSize;
+            const clampedCoord = Math.max(0, Math.min(coordInTrack - thumbSize / 2, maxTrackTravel));
+            const scrollRatio = clampedCoord / maxTrackTravel;
+
+            const maxScroll = totalSize - visibleSize;
+            const newScroll = scrollRatio * maxScroll;
+
+            onMove(Math.max(0, Math.min(newScroll, maxScroll)));
+            }
+
+            function up() {
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            }
+
+            document.addEventListener('mousemove', move);
+            document.addEventListener('mouseup', up);
+        });
+    }
+
+    function updateHScroll(newScroll) {
+      const totalWidth = labelWidth + measures * beatsPerMeasure * cellWidth;
+      scrollX = Math.max(0, Math.min(newScroll, totalWidth - canvas.width));
+      updateScrollbars();
+      requestRedraw();
+    }
+
+    function updateVScroll(newScroll) {
+        const maxScrollY = getMaxScrollY();
+        scrollY = Math.max(0, Math.min(newScroll, maxScrollY));
+        updateScrollbars();
+        requestRedraw();    
+    }
+
+    function updateScrollAndGrid() {
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      cellHeight = cellWidth / 3;
+      updateScrollbars();
+      requestRedraw();
+    }
+
+    function zoomIn() {
+      zoomLevel = Math.min(zoomLevel + 0.1, 4);
+      cellWidth = 40 * zoomLevel;
+      cellHeight = cellWidth / 3;
+      headerHeight = cellHeight;
+      updateScrollAndGrid();
+    }
+
+    function zoomOut() {
+      zoomLevel = Math.max(zoomLevel - 0.1, 0.25);
+      cellWidth = 40 * zoomLevel;
+      cellHeight = cellWidth / 3;
+      headerHeight = cellHeight;
+      updateScrollAndGrid();
+    }
+
+    measureInput.addEventListener('change', () => {
+        measures = Math.max(1, parseInt(measureInput.value, 10));
+
+        const maxScrollX = labelWidth + measures * beatsPerMeasure * cellWidth - canvas.width;
+        scrollX = Math.min(scrollX, Math.max(0, maxScrollX));
+
+        const maxScrollY = getMaxScrollY();
+        scrollY = Math.min(scrollY, maxScrollY);
+
+        updateScrollAndGrid();
+    });
+
+
+    attachDrag(hThumb, updateHScroll);
+    attachDrag(vThumb, updateVScroll);
+
+    updateScrollAndGrid();
+
+    // Mouse logic
+
+    let hoveredCell = null;
+
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const gridX = Math.floor((mouseX + scrollX - labelWidth) / cellWidth);
+        const gridY = Math.floor((mouseY + scrollY - headerHeight) / cellHeight);
+
+        if (
+            gridX >= 0 &&
+            gridX < measures * beatsPerMeasure &&
+            gridY >= 0 &&
+            gridY < rows
+        ) {
+            hoveredCell = { x: gridX, y: gridY };
+        } else {
+            hoveredCell = null;
+        }
+
+        requestRedraw(); 
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        hoveredCell = null;
+        requestRedraw();
+    });
+
+
+    function renderLoop() {
+    if (needsRedraw) {
+        drawGrid();
+        needsRedraw = false;
+    }
+        requestAnimationFrame(renderLoop);
+    }
+    
+    renderLoop();
+
+    // Replace `drawGrid()` calls with:
+    function requestRedraw() {
+        needsRedraw = true;
+    }
+
+  </script>
+</body>
+</html>
