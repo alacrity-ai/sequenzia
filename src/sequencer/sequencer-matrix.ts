@@ -10,15 +10,11 @@ import { drawMiniContour } from './grid/drawing/mini-contour.js';
 import { labelWidth } from './grid/helpers/constants.js';
 import type { Note } from './interfaces/Note.js';
 import type { Grid } from './interfaces/Grid.js';
-import type { GridConfig } from './interfaces/GridConfig.js';
+import type { GridConfig as SequenceConfig } from './interfaces/GridConfig.js';
 import { midiRangeBetween } from './grid/helpers/note-finder.js';
 import { Instrument } from '../sounds/interfaces/Instrument.js';
 import { HandlerContext as GridContext } from './interfaces/HandlerContext.js';
 import { engine as playbackEngine } from '../main.js';
-
-// New grid imports (alias is matrix for now)
-import { createGridInSequencerBody } from './matrix/utils/createGridInSequencerBody.js';
-import { Grid as Matrix } from './matrix/Grid.js';
 
 interface NoteHandler {
   stop?: () => void;
@@ -27,7 +23,7 @@ interface NoteHandler {
 
 export default class Sequencer {
   container: HTMLElement | null;
-  config: GridConfig;
+  config: SequenceConfig;
   context: AudioContext;
   destination: AudioNode;
   instrumentName: string;
@@ -70,8 +66,7 @@ export default class Sequencer {
   private pianoRollCanvas?: HTMLCanvasElement;
   private gridCanvas?: HTMLCanvasElement;
   private animationCanvas?: HTMLCanvasElement;
-  matrix?: Matrix;
-  grid?: Grid; // LEGACY GRID
+  grid?: Grid;
 
   private _scheduledAnimations: {
     time: number;
@@ -89,7 +84,7 @@ export default class Sequencer {
 
   constructor(
     containerEl: HTMLElement | null,
-    config: GridConfig,
+    config: SequenceConfig,
     context: AudioContext = getAudioContext(),
     destination: AudioNode = getMasterGain(),
     instrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano',
@@ -106,22 +101,10 @@ export default class Sequencer {
     this.squelchLoadingScreen = squelchLoadingScreen;
 
     if (this.container) {
-      const body = this.container.querySelector('.sequencer-body') as HTMLElement;
-      this.matrix = createGridInSequencerBody(body, {}, this.notes);
-
-      // LEGACY GRID
       this.pianoRollCanvas = this.container.querySelector('.piano-roll') as HTMLCanvasElement;
       this.gridCanvas = this.container.querySelector('.note-grid') as HTMLCanvasElement;
       this.animationCanvas = this.container.querySelector('.note-animate-canvas') as HTMLCanvasElement;
-
-      // 🔒 Force-disable legacy grid visuals
-      const legacyContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
-      if (legacyContainer) {
-        legacyContainer.style.display = 'none';
-      }
-
       this._initCanvases();
-      // END LEGACY GRID
     }
   }
 
@@ -129,8 +112,6 @@ export default class Sequencer {
 
   private _initCanvases(): void {
     if (!this.container) return;
-
-    // LEGACY GRID
     const noteCanvas = this.container.querySelector('canvas.note-grid') as HTMLCanvasElement;
     const playheadCanvas = this.container.querySelector('canvas.playhead-canvas') as HTMLCanvasElement;
     const scrollContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
@@ -138,7 +119,6 @@ export default class Sequencer {
 
     this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, this.notes, this.config, this);
     this.grid.scheduleRedraw();
-    // END LEGACY GRID
   }
 
   async initInstrument(): Promise<void> {
@@ -528,14 +508,10 @@ export default class Sequencer {
   
 
   redraw(): void {
-    // Legacy grid
     this.grid?.scheduleRedraw();
-
-    // New modular matrix system
-    this.matrix?.requestRedraw();
   }
 
-  getState(): { notes: Note[]; config: GridConfig; instrument: string } {
+  getState(): { notes: Note[]; config: SequenceConfig; instrument: string } {
     return {
       notes: [...this.notes],
       config: { ...this.config },
@@ -551,7 +527,7 @@ export default class Sequencer {
     pan,
   }: {
     notes: Note[];
-    config: Partial<GridConfig>;
+    config: Partial<SequenceConfig>;
     instrument?: string;
     volume?: number;
     pan?: number;

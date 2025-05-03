@@ -390,6 +390,30 @@
     });
 
 
+    const SCROLL_SPEED_Y = 1;    // reasonable for ~88 rows
+    const SCROLL_SPEED_X = 1;    // faster to traverse long timelines
+
+    canvas.addEventListener('wheel', e => {
+        // Prevent browser scrolling
+        e.preventDefault();
+
+        const maxScrollX = labelWidth + measures * beatsPerMeasure * cellWidth - canvas.width;
+        const maxScrollY = getMaxScrollY();
+
+        // Use shift+wheel or natural deltaX for horizontal scroll
+        const isHorizontal = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
+
+        if (isHorizontal) {
+            const delta = e.deltaX || e.deltaY; // fallback if deltaX is 0
+            scrollX = Math.max(0, Math.min(scrollX + delta * SCROLL_SPEED_X, maxScrollX));
+        } else {
+            scrollY = Math.max(0, Math.min(scrollY + e.deltaY * SCROLL_SPEED_Y, maxScrollY));
+        }
+
+        updateScrollbars();
+        requestRedraw();
+    }, { passive: false });
+
     function renderLoop() {
     if (needsRedraw) {
         drawGrid();

@@ -7,21 +7,6 @@ const semitoneBase: Record<string, number> = {
   C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11
 };
 
-const WELL_TEMPERAMENT_OFFSETS: Record<string, number> = {
-  'C': -14,
-  'C#': -2,
-  'D': -4,
-  'D#': 2,
-  'E': -6,
-  'F': -10,
-  'F#': -2,
-  'G': -4,
-  'G#': 2,
-  'A': 0,
-  'A#': 4,
-  'B': -2
-};
-
 function accidentalToSemitones(accidental: string): number {
   return [...accidental].reduce((acc, ch) => {
     if (ch === '#') return acc + 1;
@@ -111,6 +96,23 @@ export function pitchToMidi(pitch: string | null | undefined): number | null {
   return 12 * (octave + 1) + (baseSemitone + accidentalShift);
 }
 
+/**
+ * Converts a pitch string (e.g., "C4") to a row index in an inverted piano roll.
+ * @param pitch - Pitch name like "C4", "D#5"
+ * @param lowestMidi - MIDI value at the bottom row (e.g., 21 for A0)
+ * @param totalRows - Total vertical rows in grid (e.g., 88)
+ * @returns Row index (0 = top, increasing downward), or null if pitch is out of range
+ */
+export function pitchToInvertedRow(pitch: string, lowestMidi: number, totalRows: number): number | null {
+  const midi = pitchToMidi(pitch);
+  if (midi == null) return null;
+
+  const maxMidi = lowestMidi + totalRows - 1;
+  if (midi < lowestMidi || midi > maxMidi) return null;
+
+  return totalRows - 1 - (midi - lowestMidi);
+}
+
 const SEMIS_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const SEMIS_FLAT  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
@@ -121,6 +123,18 @@ export function midiToPitch(midi: number, preferFlats = false): string {
   return `${pitchClass}${octave}`;
 }
 
+/**
+ * Converts a vertical row index into a pitch string, using an inverted piano roll.
+ * @param row - Vertical grid row index (0 = top)
+ * @param lowestMidi - MIDI value at the bottom row (e.g., 21 for A0)
+ * @param totalRows - Total vertical rows in grid (e.g., 88 for standard keyboard)
+ */
+export function invertedRowToPitch(row: number, lowestMidi: number, totalRows: number): string {
+  const inverted = totalRows - 1 - row;
+  const midi = lowestMidi + inverted;
+  return midiToPitch(midi);
+}
+
 export function getPitchClass(pitch: string): string {
   return pitch.replace(/\d+$/, '');
 }
@@ -128,3 +142,18 @@ export function getPitchClass(pitch: string): string {
 export function isBlackKey(pitch: string): boolean {
   return pitch.includes('#');
 }
+
+const WELL_TEMPERAMENT_OFFSETS: Record<string, number> = {
+  'C': -14,
+  'C#': -2,
+  'D': -4,
+  'D#': 2,
+  'E': -6,
+  'F': -10,
+  'F#': -2,
+  'G': -4,
+  'G#': 2,
+  'A': 0,
+  'A#': 4,
+  'B': -2
+};

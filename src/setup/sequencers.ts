@@ -57,6 +57,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   setupVolumeBar(wrapper, seq);
   setupPanBar(wrapper, seq);
 
+  // Setup the collapse button
   const collapseBtn = wrapper.querySelector('.collapse-btn') as HTMLElement;
   const collapseIcon = collapseBtn.querySelector('use')!;
   const body = wrapper.querySelector('.sequencer-body') as HTMLElement;
@@ -70,6 +71,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     if (hidden) drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
   });
 
+  // Setup the delete button
   const deleteBtn = wrapper.querySelector('.delete-btn') as HTMLElement;
   deleteBtn.addEventListener('click', () => {
     const modal = document.getElementById('delete-confirm-modal') as HTMLElement;
@@ -137,12 +139,6 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   sequencers.push(seq);
   return { seq, wrapper };
 }
-
-// export function refreshPlaybackAt(currentBeat: number): void {
-//   sequencers.forEach(seq => {
-//     seq.seekTo(currentBeat);
-//   });
-// }
 
 export function toggleZoomControls(wrapper: HTMLElement, show: boolean): void {
   wrapper.querySelector('.zoom-in-btn')?.classList.toggle('hidden', !show);

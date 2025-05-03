@@ -1,0 +1,263 @@
+// src/sequencer/matrix/Grid.ts
+
+import { mergeGridConfig, createDefaultGridConfig } from './GridConfig.js';
+import { GridConfig } from './interfaces/GridConfigTypes.js';
+import { GridRenderer } from './rendering/GridRenderer.js';
+import { GridScroll } from './scrollbars/GridScroll.js';
+import { NoteManager } from './notes/NoteManager.js';
+import { NoteRenderer } from './rendering/NoteRenderer.js';
+import { NotePreviewRenderer } from './rendering/NotePreviewRenderer.js';
+import { AnimationRenderer } from './rendering/AnimationRenderer.js';
+import { PlayheadRenderer } from './rendering/PlayheadRenderer.js';
+import { CanvasManager } from './rendering/CanvasManager.js';
+import { ScrollbarManager } from './scrollbars/ScrollbarManager.js';
+import { InteractionContext } from './input/InteractionContext.js';
+import { MouseTracker } from './input/MouseTracker.js';
+import { WheelHandler } from './input/WheelHandler.js';
+import { InteractionStore } from './input/stores/InteractionStore.js';
+import { GridManager } from './GridManager.js';
+import { HeaderPlayheadRenderer } from './rendering/HeaderPlayheadRenderer.js';
+import { LabelColumnRenderer } from './rendering/LabelColumnRenderer.js';
+import { pruneNotesToTimeline } from './utils/pruneNotesToTimeline.js';
+import { GRID_CONFIG as sequencerConfig } from '../grid/helpers/constants.js';
+
+import { EventEmitter } from './events/EventEmitter.js';
+import type { GridEvents } from './interfaces/GridEvents.js';
+import type { Note } from '../interfaces/Note.js';
+import type { TrackedNote } from './interfaces/TrackedNote.js';
+import { GridSnappingContext } from './interfaces/GridSnappingContext.js';
+
+export class Grid {
+  private gridManager: GridManager;
+  private config: GridConfig;
+  private sequencerConfig = sequencerConfig;
+
+  private scroll: GridScroll;
+  private noteManager: NoteManager;
+  private scrollbars: ScrollbarManager;
+  private mouseTracker: MouseTracker;
+  private interactionContext: InteractionContext;
+  private wheelHandler: WheelHandler;
+  private interactionStore: InteractionStore;
+  private emitter: EventEmitter<GridEvents>;
+  private gridRenderer: GridRenderer;
+  private noteRenderer: NoteRenderer;
+  private notePreviewRenderer: NotePreviewRenderer;
+  private animationRenderer: AnimationRenderer;
+  private needsRedraw = true;
+  private headerRenderer: HeaderPlayheadRenderer;
+  private labelRenderer: LabelColumnRenderer;
+  private playheadRenderer: PlayheadRenderer;
+
+  private gridCanvasManager!: CanvasManager;
+  private noteCanvasManager!: CanvasManager;
+  private animationCanvasManager!: CanvasManager;
+  
+  constructor(parent: HTMLElement, config: Partial<GridConfig> = {}) {
+    this.config = mergeGridConfig(createDefaultGridConfig(), config);
+
+    // Create canvas managers for our canvases
+    this.gridManager = new GridManager(parent);
+    const { gridCanvas, noteCanvas, animationCanvas } = this.gridManager;
+    this.gridCanvasManager = new CanvasManager(gridCanvas);
+    this.noteCanvasManager = new CanvasManager(noteCanvas);
+    this.animationCanvasManager = new CanvasManager(animationCanvas);    
+
+    // Create components
+    const mainContainer = this.gridManager.container
+    this.noteManager = new NoteManager();
+    this.interactionStore = new InteractionStore();
+    this.emitter = new EventEmitter<GridEvents>();
+    this.scroll = new GridScroll(mainContainer, this.config);
+    this.scrollbars = new ScrollbarManager(mainContainer, this.scroll, this.config, () => this.requestRedraw());
+    this.wheelHandler = new WheelHandler(mainContainer, this.scroll, () => this.requestRedraw());
+
+    // Interaction
+    this.interactionContext = new InteractionContext({
+      scroll: this.scroll,
+      config: this.config,
+      store: this.interactionStore,
+      grid: this as GridSnappingContext,
+      addNote: (note) => this.noteManager.add(note),
+      requestRedraw: () => this.requestRedraw()
+    });
+    this.mouseTracker = new MouseTracker(this.interactionContext, mainContainer)
+
+    // Create renderers
+    this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore);
+    this.noteRenderer = new NoteRenderer(this.scroll, this.config, this.noteManager, this.interactionStore);
+    this.notePreviewRenderer = new NotePreviewRenderer(this.scroll, this.config, this.interactionStore, this);
+    this.animationRenderer = new AnimationRenderer(this.scroll, this.config);
+    this.headerRenderer = new HeaderPlayheadRenderer(this.scroll, this.config);
+    this.labelRenderer = new LabelColumnRenderer(this.scroll, this.config);
+    this.playheadRenderer = new PlayheadRenderer(this.scroll, this.config);
+
+    // Defer resize until layout is ready
+    requestAnimationFrame(() => this.resize());
+    
+    this.playheadRenderer.setPlayheadX(100);
+    this.attachListeners();
+    this.renderLoop();
+  }
+
+  private attachListeners(): void {
+    window.addEventListener('resize', () => this.resize());
+  }
+
+  private renderLoop(): void {
+    if (this.needsRedraw) {
+      this.render();
+      this.needsRedraw = false;
+    }
+    requestAnimationFrame(() => this.renderLoop());
+  }
+
+  private resize(): void {
+    const { width, height } = this.gridManager.container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+  
+    this.gridCanvasManager.resize();
+    this.noteCanvasManager.resize();
+    this.animationCanvasManager.resize();    
+  
+    this.scroll.recalculateBounds();
+    this.scrollbars.update();
+    this.requestRedraw();
+  }
+  
+  private get zoom(): number {
+    return this.config.behavior.zoom;
+  }
+
+  private set zoom(value: number) {
+    this.config.behavior.zoom = value;
+  }
+
+  // Public API
+
+  public render(): void {
+    this.gridCanvasManager.clear();
+    this.noteCanvasManager.clear();
+    this.animationCanvasManager.clear();
+    
+    const gridCtx = this.gridCanvasManager.getContext();
+    const noteCtx = this.noteCanvasManager.getContext();
+    const animCtx = this.animationCanvasManager.getContext();
+    
+    this.gridRenderer.draw(gridCtx);
+    this.noteRenderer.draw(noteCtx);
+    this.notePreviewRenderer.draw(noteCtx);
+    this.animationRenderer.draw(animCtx);
+    this.headerRenderer.draw(gridCtx);
+    this.labelRenderer.draw(gridCtx);
+    this.playheadRenderer.draw(animCtx);
+
+    this.scrollbars.update();
+  }
+
+  public requestRedraw(): void {
+    this.needsRedraw = true;
+  }
+
+  public on<K extends keyof GridEvents>(event: K, callback: (payload: GridEvents[K]) => void): void {
+    this.emitter.on(event, callback);
+  }
+
+  public off<K extends keyof GridEvents>(event: K, callback: (payload: GridEvents[K]) => void): void {
+    this.emitter.off(event, callback);
+  }
+
+  public setPlayheadPixelX(x: number): void {
+    this.playheadRenderer.setPlayheadX(x);
+    this.requestRedraw();
+  }
+
+  public getNotes(): Note[] {
+    return this.noteManager.getAll();
+  }
+
+  public setNotes(notes: Note[]): void {
+    this.noteManager.set(pruneNotesToTimeline(notes, this.getTotalBeats()));
+    this.requestRedraw();
+  }  
+
+  public getTrackedNotes(): TrackedNote[] {
+    return this.noteManager.getTrackedNotes(this.interactionStore);
+  }
+
+  public scrollTo(x: number, y: number): void {
+    this.scroll.setScroll(x, y);
+    this.scrollbars.update();
+    this.requestRedraw();
+  }
+
+  public setZoom(level: number): void {
+    this.zoom = level;
+    this.scroll.recalculateBounds();
+    this.requestRedraw();
+  }
+
+  public getZoom(): number {
+    return this.zoom;
+  }
+
+  public getMeasures(): number {
+    return this.config.totalMeasures;
+  }
+
+  public setMeasures(measures: number): void {
+    this.config.totalMeasures = Math.max(1, measures);
+    pruneNotesToTimeline(this.noteManager.getAll(), this.getTotalBeats());
+    this.scroll.recalculateBounds();
+    this.requestRedraw();
+  }
+
+  public getBeatsPerMeasure(): number {
+    return this.config.beatsPerMeasure;
+  }
+
+  public setBeatsPerMeasure(beats: number): void {
+    this.config.beatsPerMeasure = Math.max(1, beats);
+    this.scroll.recalculateBounds();
+    this.requestRedraw();
+  }
+
+  public getTotalBeats(): number {
+    return this.config.totalMeasures * this.config.beatsPerMeasure;
+  }
+
+  // Whether the grid is in triplet mode or not, effects snapping/note placement
+  public isTripletMode(): boolean {
+    return this.sequencerConfig.isTripletMode;
+  }
+
+  // The duration of a note to be placed, e.g. 1 = whole note, 0.5 = half note, etc.
+  public getNoteDuration(): number {
+    return this.sequencerConfig.currentDuration;
+  }
+
+  // The resolution to snap notes to, note placement, dragging, highlighting all snap to this
+  // e.g. 0.25 = quarter note, 0.125 = 8th note, 0.0625 = 16th note
+  public getSnapResolution(): number {
+    return this.sequencerConfig.snapResolution;
+  }
+
+  public emit<K extends keyof GridEvents>(event: K, payload: GridEvents[K]): void {
+    this.emitter.emit(event, payload);
+  }
+
+  /** Destroy the grid and its associated resources */
+  public destroy(): void {
+    this.mouseTracker.destroy();
+    this.wheelHandler.destroy();
+    this.scrollbars.destroy(); // If applicable
+
+    // Destroy input + scroll components
+    this.mouseTracker.destroy();
+    this.wheelHandler.destroy();
+    this.scrollbars.destroy();
+
+    // Remove DOM elements
+    this.gridManager.container.remove(); // removes all 3 canvases in one go
+  }
+}

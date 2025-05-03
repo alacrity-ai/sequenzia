@@ -1,5 +1,7 @@
 // src/sequencer/interfaces/GridConfig.ts
 
+// TODO: This should be called SequencerConfig!
+
 export interface GridConfig {
   cellWidth: number;
   cellHeight: number;
