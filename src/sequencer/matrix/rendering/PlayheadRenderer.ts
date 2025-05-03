@@ -26,13 +26,15 @@ export class PlayheadRenderer {
           layout: {
             verticalCellRatio,
             baseCellWidth,
-            totalRows,
             labelWidth,
-            headerHeight
+            headerHeight,
+            highestMidi,
+            lowestMidi
           },
           behavior: { zoom }
         } = this.config;
       
+        const totalRows = highestMidi - lowestMidi + 1;
         const scrollX = this.scroll.getX();
         const scrollY = this.scroll.getY();
         const cellHeight = (baseCellWidth * zoom) / verticalCellRatio;

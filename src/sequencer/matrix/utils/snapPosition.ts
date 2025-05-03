@@ -21,10 +21,11 @@ export function getSnappedNotePosition(
   triplet: boolean = false
 ): SnappedNotePosition | null {
   const {
-    layout: { labelWidth, headerHeight, baseCellWidth, verticalCellRatio, totalRows },
+    layout: { labelWidth, headerHeight, baseCellWidth, verticalCellRatio, highestMidi, lowestMidi },
     behavior: { zoom }
   } = config;
 
+  const totalRows = highestMidi - lowestMidi + 1;
   const cellWidth = baseCellWidth * zoom;
   const cellHeight = cellWidth / verticalCellRatio;
 

@@ -9,13 +9,15 @@ export const DEFAULT_GRID_CONFIG: GridConfig = {
   layout: {
     labelWidthColumns: 1, // columns
     headerHeightRows: 2, // rows
+    footerHeightRows: 1, // rows
     labelWidth: 80, // pixels
     headerHeight: 40, // pixels
+    footerHeight: 40, // pixels
     baseCellWidth: 70,
     minCellWidth: 10,
     maxCellWidth: 200,
     verticalCellRatio: 4,
-    totalRows: 88,            // Piano roll standard
+    highestMidi: 108,         // C8
     lowestMidi: 21            // A0
   },
 

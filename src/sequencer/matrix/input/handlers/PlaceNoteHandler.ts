@@ -8,9 +8,9 @@ import type { Note } from '../../../interfaces/Note.js';
 import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.js';
 import { getRelativeMousePos } from '../../utils/gridPosition.js';
 import { getSnappedNotePosition } from '../../utils/snapPosition.js';
-import { rowToPitch } from '../../../../sounds/audio/pitch-utils.js';
 import { isNoteNearVisibleEdge } from '../../utils/isNoteNearVisibleEdge.js';
 import { NoteManager } from '../../notes/NoteManager.js';
+import { rowToNote } from '../../utils/noteUtils.js';
 
 export class PlaceNoteHandler implements GridInteractionHandler {
     constructor(
@@ -34,6 +34,12 @@ export class PlaceNoteHandler implements GridInteractionHandler {
     }
   
     public onMouseMove(e: MouseEvent): void {
+      if (this.store.isOnNonGridElement()) {
+        this.store.setHoveredNotePosition(null);
+        this.requestRedraw();
+        return;
+      }
+      
       const mouse = getRelativeMousePos(e, e.currentTarget as HTMLElement);
       const snap = this.grid.getSnapResolution();
       const triplet = this.grid.isTripletMode();
@@ -50,16 +56,13 @@ export class PlaceNoteHandler implements GridInteractionHandler {
     }
   
     public onMouseDown(e: MouseEvent): void {
+        if (this.store.isOnNonGridElement()) return;
         const hovered = this.store.getHoveredNotePosition?.();
         if (!hovered) return;
       
-        if (isNoteNearVisibleEdge(hovered, this.scroll, this.config, this.canvas)) {
-          return;
-        }
-      
         const { layout } = this.config;
         const duration = this.grid.getNoteDuration();
-        const pitch = rowToPitch(hovered.y, layout.lowestMidi);
+        const pitch = rowToNote(hovered.y, layout.lowestMidi, layout.highestMidi);
         if (!pitch) return;
       
         const newNote: Note = {
@@ -70,7 +73,7 @@ export class PlaceNoteHandler implements GridInteractionHandler {
         };
       
         this.addNote(newNote);
-        this.noteManager.previewNote(pitch, duration);
+        this.noteManager.previewNote(rowToNote(hovered.y, layout.lowestMidi, layout.highestMidi)!, duration);
         this.requestRedraw();
       }      
   

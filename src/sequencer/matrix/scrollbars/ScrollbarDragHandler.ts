@@ -1,20 +1,32 @@
 // src/sequencer/matrix/scrollbars/ScrollbarDragHandler.ts
 
 import type { GridScroll } from './GridScroll.js';
+import type { InteractionStore } from '../input/stores/InteractionStore.js';
 
 export class ScrollbarDragHandler {
   constructor(
     private thumb: HTMLDivElement,
     private isHorizontal: boolean,
     private scroll: GridScroll,
+    private interactionStore: InteractionStore,
     private requestRedraw: () => void
   ) {
     this.attachDragHandler();
   }
-
+  
   private attachDragHandler(): void {
     const track = this.thumb.parentElement as HTMLDivElement;
     if (!track) return;
+
+    // Track hover for interaction suppression
+    const setTrue = () => this.interactionStore.setIsOnScrollbar(true);
+    const setFalse = () => this.interactionStore.setIsOnScrollbar(false);
+
+    // Add listeners to both track and thumb to cover edge cases
+    track.addEventListener('mouseenter', setTrue);
+    track.addEventListener('mouseleave', setFalse);
+    this.thumb.addEventListener('mouseenter', setTrue);
+    this.thumb.addEventListener('mouseleave', setFalse);
 
     this.thumb.addEventListener('mousedown', e => {
       e.preventDefault();
@@ -22,7 +34,7 @@ export class ScrollbarDragHandler {
       const onMouseMove = (ev: MouseEvent): void => {
         const rect = track.getBoundingClientRect();
       
-        // ✅ Use zoom-invariant layout size
+        // Use zoom-invariant layout size
         const trackLength = this.isHorizontal ? track.offsetWidth : track.offsetHeight;
       
         const clientCoord = this.isHorizontal ? ev.clientX : ev.clientY;

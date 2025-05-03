@@ -3,11 +3,15 @@
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
+import { computeBlackKeyRowMap } from '../utils/noteUtils.js';
+import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
+import { GRID_COLOR_SCHEMES, GridColorScheme } from './colors/gridColorSchemes.js';
 
 export class GridRenderer {
   private scroll: GridScroll;
   private config: GridConfig;
   private interactionStore: InteractionStore;
+  private blackKeyRowMap: boolean[];
 
   constructor(
     scroll: GridScroll,
@@ -17,6 +21,7 @@ export class GridRenderer {
     this.scroll = scroll;
     this.config = config;
     this.interactionStore = interactionStore;
+    this.blackKeyRowMap = computeBlackKeyRowMap(this.config.layout.lowestMidi, this.config.layout.highestMidi);
   }
 
   public draw(ctx: CanvasRenderingContext2D): void {
@@ -31,42 +36,61 @@ export class GridRenderer {
       },
       behavior: { zoom }
     } = this.config;
+  
+    const { gridColorScheme: schemeKey } = getUserConfig();
+    const scheme = GRID_COLOR_SCHEMES[schemeKey];
+  
+    const totalRows = this.config.layout.highestMidi - this.config.layout.lowestMidi + 1;
     const cellWidth = baseCellWidth * zoom;
     const cellHeight = cellWidth / verticalCellRatio;
-
+  
     const scrollX = this.scroll.getX();
     const scrollY = this.scroll.getY();
-
+  
     const visibleBeats = (ctx.canvas.width - labelWidth) / cellWidth;
     const totalBeats = totalMeasures * beatsPerMeasure;
-
+  
     ctx.save();
     ctx.translate(labelWidth - scrollX, headerHeight - scrollY);
-
+  
     const startBeat = Math.max(0, Math.floor((scrollX - labelWidth) / cellWidth));
-    const endBeat = Math.min(totalBeats, startBeat + visibleBeats + 2); // add buffer for sub-pixel    
-
-    // Vertical lines
-    for (let i = startBeat; i <= endBeat; i++) {
-      if (i < 0 || i >= totalBeats) continue;
-      const x = i * cellWidth;
-      ctx.strokeStyle = i % beatsPerMeasure === 0 ? '#888' : '#444';
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, this.config.layout.totalRows * cellHeight);
-      ctx.stroke();
-    }
-
-    // Horizontal lines
-    for (let r = 0; r <= this.config.layout.totalRows; r++) {
+    const endBeat = Math.min(totalBeats, startBeat + visibleBeats + 2);
+  
+    // Horizontal lines and key shading
+    for (let r = 0; r <= totalRows; r++) {
       const y = r * cellHeight;
-      ctx.strokeStyle = '#333';
+  
+      ctx.strokeStyle = scheme.gridLine;
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(totalBeats * cellWidth, y);
       ctx.stroke();
+  
+      if (r < totalRows) {
+        const isBlack = this.blackKeyRowMap[r];
+        ctx.fillStyle = isBlack ? scheme.blackKey : scheme.whiteKey;
+        ctx.fillRect(0, y, totalBeats * cellWidth, cellHeight);
+      }
     }
-
+  
+    // Vertical lines for beats and measures
+    for (let i = startBeat; i <= totalBeats; i++) {
+      if (i < 0) continue;
+  
+      const x = i * cellWidth;
+      if (i % beatsPerMeasure === 0) {
+        ctx.strokeStyle = scheme.measureLine;
+      } else {
+        ctx.strokeStyle = scheme.beatLine;
+      }
+  
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, totalRows * cellHeight);
+      ctx.stroke();
+    }
+  
     ctx.restore();
   }
+  
 }

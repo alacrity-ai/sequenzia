@@ -18,12 +18,13 @@ export function getGridCellAt(
   config: GridConfig
 ): GridCell | null {
   const {
-    layout: { labelWidth, headerHeight, baseCellWidth, verticalCellRatio, totalRows },
+    layout: { labelWidth, headerHeight, baseCellWidth, verticalCellRatio, highestMidi, lowestMidi },
     totalMeasures,
     beatsPerMeasure,
     behavior: { zoom }
   } = config;
 
+  const totalRows = highestMidi - lowestMidi + 1;
   const cellWidth = baseCellWidth * zoom;
   const cellHeight = cellWidth / verticalCellRatio;
 

@@ -74,7 +74,7 @@ export class Grid {
     this.interactionStore = new InteractionStore();
     this.emitter = new EventEmitter<GridEvents>();
     this.scroll = new GridScroll(mainContainer, this.config);
-    this.scrollbars = new ScrollbarManager(mainContainer, this.scroll, this.config, () => this.requestRedraw());
+    this.scrollbars = new ScrollbarManager(mainContainer, this.scroll, this.config, this.interactionStore, () => this.requestRedraw());
     this.wheelHandler = new WheelHandler(mainContainer, this.scroll, () => this.requestRedraw());
 
     // Interaction
@@ -123,9 +123,6 @@ export class Grid {
   }
 
   private resize(): void {
-    // const { width, height } = this.gridManager.container.getBoundingClientRect();
-    // const dpr = window.devicePixelRatio || 1;
-  
     this.gridCanvasManager.resize();
     this.noteCanvasManager.resize();
     this.animationCanvasManager.resize();    

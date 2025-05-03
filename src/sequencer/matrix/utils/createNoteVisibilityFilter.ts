@@ -2,7 +2,7 @@
 
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
-import { pitchToRowIndex } from './pitchToRowIndex.js';
+import { noteToRowIndex } from './noteUtils.js';
 
 
 /**
@@ -16,10 +16,11 @@ export function createVisibleNotesFilter(
   canvas: HTMLCanvasElement
 ): (notes: TrackedNote[]) => TrackedNote[] {
   const {
-    layout: { baseCellWidth, verticalCellRatio, lowestMidi, totalRows },
+    layout: { baseCellWidth, verticalCellRatio, highestMidi, lowestMidi },
     behavior: { zoom },
   } = config;
 
+  const totalRows = highestMidi - lowestMidi + 1;
   const cellWidth = baseCellWidth * zoom;
   const cellHeight = cellWidth / verticalCellRatio;
   const canvasWidth = canvas.offsetWidth;
@@ -29,8 +30,8 @@ export function createVisibleNotesFilter(
 
   const startX = scrollX / cellWidth - buffer;
   const endX = (scrollX + canvasWidth) / cellWidth + buffer;
-  const startRow = Math.floor(scrollY / cellHeight) - buffer;
-  const endRow = Math.ceil((scrollY + canvasHeight) / cellHeight) + buffer;
+  const startRow = Math.floor(scrollY / cellHeight);
+  const endRow = Math.min(totalRows - 1, Math.ceil((scrollY + canvasHeight) / cellHeight) + buffer);
 
   const pitchRowCache = new Map<string, number>();
 
@@ -41,7 +42,7 @@ export function createVisibleNotesFilter(
 
       let row = pitchRowCache.get(note.pitch);
       if (row == null) {
-        const resolved = pitchToRowIndex(note.pitch, lowestMidi, totalRows);
+        const resolved = noteToRowIndex(note.pitch, lowestMidi, highestMidi);
         if (resolved == null || resolved < 0 || resolved >= totalRows) return false;
         row = resolved;
         pitchRowCache.set(note.pitch, row);

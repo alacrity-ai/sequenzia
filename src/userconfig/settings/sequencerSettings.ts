@@ -50,12 +50,12 @@ export function initSequencerSettings(): void {
   gridSelect.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLSelectElement;
     updateUserConfig({ gridColorScheme: target.value });
-    getSequencers().forEach(seq => seq.grid?.scheduleRedraw());
+    getSequencers().forEach(seq => seq.matrix?.requestRedraw());
   });
 
   noteSelect.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLSelectElement;
     updateUserConfig({ noteColorScheme: target.value });
-    getSequencers().forEach(seq => seq.grid?.scheduleRedraw());
+    getSequencers().forEach(seq => seq.matrix?.requestRedraw());
   });
 }

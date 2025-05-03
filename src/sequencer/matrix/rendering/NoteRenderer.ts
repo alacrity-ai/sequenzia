@@ -7,7 +7,7 @@ import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
 import { drawRoundedRect } from '../utils/roundedRect.js';
 import { createVisibleNotesFilter } from '../utils/createNoteVisibilityFilter.js'
-import { pitchToRowIndex } from '../utils/pitchToRowIndex.js';
+import { noteToRowIndex } from '../utils/noteUtils.js';
 
 export class NoteRenderer {
   constructor(
@@ -41,7 +41,7 @@ export class NoteRenderer {
     const visibleNotes = filterVisible(notes);
     
     for (const { note, state } of visibleNotes) {
-      const row = pitchToRowIndex(note.pitch, this.config.layout.lowestMidi, this.config.layout.totalRows)!;
+      const row = noteToRowIndex(note.pitch, this.config.layout.lowestMidi, this.config.layout.highestMidi)!;
       const y = row * cellHeight;
       const x = note.start * cellWidth;
       const w = note.duration * cellWidth;

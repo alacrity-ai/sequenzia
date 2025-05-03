@@ -2,6 +2,7 @@
 
 import { ScrollbarDragHandler } from './ScrollbarDragHandler.js';
 import { injectScrollbarStyles } from './injectScrollbarStyles.js';
+import { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { GridScroll } from './GridScroll.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import { TAILWIND_COLORS } from '../../../global/macros/tailwind.js';
@@ -19,12 +20,14 @@ export class ScrollbarManager {
     private container: HTMLElement,
     private scroll: GridScroll,
     private config: GridConfig,
+    private interactionStore: InteractionStore,
     private requestRedraw: () => void
   ) {
     injectScrollbarStyles();
     this.createDOM();
     this.attachEvents();
     this.config = this.config;
+    this.interactionStore = interactionStore;
   }
 
   private createDOM(): void {
@@ -81,8 +84,8 @@ export class ScrollbarManager {
   }  
 
   private attachEvents(): void {
-    new ScrollbarDragHandler(this.hThumb, true, this.scroll, this.requestRedraw);
-    new ScrollbarDragHandler(this.vThumb, false, this.scroll, this.requestRedraw);
+    new ScrollbarDragHandler(this.hThumb, true, this.scroll, this.interactionStore, this.requestRedraw);
+    new ScrollbarDragHandler(this.vThumb, false, this.scroll, this.interactionStore, this.requestRedraw);
   }
 
   public update(): void {

@@ -7,7 +7,7 @@ import type { GridConfig } from '../interfaces/GridConfigTypes.js';
  */
 export function getContentWidth(config: GridConfig): number {
     const {
-      layout: { labelWidth, baseCellWidth },
+      layout: { labelWidth, baseCellWidth},
       totalMeasures,
       beatsPerMeasure,
       behavior: { zoom }
@@ -24,10 +24,11 @@ export function getContentWidth(config: GridConfig): number {
  */
 export function getContentHeight(config: GridConfig): number {
     const {
-      layout: { baseCellWidth, verticalCellRatio, totalRows, headerHeight },
+      layout: { baseCellWidth, verticalCellRatio, highestMidi, lowestMidi, headerHeight },
       behavior: { zoom }
     } = config;
   
+    const totalRows = highestMidi - lowestMidi + 1;
     const cellHeight = (baseCellWidth * zoom) / verticalCellRatio;
   
     return totalRows * cellHeight + headerHeight;
