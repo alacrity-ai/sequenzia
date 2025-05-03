@@ -7,12 +7,14 @@ export const DEFAULT_GRID_CONFIG: GridConfig = {
   beatsPerMeasure: 4,
 
   layout: {
-    labelWidth: 60,
-    headerHeight: 24,
-    baseCellWidth: 40,
+    labelWidthColumns: 1, // columns
+    headerHeightRows: 2, // rows
+    labelWidth: 80, // pixels
+    headerHeight: 40, // pixels
+    baseCellWidth: 70,
     minCellWidth: 10,
-    maxCellWidth: 160,
-    verticalCellRatio: 3,
+    maxCellWidth: 200,
+    verticalCellRatio: 4,
     totalRows: 88,            // Piano roll standard
     lowestMidi: 21            // A0
   },
@@ -28,7 +30,9 @@ export const DEFAULT_GRID_CONFIG: GridConfig = {
     zoom: 1.0,
     scrollMargin: 48,
     enableSnapping: true,
-    snapDivisions: 4
+    snapDivisions: 4,
+    maxZoom: 1.6,
+    minZoom: 0.5
   }
 };
 

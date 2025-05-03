@@ -246,7 +246,7 @@ export function initGrid(
     drawPlayhead(safePlayheadCtx, x, labelWidth, canvas.height);
   }
 
-  initZoomControls(sequencer.container, zoomIn, zoomOut, resetZoom);
+  // initZoomControls(sequencer.container, zoomIn, zoomOut, resetZoom);
 
   function getPitchRow(pitch: string): number {
     const topMidi = pitchToMidi(config.noteRange[1]);

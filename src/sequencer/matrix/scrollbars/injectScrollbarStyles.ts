@@ -22,7 +22,7 @@ export function injectScrollbarStyles(): void {
 
     .grid-scrollbar {
       position: absolute;
-      background: #444;
+      background: #1f1f1f;
       pointer-events: all;
     }
 
@@ -39,7 +39,7 @@ export function injectScrollbarStyles(): void {
       height: 12px;
       bottom: 0;
       right: 0;
-      background: #333;
+      background: #1f1f1f;
       z-index: 2;
       pointer-events: none;
     }

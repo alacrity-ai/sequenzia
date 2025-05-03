@@ -36,6 +36,8 @@ export class InteractionContext {
     switch (mode) {
       case InteractionMode.PlacingNote:
         return new PlaceNoteHandler(
+          this.data.canvas,
+          this.data.noteManager,
           this.data.scroll,
           this.data.config,
           this.data.store,

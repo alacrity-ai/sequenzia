@@ -4,6 +4,7 @@ import { ScrollbarDragHandler } from './ScrollbarDragHandler.js';
 import { injectScrollbarStyles } from './injectScrollbarStyles.js';
 import type { GridScroll } from './GridScroll.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
+import { TAILWIND_COLORS } from '../../../global/macros/tailwind.js';
 
 export class ScrollbarManager {
   private hScrollbar!: HTMLDivElement;
@@ -12,7 +13,7 @@ export class ScrollbarManager {
   private vThumb!: HTMLDivElement;
   private corner!: HTMLDivElement;
 
-  private readonly trackThickness = 12;
+  private readonly trackThickness = 16;
 
   constructor(
     private container: HTMLElement,
@@ -23,6 +24,7 @@ export class ScrollbarManager {
     injectScrollbarStyles();
     this.createDOM();
     this.attachEvents();
+    this.config = this.config;
   }
 
   private createDOM(): void {
@@ -42,16 +44,19 @@ export class ScrollbarManager {
     h.style.position = v.style.position = c.style.position = 'absolute';
     h.style.zIndex = v.style.zIndex = c.style.zIndex = '5';
   
+    // Set scrollbar track dimensions
     h.style.bottom = '0';
     h.style.left = '0';
     h.style.right = `${this.trackThickness}px`;
     h.style.height = `${this.trackThickness}px`;
   
+    // Set scrollbar track dimensions
     v.style.top = '0';
     v.style.right = '0';
     v.style.bottom = `${this.trackThickness}px`;
     v.style.width = `${this.trackThickness}px`;
-  
+
+    // Corner styling
     c.style.width = `${this.trackThickness}px`;
     c.style.height = `${this.trackThickness}px`;
     c.style.right = '0';
@@ -62,9 +67,9 @@ export class ScrollbarManager {
     // Thumb styling and layering
     ht.style.zIndex = vt.style.zIndex = '6';
     ht.style.position = vt.style.position = 'absolute';
-    ht.style.background = 'rgba(255, 255, 255, 0.5)';
-    vt.style.background = 'rgba(255, 255, 255, 0.5)';
-    ht.style.borderRadius = vt.style.borderRadius = '3px';
+    ht.style.background = TAILWIND_COLORS['bg-purple-700'];
+    vt.style.background = TAILWIND_COLORS['bg-purple-700'];
+    ht.style.borderRadius = vt.style.borderRadius = '8px';
     ht.style.height = '100%';
     vt.style.width = '100%';
 
@@ -90,13 +95,10 @@ export class ScrollbarManager {
     const maxX = this.scroll.getMaxScrollX();
     const maxY = this.scroll.getMaxScrollY();    
 
-    console.log('[ScrollbarManager] update():', {
-        width, height, totalWidth, totalHeight, scrollX, scrollY, maxX, maxY
-      });
-
     // Horizontal
     const hTrack = width - this.trackThickness;
-    const hThumbWidth = Math.max(40, (width / totalWidth) * hTrack);
+    const labelWidth = this.config.layout.labelWidth;
+    const hThumbWidth = Math.max(40, ((width - labelWidth) / totalWidth) * hTrack);    
     const hLeft = (scrollX / maxX) * (hTrack - hThumbWidth);
     this.hThumb.style.width = `${hThumbWidth}px`;
     this.hThumb.style.left = `${Math.max(0, hLeft)}px`;
@@ -108,10 +110,6 @@ export class ScrollbarManager {
     const vTop = (scrollY / maxY) * (vTrack - vThumbHeight);
     this.vThumb.style.height = `${vThumbHeight}px`;
     this.vThumb.style.top = `${Math.max(0, vTop)}px`;
-
-    console.log('H Thumb Style:', this.hThumb.style.cssText);
-    console.log('V Thumb Style:', this.vThumb.style.cssText);
-
   }
 
   public destroy(): void {

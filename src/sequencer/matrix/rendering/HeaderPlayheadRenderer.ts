@@ -10,7 +10,7 @@ export class HeaderPlayheadRenderer {
 
   public draw(ctx: CanvasRenderingContext2D): void {
     const {
-      layout: { labelWidth, baseCellWidth, verticalCellRatio, headerHeight },
+      layout: { baseCellWidth, headerHeight, labelWidth },
       totalMeasures,
       beatsPerMeasure,
       behavior: { zoom }
@@ -18,41 +18,49 @@ export class HeaderPlayheadRenderer {
   
     const cellWidth = baseCellWidth * zoom;
     const totalBeats = totalMeasures * beatsPerMeasure;
-    const totalGridWidth = labelWidth + totalBeats * cellWidth;
   
     const scrollX = this.scroll.getX();
   
     ctx.save();
     ctx.translate(labelWidth - scrollX, 0);
   
-    // 🔧 FIX 1: Use layout width instead of canvas buffer size
-    const layoutWidth = ctx.canvas.offsetWidth ?? totalGridWidth;
+    const layoutWidth = ctx.canvas.offsetWidth;
   
-    // Header background
-    ctx.fillStyle = '#1e1e1e';
+    // 🔷 Gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, headerHeight);
+    gradient.addColorStop(0, '#262626');
+    gradient.addColorStop(1, '#1a1a1a');
+    ctx.fillStyle = gradient;
     ctx.fillRect(-labelWidth + scrollX, 0, layoutWidth, headerHeight);
   
-    // Measure lines + labels
-    for (let measure = 0; measure < totalMeasures; measure++) {
+    // 🔠 Measure lines and labels
+    for (let measure = 0; measure <= totalMeasures; measure++) {
       const beatIndex = measure * beatsPerMeasure;
       const x = beatIndex * cellWidth;
   
-      // Vertical measure divider
-      ctx.strokeStyle = '#555';
+      // Grid line: strong every 4th, faint otherwise
+      ctx.strokeStyle = (measure % 4 === 0) ? '#888' : '#444';
+      ctx.lineWidth = (measure % 4 === 0) ? 2 : 1;
       ctx.beginPath();
       ctx.moveTo(x, 0);
-      ctx.lineTo(x, headerHeight); // 🔧 FIX 2: limit line to header height
+      ctx.lineTo(x, headerHeight);
       ctx.stroke();
   
-      // Measure label
-      ctx.fillStyle = '#ccc';
-      ctx.font = `${Math.floor(headerHeight * 0.6)}px sans-serif`;
+      // Text label
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillText(`M${measure + 1}`, x + (beatsPerMeasure * cellWidth) / 2, 4);
+  
+      const isMajor = measure % 4 === 0;
+      ctx.fillStyle = isMajor ? '#f0f0f0' : '#777';
+      ctx.font = `${isMajor ? 'bold' : ''} ${Math.floor(headerHeight * 0.5)}px 'Inter', sans-serif`;
+  
+      const labelX = x + (beatsPerMeasure * cellWidth) / 2;
+      ctx.fillText(`${measure + 1}`, labelX, 4);
     }
   
     ctx.restore();
   }
+  
+  
   
 }

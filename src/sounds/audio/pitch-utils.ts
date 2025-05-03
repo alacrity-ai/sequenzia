@@ -135,6 +135,14 @@ export function invertedRowToPitch(row: number, lowestMidi: number, totalRows: n
   return midiToPitch(midi);
 }
 
+/**
+ * Converts a row index (top = 0) into a pitch string, assuming standard descending Y grid.
+ */
+export function rowToPitch(row: number, lowestMidi: number): string {
+  const midi = lowestMidi + row;
+  return midiToPitch(midi);
+}
+
 export function getPitchClass(pitch: string): string {
   return pitch.replace(/\d+$/, '');
 }

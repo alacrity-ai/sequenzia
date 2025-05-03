@@ -8,11 +8,14 @@ import type { Note } from '../../../interfaces/Note.js';
 import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.js';
 import { getRelativeMousePos } from '../../utils/gridPosition.js';
 import { getSnappedNotePosition } from '../../utils/snapPosition.js';
-import { invertedRowToPitch } from '../../../../sounds/audio/pitch-utils.js';
-
+import { rowToPitch } from '../../../../sounds/audio/pitch-utils.js';
+import { isNoteNearVisibleEdge } from '../../utils/isNoteNearVisibleEdge.js';
+import { NoteManager } from '../../notes/NoteManager.js';
 
 export class PlaceNoteHandler implements GridInteractionHandler {
     constructor(
+      private readonly canvas: HTMLCanvasElement,
+      private readonly noteManager: NoteManager,
       private readonly scroll: GridScroll,
       private readonly config: GridConfig,
       private readonly store: InteractionStore,
@@ -36,6 +39,12 @@ export class PlaceNoteHandler implements GridInteractionHandler {
       const triplet = this.grid.isTripletMode();
   
       const snapped = getSnappedNotePosition(mouse, this.scroll, this.config, snap, triplet);
+      if (!snapped) return;
+
+      if (isNoteNearVisibleEdge(snapped, this.scroll, this.config, this.canvas)) {
+        this.store.setHoveredNotePosition(null);
+        return;
+      }
       this.store.setHoveredNotePosition(snapped);
       this.requestRedraw();
     }
@@ -44,10 +53,13 @@ export class PlaceNoteHandler implements GridInteractionHandler {
         const hovered = this.store.getHoveredNotePosition?.();
         if (!hovered) return;
       
+        if (isNoteNearVisibleEdge(hovered, this.scroll, this.config, this.canvas)) {
+          return;
+        }
+      
         const { layout } = this.config;
         const duration = this.grid.getNoteDuration();
-        const pitch = invertedRowToPitch(hovered.y, layout.lowestMidi, layout.totalRows);
-      
+        const pitch = rowToPitch(hovered.y, layout.lowestMidi);
         if (!pitch) return;
       
         const newNote: Note = {
@@ -58,8 +70,9 @@ export class PlaceNoteHandler implements GridInteractionHandler {
         };
       
         this.addNote(newNote);
+        this.noteManager.previewNote(pitch, duration);
         this.requestRedraw();
-      }
+      }      
   
     public onMouseUp(_e: MouseEvent): void {}
   }

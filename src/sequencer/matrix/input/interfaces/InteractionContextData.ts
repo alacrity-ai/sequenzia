@@ -5,8 +5,11 @@ import type { GridConfig } from '../../interfaces/GridConfigTypes.js';
 import type { InteractionStore } from '../stores/InteractionStore.js';
 import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.js';
 import type { Note } from '../../../interfaces/Note.js';
+import { NoteManager } from '../../notes/NoteManager.js';
 
 export interface InteractionContextData {
+  canvas: HTMLCanvasElement;
+  noteManager: NoteManager;
   scroll: GridScroll;
   config: GridConfig;
   store: InteractionStore;

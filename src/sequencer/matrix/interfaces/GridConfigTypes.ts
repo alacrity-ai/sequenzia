@@ -3,8 +3,10 @@
 import type { GridTimingConfig } from './GridTimingConfig.js';
 
 export interface GridLayoutConfig {
-  labelWidth: number;          // Width of the left label column (px)
-  headerHeight: number;        // Height of the top playhead header (px)
+  labelWidthColumns: number;   // Width of the left label column (columns)
+  headerHeightRows: number;    // Height of the top playhead header (rows)
+  labelWidth: number;          // Width of the left label column (pixels)
+  headerHeight: number;        // Height of the top playhead header (pixels)
   minCellWidth: number;        // Minimum width of a beat cell
   maxCellWidth: number;        // Maximum width of a beat cell
   baseCellWidth: number;       // Base width (unzoomed, 1x)
@@ -25,6 +27,8 @@ export interface GridBehaviorConfig {
   scrollMargin: number;
   enableSnapping: boolean;
   snapDivisions: number;
+  maxZoom: number;
+  minZoom: number;
 }
 
 export interface GridConfig extends GridTimingConfig {

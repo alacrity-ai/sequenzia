@@ -7,4 +7,3 @@ export interface TrackedNote {
     note: Note;                      // [pitch, start, duration, velocity]
     state: NoteInteractionState;    // UI flags
 }
-  

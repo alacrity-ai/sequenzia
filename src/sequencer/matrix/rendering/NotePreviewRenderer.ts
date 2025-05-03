@@ -4,14 +4,13 @@ import { drawRoundedRect } from '../utils/roundedRect.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
-import type { Grid } from '../Grid.js';
 
 export class NotePreviewRenderer {
   constructor(
     private scroll: GridScroll,
     private config: GridConfig,
     private store: InteractionStore,
-    private grid: Grid
+    private getNoteDuration: () => number
   ) {}
 
   public draw(ctx: CanvasRenderingContext2D): void {
@@ -23,7 +22,7 @@ export class NotePreviewRenderer {
       behavior: { zoom },
     } = this.config;
 
-    const duration = this.grid.getNoteDuration();
+    const duration = this.getNoteDuration();
     const cellWidth = baseCellWidth * zoom;
     const cellHeight = cellWidth / verticalCellRatio;
 

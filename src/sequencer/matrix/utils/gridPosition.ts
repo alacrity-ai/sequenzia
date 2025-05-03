@@ -33,7 +33,7 @@ export function getGridCellAt(
   const scrollY = scroll.getY();
 
   const gridX = Math.floor((mouse.x + scrollX - labelWidth) / cellWidth);
-  const gridY = Math.floor((mouse.y + scrollY) / cellHeight);
+  const gridY = Math.floor((mouse.y + scrollY - headerHeight) / cellHeight);
 
   if (
     gridX < 0 || gridX >= totalBeats ||

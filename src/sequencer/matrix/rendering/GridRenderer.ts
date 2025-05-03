@@ -41,7 +41,7 @@ export class GridRenderer {
     const totalBeats = totalMeasures * beatsPerMeasure;
 
     ctx.save();
-    ctx.translate(labelWidth - scrollX, -scrollY);
+    ctx.translate(labelWidth - scrollX, headerHeight - scrollY);
 
     const startBeat = Math.max(0, Math.floor((scrollX - labelWidth) / cellWidth));
     const endBeat = Math.min(totalBeats, startBeat + visibleBeats + 2); // add buffer for sub-pixel    

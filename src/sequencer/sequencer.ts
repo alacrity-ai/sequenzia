@@ -2,7 +2,7 @@
 import { initGrid } from './initGrid.js';
 import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
 import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
-import { getTempo, getTotalBeats } from './transport.js';
+import { getTempo, getTotalBeats, getTotalMeasures } from './transport.js';
 import { loadInstrument } from '../sounds/instrument-loader.js';
 import { loadAndPlayNote } from '../sounds/instrument-player.js'; // Changed from sf2-player.js
 import { pitchToMidi } from '../sounds/audio/pitch-utils.js';
@@ -19,6 +19,7 @@ import { engine as playbackEngine } from '../main.js';
 // New grid imports (alias is matrix for now)
 import { createGridInSequencerBody } from './matrix/utils/createGridInSequencerBody.js';
 import { Grid as Matrix } from './matrix/Grid.js';
+import { SequencerContext } from './matrix/interfaces/SequencerContext.js';
 
 interface NoteHandler {
   stop?: () => void;
@@ -107,7 +108,27 @@ export default class Sequencer {
 
     if (this.container) {
       const body = this.container.querySelector('.sequencer-body') as HTMLElement;
-      this.matrix = createGridInSequencerBody(body, {}, this.notes);
+      this.matrix = createGridInSequencerBody(body, {}, this.notes, this.playNote.bind(this));
+
+      // Wire zoom controls
+      function initZoomControls(
+        wrapper: HTMLElement,
+        zoomInFn: () => void,
+        zoomOutFn: () => void,
+        resetZoomFn: () => void
+      ): void {
+        const zoomInBtn = wrapper.querySelector<HTMLButtonElement>('.zoom-in-btn');
+        const zoomOutBtn = wrapper.querySelector<HTMLButtonElement>('.zoom-out-btn');
+        const zoomResetBtn = wrapper.querySelector<HTMLButtonElement>('.zoom-reset-btn');
+      
+        if (!zoomInBtn || !zoomOutBtn || !zoomResetBtn) return;
+      
+        zoomInBtn.addEventListener('click', zoomInFn);
+        zoomOutBtn.addEventListener('click', zoomOutFn);
+        zoomResetBtn.addEventListener('click', resetZoomFn);
+      }
+
+      initZoomControls(this.container, () => this.matrix?.zoomIn(), () => this.matrix?.zoomOut(), () => this.matrix?.resetZoom());
 
       // LEGACY GRID
       this.pianoRollCanvas = this.container.querySelector('.piano-roll') as HTMLCanvasElement;
@@ -219,6 +240,8 @@ export default class Sequencer {
   }
 
   async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {
+    if (!this.matrix) return;
+
     if (!this._instrument) {
       await this.initInstrument();
     }
@@ -232,7 +255,7 @@ export default class Sequencer {
   
     const bpm = getTempo();
     const beatDuration = 60 / bpm;
-    const notes = this.notes;
+    const notes = this.matrix.notes;
     notes.sort((a, b) => a.start - b.start);
   
     let i = 0;
@@ -327,7 +350,8 @@ export default class Sequencer {
     const beatDuration = 60 / bpm;
     const now = getAudioContext().currentTime;
   
-    for (const note of this.notes) {
+    if (!this.matrix) return;
+    for (const note of this.matrix.notes) {
       const noteTime = startAt + (note.start - startBeat) * beatDuration;
   
       if (noteTime >= now) {
@@ -344,6 +368,8 @@ export default class Sequencer {
   }  
 
   async reschedulePlayback(startAt: number, startBeat: number = 0): Promise<void> {
+    if (!this.matrix) return;
+    
     // Stop all currently scheduled notes and animations
     this.stopScheduledNotes();
   
@@ -360,7 +386,7 @@ export default class Sequencer {
     const now = getAudioContext().currentTime;
   
     // Re-schedule notes and animations from current beat
-    const notes = this.notes.filter(n => n.start >= startBeat);
+    const notes = this.matrix.notes.filter(n => n.start >= startBeat);
     for (const note of notes) {
       const midi = pitchToMidi(note.pitch);
       if (midi === null) continue;
@@ -398,6 +424,7 @@ export default class Sequencer {
   }
 
   async exportToOffline(signal?: AbortSignal): Promise<void> {
+    if (!this.matrix) return;
     const beatToSec = 60 / getTempo();
   
     // Check if operation was cancelled before even loading the instrument
@@ -414,7 +441,7 @@ export default class Sequencer {
     // Abort right after loading, if triggered
     if (signal?.aborted) return;
   
-    for (const note of this.notes) {
+    for (const note of this.matrix.notes) {
       if (signal?.aborted) return;
   
       const rawStartSec = note.start * beatToSec;
@@ -462,42 +489,46 @@ export default class Sequencer {
   }
 
   updateTotalMeasures(): void {
-    const totalBeats = getTotalBeats();
-    this.clampNotesToGrid();
+    if (!this.matrix) return;
+    this.matrix.setMeasures(getTotalMeasures());
+    // const totalBeats = getTotalBeats();
+    // this.clampNotesToGrid();
 
-    const fullWidth = totalBeats * this.config.cellWidth + (labelWidth || 64);
+    // const fullWidth = totalBeats * this.config.cellWidth + (labelWidth || 64);
 
-    const noteCanvas = this.container?.querySelector('canvas.note-grid') as HTMLCanvasElement;
-    const playheadCanvas = this.container?.querySelector('.playhead-canvas') as HTMLCanvasElement;
-    const miniCanvas = this.container?.querySelector('.mini-contour') as HTMLCanvasElement;
+    // const noteCanvas = this.container?.querySelector('canvas.note-grid') as HTMLCanvasElement;
+    // const playheadCanvas = this.container?.querySelector('.playhead-canvas') as HTMLCanvasElement;
+    // const miniCanvas = this.container?.querySelector('.mini-contour') as HTMLCanvasElement;
 
-    if (noteCanvas) {
-      noteCanvas.width = fullWidth;
-      noteCanvas.style.width = `${fullWidth}px`;
-    }
+    // if (noteCanvas) {
+    //   noteCanvas.width = fullWidth;
+    //   noteCanvas.style.width = `${fullWidth}px`;
+    // }
 
-    if (playheadCanvas) {
-      playheadCanvas.width = fullWidth;
-      playheadCanvas.style.width = `${fullWidth}px`;
-    }
+    // if (playheadCanvas) {
+    //   playheadCanvas.width = fullWidth;
+    //   playheadCanvas.style.width = `${fullWidth}px`;
+    // }
 
-    if (miniCanvas) {
-      drawMiniContour(miniCanvas, this.notes, this.config, this.colorIndex);
-    }
+    // if (miniCanvas) {
+    //   drawMiniContour(miniCanvas, this.matrix.notes, this.config, this.colorIndex);
+    // }
 
-    this.redraw();
+    // this.redraw();
   }
 
-  clampNotesToGrid(): void {
-    const totalBeats = getTotalBeats();
-    const clamped = this.notes.filter(note => note.start < totalBeats);
-    clamped.forEach(note => {
-      if (note.start + note.duration > totalBeats) {
-        note.duration = totalBeats - note.start;
-      }
-    });
-    this.notes.splice(0, this.notes.length, ...clamped);
-  }
+  // clampNotesToGrid(): void {
+  //   this.matrix.
+  //   if !(this.matrix) return;
+  //   const totalBeats = getTotalBeats();
+  //   const clamped = this.matrix.notes.filter(note => note.start < totalBeats);
+  //   clamped.forEach(note => {
+  //     if (note.start + note.duration > totalBeats) {
+  //       note.duration = totalBeats - note.start;
+  //     }
+  //   });
+  //   this.matrix.notes.splice(0, this.matrix.notes.length, ...clamped);
+  // }
 
   // Fades the opacity of the track if muted
   updateTrackStyle(): void {
@@ -536,8 +567,9 @@ export default class Sequencer {
   }
 
   getState(): { notes: Note[]; config: GridConfig; instrument: string } {
+    if (!this.matrix) return { notes: [], config: this.config, instrument: this.instrumentName };
     return {
-      notes: [...this.notes],
+      notes: [...this.matrix.notes],
       config: { ...this.config },
       instrument: this.instrumentName
     };
@@ -557,8 +589,9 @@ export default class Sequencer {
     pan?: number;
   }): void {
     // Replace note array efficiently
-    this.notes.length = 0;
-    this.notes.push(...notes);
+    if (!this.matrix) return;
+    this.matrix.notes.length = 0;
+    this.matrix.notes.push(...notes);
   
     // Update config (note grid layout only)
     Object.assign(this.config, config);
@@ -581,9 +614,10 @@ export default class Sequencer {
   }   
 
   updateNotesFromTrackMap(trackMap: { n: [string, number, number, number?][] }): void {
-    this.notes.splice(
+    if (!this.matrix) return;
+    this.matrix.notes.splice(
       0,
-      this.notes.length,
+      this.matrix.notes.length,
       ...trackMap.n.map(([pitch, start, duration, velocity = 100]) => ({
         pitch,
         start,
@@ -598,6 +632,8 @@ export default class Sequencer {
    * @param range Tuple of [lowNote, highNote] (e.g., ['C3', 'C5'])
    */
   updateNoteRange(range: [string, string]): void {
+    if (!this.matrix) return;
+
     // Validate the range
     const [lowNote, highNote] = range;
     const lowMidi = pitchToMidi(lowNote);
@@ -634,7 +670,7 @@ export default class Sequencer {
 
       // Redraw mini contour
       if (miniCanvas) {
-        drawMiniContour(miniCanvas, this.notes, this.config, this.colorIndex);
+        drawMiniContour(miniCanvas, this.matrix.notes, this.config, this.colorIndex);
       }
 
       // Trigger grid redraw
@@ -642,7 +678,7 @@ export default class Sequencer {
     }
 
     // Clamp existing notes to new range if needed
-    this.notes.forEach(note => {
+    this.matrix.notes.forEach(note => {
       const noteMidi = pitchToMidi(note.pitch);
       if (noteMidi === null) return;
 

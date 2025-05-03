@@ -1,5 +1,4 @@
 // src/sequencer/matrix/Grid.ts
-
 import { mergeGridConfig, createDefaultGridConfig } from './GridConfig.js';
 import { GridConfig } from './interfaces/GridConfigTypes.js';
 import { GridRenderer } from './rendering/GridRenderer.js';
@@ -26,11 +25,13 @@ import type { GridEvents } from './interfaces/GridEvents.js';
 import type { Note } from '../interfaces/Note.js';
 import type { TrackedNote } from './interfaces/TrackedNote.js';
 import { GridSnappingContext } from './interfaces/GridSnappingContext.js';
+import { SequencerContext } from './interfaces/SequencerContext.js';
 
 export class Grid {
   private gridManager: GridManager;
   private config: GridConfig;
   private sequencerConfig = sequencerConfig;
+  private sequencerContext!: SequencerContext;
 
   private scroll: GridScroll;
   private noteManager: NoteManager;
@@ -52,9 +53,13 @@ export class Grid {
   private gridCanvasManager!: CanvasManager;
   private noteCanvasManager!: CanvasManager;
   private animationCanvasManager!: CanvasManager;
+
+  private initialZoom!: number;
   
-  constructor(parent: HTMLElement, config: Partial<GridConfig> = {}) {
+  constructor(parent: HTMLElement, config: Partial<GridConfig> = {}, sequencerContext: SequencerContext) {
     this.config = mergeGridConfig(createDefaultGridConfig(), config);
+    this.sequencerContext = sequencerContext;
+    this.recalculateLabelAndHeader();
 
     // Create canvas managers for our canvases
     this.gridManager = new GridManager(parent);
@@ -65,7 +70,7 @@ export class Grid {
 
     // Create components
     const mainContainer = this.gridManager.container
-    this.noteManager = new NoteManager();
+    this.noteManager = new NoteManager(this.sequencerContext.playNote);
     this.interactionStore = new InteractionStore();
     this.emitter = new EventEmitter<GridEvents>();
     this.scroll = new GridScroll(mainContainer, this.config);
@@ -74,6 +79,8 @@ export class Grid {
 
     // Interaction
     this.interactionContext = new InteractionContext({
+      canvas: noteCanvas,
+      noteManager: this.noteManager,
       scroll: this.scroll,
       config: this.config,
       store: this.interactionStore,
@@ -86,11 +93,14 @@ export class Grid {
     // Create renderers
     this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore);
     this.noteRenderer = new NoteRenderer(this.scroll, this.config, this.noteManager, this.interactionStore);
-    this.notePreviewRenderer = new NotePreviewRenderer(this.scroll, this.config, this.interactionStore, this);
+    this.notePreviewRenderer = new NotePreviewRenderer(this.scroll, this.config, this.interactionStore, () => this.getNoteDuration());
     this.animationRenderer = new AnimationRenderer(this.scroll, this.config);
     this.headerRenderer = new HeaderPlayheadRenderer(this.scroll, this.config);
     this.labelRenderer = new LabelColumnRenderer(this.scroll, this.config);
     this.playheadRenderer = new PlayheadRenderer(this.scroll, this.config);
+
+    // Create initial values (for resetting)
+    this.initialZoom = this.zoom;
 
     // Defer resize until layout is ready
     requestAnimationFrame(() => this.resize());
@@ -113,8 +123,8 @@ export class Grid {
   }
 
   private resize(): void {
-    const { width, height } = this.gridManager.container.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+    // const { width, height } = this.gridManager.container.getBoundingClientRect();
+    // const dpr = window.devicePixelRatio || 1;
   
     this.gridCanvasManager.resize();
     this.noteCanvasManager.resize();
@@ -123,6 +133,22 @@ export class Grid {
     this.scroll.recalculateBounds();
     this.scrollbars.update();
     this.requestRedraw();
+  }
+
+  private recalculateLabelAndHeader(): void {
+    const {
+      baseCellWidth,
+      verticalCellRatio,
+      labelWidthColumns,
+      headerHeightRows
+    } = this.config.layout;
+  
+    const zoom = this.zoom;
+    const cellWidth = baseCellWidth * zoom;
+    const cellHeight = cellWidth / verticalCellRatio;
+  
+    this.config.layout.labelWidth = labelWidthColumns * cellWidth;
+    this.config.layout.headerHeight = headerHeightRows * cellHeight;
   }
   
   private get zoom(): number {
@@ -134,6 +160,14 @@ export class Grid {
   }
 
   // Public API
+
+  public get notes(): Note[] {
+    const notes = this.noteManager.getAll();
+    if (notes) {
+      return notes;
+    }
+    return [] as Note[];
+  }
 
   public render(): void {
     this.gridCanvasManager.clear();
@@ -148,8 +182,8 @@ export class Grid {
     this.noteRenderer.draw(noteCtx);
     this.notePreviewRenderer.draw(noteCtx);
     this.animationRenderer.draw(animCtx);
-    this.headerRenderer.draw(gridCtx);
     this.labelRenderer.draw(gridCtx);
+    this.headerRenderer.draw(gridCtx);
     this.playheadRenderer.draw(animCtx);
 
     this.scrollbars.update();
@@ -172,10 +206,6 @@ export class Grid {
     this.requestRedraw();
   }
 
-  public getNotes(): Note[] {
-    return this.noteManager.getAll();
-  }
-
   public setNotes(notes: Note[]): void {
     this.noteManager.set(pruneNotesToTimeline(notes, this.getTotalBeats()));
     this.requestRedraw();
@@ -194,11 +224,24 @@ export class Grid {
   public setZoom(level: number): void {
     this.zoom = level;
     this.scroll.recalculateBounds();
+    this.recalculateLabelAndHeader();
     this.requestRedraw();
   }
 
   public getZoom(): number {
     return this.zoom;
+  }
+
+  public resetZoom(): void {
+    this.setZoom(this.initialZoom);
+  }
+
+  public zoomIn(): void {
+    this.setZoom(Math.min(this.config.behavior.maxZoom, this.zoom + 0.1));
+  }
+  
+  public zoomOut(): void {
+    this.setZoom(Math.max(this.config.behavior.minZoom, this.zoom - 0.1));
   }
 
   public getMeasures(): number {

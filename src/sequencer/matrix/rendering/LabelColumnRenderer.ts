@@ -11,7 +11,7 @@ export class LabelColumnRenderer {
 
   public draw(ctx: CanvasRenderingContext2D): void {
     const {
-      layout: { labelWidth, baseCellWidth, verticalCellRatio, headerHeight, totalRows = 88 },
+      layout: { baseCellWidth, verticalCellRatio, headerHeight, labelWidth, totalRows },
       behavior: { zoom }
     } = this.config;
   

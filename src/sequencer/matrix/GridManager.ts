@@ -39,6 +39,7 @@ export class GridManager {
       div.style.border = '1px solid #333';
       div.style.overflow = 'hidden';
       div.style.boxShadow = '0 0 20px rgba(0,0,0,0.4)';
+      div.style.borderRadius = '6px';
       return div;
     }
   

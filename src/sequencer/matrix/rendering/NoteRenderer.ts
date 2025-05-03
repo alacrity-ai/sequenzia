@@ -6,6 +6,7 @@ import type { NoteManager } from '../notes/NoteManager.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
 import { drawRoundedRect } from '../utils/roundedRect.js';
+import { createVisibleNotesFilter } from '../utils/createNoteVisibilityFilter.js'
 import { pitchToRowIndex } from '../utils/pitchToRowIndex.js';
 
 export class NoteRenderer {
@@ -18,10 +19,8 @@ export class NoteRenderer {
 
   public draw(ctx: CanvasRenderingContext2D): void {
     const {
-      layout: { baseCellWidth, verticalCellRatio, labelWidth, lowestMidi },
+      layout: { baseCellWidth, verticalCellRatio, labelWidth, headerHeight },
       behavior: { zoom },
-      totalMeasures,
-      beatsPerMeasure
     } = this.config;
 
     const cellWidth = baseCellWidth * zoom;
@@ -30,26 +29,30 @@ export class NoteRenderer {
     const scrollX = this.scroll.getX();
     const scrollY = this.scroll.getY();
 
+    const canvas = ctx.canvas as HTMLCanvasElement;
     const notes: TrackedNote[] = this.noteManager.getTrackedNotes(this.interactionStore);
 
+    const isVisible = createVisibleNotesFilter(scrollX, scrollY, this.config, canvas);
+
     ctx.save();
-    ctx.translate(labelWidth - scrollX, -scrollY);
+    ctx.translate(labelWidth - scrollX, headerHeight - scrollY);
 
-    for (const { note, state } of notes) {
-      const pitchIndex = pitchToRowIndex(note.pitch, lowestMidi);
-      if (pitchIndex == null) continue;
-
+    const filterVisible = createVisibleNotesFilter(scrollX, scrollY, this.config, canvas);
+    const visibleNotes = filterVisible(notes);
+    
+    for (const { note, state } of visibleNotes) {
+      const row = pitchToRowIndex(note.pitch, this.config.layout.lowestMidi, this.config.layout.totalRows)!;
+      const y = row * cellHeight;
       const x = note.start * cellWidth;
-      const y = pitchIndex * cellHeight;
       const w = note.duration * cellWidth;
       const h = cellHeight;
-
+    
       ctx.fillStyle = state.selected
         ? '#f0f'
         : state.highlighted
         ? '#0f0'
         : '#09f';
-
+    
       drawRoundedRect(ctx, x, y, w, h, 4);
       ctx.fill();
     }
