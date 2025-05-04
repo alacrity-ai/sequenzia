@@ -6,5 +6,6 @@ export interface GridInteractionHandler {
     onMouseDown?(e: MouseEvent): void;
     onMouseMove?(e: MouseEvent): void;
     onMouseUp?(e: MouseEvent): void;
+    onContextMenu?(e: MouseEvent): void;
   }
   

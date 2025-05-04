@@ -2,10 +2,10 @@
 
 export enum InteractionMode {
     Idle,
-    PlacingNote,
+    DefaultNoteTool,
     Selecting,
-    DraggingSingle,
-    DraggingMultiple,
+    SelectedIdle,
+    Dragging,
     Pasting,
     Sizing,
   }

@@ -14,8 +14,8 @@ export class NotePreviewRenderer {
   ) {}
 
   public draw(ctx: CanvasRenderingContext2D): void {
-    const hovered = this.store.getHoveredNotePosition?.();
-    if (!hovered) return;
+    const snapped = this.store.getSnappedCursorGridPosition();
+    if (!snapped) return;
 
     const {
       layout: { baseCellWidth, verticalCellRatio, labelWidth, headerHeight },
@@ -27,8 +27,8 @@ export class NotePreviewRenderer {
     const cellHeight = cellWidth / verticalCellRatio;
 
     const noteWidth = cellWidth * duration;
-    const px = hovered.x * cellWidth;
-    const py = hovered.y * cellHeight;
+    const px = snapped.x * cellWidth;
+    const py = snapped.y * cellHeight;
 
     ctx.save();
     ctx.translate(labelWidth - this.scroll.getX(), headerHeight - this.scroll.getY());

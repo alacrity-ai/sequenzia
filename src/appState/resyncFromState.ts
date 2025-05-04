@@ -2,12 +2,11 @@
 
 import { getAppState } from './appState.js';
 import { updateTempo, updateTimeSignature, updateTotalMeasures } from '../sequencer/transport.js';
-import { createSequencer, toggleZoomControls, sequencers } from '../setup/sequencers.js';
+import { createSequencer, sequencers } from '../setup/sequencers.js';
 import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { AppState, SequencerState } from './interfaces/AppState.js';
-import { NotePosition } from '../sequencer/interfaces/Grid.js';
 import { GridConfig } from '../sequencer/interfaces/GridConfig.js';
-import { engine as playbackEngine } from '../main.js';
+import { syncLiveMatrixWithSerializedNotes } from './utils/syncMatrixToSequencer.js';
 
 interface SerializedSequencer extends SequencerState {
   config?: Partial<GridConfig>; // optional loose config, typed better
@@ -48,12 +47,7 @@ export function resyncFromState(state: AppState = getAppState()): void {
         pan: serialized.pan,
       };
 
-      const { wrapper } = createSequencer(initialState);
-
-      const zoomWrapper = wrapper.querySelector('.sequencer') as HTMLElement | null;
-      if (zoomWrapper) {
-        toggleZoomControls(zoomWrapper, true);
-      }
+      void createSequencer(initialState);
     } else {
       // 🔁 Update existing live sequencer
       live.instrumentName = serialized.instrument;
@@ -66,51 +60,15 @@ export function resyncFromState(state: AppState = getAppState()): void {
         live.pan = serialized.pan;
       }
 
+      // Redraw mini contour
       const miniCanvas = live.container?.querySelector('canvas.mini-contour') as HTMLCanvasElement | null;
       if (miniCanvas) {
-        drawMiniContour(miniCanvas, live.notes, live.config, live.colorIndex);
+        drawMiniContour(miniCanvas, serialized.notes, live.config, live.colorIndex);
       }
 
-      const gridCtx = live.grid?.gridContext;
-      if (gridCtx) {
-        const selectedNotes = gridCtx.getSelectedNotes ? gridCtx.getSelectedNotes() : [];
-        const selectedNote = gridCtx.getSelectedNote ? gridCtx.getSelectedNote() : null;
-
-        const selectedPositions: NotePosition[] = selectedNotes.map((note: any) => ({
-          pitch: note.pitch,
-          start: note.start,
-          duration: note.duration,
-          velocity: note.velocity,
-        }));
-
-        gridCtx.notes.length = 0;
-        gridCtx.notes.push(...structuredClone(serialized.notes));
-
-        if (selectedNotes.length > 0) {
-          const newSelectedNotes = selectedPositions.map(pos =>
-            gridCtx.notes.find((note: any) =>
-              note.pitch === pos.pitch &&
-              note.start === pos.start &&
-              note.duration === pos.duration &&
-              note.velocity === pos.velocity
-            )
-          ).filter(Boolean);
-
-          if (newSelectedNotes.length > 0) {
-            gridCtx.setSelectedNotes(newSelectedNotes as any);
-
-            if (selectedNote && newSelectedNotes.length === 1) {
-              gridCtx.setSelectedNote(newSelectedNotes[0] as any);
-            }
-          }
-        }
-
-        if (playbackEngine?.isActive()) {
-          const startAt = playbackEngine.getStartTime();
-          const startBeat = playbackEngine.getStartBeat();
-          void live.reschedulePlayback(startAt, startBeat);
-        }
-        live.grid?.scheduleRedraw();
+      // Sync notes and selection to matrix
+      if (live.matrix) {
+        syncLiveMatrixWithSerializedNotes(live.matrix, serialized.notes, live, true);
       }
     }
   }

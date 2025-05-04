@@ -4,6 +4,8 @@ import type { GridScroll } from '../../scrollbars/GridScroll.js';
 import type { GridConfig } from '../../interfaces/GridConfigTypes.js';
 import type { InteractionStore } from '../stores/InteractionStore.js';
 import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.js';
+import type { SequencerContext } from '../../interfaces/SequencerContext.js';
+import type { CursorController } from '../cursor/CursorController.js';
 import type { Note } from '../../../interfaces/Note.js';
 import { NoteManager } from '../../notes/NoteManager.js';
 
@@ -16,4 +18,6 @@ export interface InteractionContextData {
   grid: GridSnappingContext;
   addNote: (note: Note) => void;
   requestRedraw: () => void;
+  sequencerContext: SequencerContext;
+  cursorController: CursorController;
 }

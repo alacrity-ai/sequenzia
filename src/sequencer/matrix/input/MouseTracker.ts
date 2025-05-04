@@ -16,6 +16,7 @@ export class MouseTracker {
     this.canvas.addEventListener('mouseleave', this.onMouseLeave);
     this.canvas.addEventListener('mousedown', this.onMouseDown);
     this.canvas.addEventListener('mouseup', this.onMouseUp);
+    this.canvas.addEventListener('contextmenu', this.onContextMenu);
   }
 
   private onMouseMove = (e: MouseEvent): void => {
@@ -30,8 +31,11 @@ export class MouseTracker {
     this.context.handleMouseUp(e);
   };
 
-  private onMouseLeave = (): void => {
-    // Could call `handleMouseLeave` if supported in future
+  private onMouseLeave = (): void => {};
+
+  // Added this
+  private onContextMenu = (e: MouseEvent): void => {
+    this.context.handleContextMenu(e);
   };
 
   public destroy(): void {
@@ -39,5 +43,6 @@ export class MouseTracker {
     this.canvas.removeEventListener('mouseleave', this.onMouseLeave);
     this.canvas.removeEventListener('mousedown', this.onMouseDown);
     this.canvas.removeEventListener('mouseup', this.onMouseUp);
+    this.canvas.removeEventListener('contextmenu', this.onContextMenu); // Added this
   }
 }

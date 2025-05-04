@@ -32,8 +32,6 @@ export class NoteRenderer {
     const canvas = ctx.canvas as HTMLCanvasElement;
     const notes: TrackedNote[] = this.noteManager.getTrackedNotes(this.interactionStore);
 
-    const isVisible = createVisibleNotesFilter(scrollX, scrollY, this.config, canvas);
-
     ctx.save();
     ctx.translate(labelWidth - scrollX, headerHeight - scrollY);
 
@@ -48,10 +46,12 @@ export class NoteRenderer {
       const h = cellHeight;
     
       ctx.fillStyle = state.selected
-        ? '#f0f'
-        : state.highlighted
-        ? '#0f0'
-        : '#09f';
+      ? '#f0f'        // Bright magenta for selected
+      : state.hovered
+      ? '#ff3300'     // Bright red-orange for hovered
+      : state.highlighted
+      ? '#0f0'        // Bright green for marquee-highlighted
+      : '#09f';       // Default blue    
     
       drawRoundedRect(ctx, x, y, w, h, 4);
       ctx.fill();

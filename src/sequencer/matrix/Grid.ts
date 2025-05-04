@@ -11,12 +11,14 @@ import { PlayheadRenderer } from './rendering/PlayheadRenderer.js';
 import { CanvasManager } from './rendering/CanvasManager.js';
 import { ScrollbarManager } from './scrollbars/ScrollbarManager.js';
 import { InteractionContext } from './input/InteractionContext.js';
+import { CursorController } from './input/cursor/CursorController.js';
 import { MouseTracker } from './input/MouseTracker.js';
 import { WheelHandler } from './input/WheelHandler.js';
 import { InteractionStore } from './input/stores/InteractionStore.js';
 import { GridManager } from './GridManager.js';
 import { HeaderPlayheadRenderer } from './rendering/HeaderPlayheadRenderer.js';
 import { LabelColumnRenderer } from './rendering/LabelColumnRenderer.js';
+import { MarqueeRenderer } from './rendering/MarqueeRenderer.js';
 import { pruneNotesToTimeline } from './utils/pruneNotesToTimeline.js';
 import { GRID_CONFIG as sequencerConfig } from '../grid/helpers/constants.js';
 
@@ -24,8 +26,9 @@ import { EventEmitter } from './events/EventEmitter.js';
 import type { GridEvents } from './interfaces/GridEvents.js';
 import type { Note } from '../interfaces/Note.js';
 import type { TrackedNote } from './interfaces/TrackedNote.js';
-import { GridSnappingContext } from './interfaces/GridSnappingContext.js';
-import { SequencerContext } from './interfaces/SequencerContext.js';
+import type { InteractionContextData } from './input/interfaces/InteractionContextData.js';
+import type { GridSnappingContext } from './interfaces/GridSnappingContext.js';
+import type { SequencerContext } from './interfaces/SequencerContext.js';
 
 export class Grid {
   private gridManager: GridManager;
@@ -40,15 +43,19 @@ export class Grid {
   private interactionContext: InteractionContext;
   private wheelHandler: WheelHandler;
   private interactionStore: InteractionStore;
+  private cursorController: CursorController;
+
   private emitter: EventEmitter<GridEvents>;
+
+  private needsRedraw = true;
   private gridRenderer: GridRenderer;
   private noteRenderer: NoteRenderer;
   private notePreviewRenderer: NotePreviewRenderer;
   private animationRenderer: AnimationRenderer;
-  private needsRedraw = true;
   private headerRenderer: HeaderPlayheadRenderer;
   private labelRenderer: LabelColumnRenderer;
   private playheadRenderer: PlayheadRenderer;
+  private marqueeRenderer: MarqueeRenderer;
 
   private gridCanvasManager!: CanvasManager;
   private noteCanvasManager!: CanvasManager;
@@ -70,12 +77,13 @@ export class Grid {
 
     // Create components
     const mainContainer = this.gridManager.container
-    this.noteManager = new NoteManager(this.sequencerContext.playNote);
+    this.noteManager = new NoteManager(this.config, this.sequencerContext.playNote);
     this.interactionStore = new InteractionStore();
     this.emitter = new EventEmitter<GridEvents>();
     this.scroll = new GridScroll(mainContainer, this.config);
     this.scrollbars = new ScrollbarManager(mainContainer, this.scroll, this.config, this.interactionStore, () => this.requestRedraw());
     this.wheelHandler = new WheelHandler(mainContainer, this.scroll, () => this.requestRedraw());
+    this.cursorController = new CursorController(mainContainer);
 
     // Interaction
     this.interactionContext = new InteractionContext({
@@ -86,7 +94,9 @@ export class Grid {
       store: this.interactionStore,
       grid: this as GridSnappingContext,
       addNote: (note) => this.noteManager.add(note),
-      requestRedraw: () => this.requestRedraw()
+      requestRedraw: () => this.requestRedraw(),
+      sequencerContext: sequencerContext,
+      cursorController: this.cursorController
     });
     this.mouseTracker = new MouseTracker(this.interactionContext, mainContainer)
 
@@ -98,6 +108,7 @@ export class Grid {
     this.headerRenderer = new HeaderPlayheadRenderer(this.scroll, this.config);
     this.labelRenderer = new LabelColumnRenderer(this.scroll, this.config);
     this.playheadRenderer = new PlayheadRenderer(this.scroll, this.config);
+    this.marqueeRenderer = new MarqueeRenderer(this.scroll, this.config, this.interactionStore);
 
     // Create initial values (for resetting)
     this.initialZoom = this.zoom;
@@ -183,6 +194,11 @@ export class Grid {
     this.headerRenderer.draw(gridCtx);
     this.playheadRenderer.draw(animCtx);
 
+    if (this.interactionStore.hasMarquee()) {
+      console.log('Drawing Marquee')
+      this.marqueeRenderer.draw(animCtx);
+    }
+
     this.scrollbars.update();
   }
 
@@ -203,10 +219,11 @@ export class Grid {
     this.requestRedraw();
   }
 
+  // In the Grid (matrix) class
   public setNotes(notes: Note[]): void {
     this.noteManager.set(pruneNotesToTimeline(notes, this.getTotalBeats()));
     this.requestRedraw();
-  }  
+  }
 
   public getTrackedNotes(): TrackedNote[] {
     return this.noteManager.getTrackedNotes(this.interactionStore);
@@ -280,6 +297,16 @@ export class Grid {
   // e.g. 0.25 = quarter note, 0.125 = 8th note, 0.0625 = 16th note
   public getSnapResolution(): number {
     return this.sequencerConfig.snapResolution;
+  }
+
+  // Interaction store for the grid, used for hover/selection/etc. state
+  public getInteractionStore(): InteractionStore {
+    return this.interactionStore;
+  }
+
+  // Get the note manager for the grid
+  public getNoteManager(): NoteManager {
+    return this.noteManager;
   }
 
   public emit<K extends keyof GridEvents>(event: K, payload: GridEvents[K]): void {

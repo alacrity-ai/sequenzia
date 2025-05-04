@@ -1,6 +1,7 @@
 // src/sequencer/sequencer.ts
 import { initGrid } from './initGrid.js';
 import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
+import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
 import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
 import { getTempo, getTotalBeats, getTotalMeasures } from './transport.js';
 import { loadInstrument } from '../sounds/instrument-loader.js';
@@ -33,7 +34,6 @@ export default class Sequencer {
   destination: AudioNode;
   instrumentName: string;
   squelchLoadingScreen: boolean;
-  notes: Note[] = [];
   colorIndex: number = 0;
 
   id: number = 0;
@@ -108,25 +108,10 @@ export default class Sequencer {
 
     if (this.container) {
       const body = this.container.querySelector('.sequencer-body') as HTMLElement;
-      this.matrix = createGridInSequencerBody(body, {}, this.notes, this.playNote.bind(this));
-
-      // Wire zoom controls
-      function initZoomControls(
-        wrapper: HTMLElement,
-        zoomInFn: () => void,
-        zoomOutFn: () => void,
-        resetZoomFn: () => void
-      ): void {
-        const zoomInBtn = wrapper.querySelector<HTMLButtonElement>('.zoom-in-btn');
-        const zoomOutBtn = wrapper.querySelector<HTMLButtonElement>('.zoom-out-btn');
-        const zoomResetBtn = wrapper.querySelector<HTMLButtonElement>('.zoom-reset-btn');
-      
-        if (!zoomInBtn || !zoomOutBtn || !zoomResetBtn) return;
-      
-        zoomInBtn.addEventListener('click', zoomInFn);
-        zoomOutBtn.addEventListener('click', zoomOutFn);
-        zoomResetBtn.addEventListener('click', resetZoomFn);
-      }
+      this.matrix = createGridInSequencerBody(body, {}, {
+        playNote: this.playNote.bind(this),
+        getId: () => this.id
+      });          
 
       initZoomControls(this.container, () => this.matrix?.zoomIn(), () => this.matrix?.zoomOut(), () => this.matrix?.resetZoom());
 
@@ -157,7 +142,7 @@ export default class Sequencer {
     const scrollContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
     const animationCanvas = this.container.querySelector('canvas.note-animate-canvas') as HTMLCanvasElement;
 
-    this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, this.notes, this.config, this);
+    this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, [] as Note[], this.config, this);
     this.grid.scheduleRedraw();
     // END LEGACY GRID
   }
@@ -183,6 +168,10 @@ export default class Sequencer {
       trackNameEl.textContent = `${this.id + 1}: ${this.instrumentName}`;
     }
   }
+
+  get notes(): Note[] {
+    return this.matrix?.notes ?? [] as Note[];
+  }  
 
   get volume(): number {
     return this._volume;
@@ -491,44 +480,7 @@ export default class Sequencer {
   updateTotalMeasures(): void {
     if (!this.matrix) return;
     this.matrix.setMeasures(getTotalMeasures());
-    // const totalBeats = getTotalBeats();
-    // this.clampNotesToGrid();
-
-    // const fullWidth = totalBeats * this.config.cellWidth + (labelWidth || 64);
-
-    // const noteCanvas = this.container?.querySelector('canvas.note-grid') as HTMLCanvasElement;
-    // const playheadCanvas = this.container?.querySelector('.playhead-canvas') as HTMLCanvasElement;
-    // const miniCanvas = this.container?.querySelector('.mini-contour') as HTMLCanvasElement;
-
-    // if (noteCanvas) {
-    //   noteCanvas.width = fullWidth;
-    //   noteCanvas.style.width = `${fullWidth}px`;
-    // }
-
-    // if (playheadCanvas) {
-    //   playheadCanvas.width = fullWidth;
-    //   playheadCanvas.style.width = `${fullWidth}px`;
-    // }
-
-    // if (miniCanvas) {
-    //   drawMiniContour(miniCanvas, this.matrix.notes, this.config, this.colorIndex);
-    // }
-
-    // this.redraw();
   }
-
-  // clampNotesToGrid(): void {
-  //   this.matrix.
-  //   if !(this.matrix) return;
-  //   const totalBeats = getTotalBeats();
-  //   const clamped = this.matrix.notes.filter(note => note.start < totalBeats);
-  //   clamped.forEach(note => {
-  //     if (note.start + note.duration > totalBeats) {
-  //       note.duration = totalBeats - note.start;
-  //     }
-  //   });
-  //   this.matrix.notes.splice(0, this.matrix.notes.length, ...clamped);
-  // }
 
   // Fades the opacity of the track if muted
   updateTrackStyle(): void {
@@ -557,7 +509,6 @@ export default class Sequencer {
     contour?.classList.toggle('opacity-100', !shouldFade);
   }
   
-
   redraw(): void {
     // Legacy grid
     this.grid?.scheduleRedraw();
@@ -590,8 +541,7 @@ export default class Sequencer {
   }): void {
     // Replace note array efficiently
     if (!this.matrix) return;
-    this.matrix.notes.length = 0;
-    this.matrix.notes.push(...notes);
+    this.matrix.setNotes(notes);
   
     // Update config (note grid layout only)
     Object.assign(this.config, config);

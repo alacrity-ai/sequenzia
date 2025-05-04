@@ -2,15 +2,46 @@
 
 import { InteractionMode } from './interfaces/InteractionEnum.js';
 import { GridInteractionHandler } from './interfaces/GridInteractionHandler.js';
-import { PlaceNoteHandler } from './handlers/PlaceNoteHandler.js';
+import { DefaultNoteToolHandler } from './handlers/DefaultNoteToolHandler.js';
+import { SelectingToolHandler } from './handlers/SelectingToolHandler.js';
+
 import type { InteractionContextData } from './interfaces/InteractionContextData.js';
+import type { InteractionController } from './interfaces/InteractionController.js';
 
 export class InteractionContext {
   private mode: InteractionMode = InteractionMode.Idle;
   private activeHandler: GridInteractionHandler | null = null;
 
+  private lastMouseX: number = 0;
+  private lastMouseY: number = 0;
+
   constructor(private readonly data: InteractionContextData) {
-    this.transitionTo(InteractionMode.PlacingNote); // Set default interaction
+    // Set initial mode
+    this.transitionTo(InteractionMode.DefaultNoteTool);
+  }
+  
+  public handleMouseDown(e: MouseEvent): void {
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+    this.activeHandler?.onMouseDown?.(e);
+  }
+
+  public handleMouseMove(e: MouseEvent): void {
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+    this.activeHandler?.onMouseMove?.(e);
+  }
+
+  public handleMouseUp(e: MouseEvent): void {
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+    this.activeHandler?.onMouseUp?.(e);
+  }
+
+  public handleContextMenu(e: MouseEvent): void {
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+    this.activeHandler?.onContextMenu?.(e);
   }
 
   public transitionTo(mode: InteractionMode): void {
@@ -20,29 +51,36 @@ export class InteractionContext {
     this.activeHandler?.onEnter?.();
   }
 
-  public handleMouseDown(e: MouseEvent): void {
-    this.activeHandler?.onMouseDown?.(e);
-  }
-
-  public handleMouseMove(e: MouseEvent): void {
-    this.activeHandler?.onMouseMove?.(e);
-  }
-
-  public handleMouseUp(e: MouseEvent): void {
-    this.activeHandler?.onMouseUp?.(e);
-  }
-
   private createHandlerForMode(mode: InteractionMode): GridInteractionHandler {
+    const controller: InteractionController = {
+      transitionTo: (mode) => this.transitionTo(mode),
+      getLastMouseX: () => this.lastMouseX,
+      getLastMouseY: () => this.lastMouseY
+    };
+
     switch (mode) {
-      case InteractionMode.PlacingNote:
-        return new PlaceNoteHandler(
+      case InteractionMode.DefaultNoteTool:
+        return new DefaultNoteToolHandler(
           this.data.canvas,
           this.data.noteManager,
           this.data.scroll,
           this.data.config,
           this.data.store,
           this.data.grid,
-          this.data.addNote,
+          this.data.requestRedraw,
+          () => this.data.sequencerContext.getId(),
+          controller,
+          this.data.cursorController
+        );
+      case InteractionMode.Selecting:
+        return new SelectingToolHandler(
+          this.data.canvas,
+          this.data.config,
+          this.data.scroll,
+          this.data.grid,
+          this.data.store,
+          controller,
+          this.data.noteManager,
           this.data.requestRedraw
         );
       default:

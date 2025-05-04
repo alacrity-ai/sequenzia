@@ -68,6 +68,7 @@ export function noteToRowIndex(
 }
 
 
+
 /**
  * Converts a vertical row index into a pitch string like "C4" or "A#3", using an inverted piano roll.
  * @param row - Vertical grid row index (0 = top)
