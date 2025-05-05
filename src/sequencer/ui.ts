@@ -3,7 +3,7 @@
 import { SEQUENCER_CONFIG as config, SNAP_RESOLUTIONS, durationHotkeys } from './constants/sequencerConstants.js';
 import { initConfigModal } from '../userconfig/initUserConfig.js';
 import { getActiveSelection } from './utils/selectionTracker.js';
-import { getEditMode, EditModes } from '../setup/stores/editModeStore.js';
+import type { Grid } from './matrix/Grid.js';
 import { getTimeSignature, getTotalMeasures } from './transport.js';
 import { showVelocityModal } from './ui/modals/velocity/velocityModeMenu.js';
 import { showErrorModal } from '../global/errorGeneric.js';
@@ -163,7 +163,7 @@ export function setupUI({
     }
 
     // === VELOCITY SHORTCUT ===
-    if (e.key === 'v') {
+    if (e.key === 'v' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const selection = getActiveSelection();
       if (!selection || selection.selectedNotes.length === 0) {
         showErrorModal('No notes selected. Please select notes before adjusting velocity.');
@@ -304,7 +304,10 @@ export function updateMeasuresInput(measures: number): void {
   }
 }
 
-export function setupSequencerGripHandler(sequencerElement: HTMLElement): void {
+export function setupSequencerGripHandler(
+  sequencerElement: HTMLElement,
+  matrix: Grid
+): void {
   const gripHandle = sequencerElement.querySelector('.cursor-grab') as HTMLElement | null;
   if (!gripHandle) return;
 
@@ -323,7 +326,7 @@ export function setupSequencerGripHandler(sequencerElement: HTMLElement): void {
     startY = e.clientY;
     startHeight = body.offsetHeight;
     gripHandle.classList.replace('cursor-grab', 'cursor-grabbing');
-    document.body.style.userSelect = 'none'; // Prevent accidental text selection
+    document.body.style.userSelect = 'none';
   });
 
   window.addEventListener('mousemove', (e: MouseEvent) => {
@@ -331,10 +334,11 @@ export function setupSequencerGripHandler(sequencerElement: HTMLElement): void {
 
     const deltaY = e.clientY - startY;
     let newHeight = startHeight + deltaY;
-
-    // Clamp the height within allowed bounds
     newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
     body.style.height = `${newHeight}px`;
+
+    // 🟣 Notify grid that its parent resized
+    matrix.resize();
   });
 
   window.addEventListener('mouseup', () => {

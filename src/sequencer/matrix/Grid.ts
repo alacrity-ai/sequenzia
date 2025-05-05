@@ -145,17 +145,6 @@ export class Grid {
     requestAnimationFrame(() => this.renderLoop());
   }
 
-  private resize(): void {
-    this.gridCanvasManager.resize();
-    this.noteCanvasManager.resize();
-    this.animationCanvasManager.resize();
-    this.playheadCanvasManager.resize(); 
-  
-    this.scroll.recalculateBounds();
-    this.scrollbars.update();
-    this.requestRedraw();
-  }
-
   private recalculateLabelAndHeader(): void {
     const {
       baseCellWidth,
@@ -218,6 +207,17 @@ export class Grid {
 
   public requestRedraw(): void {
     this.needsRedraw = true;
+  }
+
+  public resize(): void {
+    this.gridCanvasManager.resize();
+    this.noteCanvasManager.resize();
+    this.animationCanvasManager.resize();
+    this.playheadCanvasManager.resize(); 
+  
+    this.scroll.recalculateBounds();
+    this.scrollbars.update();
+    this.requestRedraw();
   }
 
   public on<K extends keyof GridEvents>(event: K, callback: (payload: GridEvents[K]) => void): void {

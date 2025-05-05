@@ -140,7 +140,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     instrumentSelectModal.classList.remove('hidden');
   });  
 
-  setupSequencerGripHandler(wrapper);
+  setupSequencerGripHandler(wrapper, seq.matrix!);
   sequencers.push(seq);
   return { seq, wrapper };
 }

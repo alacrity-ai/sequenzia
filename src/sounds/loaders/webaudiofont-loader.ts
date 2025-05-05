@@ -305,15 +305,6 @@ export async function getAvailableInstruments(library: string): Promise<string[]
     .map(entry => entry.displayName);
 }
 
-// async function withLoading<T>(promise: Promise<T>): Promise<T> {
-//   showLoadingModal();
-//   try {
-//     return await promise;
-//   } finally {
-//     hideLoadingModal();
-//   }
-// }
-
 export function getWebAudioFontEngine() {
   return {
     name: 'webaudiofont',
