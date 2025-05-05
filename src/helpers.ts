@@ -1,5 +1,5 @@
 import { sequencers } from './setup/sequencers.js';
-import { drawMiniContour } from './sequencer/grid/drawing/mini-contour.js';
+import { drawMiniContour } from './sequencer/ui/renderers/drawMiniContour.js';
 import { toggleZoomControls } from './setup/sequencers.js';
 
 /**

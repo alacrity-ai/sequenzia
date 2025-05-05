@@ -3,7 +3,7 @@
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
-import { computeBlackKeyRowMap } from '../utils/noteUtils.js';
+import { computeBlackKeyMidiMap } from '../utils/noteUtils.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
 import { GRID_COLOR_SCHEMES } from './colors/constants/colorSchemes.js';
 
@@ -11,17 +11,16 @@ export class GridRenderer {
   private scroll: GridScroll;
   private config: GridConfig;
   private interactionStore: InteractionStore;
-  private blackKeyRowMap: boolean[];
 
   constructor(
     scroll: GridScroll,
     config: GridConfig,
-    interactionStore: InteractionStore
+    interactionStore: InteractionStore,
+    private getBlackKeyMap: () => Map<number, boolean>
   ) {
     this.scroll = scroll;
     this.config = config;
     this.interactionStore = interactionStore;
-    this.blackKeyRowMap = computeBlackKeyRowMap(this.config.layout.lowestMidi, this.config.layout.highestMidi);
   }
 
   public draw(ctx: CanvasRenderingContext2D): void {
@@ -67,7 +66,8 @@ export class GridRenderer {
       ctx.stroke();
   
       if (r < totalRows) {
-        const isBlack = this.blackKeyRowMap[r];
+        const midi = this.config.layout.highestMidi - r;
+        const isBlack = this.getBlackKeyMap().get(midi);
         ctx.fillStyle = isBlack ? scheme.blackKey : scheme.whiteKey;
         ctx.fillRect(0, y, totalBeats * cellWidth, cellHeight);
       }

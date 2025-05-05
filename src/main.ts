@@ -22,7 +22,7 @@ import { importSessionFromJSON } from './export/load.js';
 import { importSessionFromMIDI } from './export/midi/loadFromMidi.js';
 import { loadSession } from './export/loadSession.js';
 import { setupNoteDurationButtons } from './setup/noteDurationButtons.js';
-import { drawGlobalMiniContour } from './sequencer/grid/drawing/mini-contour.js';
+import { drawGlobalMiniContour } from './sequencer/ui/renderers/drawMiniContour.js';
 import { initGlobalPlayhead } from './playhead/global-playhead.js';
 import { startMasterPlayheadLoop, cancelMasterPlayheadLoop, resetPlayheads } from './playhead/playhead-engine.js';
 import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';

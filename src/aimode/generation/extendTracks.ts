@@ -9,7 +9,7 @@ import {
   mergeTracksMaps
 } from '../helpers/trackHelpers.js';
 import { getMaxBeatsContext, getExtendBeatsAmount } from '../aiConfig.js';
-import { drawMiniContour, drawGlobalMiniContour } from '../../sequencer/grid/drawing/mini-contour.js';
+import { drawMiniContour, drawGlobalMiniContour } from '../../sequencer/ui/renderers/drawMiniContour.js';
 import { updateTotalMeasures, getTimeSignature } from '../../sequencer/transport.js';
 import { TrackTuple } from '../../sequencer/interfaces/TrackTuple.js';
 import { Track } from '../../sequencer/interfaces/Track.js'
@@ -70,7 +70,7 @@ export async function extendTracksWithAI(): Promise<void> {
     updateTotalMeasures(newTotalMeasures);
 
     allSequencers.forEach((seq, i) => {
-      seq.updateTotalMeasures(newTotalMeasures);
+      seq.updateTotalMeasures();
 
       const selectedIndex = selectedIndices.indexOf(i);
       if (selectedIndex !== -1) {
@@ -78,9 +78,7 @@ export async function extendTracksWithAI(): Promise<void> {
         seq.updateNotesFromTrackMap(trackMap);
       }
 
-      seq.grid?.scheduleRedraw();
-
-      const miniCanvas = seq.container.querySelector('canvas.mini-contour') as HTMLCanvasElement | null;
+      const miniCanvas = seq.container?.querySelector('canvas.mini-contour') as HTMLCanvasElement | null;
       if (miniCanvas) {
         drawMiniContour(miniCanvas, seq.notes, seq.config, seq.colorIndex);
       }

@@ -4,7 +4,7 @@ import { refreshInstrumentSelectorModal } from './instrumentSelector.js';
 import { setupVolumeBar } from './controls/sequencerVolume';
 import { setupPanBar } from './controls/sequencerPan';
 import { setupSequencerGripHandler } from '../sequencer/ui.js';
-import { drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
+import { drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
 import { getAudioContext as audioCtx, getMasterGain } from '../sounds/audio/audio.js';
 import { recordDiff } from '../appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';

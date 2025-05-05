@@ -21,6 +21,7 @@ import { LabelColumnRenderer } from './rendering/LabelColumnRenderer.js';
 import { MarqueeRenderer } from './rendering/MarqueeRenderer.js';
 import { SEQUENCER_CONFIG as sequencerConfig } from '../constants/sequencerConstants.js';
 import { setClipboard, getClipboard } from '../clipboard.js';
+import { computeBlackKeyMidiMap } from './utils/noteUtils.js';
 
 import { EventEmitter } from './events/EventEmitter.js';
 import type { GridEvents } from './interfaces/GridEvents.js';
@@ -63,6 +64,8 @@ export class Grid {
   private playheadCanvasManager!: CanvasManager;
 
   private initialZoom!: number;
+  private customLabels: Record<number, string> | null = null;
+  private blackKeyMap: Map<number, boolean> = new Map();
   
   constructor(parent: HTMLElement, config: Partial<GridConfig> = {}, sequencerContext: SequencerContext) {
     this.config = mergeGridConfig(createDefaultGridConfig(), config);
@@ -107,17 +110,20 @@ export class Grid {
     this.mouseTracker = new InputTracker(this.interactionContext, mainContainer)
 
     // Create renderers
-    this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore);
+    this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore, () => this.getBlackKeyMap());
     this.noteRenderer = new NoteRenderer(this.scroll, this.config, this.noteManager, this.interactionStore, this.sequencerContext.getId());
     this.notePreviewRenderer = new NotePreviewRenderer(this.scroll, this.config, this.interactionStore, () => this.getNoteDuration());
     this.animationRenderer = new AnimationRenderer(this.scroll, this.config);
     this.headerRenderer = new HeaderPlayheadRenderer(this.scroll, this.config);
-    this.labelRenderer = new LabelColumnRenderer(this.scroll, this.config);
+    this.labelRenderer = new LabelColumnRenderer(this.scroll, this.config, () => this.customLabels, () => this.getBlackKeyMap());
     this.playheadRenderer = new PlayheadRenderer(this.scroll, this.config);
     this.marqueeRenderer = new MarqueeRenderer(this.scroll, this.config, this.interactionStore);
 
     // Create initial values (for resetting)
     this.initialZoom = this.zoom;
+
+    // Initialize custom labels as null
+    this.customLabels = null;
 
     // Defer resize until layout is ready
     requestAnimationFrame(() => this.resize());
@@ -274,6 +280,11 @@ export class Grid {
     this.setZoom(Math.max(this.config.behavior.minZoom, this.zoom - 0.1));
   }
 
+  public setCustomLabels(labels: Record<number, string> | null): void {
+    this.customLabels = labels;
+    this.requestRedraw();
+  }
+
   public getMeasures(): number {
     return this.config.totalMeasures;
   }
@@ -297,6 +308,26 @@ export class Grid {
   public getTotalBeats(): number {
     return this.config.totalMeasures * this.config.beatsPerMeasure;
   }
+
+  // The MIDI note range of the grid (determines the rows)
+  public setNoteRange(lowestMidi: number, highestMidi: number): void {
+    this.config.layout.lowestMidi = lowestMidi;
+    this.config.layout.highestMidi = highestMidi;
+    
+    this.blackKeyMap = computeBlackKeyMidiMap(lowestMidi, highestMidi);
+    this.scroll.recalculateBounds();
+    this.recalculateLabelAndHeader();
+    this.resize();
+    this.requestRedraw();
+  }
+
+  public refreshNoteRange(): void {
+    this.setNoteRange(this.config.layout.lowestMidi, this.config.layout.highestMidi);
+  }
+
+  public getBlackKeyMap(): Map<number, boolean> {
+    return this.blackKeyMap;
+  }  
 
   // Whether the grid is in triplet mode or not, effects snapping/note placement
   public isTripletMode(): boolean {

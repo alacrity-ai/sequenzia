@@ -1,4 +1,4 @@
-// src/sequencer/matrix/utils/noteToRowIndex.ts
+// src/sequencer/matrix/utils/noteUtils.ts
 
 
 const SEMIS_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -117,4 +117,29 @@ export function computeBlackKeyRowMap(lowestMidi: number, highestMidi: number): 
     map[row] = isBlackKey(pitch);
   }
   return map;
+}
+
+export function computeBlackKeyMidiMap(lowestMidi: number, highestMidi: number): Map<number, boolean> {
+  const map = new Map<number, boolean>();
+  for (let midi = lowestMidi; midi <= highestMidi; midi++) {
+    map.set(midi, isBlackKey(midiToPitch(midi)));
+  }
+  return map;
+}
+
+/**
+ * Computes the MIDI interval between two pitch strings, throwing if invalid.
+ * @param highPitch Higher pitch (e.g., "B9")
+ * @param lowPitch Lower pitch (e.g., "C1")
+ * @returns Difference in semitones
+ */
+export function midiRangeBetween(highPitch: string, lowPitch: string): number {
+  const high = pitchToMidi(highPitch);
+  const low = pitchToMidi(lowPitch);
+
+  if (high === null || low === null) {
+    throw new Error(`Invalid pitches provided: ${highPitch}, ${lowPitch}`);
+  }
+
+  return high - low;
 }

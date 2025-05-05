@@ -3,7 +3,7 @@
 import { getAppState } from './appState.js';
 import { updateTempo, updateTimeSignature, updateTotalMeasures } from '../sequencer/transport.js';
 import { createSequencer, sequencers } from '../setup/sequencers.js';
-import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
+import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
 import { AppState, SequencerState } from './interfaces/AppState.js';
 import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig.js';
 import { syncLiveMatrixWithSerializedNotes } from './utils/syncMatrixToSequencer.js';

@@ -3,7 +3,7 @@
 import { updateTempo, updateTimeSignature, updateTotalMeasures, getTempo, getTotalMeasures } from '../sequencer/transport.js';
 import { destroyAllSequencers, sequencers } from '../setup/sequencers.js';
 import { collapseAllSequencers } from '../helpers.js';
-import { refreshGlobalMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
+import { refreshGlobalMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
 import { drawGlobalPlayhead } from '../playhead/global-playhead.js';
 import { recordDiff } from '../appState/appState.js';
 import { createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';

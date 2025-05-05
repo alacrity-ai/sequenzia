@@ -3,8 +3,6 @@
 import { AppState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
 import { Note } from '../../../../sequencer/interfaces/Note.js';
-import { drawGlobalMiniContour } from '../../../../sequencer/grid/drawing/mini-contour.js';
-import { sequencers } from '../../../../setup/sequencers.js';
 
 /**
  * Applies a DELETE_NOTES diff to remove notes from a sequencer.
@@ -22,12 +20,6 @@ export function applyDELETE_NOTES(state: AppState, diff: Diff): AppState {
     const key = `${n.pitch}|${n.start}|${n.duration}`;
     return !toDelete.has(key);
   });
-
-  // ✅ Refresh global mini contour (using LIVE sequencers array)
-  const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
-  if (globalMiniCanvas) {
-    drawGlobalMiniContour(globalMiniCanvas, sequencers);
-  }
 
   return newState;
 }

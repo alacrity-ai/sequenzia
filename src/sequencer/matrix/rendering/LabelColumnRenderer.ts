@@ -3,19 +3,21 @@
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import { rowToNote } from '../utils/noteUtils.js';
-import { computeBlackKeyRowMap } from '../utils/noteUtils.js';
+import { computeBlackKeyMidiMap } from '../utils/noteUtils.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
 import { GRID_COLOR_SCHEMES } from '../rendering/colors/constants/colorSchemes.js';
 
 export class LabelColumnRenderer {
-  private blackKeyRowMap: boolean[];
+  private blackKeyMap: Map<number, boolean>;
 
   constructor(
     private scroll: GridScroll,
-    private config: GridConfig
+    private config: GridConfig,
+    private getCustomLabels: () => Record<number, string> | null,
+    private getBlackKeyMap: () => Map<number, boolean>
   ) {
     const { lowestMidi, highestMidi } = config.layout;
-    this.blackKeyRowMap = computeBlackKeyRowMap(lowestMidi, highestMidi);
+    this.blackKeyMap = computeBlackKeyMidiMap(lowestMidi, highestMidi);
   }
 
   public draw(ctx: CanvasRenderingContext2D): void {
@@ -36,7 +38,7 @@ export class LabelColumnRenderer {
     ctx.save();
     ctx.translate(0, -scrollY);
 
-    // 🎨 Label column background
+    // Label column background
     const gradient = ctx.createLinearGradient(0, 0, 0, layoutHeight);
     gradient.addColorStop(0, scheme.labelWhite);
     gradient.addColorStop(1, scheme.labelBlack);
@@ -47,19 +49,21 @@ export class LabelColumnRenderer {
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
 
-    // Right-side border to separate from the note grid
-    ctx.strokeStyle = scheme.gridLine; // or a dedicated border color if desired
+    // Right-side border
+    ctx.strokeStyle = scheme.gridLine;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(labelWidth - 0.5, scrollY); // offset by 0.5 for pixel-perfect 1px line
+    ctx.moveTo(labelWidth - 0.5, scrollY);
     ctx.lineTo(labelWidth - 0.5, scrollY + layoutHeight);
     ctx.stroke();
 
+    const customLabels = this.getCustomLabels();
 
     for (let r = 0; r < totalRows; r++) {
       const y = r * cellHeight + headerHeight;
-      const noteName = rowToNote(r, lowestMidi, highestMidi);
-      const isBlackKey = this.blackKeyRowMap[r];
+      const midi = highestMidi - r;
+      const noteName = customLabels?.[midi] ?? rowToNote(r, lowestMidi, highestMidi);
+      const isBlackKey = this.getBlackKeyMap().get(midi) ?? false;
 
       ctx.fillStyle = isBlackKey ? scheme.textBlack : scheme.textWhite;
       ctx.fillText(noteName, labelWidth - 8, y + cellHeight / 2);

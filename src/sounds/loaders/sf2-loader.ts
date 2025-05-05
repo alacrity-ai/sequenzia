@@ -5,7 +5,8 @@ import { Instrument } from '../interfaces/Instrument.js';
 import { showLoadingModal, hideLoadingModal } from '../../global/loadingModal.js';
 import * as smplr from 'smplr';
 
-let activeInstrumentLoads = 0;
+import { beginInstrumentLoad, endInstrumentLoad } from './loadingStore.js';
+
 
 // Cache instruments per AudioContext
 const contextInstrumentMap: Map<AudioContext, Map<string, Instrument>> = new Map();
@@ -169,6 +170,7 @@ export function getAvailableSoundfontKits(): string[] {
 }
 
 export async function getAvailableInstruments(library: string): Promise<string[]> {
+  console.log('GET AVAILABLE INSTRUMENTS CALLED')
   const libraryNormalized = library.toLowerCase();
 
   if (libraryNormalized === 'splendidgrandpiano') {
@@ -186,7 +188,7 @@ export async function getAvailableInstruments(library: string): Promise<string[]
 
   // Otherwise treat it as a Soundfont
   const dummyInstrument = 'acoustic_grand_piano'; // preload safe assumption
-  await loadInstrument(`${library}/${dummyInstrument}`);
+  await loadInstrument(`${library}/${dummyInstrument}`, getAudioContext(), null, 0, 0, true);
   const instruments = smplr.getSoundfontNames();
   return instruments ?? [];
 }
@@ -196,26 +198,12 @@ export function getDrumMachineInstruments() {
   return smplr.getDrumMachineNames();
 }
 
-// Internal loading feedback utilities
-function onInstrumentLoadStart(): void {
-  activeInstrumentLoads++;
-  if (activeInstrumentLoads === 1) showLoadingModal();
-}
-
-function onInstrumentLoadEnd(): void {
-  activeInstrumentLoads--;
-  if (activeInstrumentLoads <= 0) {
-    activeInstrumentLoads = 0;
-    // hideLoadingModal();
-  }
-}
-
 async function withLoading<T>(loadPromise: Promise<T>): Promise<void> {
-  onInstrumentLoadStart();
+  beginInstrumentLoad();
   try {
     await loadPromise;
   } finally {
-    onInstrumentLoadEnd();
+    endInstrumentLoad();
   }
 }
 

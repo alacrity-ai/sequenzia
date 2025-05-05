@@ -1,25 +1,18 @@
 // src/sequencer/sequencer.ts
-// import { initGrid } from './initGrid.js';
 import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
 import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
 import { getTempo, getTotalMeasures } from './transport.js';
 import { loadInstrument } from '../sounds/instrument-loader.js';
-import { loadAndPlayNote } from '../sounds/instrument-player.js'; // Changed from sf2-player.js
-import { pitchToMidi } from '../sounds/audio/pitch-utils.js';
-import { drawMiniContour } from './grid/drawing/mini-contour.js';
+import { loadAndPlayNote } from '../sounds/instrument-player.js';
+import { pitchToMidi, midiRangeBetween } from './matrix/utils/noteUtils.js';
+import { DRUM_MIDI_TO_NAME } from '../sounds/loaders/constants/drums.js';
+import { drawMiniContour } from './ui/renderers/drawMiniContour.js';
 import type { Note } from './interfaces/Note.js';
 import type { SequencerConfig } from './interfaces/SequencerConfig.js';
-import { midiRangeBetween } from './grid/helpers/note-finder.js';
 import { Instrument } from '../sounds/interfaces/Instrument.js';
-import { HandlerContext as GridContext } from './interfaces/HandlerContext.js';
 import { engine as playbackEngine } from '../main.js';
 import { createGridInSequencerBody } from './matrix/utils/createGridInSequencerBody.js';
 import { Grid } from './matrix/Grid.js';
-
-interface NoteHandler {
-  stop?: () => void;
-  forceStop?: () => void;
-}
 
 export default class Sequencer {
   container: HTMLElement | null;
@@ -56,21 +49,10 @@ export default class Sequencer {
 
   collapsed: boolean = false;
 
-  // private _activeNotes: Set<Note> = new Set();
-  private _activeNoteKeys: Set<string> = new Set();
-  private _noteHandlers: Map<string, NoteHandler> = new Map();
-  private _beatHandler: ((beat: number) => void) | null = null;
-  private _unsub: (() => void) | null = null;
-
-  private pianoRollCanvas?: HTMLCanvasElement;
-  private gridCanvas?: HTMLCanvasElement;
   private animationCanvas?: HTMLCanvasElement;
   matrix?: Grid;
 
   private _scheduledAnimations: ReturnType<typeof setTimeout>[] = [];
-  
-  private _animationLoopRunning: boolean = false;
-  private _animationCursor: number = 0;
 
   refreshPanUI?: () => void;
   refreshVolumeUI?: () => void;
@@ -103,25 +85,12 @@ export default class Sequencer {
         getId: () => this.id
       });
     
+      this.matrix.refreshNoteRange();
       initZoomControls(this.container, () => this.matrix?.zoomIn(), () => this.matrix?.zoomOut(), () => this.matrix?.resetZoom());
     } 
   }
 
   private _instrument: Instrument | null = null;
-
-  private _initCanvases(): void {
-    if (!this.container) return;
-
-    // LEGACY GRID
-    // const noteCanvas = this.container.querySelector('canvas.note-grid') as HTMLCanvasElement;
-    // const playheadCanvas = this.container.querySelector('canvas.playhead-canvas') as HTMLCanvasElement;
-    // const scrollContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
-    // const animationCanvas = this.container.querySelector('canvas.note-animate-canvas') as HTMLCanvasElement;
-
-    // this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, [] as Note[], this.config, this);
-    // this.grid.scheduleRedraw();
-    // END LEGACY GRID
-  }
 
   async initInstrument(): Promise<void> {
     try {
@@ -281,10 +250,6 @@ export default class Sequencer {
     }
   
     this._scheduledAnimations = [];
-  }  
-
-  private _startAnimationLoop(): void {
-    //
   }  
 
   resumeAnimationsFromCurrentTime(startAt: number, startBeat: number): void {
@@ -572,48 +537,22 @@ export default class Sequencer {
     this.config.noteRange = range;
     this.config.visibleNotes = midiRangeBetween(highNote, lowNote) + 1;
 
-    // Update canvases and redraw
-    const noteCanvas = this.container?.querySelector('canvas.note-grid') as HTMLCanvasElement;
-    const playheadCanvas = this.container?.querySelector('.playhead-canvas') as HTMLCanvasElement;
-    const animationCanvas = this.container?.querySelector('.note-animate-canvas') as HTMLCanvasElement;
+    // Update mini contour
     const miniCanvas = this.container?.querySelector('.mini-contour') as HTMLCanvasElement;
-
-    if (noteCanvas && playheadCanvas && animationCanvas) {
-      const fullHeight = this.config.visibleNotes * this.config.cellHeight;
-      
-      // Update canvas heights
-      [noteCanvas, playheadCanvas, animationCanvas].forEach(canvas => {
-        canvas.height = fullHeight;
-        canvas.style.height = `${fullHeight}px`;
-      });
-
-      // Redraw mini contour
-      if (miniCanvas) {
-        drawMiniContour(miniCanvas, this.matrix.notes, this.config, this.colorIndex);
-      }
-
-      // Trigger grid redraw
-      this.redraw();
+    if (miniCanvas) {
+      drawMiniContour(miniCanvas, this.matrix.notes, this.config, this.colorIndex);
     }
 
-    // Clamp existing notes to new range if needed
-    this.matrix.notes.forEach(note => {
-      const noteMidi = pitchToMidi(note.pitch);
-      if (noteMidi === null) return;
-
-      if (noteMidi < lowMidi) {
-        note.pitch = lowNote;
-      } else if (noteMidi > highMidi) {
-        note.pitch = highNote;
-      }
-    });
+    this.matrix.setNoteRange(lowMidi, highMidi);
   }
 
   updateToDrumNoteRange(): void {
     if (!this.instrumentName.toLowerCase().includes('drum kit')) {
-      this.updateNoteRange(['C1', 'B9']);
+      this.updateNoteRange(['A0', 'C9']);
+      this.matrix?.setCustomLabels(null);
     } else {
       this.updateNoteRange(['B1', 'A5']);
+      this.matrix?.setCustomLabels(DRUM_MIDI_TO_NAME);
     }
   }
   
