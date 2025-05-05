@@ -294,13 +294,23 @@ export default class Sequencer {
   
     const bpm = getTempo();
     const beatDuration = 60 / bpm;
-    const startWallTime = performance.now(); // anchor to wall-clock
-    const offset = startAt; // seconds
+    const nowWall = performance.now(); // current wall-clock time (ms)
+    const nowAudio = getAudioContext().currentTime; // current audio time (s)
+  
+    // Calculate how much real time has elapsed since playback started
+    const elapsedAudioSeconds = nowAudio - startAt;
+    const elapsedBeats = elapsedAudioSeconds / beatDuration;
+  
+    // Determine the current beat position
+    const currentBeat = startBeat + elapsedBeats;
+  
+    const startWallTime = nowWall - elapsedBeats * beatDuration * 1000; // anchor wall time
   
     for (const note of this.matrix.notes) {
-      const offsetBeats = note.start - startBeat;
-      const wallTime = startWallTime + offsetBeats * beatDuration * 1000; // ms
-      const delay = wallTime - performance.now();
+      if (note.start < currentBeat) continue; // note already passed
+  
+      const offsetBeats = note.start - currentBeat;
+      const delay = offsetBeats * beatDuration * 1000;
   
       if (delay >= 0) {
         const timeoutId = setTimeout(() => {
