@@ -20,52 +20,45 @@ export class PlayheadRenderer {
     }
   
     public draw(ctx: CanvasRenderingContext2D): void {
-        if (this.x == null) return;
-      
-        const {
-          layout: {
-            verticalCellRatio,
-            baseCellWidth,
-            labelWidth,
-            headerHeight,
-            highestMidi,
-            lowestMidi
-          },
-          behavior: { zoom }
-        } = this.config;
-      
-        const totalRows = highestMidi - lowestMidi + 1;
-        const scrollX = this.scroll.getX();
-        const scrollY = this.scroll.getY();
-        const cellHeight = (baseCellWidth * zoom) / verticalCellRatio;
-        const totalGridHeight = totalRows * cellHeight + headerHeight;
-      
-        ctx.save();
-        ctx.translate(labelWidth - scrollX, -scrollY);
-      
-        // Subtle glow & refined line
-        const x = this.x;
-        const glowColor = 'rgba(255, 50, 50, 0.3)';
-        const strokeColor = 'rgba(255, 80, 80, 0.9)';
-      
-        // Outer glow
-        ctx.strokeStyle = glowColor;
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, totalGridHeight);
-        ctx.stroke();
-      
-        // Inner crisp line
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, totalGridHeight);
-        ctx.stroke();
-      
-        ctx.restore();
-      }
+      if (this.x == null) return;
+    
+      const {
+        layout: {
+          verticalCellRatio,
+          baseCellWidth,
+          labelWidth,
+          headerHeight,
+          highestMidi,
+          lowestMidi
+        },
+        behavior: { zoom }
+      } = this.config;
+    
+      const totalRows = highestMidi - lowestMidi + 1;
+      const scrollX = this.scroll.getX();
+      const scrollY = this.scroll.getY();
+      const cellHeight = (baseCellWidth * zoom) / verticalCellRatio;
+      const totalGridHeight = totalRows * cellHeight + headerHeight;
+    
+      const x = this.x;
+    
+      ctx.save();
+      ctx.translate(labelWidth - scrollX, -scrollY);
+    
+      // === Tailwind-styled playhead ===
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(168, 85, 247, 1.0)'; // solid purple-500
+      ctx.shadowColor = 'rgba(168, 85, 247, 0.5)'; // soft glow
+      ctx.shadowBlur = 6;
+    
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, totalGridHeight);
+      ctx.stroke();
+    
+      ctx.restore();
+    }
+    
          
   }
   

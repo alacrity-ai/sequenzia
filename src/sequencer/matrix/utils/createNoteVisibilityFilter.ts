@@ -26,7 +26,7 @@ export function createVisibleNotesFilter(
   const canvasWidth = canvas.offsetWidth;
   const canvasHeight = canvas.offsetHeight;
 
-  const buffer = -1;
+  const buffer = 0;
 
   const startX = scrollX / cellWidth - buffer;
   const endX = (scrollX + canvasWidth) / cellWidth + buffer;

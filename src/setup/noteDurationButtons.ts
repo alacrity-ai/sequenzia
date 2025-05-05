@@ -114,6 +114,16 @@ export function setupNoteDurationButtons(): void {
 
   // === Keyboard Hotkeys ===
   document.addEventListener('keydown', (e) => {
+    const target = e.target as HTMLElement;
+
+    // Guard: if focus is in an editable field, do nothing
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable
+    ) {
+      return;
+    }
 
     if (Object.prototype.hasOwnProperty.call(durationHotkeys, e.code)) {
       e.preventDefault();
