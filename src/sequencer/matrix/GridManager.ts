@@ -5,9 +5,11 @@ export class GridManager {
     public gridCanvas: HTMLCanvasElement;
     public noteCanvas: HTMLCanvasElement;
     public animationCanvas: HTMLCanvasElement;
+    public playheadCanvas: HTMLCanvasElement;
     public gridCtx: CanvasRenderingContext2D;
     public noteCtx: CanvasRenderingContext2D;
     public animationCtx: CanvasRenderingContext2D;
+    public playheadCtx: CanvasRenderingContext2D;
   
     constructor(parent: HTMLElement) {
       this.container = this.createContainer();
@@ -16,14 +18,17 @@ export class GridManager {
       this.gridCanvas = this.createCanvas('gridCanvas');
       this.noteCanvas = this.createCanvas('noteCanvas');
       this.animationCanvas = this.createCanvas('animationCanvas');
-  
+      this.playheadCanvas = this.createCanvas('playheadCanvas');
+
       this.container.appendChild(this.gridCanvas);
       this.container.appendChild(this.noteCanvas);
       this.container.appendChild(this.animationCanvas);
+      this.container.appendChild(this.playheadCanvas);
   
       this.gridCtx = this.getCtx(this.gridCanvas);
       this.noteCtx = this.getCtx(this.noteCanvas);
       this.animationCtx = this.getCtx(this.animationCanvas);
+      this.playheadCtx = this.getCtx(this.playheadCanvas);
   
       this.injectContainerStyles();
       this.injectCanvasStyles();
@@ -73,6 +78,9 @@ export class GridManager {
         }
         #grid-container canvas#animationCanvas {
           z-index: 2;
+        }
+        #grid-container canvas#playheadCanvas {
+          z-index: 3;
         }
       `;
       document.head.appendChild(style);

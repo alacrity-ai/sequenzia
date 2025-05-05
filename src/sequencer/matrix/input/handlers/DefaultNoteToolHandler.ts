@@ -36,7 +36,8 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
       private readonly getSequencerId: () => number,
       private readonly controller: InteractionController,
       private readonly cursorController: CursorController,
-      private readonly getClipboard: () => { notes: Note[] }
+      private readonly getClipboard: () => { notes: Note[] },
+      private readonly playNoteAnimation: (note: Note) => void
     ) {}
 
     public onMouseDown(e: MouseEvent): void {
@@ -171,7 +172,15 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
         createReversePlaceNotesDiff(this.getSequencerId(), [newNote])
       );
 
+      // Play the note 
       this.noteManager.previewNote(pitch, duration);
+      // Play the note animation
+      this.playNoteAnimation({
+        start: snapped.x,
+        duration: duration,
+        pitch,
+        velocity: 100
+      });      
     }
 
     // Right click: Delete note

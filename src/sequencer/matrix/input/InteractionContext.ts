@@ -87,7 +87,8 @@ export class InteractionContext {
           () => this.data.sequencerContext.getId(),
           controller,
           this.data.cursorController,
-          this.data.getClipboard
+          this.data.getClipboard,
+          this.data.playNoteAnimation
         );
       case InteractionMode.Selecting:
         return new SelectingToolHandler(

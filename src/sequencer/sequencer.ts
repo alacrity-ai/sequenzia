@@ -67,11 +67,7 @@ export default class Sequencer {
   private animationCanvas?: HTMLCanvasElement;
   matrix?: Grid;
 
-  private _scheduledAnimations: {
-    time: number;
-    note: Note;
-    context: GridContext;
-  }[] = [];
+  private _scheduledAnimations: ReturnType<typeof setTimeout>[] = [];
   
   private _animationLoopRunning: boolean = false;
   private _animationCursor: number = 0;
@@ -232,39 +228,49 @@ export default class Sequencer {
       i++;
     }
   
+    // Anchor wall-clock time (ms) to the same logical start point as AudioContext time (s)
+    const startWallTime = performance.now(); // ms
+
     for (; i < notes.length; i++) {
       const note = notes[i];
       const midi = pitchToMidi(note.pitch);
       if (midi === null) continue;
-  
-      const noteTime = startAt + (note.start - startBeat) * beatDuration;
-      const duration = note.duration * beatDuration;
+
+      const offsetBeats = note.start - startBeat;
+      const noteTime = startAt + offsetBeats * beatDuration; // seconds (AudioContext)
+      const duration = note.duration * beatDuration;         // seconds
       const velocity = note.velocity ?? 100;
-  
+
       try {
         console.log(`[SEQ:${this.id}] Scheduling note ${note.pitch} at ${noteTime.toFixed(3)}`);
+        
+        // Schedule audio playback
         this._instrument.start({
           note: midi,
           time: noteTime,
           duration,
           velocity
         });
-  
-        // // LEGACY GRID: Schedule note animation
-        // if (!this.collapsed && this.grid?.gridContext?.animationCtx) {
-        //   this._scheduledAnimations.push({
-        //     time: noteTime,
-        //     note,
-        //     context: this.grid.gridContext
-        //   });
-        
-        //   this._startAnimationLoop(); // ensures this instance animates
-        // }        
-  
+
+        if (!this.collapsed) {
+          // Compute corresponding wall-clock time in ms
+          const wallTime = startWallTime + offsetBeats * beatDuration * 1000;
+          const delay = wallTime - performance.now();
+
+          if (delay >= 0) {
+            const scheduled = setTimeout(() => {
+              this.matrix?.playNoteAnimation(note);
+            }, delay);
+            this._scheduledAnimations.push(scheduled);
+            console.log(`[SEQ:${this.id}] Scheduled animation for ${note.pitch} in ${delay.toFixed(2)} ms`);
+          }
+        }
+
       } catch (err) {
         console.warn(`[SEQ:${this.id}] Failed to schedule note`, note, err);
       }
     }
+
   }
 
   stopScheduledNotes(): void {
@@ -272,104 +278,71 @@ export default class Sequencer {
       this._instrument.stop();
     }
   
+    for (const timeoutId of this._scheduledAnimations) {
+      clearTimeout(timeoutId);
+    }
+  
     this._scheduledAnimations = [];
-    this._animationCursor = 0;
-    this._animationLoopRunning = false;      
-  }
+  }  
 
   private _startAnimationLoop(): void {
-    if (this._animationLoopRunning) return;
-    this._animationLoopRunning = true;
-  
-    const loop = () => {
-      const now = getAudioContext().currentTime;
-      const lookahead = 0.05;
-      const len = this._scheduledAnimations.length;
-  
-      while (
-        this._animationCursor < len &&
-        this._scheduledAnimations[this._animationCursor].time < now + lookahead
-      ) {
-        const { note, context } = this._scheduledAnimations[this._animationCursor++];
-
-        // LEGACY GRID
-        // animateNotePlay(context, note, {
-        //   getPitchRow: context.getPitchRow,
-        //   cellWidth: context.getCellWidth(),
-        //   cellHeight: context.getCellHeight(),
-        //   labelWidth
-        // });
-      }
-  
-      if (this._animationCursor >= len) {
-        this._scheduledAnimations = [];
-        this._animationCursor = 0;
-        this._animationLoopRunning = false;
-      } else {
-        requestAnimationFrame(loop);
-      }
-    };
-  
-    requestAnimationFrame(loop);
+    //
   }  
 
   resumeAnimationsFromCurrentTime(startAt: number, startBeat: number): void {
-    // LEGACY GRID:
-    // if (!this.grid?.gridContext || this.collapsed) return;
+    if (!this.matrix || this.collapsed) return;
   
-    // const bpm = getTempo();
-    // const beatDuration = 60 / bpm;
-    // const now = getAudioContext().currentTime;
+    const bpm = getTempo();
+    const beatDuration = 60 / bpm;
+    const startWallTime = performance.now(); // anchor to wall-clock
+    const offset = startAt; // seconds
   
-    // if (!this.matrix) return;
-    // for (const note of this.matrix.notes) {
-    //   const noteTime = startAt + (note.start - startBeat) * beatDuration;
+    for (const note of this.matrix.notes) {
+      const offsetBeats = note.start - startBeat;
+      const wallTime = startWallTime + offsetBeats * beatDuration * 1000; // ms
+      const delay = wallTime - performance.now();
   
-    //   if (noteTime >= now) {
-    //     this._scheduledAnimations.push({
-    //       time: noteTime,
-    //       note,
-    //       context: this.grid.gridContext
-    //     });
-    //   }
-    // }
-  
-    // this._scheduledAnimations.sort((a, b) => a.time - b.time);
-    // this._startAnimationLoop();
+      if (delay >= 0) {
+        const timeoutId = setTimeout(() => {
+          this.matrix?.playNoteAnimation(note);
+        }, delay);
+        this._scheduledAnimations.push(timeoutId);
+      }
+    }
   }  
-
+  
   async reschedulePlayback(startAt: number, startBeat: number = 0): Promise<void> {
     if (!this.matrix) return;
-    
-    // Stop all currently scheduled notes and animations
+  
     this.stopScheduledNotes();
   
-    // Reinitialize the instrument if needed (should be fast if cached)
     if (!this._instrument) {
       await this.initInstrument();
     }
   
-    // Skip re-scheduling if muted or shouldn't play
     if (this.mute || !this.shouldPlay || !this._instrument?.start) return;
   
     const bpm = getTempo();
     const beatDuration = 60 / bpm;
-    const now = getAudioContext().currentTime;
+    const startWallTime = performance.now(); // anchor for wall-clock animation scheduling
   
-    // Re-schedule notes and animations from current beat
+    const nowAudio = getAudioContext().currentTime;
+  
     const notes = this.matrix.notes.filter(n => n.start >= startBeat);
+  
     for (const note of notes) {
       const midi = pitchToMidi(note.pitch);
       if (midi === null) continue;
   
-      const noteTime = startAt + (note.start - startBeat) * beatDuration;
+      const offsetBeats = note.start - startBeat;
+      const noteTime = startAt + offsetBeats * beatDuration; // audio time (s)
       const duration = note.duration * beatDuration;
       const velocity = note.velocity ?? 100;
   
-      if (noteTime <= now + 0.01) continue;
-
+      if (noteTime <= nowAudio + 0.01) continue; // skip notes in the immediate past
+  
       try {
-        console.log(`[SEQ:${this.id}] Recheduling note ${note.pitch} at ${noteTime.toFixed(3)}`);
+        console.log(`[SEQ:${this.id}] Re-scheduling note ${note.pitch} at ${noteTime.toFixed(3)}`);
         this._instrument.start({
           note: midi,
           time: noteTime,
@@ -377,23 +350,23 @@ export default class Sequencer {
           velocity
         });
   
-        // Schedule animation
-        // LEGACY GRID
-        // if (!this.collapsed && this.grid?.gridContext?.animationCtx && noteTime >= now) {
-        //   this._scheduledAnimations.push({
-        //     time: noteTime,
-        //     note,
-        //     context: this.grid.gridContext
-        //   });
+        if (!this.collapsed) {
+          const wallTime = startWallTime + offsetBeats * beatDuration * 1000; // ms
+          const delay = wallTime - performance.now(); // calculate live delay
   
-        //   this._startAnimationLoop();
-        // }
+          if (delay >= 0) {
+            const timeoutId = setTimeout(() => {
+              this.matrix?.playNoteAnimation(note);
+            }, delay);
+            this._scheduledAnimations.push(timeoutId);
+          }
+        }
   
       } catch (err) {
         console.warn(`[SEQ:${this.id}] Failed to re-schedule note`, note, err);
       }
     }
-  }
+  }    
 
   async exportToOffline(signal?: AbortSignal, notesOverride?: Note[]): Promise<void> {
     const notes = notesOverride ?? this.matrix?.notes;
@@ -640,32 +613,26 @@ export default class Sequencer {
     this.collapsed = val;
   
     if (val) {
-      this._scheduledAnimations = [];
-      this._animationCursor = 0;
-      this._animationLoopRunning = false;
-  
-      // Hide canvas element
+      // Prevent animation rendering
       this.animationCanvas?.classList.add('hidden');
   
-      // Disable drawing context
-      // LEGACY GRID OPTIMIZATION:
-      // if (this.grid?.gridContext) {
-      //   this.grid.gridContext.animationCtx = null; // <-- requires nullable typing
-      // }
+      // Cancel pending animation timeouts
+      for (const timeoutId of this._scheduledAnimations) {
+        clearTimeout(timeoutId);
+      }
+      this._scheduledAnimations = [];
   
     } else {
       this.animationCanvas?.classList.remove('hidden');
-
-      // LEGACY GRID OPTIMIZATION
-      // if (this.animationCanvas && this.grid?.gridContext) {
-      //   this.grid.gridContext.animationCtx = this.animationCanvas.getContext('2d');
-      // }
-    
-      // Attempt to resume animation from current playback position
+  
+      // If we are playing, re-schedule animations from the current time
       if (playbackEngine.isActive()) {
-        this.resumeAnimationsFromCurrentTime(playbackEngine.getStartTime(), playbackEngine.getStartBeat());
+        this.resumeAnimationsFromCurrentTime(
+          playbackEngine.getStartTime(),
+          playbackEngine.getStartBeat()
+        );
       }
-    }    
+    }
   }  
 
   destroy(): void {

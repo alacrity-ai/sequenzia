@@ -30,7 +30,6 @@ import type { TrackedNote } from './interfaces/TrackedNote.js';
 import type { InteractionContextData } from './input/interfaces/InteractionContextData.js';
 import type { GridSnappingContext } from './interfaces/GridSnappingContext.js';
 import type { SequencerContext } from './interfaces/SequencerContext.js';
-import type { Clipboard } from '../interfaces/Clipboard.js';
 
 export class Grid {
   private gridManager: GridManager;
@@ -62,6 +61,7 @@ export class Grid {
   private gridCanvasManager!: CanvasManager;
   private noteCanvasManager!: CanvasManager;
   private animationCanvasManager!: CanvasManager;
+  private playheadCanvasManager!: CanvasManager;
 
   private initialZoom!: number;
   
@@ -72,10 +72,11 @@ export class Grid {
 
     // Create canvas managers for our canvases
     this.gridManager = new GridManager(parent);
-    const { gridCanvas, noteCanvas, animationCanvas } = this.gridManager;
+    const { gridCanvas, noteCanvas, animationCanvas, playheadCanvas } = this.gridManager;
     this.gridCanvasManager = new CanvasManager(gridCanvas);
     this.noteCanvasManager = new CanvasManager(noteCanvas);
-    this.animationCanvasManager = new CanvasManager(animationCanvas);    
+    this.animationCanvasManager = new CanvasManager(animationCanvas); 
+    this.playheadCanvasManager = new CanvasManager(playheadCanvas);   
 
     // Create components
     const mainContainer = this.gridManager.container
@@ -101,6 +102,7 @@ export class Grid {
       cursorController: this.cursorController,
       setClipboard,
       getClipboard,
+      playNoteAnimation: (note) => this.playNoteAnimation(note)
     };
     this.interactionContext = new InteractionContext(contextData);
     this.mouseTracker = new InputTracker(this.interactionContext, mainContainer)
@@ -141,7 +143,8 @@ export class Grid {
   private resize(): void {
     this.gridCanvasManager.resize();
     this.noteCanvasManager.resize();
-    this.animationCanvasManager.resize();    
+    this.animationCanvasManager.resize();
+    this.playheadCanvasManager.resize(); 
   
     this.scroll.recalculateBounds();
     this.scrollbars.update();
@@ -186,10 +189,12 @@ export class Grid {
     this.gridCanvasManager.clear();
     this.noteCanvasManager.clear();
     this.animationCanvasManager.clear();
+    this.playheadCanvasManager.clear();
     
     const gridCtx = this.gridCanvasManager.getContext();
     const noteCtx = this.noteCanvasManager.getContext();
     const animCtx = this.animationCanvasManager.getContext();
+    const playheadCtx = this.playheadCanvasManager.getContext();
     
     this.gridRenderer.draw(gridCtx);
     this.noteRenderer.draw(noteCtx);
@@ -197,7 +202,7 @@ export class Grid {
     this.animationRenderer.draw(animCtx);
     this.labelRenderer.draw(gridCtx);
     this.headerRenderer.draw(gridCtx);
-    this.playheadRenderer.draw(animCtx);
+    this.playheadRenderer.draw(playheadCtx);
 
     if (this.interactionStore.hasMarquee()) {
       this.marqueeRenderer.draw(animCtx);
@@ -231,6 +236,10 @@ export class Grid {
   public setNotes(notes: Note[]): void {
     this.noteManager.set(pruneNotesToTimeline(notes, this.getTotalBeats()));
     this.requestRedraw();
+  }
+
+  public playNoteAnimation(note: Note): void {
+    this.animationRenderer.playNote(note);
   }
 
   public getTrackedNotes(): TrackedNote[] {

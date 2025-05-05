@@ -59,18 +59,25 @@ export class NoteRenderer {
       const h = cellHeight;
     
       const baseColor = getNoteColor(note, noteColorContext);
-
-      ctx.fillStyle = state.selected
-        ? '#f0f'
-        : state.hovered
-        ? '#ff3300'
-        : state.highlighted
-        ? '#0f0'
-        : baseColor;         
     
+      // Fill color (base or dimmed depending on state)
+      ctx.fillStyle = baseColor;
       drawRoundedRect(ctx, x, y, w, h, 4);
       ctx.fill();
-    }
+    
+      // Interaction outlines
+      if (state.selected || state.hovered || state.highlighted) {
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = state.selected
+          ? '#ffffff'           // Selected: white outline
+          : state.hovered
+          ? '#ff9933'           // Hovered: orange outline
+          : '#33ff99';          // Highlighted: cyan/green outline
+    
+        drawRoundedRect(ctx, x, y, w, h, 4);
+        ctx.stroke();
+      }
+    }    
 
     ctx.restore();
   }

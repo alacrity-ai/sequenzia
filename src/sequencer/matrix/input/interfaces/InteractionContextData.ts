@@ -23,4 +23,5 @@ export interface InteractionContextData {
   cursorController: CursorController;
   setClipboard: (notes: Note[]) => void;
   getClipboard: () => Clipboard;
+  playNoteAnimation: (note: Note) => void;
 }
