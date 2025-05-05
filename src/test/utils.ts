@@ -2,7 +2,7 @@
 
 import { vi } from 'vitest';
 import { Note } from '../sequencer/interfaces/Note';
-import { GridConfig } from '../sequencer/interfaces/GridConfig';
+import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig';
 
 /**
  * Creates a standard set of test elements for grid tests
@@ -40,7 +40,7 @@ export function setupGridTestData() {
     { pitch: 'E4', start: 1, duration: 1 },
   ];
 
-  const dummyConfig: GridConfig = {
+  const dummyConfig: SequencerConfig = {
     noteRange: ['C2', 'C6'],
     isTripletMode: false,
     snapResolution: 0.25,

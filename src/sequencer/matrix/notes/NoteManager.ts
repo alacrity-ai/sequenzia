@@ -6,9 +6,6 @@ import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { SequencerContext } from '../interfaces/SequencerContext.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 
-import { rowToNote } from '../utils/noteUtils.js';
-import { config } from 'process';
-
 
 export class NoteManager {
   private notes: Note[] = [];
@@ -53,7 +50,23 @@ export class NoteManager {
       };
     });
   }
+
+  // Removes a single note
+  public remove(note: Note): void {
+    const key = `${note.pitch}:${note.start}`;
+    this.notes = this.notes.filter(n => !(n.pitch === note.pitch && n.start === note.start));
+    this.noteIndex.delete(key);
+  }
   
+  // Removes all notes in the provided array
+  public removeAll(notesToRemove: Note[]): void {
+    const keysToRemove = new Set(notesToRemove.map(n => `${n.pitch}:${n.start}`));
+    this.notes = this.notes.filter(n => !keysToRemove.has(`${n.pitch}:${n.start}`));
+    for (const key of keysToRemove) {
+      this.noteIndex.delete(key);
+    }
+  }  
+
   public rebuildIndex(): void {
     this.noteIndex.clear();
     for (const note of this.notes) {

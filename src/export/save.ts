@@ -148,15 +148,15 @@ export async function exportSessionToWAV(
 
     for (const state of session.tracks) {
       if (aborted) return;
+    
       const instrumentName = state.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
-      // @ts-ignore
-      const squelchLoadingScreen = true;
-      const seq = new Sequencer(null, state.config as any, offlineCtx as any, offlineCtx.destination, instrumentName, squelchLoadingScreen);
-      seq.setState(state);
-      await seq.exportToOffline(abortController.signal);
-
+      const seq = new Sequencer(null, state.config as any, offlineCtx as any, offlineCtx.destination, instrumentName, true);
+    
+      // Avoid calling setState; just directly pass the notes
+      await seq.exportToOffline(abortController.signal, state.notes);
+    
       if (aborted) return;
-    }
+    }    
 
     if (aborted) return;
     showLoadingModal("Rendering Audio", "Rendering audio buffer…", undefined, true); // without cancel

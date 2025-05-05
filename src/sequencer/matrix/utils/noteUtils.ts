@@ -44,6 +44,27 @@ const NOTE_TO_MIDI: Record<string, number> = {
     return 12 * (octave + 1) + (baseSemitone + accidentalShift);
   }
 
+  // Alias for pitchToMidi
+  export function noteToMidi(pitch: string | null | undefined): number | null {
+    return pitchToMidi(pitch);
+  }
+
+  // Function to extract pitch class from a pitch string (e.g., "C4" -> "C")
+  export function getPitchClass(pitch: string): string {
+    return pitch.replace(/\d+$/, '');
+  }
+
+  // Alias for getPitchClass
+  export function getNoteClass(note: string): string {
+    return getPitchClass(note);
+  }
+
+  export const getPitchClassIndex = (pitch: string): number => {
+    const midi = pitchToMidi(pitch);
+    return midi !== null ? midi % 12 : 0;
+  };
+  
+
 /**
  * Converts a pitch like "C4" to a vertical grid row index.
  * Inverts the result so that row 0 is the highest pitch and the largest index is the lowest.
@@ -66,8 +87,6 @@ export function noteToRowIndex(
   const flippedIndex = totalRows - 1 - unflippedIndex;
   return flippedIndex >= 0 && flippedIndex < totalRows ? flippedIndex : null;
 }
-
-
 
 /**
  * Converts a vertical row index into a pitch string like "C4" or "A#3", using an inverted piano roll.

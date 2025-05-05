@@ -2,8 +2,8 @@
 import { hideSplashScreen } from './global/splashscreen.js';
 import { setupHeaderModeToggler } from './global/headerModeToggler.js';
 import { setupGlobalUndoRedo } from './global/undo-redo.js';
-import { registerVelocityModeHandlers } from './sequencer/grid/interaction/velocity/velocityModeHandlers.js';
-import { registerVelocityMenuHandlers } from './sequencer/grid/interaction/velocity/velocityModeMenu.js';
+import { registerVelocityModeHandlers } from './sequencer/ui/modals/velocity/velocityModalHandlers.js';
+import { registerVelocityMenuHandlers } from './sequencer/ui/modals/velocity/velocityModeMenu.js';
 import { undo, redo } from './appState/stateHistory';
 import { setupWhatsNewButton } from './global/whatsnew.js';
 import { showSplashScreen } from './global/splashscreen.js';
@@ -11,7 +11,7 @@ import { setupHelpButton } from './global/helpbutton.js';
 import { setupKeyboard } from './setup/setupKeyboard.js';
 import { setupVisualizer } from './setup/visualizer.js';
 import { getSequencers, sequencers, setupAddTrackButton } from './setup/sequencers.js';
-import { GRID_CONFIG as config } from './sequencer/grid/helpers/constants.js';
+import { SEQUENCER_CONFIG as config } from './sequencer/constants/sequencerConstants.js';
 import { setupUI } from './sequencer/ui.js';
 import { initFooterUI } from './setup/footerUI.js';
 import { showSaveWavOptionsModal } from './export/interaction/saveWavMenu.js';
@@ -27,7 +27,6 @@ import { initGlobalPlayhead } from './playhead/global-playhead.js';
 import { startMasterPlayheadLoop, cancelMasterPlayheadLoop, resetPlayheads } from './playhead/playhead-engine.js';
 import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';
 import { setupControlModeSwitch } from './setup/controlModeSwitch.js';
-import { setupSelectModeUI } from './sequencer/grid/interaction/selectModeButtonHandlers.js';
 import { onStateUpdated } from './appState/onStateUpdated.js';
 import { resyncFromState } from './appState/resyncFromState.js';
 import { getAppState, recordDiff } from './appState/appState.js';
@@ -89,7 +88,6 @@ recordDiff(
 
 // === Additional UI Setup ===
 setupGlobalUndoRedo(undo, redo);
-setupSelectModeUI();
 refreshGlobalMiniContour();
 setupAddTrackButton();
 setupNoteDurationButtons();

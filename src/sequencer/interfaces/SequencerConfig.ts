@@ -1,8 +1,8 @@
-// src/sequencer/interfaces/GridConfig.ts
+// src/sequencer/interfaces/SequencerConfig.ts
 
 // TODO: This should be called SequencerConfig!
 
-export interface GridConfig {
+export interface SequencerConfig {
   cellWidth: number;
   cellHeight: number;
   visibleNotes: number;

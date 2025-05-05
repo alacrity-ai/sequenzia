@@ -80,16 +80,21 @@ export class SelectingToolHandler implements GridInteractionHandler {
     );
   
     if (selected.length > 0) {
+      this.store.clearHighlightedNotes();
       this.store.setSelectedNotes(selected);
       this.store.setMarqueeBox(null);
-      console.log('Selected count', selected.length);
-      console.log('Selected notes', selected);
       this.controller.transitionTo(InteractionMode.SelectedIdle);
     } else {
       this.store.clearSelection();
       this.controller.transitionTo(InteractionMode.DefaultNoteTool);
     }
   } 
+
+  public onMouseLeave(): void {
+    this.store.clearHighlightedNotes();
+    this.store.setMarqueeBox(null);
+    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+  }  
 
   public onExit(): void {
     this.store.clearHighlightedNotes();

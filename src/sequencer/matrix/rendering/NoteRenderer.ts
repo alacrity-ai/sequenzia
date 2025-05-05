@@ -7,14 +7,19 @@ import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
 import { drawRoundedRect } from '../utils/roundedRect.js';
 import { createVisibleNotesFilter } from '../utils/createNoteVisibilityFilter.js'
-import { noteToRowIndex } from '../utils/noteUtils.js';
+import { noteToRowIndex, getPitchClassIndex } from '../utils/noteUtils.js';
+import { NOTE_COLOR_SCHEMES } from './colors/noteColorSchemes.js';
+import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
+import { getTrackColor } from './colors/helpers/getTrackColor.js';
+import { SequencerContext } from '../interfaces/SequencerContext.js';
 
 export class NoteRenderer {
   constructor(
     private scroll: GridScroll,
     private config: GridConfig,
     private noteManager: NoteManager,
-    private interactionStore: InteractionStore
+    private interactionStore: InteractionStore,
+    private sequencerId: number
   ) {}
 
   public draw(ctx: CanvasRenderingContext2D): void {
@@ -23,6 +28,14 @@ export class NoteRenderer {
       behavior: { zoom },
     } = this.config;
 
+    const { noteColorScheme } = getUserConfig();
+    const getNoteColor = NOTE_COLOR_SCHEMES[noteColorScheme] || (() => '#999');
+    
+    const noteColorContext = {
+      getPitchClass: getPitchClassIndex,
+      getTrackColor: () => getTrackColor(this.sequencerId),
+    };
+    
     const cellWidth = baseCellWidth * zoom;
     const cellHeight = cellWidth / verticalCellRatio;
 
@@ -45,13 +58,15 @@ export class NoteRenderer {
       const w = note.duration * cellWidth;
       const h = cellHeight;
     
+      const baseColor = getNoteColor(note, noteColorContext);
+
       ctx.fillStyle = state.selected
-      ? '#f0f'        // Bright magenta for selected
-      : state.hovered
-      ? '#ff3300'     // Bright red-orange for hovered
-      : state.highlighted
-      ? '#0f0'        // Bright green for marquee-highlighted
-      : '#09f';       // Default blue    
+        ? '#f0f'
+        : state.hovered
+        ? '#ff3300'
+        : state.highlighted
+        ? '#0f0'
+        : baseColor;         
     
       drawRoundedRect(ctx, x, y, w, h, 4);
       ctx.fill();

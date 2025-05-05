@@ -5,7 +5,7 @@ import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import { computeBlackKeyRowMap } from '../utils/noteUtils.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
-import { GRID_COLOR_SCHEMES, GridColorScheme } from './colors/gridColorSchemes.js';
+import { GRID_COLOR_SCHEMES } from './colors/constants/colorSchemes.js';
 
 export class GridRenderer {
   private scroll: GridScroll;

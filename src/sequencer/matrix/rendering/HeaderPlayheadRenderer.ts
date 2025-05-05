@@ -2,7 +2,7 @@
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
-import { GRID_COLOR_SCHEMES } from '../rendering/colors/gridColorSchemes.js';
+import { GRID_COLOR_SCHEMES } from '../rendering/colors/constants/colorSchemes.js';
 
 export class HeaderPlayheadRenderer {
   constructor(

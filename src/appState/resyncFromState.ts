@@ -5,11 +5,11 @@ import { updateTempo, updateTimeSignature, updateTotalMeasures } from '../sequen
 import { createSequencer, sequencers } from '../setup/sequencers.js';
 import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
 import { AppState, SequencerState } from './interfaces/AppState.js';
-import { GridConfig } from '../sequencer/interfaces/GridConfig.js';
+import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig.js';
 import { syncLiveMatrixWithSerializedNotes } from './utils/syncMatrixToSequencer.js';
 
 interface SerializedSequencer extends SequencerState {
-  config?: Partial<GridConfig>; // optional loose config, typed better
+  config?: Partial<SequencerConfig>; // optional loose config, typed better
 }
 
 function sequencerIdsMatch(liveId: number | undefined, serializedId: number | undefined): boolean {

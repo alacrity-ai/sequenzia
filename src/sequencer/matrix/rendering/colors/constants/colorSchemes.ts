@@ -1,18 +1,9 @@
-// src/sequencer/matrix/rendering/colors/gridColorSchemes.ts
 
-export interface GridColorScheme {
-    whiteKey: string;
-    blackKey: string;
-    labelWhite: string;
-    labelBlack: string;
-    textWhite: string;
-    textBlack: string;
-    gridLine: string;
-    beatLine: string;
-    measureLine: string;
-  }
-  
-  export const GRID_COLOR_SCHEMES: Record<string, GridColorScheme> = {
+// src/sequencer/matrix/rendering/colors/constants/colorSchemes.ts
+
+import type { GridColorScheme } from '../interfaces/GridColorScheme.js';
+
+export const GRID_COLOR_SCHEMES: Record<string, GridColorScheme> = {
     Midnight: {
       whiteKey: '#1e1e1e',
       blackKey: '#2a103b',

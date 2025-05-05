@@ -35,7 +35,8 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
       private readonly requestRedraw: () => void,
       private readonly getSequencerId: () => number,
       private readonly controller: InteractionController,
-      private readonly cursorController: CursorController
+      private readonly cursorController: CursorController,
+      private readonly getClipboard: () => { notes: Note[] }
     ) {}
 
     public onMouseDown(e: MouseEvent): void {
@@ -69,7 +70,6 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
           if (note) {
             this.store.setSelectedNotes([note]); // select it (safe to overwrite)
             this.store.endSelectionDrag(); // cleanup pending selection state
-            console.log('DRAGGING MODE ACTIVATED!!');
             this.controller.transitionTo(InteractionMode.Dragging);
             return;
           }
@@ -196,16 +196,34 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
         createReverseDeleteNotesDiff(this.getSequencerId(), [noteToDelete])
       );
     }
-    
+  
+    public onMouseLeave(): void {
+      this.store.setSnappedCursorGridPosition(null);
+      this.store.setHoveredNoteKey(null);
+      this.cursorController.set(CursorState.Default);
+      this.requestRedraw();
+    }    
 
+    public onKeyDown(e: KeyboardEvent): void {
+      const isMac = navigator.platform.toUpperCase().includes('MAC');
+      const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+    
+      if (isCmdOrCtrl && e.key === 'v') {
+        const clipboard = this.getClipboard();
+        if (!clipboard.notes.length) return;
+    
+        this.store.clearSelection();
+        this.controller.transitionTo(InteractionMode.Pasting);
+      }
+    }
+    
     public onEnter(): void {
       // Optional: change cursor/tool indicator
     }
-  
     public onExit(): void {
       // Clear both preview and hovered note state
       this.store.setSnappedCursorGridPosition(null);
       this.store.setHoveredNoteKey(null);
       this.requestRedraw();
-    }    
+    }  
   }

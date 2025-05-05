@@ -4,12 +4,15 @@ import { InteractionMode } from './interfaces/InteractionEnum.js';
 import { GridInteractionHandler } from './interfaces/GridInteractionHandler.js';
 import { DefaultNoteToolHandler } from './handlers/DefaultNoteToolHandler.js';
 import { SelectingToolHandler } from './handlers/SelectingToolHandler.js';
+import { SelectedIdleToolHandler } from './handlers/SelectedIdleToolHandler.js';
+import { PastingToolHandler } from './handlers/PastingToolHandler.js';
+import { DraggingToolHandler } from './handlers/DraggingToolHandler.js';
 
 import type { InteractionContextData } from './interfaces/InteractionContextData.js';
 import type { InteractionController } from './interfaces/InteractionController.js';
 
 export class InteractionContext {
-  private mode: InteractionMode = InteractionMode.Idle;
+  private mode: InteractionMode = InteractionMode.DefaultNoteTool;
   private activeHandler: GridInteractionHandler | null = null;
 
   private lastMouseX: number = 0;
@@ -19,7 +22,7 @@ export class InteractionContext {
     // Set initial mode
     this.transitionTo(InteractionMode.DefaultNoteTool);
   }
-  
+
   public handleMouseDown(e: MouseEvent): void {
     this.lastMouseX = e.clientX;
     this.lastMouseY = e.clientY;
@@ -44,7 +47,20 @@ export class InteractionContext {
     this.activeHandler?.onContextMenu?.(e);
   }
 
+  public handleMouseLeave(): void {
+    this.activeHandler?.onMouseLeave?.();
+  }
+
+  public handleMouseEnter(e: MouseEvent): void {
+    this.activeHandler?.onMouseEnter?.(e);
+  }  
+
+  public handleKeyDown(e: KeyboardEvent): void {
+    this.activeHandler?.onKeyDown?.(e);
+  }  
+
   public transitionTo(mode: InteractionMode): void {
+    console.log('Transitioning from mode named', InteractionMode[this.mode], 'to', InteractionMode[mode]);
     this.activeHandler?.onExit?.();
     this.mode = mode;
     this.activeHandler = this.createHandlerForMode(mode);
@@ -55,7 +71,7 @@ export class InteractionContext {
     const controller: InteractionController = {
       transitionTo: (mode) => this.transitionTo(mode),
       getLastMouseX: () => this.lastMouseX,
-      getLastMouseY: () => this.lastMouseY
+      getLastMouseY: () => this.lastMouseY,
     };
 
     switch (mode) {
@@ -70,7 +86,8 @@ export class InteractionContext {
           this.data.requestRedraw,
           () => this.data.sequencerContext.getId(),
           controller,
-          this.data.cursorController
+          this.data.cursorController,
+          this.data.getClipboard
         );
       case InteractionMode.Selecting:
         return new SelectingToolHandler(
@@ -82,6 +99,48 @@ export class InteractionContext {
           controller,
           this.data.noteManager,
           this.data.requestRedraw
+        );
+      case InteractionMode.SelectedIdle:
+        return new SelectedIdleToolHandler(
+          this.data.canvas,
+          this.data.config,
+          this.data.scroll,
+          this.data.noteManager,
+          this.data.store,
+          this.data.grid,
+          this.data.requestRedraw,
+          () => this.data.sequencerContext.getId(),
+          controller,
+          this.data.cursorController,
+          this.data.setClipboard,
+          this.data.getClipboard
+        );
+      case InteractionMode.Pasting:
+        return new PastingToolHandler(
+          this.data.canvas,
+          this.data.config,
+          this.data.scroll,
+          this.data.store,
+          this.data.grid,
+          this.data.requestRedraw,
+          () => this.data.sequencerContext.getId(),
+          controller,
+          this.data.cursorController,
+          this.data.getClipboard,
+          this.data.addNote
+        );
+      case InteractionMode.Dragging:
+        return new DraggingToolHandler(
+          this.data.canvas,
+          this.data.config,
+          this.data.scroll,
+          this.data.store,
+          this.data.noteManager,
+          this.data.grid,
+          this.data.requestRedraw,
+          controller,
+          this.data.cursorController,
+          () => this.data.sequencerContext.getId()
         );
       default:
         return {};

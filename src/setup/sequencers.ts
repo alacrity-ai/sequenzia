@@ -12,7 +12,7 @@ import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../
 import { getAppState, setAppState } from '../appState/appState.js';
 import { clearHistory } from '../appState/stateHistory.js';
 import { notifyStateUpdated } from '../appState/onStateUpdated.js';
-import { GRID_CONFIG as config } from '../sequencer/grid/helpers/constants.js'; // Imported as 'config'
+import { SEQUENCER_CONFIG as config } from '../sequencer/constants/sequencerConstants.js';
 import type { SequencerState } from '../appState/interfaces/AppState.js';
 
 export const sequencers: Sequencer[] = [];
@@ -37,6 +37,11 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   seq.mute = false;
   seq.solo = false;
   seq.volume = 100 / 127;
+
+  // Set notes into the matrix early
+  if (initialState?.notes && seq.matrix) {
+    seq.matrix.setNotes(initialState.notes);
+  }
 
   const mini = wrapper.querySelector('canvas.mini-contour') as HTMLCanvasElement;
   if (initialState) {

@@ -1,26 +1,20 @@
 // src/sequencer/sequencer.ts
-import { initGrid } from './initGrid.js';
+// import { initGrid } from './initGrid.js';
 import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
 import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
-import { animateNotePlay } from './grid/animation/notePlayAnimation.js';
-import { getTempo, getTotalBeats, getTotalMeasures } from './transport.js';
+import { getTempo, getTotalMeasures } from './transport.js';
 import { loadInstrument } from '../sounds/instrument-loader.js';
 import { loadAndPlayNote } from '../sounds/instrument-player.js'; // Changed from sf2-player.js
 import { pitchToMidi } from '../sounds/audio/pitch-utils.js';
 import { drawMiniContour } from './grid/drawing/mini-contour.js';
-import { labelWidth } from './grid/helpers/constants.js';
 import type { Note } from './interfaces/Note.js';
-import type { Grid } from './interfaces/Grid.js';
-import type { GridConfig } from './interfaces/GridConfig.js';
+import type { SequencerConfig } from './interfaces/SequencerConfig.js';
 import { midiRangeBetween } from './grid/helpers/note-finder.js';
 import { Instrument } from '../sounds/interfaces/Instrument.js';
 import { HandlerContext as GridContext } from './interfaces/HandlerContext.js';
 import { engine as playbackEngine } from '../main.js';
-
-// New grid imports (alias is matrix for now)
 import { createGridInSequencerBody } from './matrix/utils/createGridInSequencerBody.js';
-import { Grid as Matrix } from './matrix/Grid.js';
-import { SequencerContext } from './matrix/interfaces/SequencerContext.js';
+import { Grid } from './matrix/Grid.js';
 
 interface NoteHandler {
   stop?: () => void;
@@ -29,7 +23,7 @@ interface NoteHandler {
 
 export default class Sequencer {
   container: HTMLElement | null;
-  config: GridConfig;
+  config: SequencerConfig;
   context: AudioContext;
   destination: AudioNode;
   instrumentName: string;
@@ -71,8 +65,7 @@ export default class Sequencer {
   private pianoRollCanvas?: HTMLCanvasElement;
   private gridCanvas?: HTMLCanvasElement;
   private animationCanvas?: HTMLCanvasElement;
-  matrix?: Matrix;
-  grid?: Grid; // LEGACY GRID
+  matrix?: Grid;
 
   private _scheduledAnimations: {
     time: number;
@@ -90,7 +83,7 @@ export default class Sequencer {
 
   constructor(
     containerEl: HTMLElement | null,
-    config: GridConfig,
+    config: SequencerConfig,
     context: AudioContext = getAudioContext(),
     destination: AudioNode = getMasterGain(),
     instrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano',
@@ -108,27 +101,14 @@ export default class Sequencer {
 
     if (this.container) {
       const body = this.container.querySelector('.sequencer-body') as HTMLElement;
+    
       this.matrix = createGridInSequencerBody(body, {}, {
         playNote: this.playNote.bind(this),
         getId: () => this.id
-      });          
-
+      });
+    
       initZoomControls(this.container, () => this.matrix?.zoomIn(), () => this.matrix?.zoomOut(), () => this.matrix?.resetZoom());
-
-      // LEGACY GRID
-      this.pianoRollCanvas = this.container.querySelector('.piano-roll') as HTMLCanvasElement;
-      this.gridCanvas = this.container.querySelector('.note-grid') as HTMLCanvasElement;
-      this.animationCanvas = this.container.querySelector('.note-animate-canvas') as HTMLCanvasElement;
-
-      // 🔒 Force-disable legacy grid visuals
-      const legacyContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
-      if (legacyContainer) {
-        legacyContainer.style.display = 'none';
-      }
-
-      this._initCanvases();
-      // END LEGACY GRID
-    }
+    } 
   }
 
   private _instrument: Instrument | null = null;
@@ -137,13 +117,13 @@ export default class Sequencer {
     if (!this.container) return;
 
     // LEGACY GRID
-    const noteCanvas = this.container.querySelector('canvas.note-grid') as HTMLCanvasElement;
-    const playheadCanvas = this.container.querySelector('canvas.playhead-canvas') as HTMLCanvasElement;
-    const scrollContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
-    const animationCanvas = this.container.querySelector('canvas.note-animate-canvas') as HTMLCanvasElement;
+    // const noteCanvas = this.container.querySelector('canvas.note-grid') as HTMLCanvasElement;
+    // const playheadCanvas = this.container.querySelector('canvas.playhead-canvas') as HTMLCanvasElement;
+    // const scrollContainer = this.container.querySelector('#grid-scroll-container') as HTMLElement;
+    // const animationCanvas = this.container.querySelector('canvas.note-animate-canvas') as HTMLCanvasElement;
 
-    this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, [] as Note[], this.config, this);
-    this.grid.scheduleRedraw();
+    // this.grid = initGrid(noteCanvas, playheadCanvas, animationCanvas, scrollContainer, [] as Note[], this.config, this);
+    // this.grid.scheduleRedraw();
     // END LEGACY GRID
   }
 
@@ -270,16 +250,16 @@ export default class Sequencer {
           velocity
         });
   
-        // Schedule note animation
-        if (!this.collapsed && this.grid?.gridContext?.animationCtx) {
-          this._scheduledAnimations.push({
-            time: noteTime,
-            note,
-            context: this.grid.gridContext
-          });
+        // // LEGACY GRID: Schedule note animation
+        // if (!this.collapsed && this.grid?.gridContext?.animationCtx) {
+        //   this._scheduledAnimations.push({
+        //     time: noteTime,
+        //     note,
+        //     context: this.grid.gridContext
+        //   });
         
-          this._startAnimationLoop(); // ensures this instance animates
-        }        
+        //   this._startAnimationLoop(); // ensures this instance animates
+        // }        
   
       } catch (err) {
         console.warn(`[SEQ:${this.id}] Failed to schedule note`, note, err);
@@ -312,12 +292,13 @@ export default class Sequencer {
       ) {
         const { note, context } = this._scheduledAnimations[this._animationCursor++];
 
-        animateNotePlay(context, note, {
-          getPitchRow: context.getPitchRow,
-          cellWidth: context.getCellWidth(),
-          cellHeight: context.getCellHeight(),
-          labelWidth
-        });
+        // LEGACY GRID
+        // animateNotePlay(context, note, {
+        //   getPitchRow: context.getPitchRow,
+        //   cellWidth: context.getCellWidth(),
+        //   cellHeight: context.getCellHeight(),
+        //   labelWidth
+        // });
       }
   
       if (this._animationCursor >= len) {
@@ -333,27 +314,28 @@ export default class Sequencer {
   }  
 
   resumeAnimationsFromCurrentTime(startAt: number, startBeat: number): void {
-    if (!this.grid?.gridContext || this.collapsed) return;
+    // LEGACY GRID:
+    // if (!this.grid?.gridContext || this.collapsed) return;
   
-    const bpm = getTempo();
-    const beatDuration = 60 / bpm;
-    const now = getAudioContext().currentTime;
+    // const bpm = getTempo();
+    // const beatDuration = 60 / bpm;
+    // const now = getAudioContext().currentTime;
   
-    if (!this.matrix) return;
-    for (const note of this.matrix.notes) {
-      const noteTime = startAt + (note.start - startBeat) * beatDuration;
+    // if (!this.matrix) return;
+    // for (const note of this.matrix.notes) {
+    //   const noteTime = startAt + (note.start - startBeat) * beatDuration;
   
-      if (noteTime >= now) {
-        this._scheduledAnimations.push({
-          time: noteTime,
-          note,
-          context: this.grid.gridContext
-        });
-      }
-    }
+    //   if (noteTime >= now) {
+    //     this._scheduledAnimations.push({
+    //       time: noteTime,
+    //       note,
+    //       context: this.grid.gridContext
+    //     });
+    //   }
+    // }
   
-    this._scheduledAnimations.sort((a, b) => a.time - b.time);
-    this._startAnimationLoop();
+    // this._scheduledAnimations.sort((a, b) => a.time - b.time);
+    // this._startAnimationLoop();
   }  
 
   async reschedulePlayback(startAt: number, startBeat: number = 0): Promise<void> {
@@ -396,15 +378,16 @@ export default class Sequencer {
         });
   
         // Schedule animation
-        if (!this.collapsed && this.grid?.gridContext?.animationCtx && noteTime >= now) {
-          this._scheduledAnimations.push({
-            time: noteTime,
-            note,
-            context: this.grid.gridContext
-          });
+        // LEGACY GRID
+        // if (!this.collapsed && this.grid?.gridContext?.animationCtx && noteTime >= now) {
+        //   this._scheduledAnimations.push({
+        //     time: noteTime,
+        //     note,
+        //     context: this.grid.gridContext
+        //   });
   
-          this._startAnimationLoop();
-        }
+        //   this._startAnimationLoop();
+        // }
   
       } catch (err) {
         console.warn(`[SEQ:${this.id}] Failed to re-schedule note`, note, err);
@@ -412,12 +395,16 @@ export default class Sequencer {
     }
   }
 
-  async exportToOffline(signal?: AbortSignal): Promise<void> {
-    if (!this.matrix) return;
+  async exportToOffline(signal?: AbortSignal, notesOverride?: Note[]): Promise<void> {
+    const notes = notesOverride ?? this.matrix?.notes;
+    if (!notes || notes.length === 0) return;
+  
     const beatToSec = 60 / getTempo();
   
-    // Check if operation was cancelled before even loading the instrument
-    if (signal?.aborted) return;
+    if (signal?.aborted) {
+      console.log('ABORTED Before loading instrument');
+      return;
+    }
   
     const instrument = await loadInstrument(
       this.instrumentName,
@@ -427,11 +414,16 @@ export default class Sequencer {
       this._pan
     );
   
-    // Abort right after loading, if triggered
-    if (signal?.aborted) return;
+    if (signal?.aborted) {
+      console.log('ABORTED Right after loading instrument');
+      return;
+    }
   
-    for (const note of this.matrix.notes) {
-      if (signal?.aborted) return;
+    for (const note of notes) {
+      if (signal?.aborted) {
+        console.log('ABORTED During note export');
+        return;
+      }
   
       const rawStartSec = note.start * beatToSec;
       const startSec = Math.max(0.01, rawStartSec);
@@ -451,7 +443,7 @@ export default class Sequencer {
         instrument.start({
           note: mappedNote,
           duration: durationSec,
-          velocity: velocity,
+          velocity,
           time: startSec,
           loop: false,
         });
@@ -459,7 +451,7 @@ export default class Sequencer {
         console.warn(`[SEQ:${this.id}] Failed to start note in export:`, note, err);
       }
     }
-  }
+  }  
 
   // Used by grid when placing/manipulating notes
   playNote(pitch: string, durationSec: number, velocity = 100, loop = false): Promise<null> {
@@ -510,14 +502,10 @@ export default class Sequencer {
   }
   
   redraw(): void {
-    // Legacy grid
-    this.grid?.scheduleRedraw();
-
-    // New modular matrix system
     this.matrix?.requestRedraw();
   }
 
-  getState(): { notes: Note[]; config: GridConfig; instrument: string } {
+  getState(): { notes: Note[]; config: SequencerConfig; instrument: string } {
     if (!this.matrix) return { notes: [], config: this.config, instrument: this.instrumentName };
     return {
       notes: [...this.matrix.notes],
@@ -534,7 +522,7 @@ export default class Sequencer {
     pan,
   }: {
     notes: Note[];
-    config: Partial<GridConfig>;
+    config: Partial<SequencerConfig>;
     instrument?: string;
     volume?: number;
     pan?: number;
@@ -660,16 +648,18 @@ export default class Sequencer {
       this.animationCanvas?.classList.add('hidden');
   
       // Disable drawing context
-      if (this.grid?.gridContext) {
-        this.grid.gridContext.animationCtx = null; // <-- requires nullable typing
-      }
+      // LEGACY GRID OPTIMIZATION:
+      // if (this.grid?.gridContext) {
+      //   this.grid.gridContext.animationCtx = null; // <-- requires nullable typing
+      // }
   
     } else {
       this.animationCanvas?.classList.remove('hidden');
-    
-      if (this.animationCanvas && this.grid?.gridContext) {
-        this.grid.gridContext.animationCtx = this.animationCanvas.getContext('2d');
-      }
+
+      // LEGACY GRID OPTIMIZATION
+      // if (this.animationCanvas && this.grid?.gridContext) {
+      //   this.grid.gridContext.animationCtx = this.animationCanvas.getContext('2d');
+      // }
     
       // Attempt to resume animation from current playback position
       if (playbackEngine.isActive()) {

@@ -5,7 +5,7 @@ import { recordDiff } from '../appState/appState.js';
 import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState/diffEngine/types/global/changeTempo.js';
 import { createSetTimeSignatureDiff, createReverseSetTimeSignatureDiff } from '../appState/diffEngine/types/global/changeTimeSignature.js';
 import { createSetTotalMeasuresDiff, createReverseSetTotalMeasuresDiff } from '../appState/diffEngine/types/global/changeMeasures.js';
-import { GRID_CONFIG as config } from './grid/helpers/constants.js';
+import { SEQUENCER_CONFIG as config } from './constants/sequencerConstants.js';
 import { engine as playbackEngine } from '../main.js';
 
 let beatDuration: number = 500; // ms per beat
@@ -72,13 +72,14 @@ export function updateTimeSignature(beats: number, record: boolean = true): void
     beatsInput.value = String(beats);
   }
 
-  getSequencers().forEach(seq => {
-    if (seq.grid?.resizeAndRedraw) {
-      seq.grid.resizeAndRedraw();
-    } else {
-      seq.grid?.scheduleRedraw();
-    }
-  });
+  // LEGACY GRID:
+  // getSequencers().forEach(seq => {
+  //   if (seq.grid?.resizeAndRedraw) {
+  //     seq.grid.resizeAndRedraw();
+  //   } else {
+  //     seq.grid?.scheduleRedraw();
+  //   }
+  // });
 }
 
 export function getTimeSignature(): number {
@@ -102,9 +103,10 @@ export function updateTotalMeasures(measures: number, record: boolean = true): v
     measuresInput.value = String(measures);
   }
 
-  getSequencers().forEach(seq => {
-    seq.grid?.scheduleRedraw();
-  });
+  // LEGACY GRID:
+  // getSequencers().forEach(seq => {
+  //   seq.grid?.scheduleRedraw();
+  // });
 }
 
 export function getTotalMeasures(): number {

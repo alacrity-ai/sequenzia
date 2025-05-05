@@ -67,6 +67,18 @@ export async function loadInstrument(
   
     await loadWebAudioFontPlayer();
 
+    // 🩹 Monkey-patch to prevent resume on OfflineAudioContext
+    if (player.resumeContext) {
+      const originalResume = player.resumeContext;
+      player.resumeContext = (ctx: BaseAudioContext) => {
+        if (ctx instanceof OfflineAudioContext) {
+          // OfflineAudioContext does not support resume
+          return;
+        }
+        return originalResume.call(player, ctx);
+      };
+    }
+
     const matched = webAudioFontCatalogue.find(
       entry => entry.library === libraryRaw && entry.displayName === instrumentDisplayName
     );

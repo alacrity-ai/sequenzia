@@ -5,7 +5,7 @@ import type { GridScroll } from '../scrollbars/GridScroll.js';
 import { rowToNote } from '../utils/noteUtils.js';
 import { computeBlackKeyRowMap } from '../utils/noteUtils.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
-import { GRID_COLOR_SCHEMES } from '../rendering/colors/gridColorSchemes.js';
+import { GRID_COLOR_SCHEMES } from '../rendering/colors/constants/colorSchemes.js';
 
 export class LabelColumnRenderer {
   private blackKeyRowMap: boolean[];

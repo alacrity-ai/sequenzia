@@ -16,6 +16,21 @@ export class InteractionStore {
     return this.snappedCursorGridPosition;
   }
 
+  // --- Previewed Notes ---
+  private previewNotes: Note[] = [];
+
+  public setPreviewNotes(notes: Note[]): void {
+    this.previewNotes = notes;
+  }
+
+  public getPreviewNotes(): Note[] {
+    return this.previewNotes;
+  }
+
+  public clearPreviewNotes(): void {
+    this.previewNotes = [];
+  }
+
   // ---- Hovered note ----
   private hoveredNoteKey: string | null = null;
 

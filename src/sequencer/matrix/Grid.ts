@@ -12,7 +12,7 @@ import { CanvasManager } from './rendering/CanvasManager.js';
 import { ScrollbarManager } from './scrollbars/ScrollbarManager.js';
 import { InteractionContext } from './input/InteractionContext.js';
 import { CursorController } from './input/cursor/CursorController.js';
-import { MouseTracker } from './input/MouseTracker.js';
+import { InputTracker } from './input/InputTracker.js';
 import { WheelHandler } from './input/WheelHandler.js';
 import { InteractionStore } from './input/stores/InteractionStore.js';
 import { GridManager } from './GridManager.js';
@@ -20,7 +20,8 @@ import { HeaderPlayheadRenderer } from './rendering/HeaderPlayheadRenderer.js';
 import { LabelColumnRenderer } from './rendering/LabelColumnRenderer.js';
 import { MarqueeRenderer } from './rendering/MarqueeRenderer.js';
 import { pruneNotesToTimeline } from './utils/pruneNotesToTimeline.js';
-import { GRID_CONFIG as sequencerConfig } from '../grid/helpers/constants.js';
+import { SEQUENCER_CONFIG as sequencerConfig } from '../constants/sequencerConstants.js';
+import { setClipboard, getClipboard } from '../clipboard.js';
 
 import { EventEmitter } from './events/EventEmitter.js';
 import type { GridEvents } from './interfaces/GridEvents.js';
@@ -29,6 +30,7 @@ import type { TrackedNote } from './interfaces/TrackedNote.js';
 import type { InteractionContextData } from './input/interfaces/InteractionContextData.js';
 import type { GridSnappingContext } from './interfaces/GridSnappingContext.js';
 import type { SequencerContext } from './interfaces/SequencerContext.js';
+import type { Clipboard } from '../interfaces/Clipboard.js';
 
 export class Grid {
   private gridManager: GridManager;
@@ -39,7 +41,7 @@ export class Grid {
   private scroll: GridScroll;
   private noteManager: NoteManager;
   private scrollbars: ScrollbarManager;
-  private mouseTracker: MouseTracker;
+  private mouseTracker: InputTracker;
   private interactionContext: InteractionContext;
   private wheelHandler: WheelHandler;
   private interactionStore: InteractionStore;
@@ -86,7 +88,7 @@ export class Grid {
     this.cursorController = new CursorController(mainContainer);
 
     // Interaction
-    this.interactionContext = new InteractionContext({
+    const contextData: InteractionContextData = {
       canvas: noteCanvas,
       noteManager: this.noteManager,
       scroll: this.scroll,
@@ -96,13 +98,16 @@ export class Grid {
       addNote: (note) => this.noteManager.add(note),
       requestRedraw: () => this.requestRedraw(),
       sequencerContext: sequencerContext,
-      cursorController: this.cursorController
-    });
-    this.mouseTracker = new MouseTracker(this.interactionContext, mainContainer)
+      cursorController: this.cursorController,
+      setClipboard,
+      getClipboard,
+    };
+    this.interactionContext = new InteractionContext(contextData);
+    this.mouseTracker = new InputTracker(this.interactionContext, mainContainer)
 
     // Create renderers
     this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore);
-    this.noteRenderer = new NoteRenderer(this.scroll, this.config, this.noteManager, this.interactionStore);
+    this.noteRenderer = new NoteRenderer(this.scroll, this.config, this.noteManager, this.interactionStore, this.sequencerContext.getId());
     this.notePreviewRenderer = new NotePreviewRenderer(this.scroll, this.config, this.interactionStore, () => this.getNoteDuration());
     this.animationRenderer = new AnimationRenderer(this.scroll, this.config);
     this.headerRenderer = new HeaderPlayheadRenderer(this.scroll, this.config);
@@ -116,7 +121,7 @@ export class Grid {
     // Defer resize until layout is ready
     requestAnimationFrame(() => this.resize());
     
-    this.playheadRenderer.setPlayheadX(100);
+    this.playheadRenderer.setPlayheadX(0);
     this.attachListeners();
     this.renderLoop();
   }
@@ -195,7 +200,6 @@ export class Grid {
     this.playheadRenderer.draw(animCtx);
 
     if (this.interactionStore.hasMarquee()) {
-      console.log('Drawing Marquee')
       this.marqueeRenderer.draw(animCtx);
     }
 
@@ -218,6 +222,10 @@ export class Grid {
     this.playheadRenderer.setPlayheadX(x);
     this.requestRedraw();
   }
+
+  public getPixelsPerBeat(): number {
+    return this.config.layout.baseCellWidth * this.config.behavior.zoom;
+  }  
 
   // In the Grid (matrix) class
   public setNotes(notes: Note[]): void {
