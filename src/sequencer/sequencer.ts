@@ -256,14 +256,12 @@ export default class Sequencer {
           // Compute corresponding wall-clock time in ms
           const wallTime = startWallTime + offsetBeats * beatDuration * 1000;
           const delay = wallTime - performance.now();
-
-          if (delay >= 0) {
-            const scheduled = setTimeout(() => {
-              this.matrix?.playNoteAnimation(note);
-            }, delay);
-            this._scheduledAnimations.push(scheduled);
-            console.log(`[SEQ:${this.id}] Scheduled animation for ${note.pitch} in ${delay.toFixed(2)} ms`);
-          }
+          const clampedDelay = Math.max(0, delay);
+          
+          const scheduled = setTimeout(() => {
+            this.matrix?.playNoteAnimation(note);
+          }, clampedDelay);
+          this._scheduledAnimations.push(scheduled);          
         }
 
       } catch (err) {
