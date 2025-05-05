@@ -163,7 +163,7 @@ export function setupUI({
     }
 
     // === VELOCITY SHORTCUT ===
-    if (e.key === '1' && getEditMode() === EditModes.SELECT) {
+    if (e.key === 'v') {
       const selection = getActiveSelection();
       if (!selection || selection.selectedNotes.length === 0) {
         showErrorModal('No notes selected. Please select notes before adjusting velocity.');

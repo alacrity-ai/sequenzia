@@ -19,7 +19,6 @@ import { GridManager } from './GridManager.js';
 import { HeaderPlayheadRenderer } from './rendering/HeaderPlayheadRenderer.js';
 import { LabelColumnRenderer } from './rendering/LabelColumnRenderer.js';
 import { MarqueeRenderer } from './rendering/MarqueeRenderer.js';
-import { pruneNotesToTimeline } from './utils/pruneNotesToTimeline.js';
 import { SEQUENCER_CONFIG as sequencerConfig } from '../constants/sequencerConstants.js';
 import { setClipboard, getClipboard } from '../clipboard.js';
 
@@ -234,7 +233,7 @@ export class Grid {
 
   // In the Grid (matrix) class
   public setNotes(notes: Note[]): void {
-    this.noteManager.set(pruneNotesToTimeline(notes, this.getTotalBeats()));
+    this.noteManager.set(notes);
     this.requestRedraw();
   }
 
@@ -281,7 +280,6 @@ export class Grid {
 
   public setMeasures(measures: number): void {
     this.config.totalMeasures = Math.max(1, measures);
-    pruneNotesToTimeline(this.noteManager.getAll(), this.getTotalBeats());
     this.scroll.recalculateBounds();
     this.requestRedraw();
   }

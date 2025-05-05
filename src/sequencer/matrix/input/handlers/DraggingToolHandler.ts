@@ -10,6 +10,7 @@ import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.j
 import type { InteractionController } from '../interfaces/InteractionController.js';
 import type { CursorController } from '../cursor/CursorController.js';
 
+import { transformDraggedNotes } from '../../utils/transformDraggedNotes.js';
 import { CursorState } from '../interfaces/CursorState.js';
 import { InteractionMode } from '../interfaces/InteractionEnum.js';
 import { getRelativeMousePos } from '../../utils/gridPosition.js';
@@ -42,18 +43,21 @@ export class DraggingToolHandler implements GridInteractionHandler {
       this.controller.transitionTo(InteractionMode.DefaultNoteTool);
       return;
     }
-
+  
     this.originalNotes = selected.map(n => ({ ...n }));
-    this.anchorNote = selected[0];
-
-    // Temporarily remove the notes being dragged from the grid
+  
+    const anchorKey = this.store.getDragAnchorNoteKey();
+    const anchor = anchorKey
+      ? selected.find(n => `${n.pitch}:${n.start}` === anchorKey)
+      : selected[0];
+  
+    this.anchorNote = anchor ?? selected[0];
+  
     this.noteManager.removeAll(selected);
-
-    console.log('Setting preview notes to: ', this.originalNotes);
     this.store.setPreviewNotes(this.originalNotes);
     this.hasMoved = false;
     this.requestRedraw();
-  }
+  }  
 
   public onMouseMove(e: MouseEvent): void {
     const mouse = getRelativeMousePos(e, this.canvas);
@@ -61,36 +65,21 @@ export class DraggingToolHandler implements GridInteractionHandler {
     const triplet = this.grid.isTripletMode();
     const snapped = getSnappedNotePosition(mouse, this.scroll, this.config, snap, triplet);
     if (!snapped || !this.anchorNote) return;
-
+  
     const { layout } = this.config;
-    const targetPitch = rowToNote(snapped.y, layout.lowestMidi, layout.highestMidi);
-    if (!targetPitch) return;
-
-    const targetMidi = noteToMidi(targetPitch);
-    const anchorMidi = noteToMidi(this.anchorNote.pitch);
-
-    if (targetMidi == null || anchorMidi == null) return;
-
-    const deltaBeats = snapped.x - this.anchorNote.start;
-    const deltaMidi = targetMidi - anchorMidi;
-
-    const movedNotes: Note[] = this.originalNotes.flatMap(n => {
-        const pitchMidi = noteToMidi(n.pitch);
-        if (pitchMidi == null) return [];
-      
-        const pastedMidi = pitchMidi + deltaMidi;
-        const newPitch = midiToPitch(pastedMidi);
-        if (!newPitch) return [];
-      
-        return [{
-          pitch: newPitch,
-          start: n.start + deltaBeats,
-          duration: n.duration,
-          velocity: n.velocity ?? 100
-        }];
-      });      
-
-    this.store.setPreviewNotes(movedNotes);
+    const pitch = rowToNote(snapped.y, layout.lowestMidi, layout.highestMidi);
+    if (!pitch) return;
+  
+    const preview = transformDraggedNotes({
+      originalNotes: this.originalNotes,
+      anchorNote: this.anchorNote,
+      targetPitch: pitch,
+      targetBeat: snapped.x,
+      lowestMidi: layout.lowestMidi,
+      highestMidi: layout.highestMidi,
+    });
+  
+    this.store.setPreviewNotes(preview);
     this.hasMoved = true;
     this.cursorController.set(CursorState.Grabbing);
     this.requestRedraw();
@@ -143,6 +132,7 @@ export class DraggingToolHandler implements GridInteractionHandler {
     this.anchorNote = null;
     this.store.clearPreviewNotes();
     this.store.clearSelection();
+    this.store.setDragAnchorNoteKey(null);
     this.requestRedraw();
   }
   

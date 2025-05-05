@@ -14,8 +14,7 @@ import { InteractionMode } from '../interfaces/InteractionEnum.js';
 import { CursorState } from '../interfaces/CursorState.js';
 import { getRelativeMousePos } from '../../utils/gridPosition.js';
 import { getSnappedNotePosition } from '../../utils/snapPosition.js';
-import { isNearNoteRightEdge } from '../../utils/isNearNoteEdge.js';
-import { isNoteNearVisibleEdge } from '../../utils/isNoteNearVisibleEdge.js';
+import { getRawBeatFromEvent, getSnappedFromEvent } from '../../utils/snapping.js';
 
 import { rowToNote } from '../../utils/noteUtils.js';
 import { recordDiff } from '../../../../appState/appState.js';
@@ -54,6 +53,30 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
 
   public onMouseDown(e: MouseEvent): void {
     if (e.button !== 0 || this.store.isOnNonGridElement()) return;
+  
+    const snapped = getSnappedFromEvent(e, this.canvas, this.grid, this.scroll, this.config);
+    if (!snapped) return;
+  
+    const rawBeat = getRawBeatFromEvent(e, this.canvas, this.scroll, this.config);
+    const pitch = rowToNote(snapped.y, this.config.layout.lowestMidi, this.config.layout.highestMidi);
+    const edgeNote = this.noteManager.findNoteEdgeAtCursor(pitch, rawBeat);
+  
+    if (edgeNote) {
+      const hoveredKey = `${edgeNote.pitch}:${edgeNote.start}`;
+      const selectedKeys = new Set(
+        this.store.getSelectedNotes().map(n => `${n.pitch}:${n.start}`)
+      );
+  
+      // If the edge note is not already selected, select it exclusively
+      if (!selectedKeys.has(hoveredKey)) {
+        this.store.setSelectedNotes([edgeNote]);
+      }
+  
+      this.controller.transitionTo(InteractionMode.Sizing);
+      return;
+    }
+  
+    // Otherwise begin drag/marquee logic
     this.store.beginSelectionDrag();
     this.initialMouseX = e.clientX;
     this.initialMouseY = e.clientY;
@@ -76,6 +99,7 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
   
       // If drag began over a hovered note — enter Dragging mode with current selection
       if (hoveredKey && distance >= this.dragThreshold) {
+        this.store.setDragAnchorNoteKey(hoveredKey);
         this.store.endSelectionDrag();
         this.controller.transitionTo(InteractionMode.Dragging);
         return;
@@ -90,7 +114,6 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
       }
     }
   
-    // Hover logic only — no snapped preview, no cursor indicator beyond hover
     const mouse = getRelativeMousePos(e, this.canvas);
     const snap = this.grid.getSnapResolution();
     const triplet = this.grid.isTripletMode();
@@ -102,27 +125,27 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
       return;
     }
   
-    // if (isNoteNearVisibleEdge(snapped, this.scroll, this.config, this.canvas)) {
-    //   this.store.setHoveredNoteKey(null);
-    //   this.cursorController.set(CursorState.Default);
-    //   this.requestRedraw();
-    //   return;
-    // }
-  
+    const rawBeat = getRawBeatFromEvent(e, this.canvas, this.scroll, this.config);
     const pitch = rowToNote(snapped.y, this.config.layout.lowestMidi, this.config.layout.highestMidi);
-    const note = this.noteManager.findAtPosition(pitch, snapped.x);
+    const hoveredNote = this.noteManager.findNoteUnderCursor(pitch, rawBeat);
+    const edgeNote = this.noteManager.findNoteEdgeAtCursor(pitch, rawBeat);
   
-    if (note) {
-      const key = `${note.pitch}:${note.start}`;
+    if (hoveredNote) {
+      const key = `${hoveredNote.pitch}:${hoveredNote.start}`;
       this.store.setHoveredNoteKey(key);
-      this.cursorController.set(CursorState.Pointer);
+  
+      if (edgeNote && edgeNote === hoveredNote) {
+        this.cursorController.set(CursorState.ResizeHorizontal);
+      } else {
+        this.cursorController.set(CursorState.Pointer);
+      }
     } else {
       this.store.setHoveredNoteKey(null);
       this.cursorController.set(CursorState.Default);
     }
   
     this.requestRedraw();
-  }  
+  }    
 
   public onMouseUp(e: MouseEvent): void {
     if (e.button !== 0 || this.store.isOnNonGridElement()) return;
@@ -132,7 +155,7 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
     const hoveredKey = this.store.getHoveredNoteKey();
     if (hoveredKey) {
       const [pitch, start] = hoveredKey.split(':');
-      const note = this.noteManager.findAtPosition(pitch, Number(start));
+      const note = this.noteManager.findNoteUnderCursor(pitch, Number(start));
       if (note) {
         this.store.setSelectedNotes([note]);
         this.controller.transitionTo(InteractionMode.SelectedIdle);
@@ -154,7 +177,7 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
   
     const [pitch, startStr] = hoveredKey.split(':');
     const start = parseFloat(startStr);
-    const hoveredNote = this.noteManager.findAtPosition(pitch, start);
+    const hoveredNote = this.noteManager.findNoteUnderCursor(pitch, start);
     if (!hoveredNote) return;
   
     const selected = this.store.getSelectedNotes();

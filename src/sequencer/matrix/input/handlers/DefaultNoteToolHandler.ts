@@ -9,11 +9,10 @@ import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.j
 import type { InteractionController } from '../interfaces/InteractionController.js';
 import type { CursorController } from '../cursor/CursorController.js';
 
+import { getSnappedFromEvent, getRawBeatFromEvent } from '../../utils/snapping.js';
+import { abortIfOutOfGridBounds } from '../../utils/gridGuards.js';
 import { CursorState } from '../interfaces/CursorState.js';
 import { InteractionMode } from '../interfaces/InteractionEnum.js';
-import { getRelativeMousePos } from '../../utils/gridPosition.js';
-import { getSnappedNotePosition } from '../../utils/snapPosition.js';
-import { isNoteNearVisibleEdge } from '../../utils/isNoteNearVisibleEdge.js';
 import { NoteManager } from '../../notes/NoteManager.js';
 import { rowToNote } from '../../utils/noteUtils.js';
 import { createPlaceNotesDiff, createReversePlaceNotesDiff } from '../../../../appState/diffEngine/types/grid/placeNotes.js';
@@ -38,11 +37,33 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
       private readonly cursorController: CursorController,
       private readonly getClipboard: () => { notes: Note[] },
       private readonly playNoteAnimation: (note: Note) => void
-    ) {}
+    ) {} 
 
     public onMouseDown(e: MouseEvent): void {
       if (e.button !== 0 || this.store.isOnNonGridElement()) return;
-
+    
+      const snapped = getSnappedFromEvent(e, this.canvas, this.grid, this.scroll, this.config);
+      if (abortIfOutOfGridBounds(snapped, this.store, this.cursorController, this.requestRedraw)) return;
+    
+      const rawBeat = getRawBeatFromEvent(e, this.canvas, this.scroll, this.config);
+      if (snapped) {
+        const pitch = rowToNote(
+          snapped.y,
+          this.config.layout.lowestMidi,
+          this.config.layout.highestMidi
+        );
+      
+        const edgeNote = this.noteManager.findNoteEdgeAtCursor(pitch, rawBeat);
+        const hoveredKey = this.store.getHoveredNoteKey();
+      
+        if (edgeNote && hoveredKey === `${edgeNote.pitch}:${edgeNote.start}`) {
+          this.store.setSelectedNotes([edgeNote]); // lock in single note for resizing
+          this.controller.transitionTo(InteractionMode.Sizing);
+          return;
+        }
+      }
+    
+      // Otherwise begin marquee selection
       this.store.beginSelectionDrag();
       this.initialMouseX = e.clientX;
       this.initialMouseY = e.clientY;
@@ -85,31 +106,32 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
       }
     
       // Snap mouse to grid position
-      const mouse = getRelativeMousePos(e, e.currentTarget as HTMLElement);
-      const snap = this.grid.getSnapResolution();
-      const triplet = this.grid.isTripletMode();
-      const snapped = getSnappedNotePosition(mouse, this.scroll, this.config, snap, triplet);
+      const snapped = getSnappedFromEvent(e, this.canvas, this.grid, this.scroll, this.config);
       if (!snapped) return;
-    
-      // Edge guard
-      if (isNoteNearVisibleEdge(snapped, this.scroll, this.config, this.canvas)) {
-        this.store.setSnappedCursorGridPosition(null);
-        this.store.setHoveredNoteKey(null);
-        return;
-      }
-    
+      if (abortIfOutOfGridBounds(snapped, this.store, this.cursorController, this.requestRedraw)) return;
+
       // Always update snapped preview position
       this.store.setSnappedCursorGridPosition(snapped);
     
-      // Hover logic
+      // === Hover logic
       const pitch = rowToNote(snapped.y, this.config.layout.lowestMidi, this.config.layout.highestMidi);
-      const note = this.noteManager.findAtPosition(pitch, snapped.x);
-    
-      if (note) {
-        const key = `${note.pitch}:${note.start}`;
+
+      // Use snapped beat for accurate note detection
+      const rawBeat = getRawBeatFromEvent(e, this.canvas, this.scroll, this.config);
+      const hoveredNote = this.noteManager.findNoteUnderCursor(pitch, rawBeat);
+      const edgeNote = this.noteManager.findNoteEdgeAtCursor(pitch, rawBeat);
+
+      // Hover expression and cursor logic
+      if (hoveredNote) {
+        const key = `${hoveredNote.pitch}:${hoveredNote.start}`;
         this.store.setHoveredNoteKey(key);
         this.store.setSnappedCursorGridPosition(null);
-        this.cursorController.set(CursorState.Pointer);
+
+        if (edgeNote === hoveredNote) {
+          this.cursorController.set(CursorState.ResizeHorizontal);
+        } else {
+          this.cursorController.set(CursorState.Pointer);
+        }
       } else {
         this.store.setHoveredNoteKey(null);
         this.store.setSnappedCursorGridPosition(snapped);
@@ -118,7 +140,6 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
     
       this.requestRedraw();
     }
-      
 
     // Left click: Place a note, or select a note if over an existing note
     public onMouseUp(e: MouseEvent): void {
@@ -139,6 +160,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
       // First: are we hovering over a note? Then select it instead of placing
       const hoveredKey = this.store.getHoveredNoteKey();
       if (hoveredKey) {
+        console.log('Selecting a single note...');
         const [pitch, start] = hoveredKey.split(':');
         const selectedNote = this.noteManager.findAtPosition(pitch, Number(start));
         if (selectedNote) {

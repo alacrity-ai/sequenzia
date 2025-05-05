@@ -56,41 +56,56 @@ export function applyVelocityChange(opts: VelocityChangeOptions): void {
   const indexed = selectedNotes.map((note, i) => ({ note, originalIndex: i }));
   indexed.sort((a, b) => a.note.start - b.note.start);
 
-  indexed.forEach(({ note }, i) => {
-    let baseVelocity: number;
+  // Group notes by their start time
+  const groupedByStart = new Map<number, { note: typeof selectedNotes[number], originalIndex: number }[]>();
+  for (const item of indexed) {
+    const key = item.note.start;
+    if (!groupedByStart.has(key)) {
+      groupedByStart.set(key, []);
+    }
+    groupedByStart.get(key)!.push(item);
+  }
 
-    switch (mode) {
-      case 'set':
-        baseVelocity = Math.max(1, value);
-        break;
-      case 'increase':
-        baseVelocity = (note.velocity ?? 100) + value;
-        break;
-      case 'decrease':
-        baseVelocity = (note.velocity ?? 100) - value;
-        break;
-      case 'none':
-      default:
-        baseVelocity = note.velocity ?? 100;
-        break;
+  // Sort groups by temporal order
+  const sortedGroups = Array.from(groupedByStart.entries())
+    .sort((a, b) => a[0] - b[0])
+    .map(([, group]) => group);
+
+  // Apply velocity changes group-wise
+  sortedGroups.forEach((group, groupIndex) => {
+    let t = rampMode === 'linear' ? groupIndex : Math.pow(groupIndex, 1.3);
+    let delta = rampAmount * t;
+    if (rampDirection === 'down') {
+      delta = -delta;
     }
 
-    let delta = 0;
-    if (rampDirection !== 'none' && rampAmount !== 0) {
-      const t = rampMode === 'linear' ? i : Math.pow(i, 1.3);
-      delta = rampAmount * t;
-      if (rampDirection === 'down') {
-        delta = -delta;
+    for (const { note } of group) {
+      let baseVelocity: number;
+
+      switch (mode) {
+        case 'set':
+          baseVelocity = Math.max(1, value);
+          break;
+        case 'increase':
+          baseVelocity = (note.velocity ?? 100) + value;
+          break;
+        case 'decrease':
+          baseVelocity = (note.velocity ?? 100) - value;
+          break;
+        case 'none':
+        default:
+          baseVelocity = note.velocity ?? 100;
+          break;
       }
-    }
 
-    let randomized = baseVelocity + delta;
-    if (randomize && randomRange > 0) {
-      const rand = (Math.random() * 2 - 1) * randomRange;
-      randomized += rand;
-    }
+      let randomized = baseVelocity + delta;
+      if (randomize && randomRange > 0) {
+        const rand = (Math.random() * 2 - 1) * randomRange;
+        randomized += rand;
+      }
 
-    note.velocity = Math.max(1, Math.min(127, Math.round(randomized)));
+      note.velocity = Math.max(1, Math.min(127, Math.round(randomized)));
+    }
   });
 
   const afterNotes = indexed

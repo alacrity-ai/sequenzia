@@ -7,6 +7,7 @@ import { SelectingToolHandler } from './handlers/SelectingToolHandler.js';
 import { SelectedIdleToolHandler } from './handlers/SelectedIdleToolHandler.js';
 import { PastingToolHandler } from './handlers/PastingToolHandler.js';
 import { DraggingToolHandler } from './handlers/DraggingToolHandler.js';
+import { SizingToolHandler } from './handlers/SizingToolHandler.js';
 
 import type { InteractionContextData } from './interfaces/InteractionContextData.js';
 import type { InteractionController } from './interfaces/InteractionController.js';
@@ -128,10 +129,22 @@ export class InteractionContext {
           controller,
           this.data.cursorController,
           this.data.getClipboard,
-          this.data.addNote
         );
       case InteractionMode.Dragging:
         return new DraggingToolHandler(
+          this.data.canvas,
+          this.data.config,
+          this.data.scroll,
+          this.data.store,
+          this.data.noteManager,
+          this.data.grid,
+          this.data.requestRedraw,
+          controller,
+          this.data.cursorController,
+          () => this.data.sequencerContext.getId()
+        );
+      case InteractionMode.Sizing:
+        return new SizingToolHandler(
           this.data.canvas,
           this.data.config,
           this.data.scroll,

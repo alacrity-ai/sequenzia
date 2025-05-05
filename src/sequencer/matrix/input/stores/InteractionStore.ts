@@ -91,6 +91,17 @@ export class InteractionStore {
     return this.selectedNotes.length > 0;
   }
 
+  // ---- Drag anchor note key ----
+  private dragAnchorNoteKey: string | null = null;
+
+  public setDragAnchorNoteKey(key: string | null): void {
+    this.dragAnchorNoteKey = key;
+  }
+  
+  public getDragAnchorNoteKey(): string | null {
+    return this.dragAnchorNoteKey;
+  }  
+
   // ---- UI boundaries (scrollbars, overlays, etc.) ----
   private isOnScrollbar = false;
   private isScrolling = false;

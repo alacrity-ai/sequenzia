@@ -5,7 +5,7 @@ import { EditMode } from '../../sequencer/interfaces/EditMode.js';
 
 export const EditModes = {
   NOTE_PLACEMENT: 'note-placement',
-  SELECT: 'select',
+  NOTE_EDITING: 'note-editing',
   NONE: 'none',
 } as const;
 
@@ -35,7 +35,7 @@ let isTemporarySelectMode = false;
 
 export function enterTemporarySelectMode(): void {
   isTemporarySelectMode = true;
-  setEditMode(EditModes.SELECT);
+  setEditMode(EditModes.NOTE_EDITING);
 }
 
 export function clearTemporarySelectModeFlag(): void {

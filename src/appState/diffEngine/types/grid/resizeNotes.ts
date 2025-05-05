@@ -43,7 +43,7 @@ export function applyRESIZE_NOTES(state: AppState, diff: Diff): AppState {
 /**
  * Creates a forward diff to resize notes.
  */
-export function createResizeNotesDiff(sequencerId: string, resizes: ResizeEntry[]): Diff {
+export function createResizeNotesDiff(sequencerId: number, resizes: ResizeEntry[]): Diff {
   return {
     type: 'RESIZE_NOTES',
     sequencerId,
@@ -55,7 +55,7 @@ export function createResizeNotesDiff(sequencerId: string, resizes: ResizeEntry[
  * Creates a reverse diff to restore old note durations.
  */
 export function createReverseResizeNotesDiff(
-  sequencerId: string,
+  sequencerId: number,
   resizes: Array<{ pitch: string; start: number; oldDuration: number }>
 ): Diff {
   const reverseResizes = resizes.map(r => ({

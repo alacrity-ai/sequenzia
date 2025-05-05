@@ -289,14 +289,14 @@
         <div id="note-duration-panel" class="flex gap-3">
           <!-- Note Edit Mode Controls -->
           <div class="flex gap-2 border-r border-purple-800 pr-3 mr-1">
-            <button id="note-placement-mode-btn"
+            <button id="note-placement-options-btn"
                     class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
                     title="Note Placement Mode (Q)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-music"></use>
               </svg>
             </button>
-            <button id="select-mode-btn"
+            <button id="note-editing-options-btn"
                     class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
                     title="Select Mode (W)">
               <svg class="w-6 h-6" aria-hidden="true">
@@ -329,17 +329,17 @@
           </div>
 
           <!-- Select Mode Controls (Initially Hidden) -->
-          <div id="select-mode-controls" class="flex gap-2 hidden">
+          <div id="note-editing-controls" class="flex gap-2 hidden">
             <!-- Velocity and Quantize Buttons -->
             <button id="velocity-mode-menu-btn"
-                    class="select-mode-velocity bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    class="note-editing-velocity bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Adjust Velocity (1)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-chart-bar"></use>
               </svg>
             </button>
             <button id="quantize-mode-menu-btn"
-                    class="select-mode-quantize bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    class="note-editing-quantize bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Quantize Notes (2)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-clock"></use>
@@ -350,25 +350,25 @@
             <div class="border-l border-purple-800 mx-2"></div>
             
             <!-- Existing Copy/Cut/Paste Buttons -->
-            <button class="select-mode-copy bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+            <button class="note-editing-copy bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Copy (CTRL+C)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-copy"></use>
               </svg>
             </button>
-            <button class="select-mode-cut bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+            <button class="note-editing-cut bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Cut (CTRL+X)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-cut"></use>
               </svg>
             </button>
-            <button class="select-mode-paste bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+            <button class="note-editing-paste bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Paste (CTRL+V)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-paste"></use>
               </svg>
             </button>
-            <button class="select-mode-delete bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+            <button class="note-editing-delete bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Delete (Del)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-trash"></use>
