@@ -23,6 +23,7 @@ export class DraggingToolHandler implements GridInteractionHandler {
   private originalNotes: Note[] = [];
   private anchorNote: Note | null = null;
   private hasMoved: boolean = false;
+  private lastPreviewedPitch: string | null = null;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -82,6 +83,13 @@ export class DraggingToolHandler implements GridInteractionHandler {
     this.store.setPreviewNotes(preview);
     this.hasMoved = true;
     this.cursorController.set(CursorState.Grabbing);
+
+    // Only play note if pitch changed
+    if (pitch !== this.lastPreviewedPitch) {
+      this.noteManager.previewNote(pitch, 0.25);
+      this.lastPreviewedPitch = pitch;
+    }
+
     this.requestRedraw();
   }
 
