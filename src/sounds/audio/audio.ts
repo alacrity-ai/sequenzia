@@ -47,7 +47,6 @@ export interface NoteHandle {
  * Play a note using the active instrument (any engine).
  */
 export function playNote(note: string): NoteHandle | null {
-  // getAudioContext().resume();
   try {
     const stopFn = genericPlayNote(note, 100, false);
     if (!stopFn) return null;

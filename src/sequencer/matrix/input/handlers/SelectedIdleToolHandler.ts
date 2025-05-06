@@ -24,7 +24,7 @@ import { NoteManager } from '../../notes/NoteManager.js';
 export class SelectedIdleToolHandler implements GridInteractionHandler {
   private initialMouseX: number = 0;
   private initialMouseY: number = 0;
-  private readonly dragThreshold: number = 10;
+  private readonly dragThreshold: number = 5;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
