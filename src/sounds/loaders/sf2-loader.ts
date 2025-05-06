@@ -181,7 +181,6 @@ export function getAvailableSoundfontKits(): string[] {
 }
 
 export async function getAvailableInstruments(library: string): Promise<string[]> {
-  console.log('GET AVAILABLE INSTRUMENTS CALLED')
   const libraryNormalized = library.toLowerCase();
 
   if (libraryNormalized === 'splendidgrandpiano') {

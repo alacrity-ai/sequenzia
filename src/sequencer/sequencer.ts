@@ -78,11 +78,13 @@ export default class Sequencer {
     context: AudioContext = getAudioContext(),
     destination: AudioNode = getMasterGain(),
     instrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano',
-    squelchLoadingScreen: boolean = false
+    squelchLoadingScreen: boolean = false,
+    id: number = 0
     
   ) {
     Sequencer.allSequencers.push(this);
 
+    this.id = id;
     this.container = containerEl;
     this.config = { ...config };
     this.context = context;

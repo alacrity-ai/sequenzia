@@ -160,7 +160,6 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
       // First: are we hovering over a note? Then select it instead of placing
       const hoveredKey = this.store.getHoveredNoteKey();
       if (hoveredKey) {
-        console.log('Selecting a single note...');
         const [pitch, start] = hoveredKey.split(':');
         const selectedNote = this.noteManager.findAtPosition(pitch, Number(start));
         if (selectedNote) {
@@ -196,7 +195,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
 
       // Play the note 
       this.noteManager.previewNote(pitch, duration);
-      
+
       // Play the note animation
       this.playNoteAnimation({
         start: snapped.x,

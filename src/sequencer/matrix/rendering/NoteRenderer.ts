@@ -11,7 +11,6 @@ import { noteToRowIndex, getPitchClassIndex } from '../utils/noteUtils.js';
 import { NOTE_COLOR_SCHEMES } from './colors/noteColorSchemes.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
 import { getTrackColor } from './colors/helpers/getTrackColor.js';
-import { SequencerContext } from '../interfaces/SequencerContext.js';
 
 export class NoteRenderer {
   constructor(
@@ -35,7 +34,7 @@ export class NoteRenderer {
       getPitchClass: getPitchClassIndex,
       getTrackColor: () => getTrackColor(this.sequencerId),
     };
-    
+
     const cellWidth = baseCellWidth * zoom;
     const cellHeight = cellWidth / verticalCellRatio;
 

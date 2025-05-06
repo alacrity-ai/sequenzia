@@ -61,7 +61,6 @@ export class InteractionContext {
   }  
 
   public transitionTo(mode: InteractionMode): void {
-    console.log('Transitioning from mode named', InteractionMode[this.mode], 'to', InteractionMode[mode]);
     this.activeHandler?.onExit?.();
     this.mode = mode;
     this.activeHandler = this.createHandlerForMode(mode);

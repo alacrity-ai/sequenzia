@@ -31,7 +31,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   const mergedConfig = { id: newId, ...config };
 
   const instrument = initialState?.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
-  const seq = new Sequencer(wrapper, mergedConfig, audioCtx(), getMasterGain(), instrument);
+  const seq = new Sequencer(wrapper, mergedConfig, audioCtx(), getMasterGain(), instrument, true, newId);
   seq.id = newId;
   seq.colorIndex = newId;
   seq.mute = false;

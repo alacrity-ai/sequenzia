@@ -108,7 +108,6 @@ export async function loadInstrument(
 
 
     const isDrumKit = matched.displayName.startsWith('Drum Kit');
-    console.log('Is drum kit: ', isDrumKit);
     if (!isDrumKit) {
       // Melodic instrument branch
       const varName = `_tone_${matched.id}`;
@@ -208,13 +207,11 @@ export async function loadInstrument(
     }
     const [, kitNumberStr, libraryName] = match;    
     const kitNumber = parseInt(kitNumberStr, 10);
-    console.log('Regex got kit number: ', kitNumber);
     const drumPresets: Record<number, any> = {};
   
     const loadDrumPresets = async () => {
       for (const midi of DRUM_MIDI_RANGE) {
         const varName = `_drum_${midi}_${kitNumber}_${libraryName}_sf2_file`;
-        console.log('varName is: ', varName);
         const url = `https://surikov.github.io/webaudiofontdata/sound/${12800 + midi}_${kitNumber}_${libraryName}_sf2_file.js`;
     
         try {

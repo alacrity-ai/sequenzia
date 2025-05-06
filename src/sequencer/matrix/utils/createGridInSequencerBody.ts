@@ -9,6 +9,5 @@ export function createGridInSequencerBody(
   config: Partial<GridConfig>,
   sequencerContext: SequencerContext
 ): Grid {
-  console.log('Grid createated in sequencer body with context: ', sequencerContext);
   return new Grid(container, config, sequencerContext);
 }
