@@ -40,7 +40,7 @@ export class Grid {
   private scroll: GridScroll;
   private noteManager: NoteManager;
   private scrollbars: ScrollbarManager;
-  private mouseTracker: InputTracker;
+  private inputTracker: InputTracker;
   private interactionContext: InteractionContext;
   private wheelHandler: WheelHandler;
   private interactionStore: InteractionStore;
@@ -66,6 +66,8 @@ export class Grid {
   private initialZoom!: number;
   private customLabels: Record<number, string> | null = null;
   private blackKeyMap: Map<number, boolean> = new Map();
+
+  private isDestroyed = false;
   
   constructor(parent: HTMLElement, config: Partial<GridConfig> = {}, sequencerContext: SequencerContext) {
     this.config = mergeGridConfig(createDefaultGridConfig(), config);
@@ -107,7 +109,7 @@ export class Grid {
       playNoteAnimation: (note) => this.playNoteAnimation(note)
     };
     this.interactionContext = new InteractionContext(contextData);
-    this.mouseTracker = new InputTracker(this.interactionContext, mainContainer)
+    this.inputTracker = new InputTracker(this.interactionContext, mainContainer)
 
     // Create renderers
     this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore, () => this.getBlackKeyMap());
@@ -133,11 +135,18 @@ export class Grid {
     this.renderLoop();
   }
 
+  private readonly onWindowResize = () => this.resize();
+
   private attachListeners(): void {
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener('resize', this.onWindowResize);
   }
+  
+  private detachListeners(): void {
+    window.removeEventListener('resize', this.onWindowResize);
+  }  
 
   private renderLoop(): void {
+    if (this.isDestroyed) return;
     if (this.needsRedraw) {
       this.render();
       this.needsRedraw = false;
@@ -361,16 +370,23 @@ export class Grid {
 
   /** Destroy the grid and its associated resources */
   public destroy(): void {
-    this.mouseTracker.destroy();
-    this.wheelHandler.destroy();
-    this.scrollbars.destroy(); // If applicable
-
-    // Destroy input + scroll components
-    this.mouseTracker.destroy();
+    this.inputTracker.destroy();
     this.wheelHandler.destroy();
     this.scrollbars.destroy();
 
     // Remove DOM elements
     this.gridManager.container.remove(); // removes all 3 canvases in one go
+    this.gridCanvasManager.destroy();
+    this.noteCanvasManager.destroy();
+    this.animationCanvasManager.destroy();
+    this.playheadCanvasManager.destroy();
+
+    // Remove global listeners
+    this.detachListeners();
+    this.emitter.removeAllListeners();
+    this.interactionContext.destroy();
+
+    // Set destroyed flag for render loop
+    this.isDestroyed = true;
   }
 }

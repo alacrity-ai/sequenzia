@@ -1,7 +1,7 @@
 // js/userconfig/settings/sequencerSettings.js
 
 import { getUserConfig, updateUserConfig } from './userConfig.js';
-import { getSequencers } from '../../setup/sequencers.js';
+import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
 import { UserConfig } from '../interfaces/UserConfig.js';
 
 export const GRID_COLOR_SCHEMES: string[] = [

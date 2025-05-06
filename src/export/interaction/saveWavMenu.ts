@@ -2,7 +2,7 @@
 
 import { getAppState } from '../../appState/appState.js';
 import { exportSessionToWAV } from '../save.js';
-import { sequencers } from '../../setup/sequencers.js';
+import { sequencers } from '../../sequencer/factories/SequencerFactory.js';
 
 export interface SaveWavOptions {
   sampleRate: number;

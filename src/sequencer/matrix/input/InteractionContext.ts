@@ -159,4 +159,9 @@ export class InteractionContext {
         return {};
     }
   }
+
+  public destroy(): void {
+    this.activeHandler?.onExit?.();
+    this.activeHandler = null;
+  }  
 }

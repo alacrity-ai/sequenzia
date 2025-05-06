@@ -7,11 +7,11 @@ import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
 import { getPreviewContext } from '../sounds/audio/previewContext.js';
 import { exportNotesToOffline } from './services/offlineExportService.js';
 
-import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
 import { getTotalMeasures, getTimeSignature } from './transport.js';
 import { updateTrackStyle } from './ui/helpers/updateTrackStyle.js';
 import { setCollapsed } from './ui/helpers/setCollapsed.js';
 import { updateNoteRange, updateToDrumNoteRange } from './services/rangeUpdateService.js';
+import { ListenerRegistry } from '../setup/stores/ListenerRegistry.js';
 
 import { loadInstrument } from '../sounds/instrument-loader.js';
 import { loadAndPlayNote } from '../sounds/instrument-player.js';
@@ -35,15 +35,14 @@ export default class Sequencer {
   instrumentName: string;
   squelchLoadingScreen: boolean;
   colorIndex: number = 0;
-
   matrix?: Grid;
+  _registry: ListenerRegistry | null = null;
 
   id: number = 0;
   mute: boolean = false;
   solo: boolean = false;
   collapsed: boolean = false;
 
-  private animationCanvas?: HTMLCanvasElement;
   private _scheduledAnimations: ReturnType<typeof setTimeout>[] = [];
 
   refreshPanUI?: () => void;
@@ -101,7 +100,6 @@ export default class Sequencer {
       });
     
       this.matrix.refreshNoteRange();
-      initZoomControls(this.container, () => this.matrix?.zoomIn(), () => this.matrix?.zoomOut(), () => this.matrix?.resetZoom());
     } 
   }
 
@@ -169,10 +167,6 @@ export default class Sequencer {
 
   set scheduledAnimations(val: number[]) {
     this._scheduledAnimations = val as unknown[] as ReturnType<typeof setTimeout>[];
-  }
-
-  get animCanvas(): HTMLCanvasElement | undefined {
-    return this.animationCanvas;
   }
 
   toggleMute(): void {
@@ -379,9 +373,27 @@ export default class Sequencer {
     });
   }
   
+  setRegistry(registry: ListenerRegistry): void {
+    this._registry = registry;
+  }
+
   destroy(): void {
+    // Cleanup
     this.stopScheduledNotes();
     this.matrix?.destroy();
     this.container?.remove();
+
+    // Remove from global registry
+    Sequencer.allSequencers = Sequencer.allSequencers.filter(seq => seq !== this);
+    
+    // Clear all listeners attached during setup
+    this._registry?.clear();
+
+    // Reference cleanup
+    this._instrument = null;
+    this.matrix = undefined;
+    this.container = null;
+    this.refreshPanUI = undefined;
+    this.refreshVolumeUI = undefined;
   }
 }

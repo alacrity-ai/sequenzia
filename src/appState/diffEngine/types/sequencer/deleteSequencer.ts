@@ -1,6 +1,6 @@
 // src/appState/diffEngine/types/sequencer/deleteSequencer.ts
 
-import { sequencers } from '../../../../setup/sequencers.js';
+import { sequencers } from '../../../../sequencer/factories/SequencerFactory.js';
 import { AppState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
 

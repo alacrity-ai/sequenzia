@@ -3,7 +3,7 @@
 import { updateAllMatrixPlayheads } from './helpers/updateAllGridPlayheads.js';
 import { drawGlobalPlayhead } from './global-playhead.js';
 import { getTotalBeats } from '../sequencer/transport.js';
-import { getSnappedBeat } from '../sequencer/grid/helpers/geometry.js';
+import { getSnappedBeat } from '../sequencer/utils/snappedBeat.js';
 import type { SequencerConfig } from '../sequencer/interfaces/SequencerConfig.js';
 import { engine as playbackEngine } from '../main.js';
 

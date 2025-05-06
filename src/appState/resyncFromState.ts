@@ -2,7 +2,7 @@
 
 import { getAppState } from './appState.js';
 import { updateTempo, updateTimeSignature, updateTotalMeasures } from '../sequencer/transport.js';
-import { createSequencer, sequencers } from '../setup/sequencers.js';
+import { createSequencer, sequencers } from '../sequencer/factories/SequencerFactory.js';
 import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
 import { AppState, SequencerState } from './interfaces/AppState.js';
 import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig.js';

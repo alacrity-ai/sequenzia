@@ -1,6 +1,6 @@
 // src/appState/diffEngine/types/sequencer/createSequencer.ts
 
-import { createSequencer, sequencers, toggleZoomControls } from '../../../../setup/sequencers.js';
+import { createSequencer, sequencers } from '../../../../sequencer/factories/SequencerFactory.js';
 import { AppState, SequencerState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
 
@@ -29,7 +29,6 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
     };    
 
     const { seq, wrapper } = createSequencer(initialState);
-    toggleZoomControls(wrapper, true);
   }
 
   return newState;

@@ -1,32 +1,37 @@
 import type Sequencer from '../../sequencer.js';
 
+import { toggleZoomControls } from '../../ui/controls/zoomControls.js';
+import { toggleSequencerGripHandle } from '../../ui/controls/gripHandler.js';
 import { engine as playbackEngine } from '../../../main.js';
 
 export function setCollapsed(seq: Sequencer, val: boolean): void {
     seq.collapsed = val;
   
-    if (val) {
-      // Prevent animation rendering
-      seq.animCanvas?.classList.add('hidden');
+    const container = seq.container as HTMLElement;
   
-      // Cancel pending animation timeouts
-      for (const timeoutId of seq.scheduledAnimations) {
-        clearTimeout(timeoutId);
-      }
+    const toggleUIVisibility = (visible: boolean): void => {
+      toggleZoomControls(container, visible);
+      toggleSequencerGripHandle(container, visible);
+    };
+  
+    const cancelScheduledAnimations = (): void => {
+      for (const id of seq.scheduledAnimations) clearTimeout(id);
       seq.scheduledAnimations = [];
+    };
   
+    if (val) {
+      cancelScheduledAnimations();
+      toggleUIVisibility(false);
     } else {
-      seq.animCanvas?.classList.remove('hidden');
-  
-      // Call resize to redraw the grid
+      toggleUIVisibility(true);
       seq.matrix?.resize();
-
-      // If we are playing, re-schedule animations from the current time
+  
       if (playbackEngine.isActive()) {
-          seq.resumeAnimationsFromCurrentTime(
+        seq.resumeAnimationsFromCurrentTime(
           playbackEngine.getStartTime(),
           playbackEngine.getStartBeat()
         );
       }
     }
   }
+  

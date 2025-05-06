@@ -1,6 +1,6 @@
 // src/sequencer/transport.ts
 
-import { getSequencers } from '../setup/sequencers.js';
+import { getSequencers } from './factories/SequencerFactory.js';
 import { recordDiff } from '../appState/appState.js';
 import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState/diffEngine/types/global/changeTempo.js';
 import { createSetTimeSignatureDiff, createReverseSetTimeSignatureDiff } from '../appState/diffEngine/types/global/changeTimeSignature.js';

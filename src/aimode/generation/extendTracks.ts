@@ -1,6 +1,6 @@
 // src/aimode/generation/extendTracks.ts
 
-import { getSequencers } from '../../setup/sequencers.js';
+import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
 import { getStartBeat } from '../ExtendMode.js';
 import { extendTracks } from '../clients/OpenAIService.js';
 import {

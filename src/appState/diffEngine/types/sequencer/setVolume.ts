@@ -1,6 +1,6 @@
 import { AppState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
-import { sequencers } from '../../../../setup/sequencers.js';
+import { sequencers } from '../../../../sequencer/factories/SequencerFactory.js';
 
 /**
  * Applies a SET_VOLUME diff to update track volume.

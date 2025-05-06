@@ -23,6 +23,12 @@ export class EventEmitter<Events extends { [key: string]: unknown }> {
   clear<K extends keyof Events>(event: K): void {
     this.listeners[event]?.clear();
   }
+
+  removeAllListeners(): void {
+    for (const key in this.listeners) {
+      this.listeners[key as keyof Events]?.clear();
+    }
+  }  
 }
 
 /* Usage:

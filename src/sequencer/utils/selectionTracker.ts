@@ -1,6 +1,6 @@
 // src/sequencer/utils/getActiveSelection.js
 
-import { getSequencers } from '../../setup/sequencers.js';
+import { getSequencers } from '../factories/SequencerFactory.js';
 
 import type { Note } from '../../sequencer/interfaces/Note.js';
 import type { Grid } from '../matrix/Grid.js';

@@ -2,7 +2,7 @@
 
 import { getAudioContext } from '../sounds/audio/audio.js';
 import { isLoopEnabled, getTotalBeats } from './transport.js';
-import { resetPlayButtonState } from './ui.js';
+import { resetPlayButtonState } from '../setup/footer/ui.js';
 import { getTempo } from './transport.js';
 import Sequencer from './sequencer.js';
 

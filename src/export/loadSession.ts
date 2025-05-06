@@ -1,9 +1,8 @@
 // src/export/loadSession.ts
 
 import { updateTempo, updateTimeSignature, updateTotalMeasures, getTempo, getTotalMeasures } from '../sequencer/transport.js';
-import { destroyAllSequencers, sequencers } from '../setup/sequencers.js';
-import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../appState/diffEngine/types/sequencer/deleteSequencer.js';
-import { collapseAllSequencers } from '../helpers.js';
+import { destroyAllSequencers, sequencers } from '../sequencer/factories/SequencerFactory.js';
+import { collapseAllSequencers } from '../sequencer/utils/collapseAll.js';
 import { refreshGlobalMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
 import { drawGlobalPlayhead } from '../playhead/global-playhead.js';
 import { engine as playbackEngine } from '../main.js';
@@ -36,26 +35,7 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
   if (measuresInput) measuresInput.value = String(getTotalMeasures());
 
   // Destroy current sequencers
-  // destroyAllSequencers();
-
-  for (const seq of sequencers.slice()) {
-    recordDiff(
-      createDeleteSequencerDiff(
-        seq.id,
-        seq.instrumentName,
-        seq.matrix?.getNoteManager().getAll() ?? [],
-        seq.volume,
-        seq.pan
-      ),
-      createReverseDeleteSequencerDiff(
-        seq.id,
-        seq.instrumentName,
-        seq.matrix?.getNoteManager().getAll() ?? [],
-        seq.volume,
-        seq.pan
-      )
-    );
-  }
+  destroyAllSequencers();
 
   // Create new sequencers from imported tracks
   for (const [i, state] of tracks.entries()) {

@@ -54,5 +54,17 @@ export class CanvasManager {
     public clear(): void {
       this.ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
     }
+
+    public destroy(): void {
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.canvas.width = 0;
+      this.canvas.height = 0;
+      // Remove the canvas from the DOM if you're sure it's unused
+      if (this.canvas.parentNode) {
+        this.canvas.parentNode.removeChild(this.canvas);
+      }
+    }    
   }
+  
   

@@ -14,6 +14,9 @@ export class ScrollbarManager {
   private vThumb!: HTMLDivElement;
   private corner!: HTMLDivElement;
 
+  private hDragHandler!: ScrollbarDragHandler;
+  private vDragHandler!: ScrollbarDragHandler;  
+
   private readonly trackThickness = 16;
 
   constructor(
@@ -84,8 +87,8 @@ export class ScrollbarManager {
   }  
 
   private attachEvents(): void {
-    new ScrollbarDragHandler(this.hThumb, true, this.scroll, this.interactionStore, this.requestRedraw);
-    new ScrollbarDragHandler(this.vThumb, false, this.scroll, this.interactionStore, this.requestRedraw);
+    this.hDragHandler = new ScrollbarDragHandler(this.hThumb, true, this.scroll, this.interactionStore, this.requestRedraw);
+    this.vDragHandler= new ScrollbarDragHandler(this.vThumb, false, this.scroll, this.interactionStore, this.requestRedraw);
   }
 
   public update(): void {
@@ -116,8 +119,14 @@ export class ScrollbarManager {
   }
 
   public destroy(): void {
+    this.hDragHandler.destroy();
+    this.vDragHandler.destroy();
+
     this.hScrollbar.remove();
     this.vScrollbar.remove();
     this.corner.remove();
+    this.hScrollbar = null!;
+    this.vScrollbar = null!;
+    this.corner = null!;
   }
 }
