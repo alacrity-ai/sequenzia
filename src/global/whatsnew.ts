@@ -3,25 +3,28 @@
 import { getAssetPath } from './assetHelpers.js';
 
 // ====== Metadata (update these in PRs) ======
-export const WHATS_NEW_VERSION = 'v0.0.9';
-export const WHATS_NEW_DATE = 'May 1, 2025';
+export const WHATS_NEW_VERSION = 'v0.0.10';
+export const WHATS_NEW_DATE = 'May 5, 2025';
 
 // ====== Content ======
+// ====== Content ======
 export const WHATS_NEW_CONTENT: string[] = [
-    "✨ New Features",
-    "- 🖥️ Increased playback performance by over 1000%",
-    "- 🎹 Added additional WAV export options",
-    "- 🛠️ Across the board UI/UX Improvements",
-    "- 🎵 Added velocity menu with various features",
-    "- 🦟 Squashed various bugs",
-  
-    "🐞 Known Issues",
-    "- 🚫 Scaling groups of notes not functional",
-  
-    "🛣️ Roadmap",
-    "- 🧠 Upcoming: AI-assisted generation and extension tools",
-  ];
-  
+  "✨ New Features",
+  "- 🧱 Introduced fully modular matrix-based grid system for better performance and maintainability",
+  "- 🎛️ Switched to multi-canvas rendering (grid, note, animation) for improved visual clarity and layering",
+  "- 🖱️ Implemented robust interaction state machine for clean, extensible editing tools",
+  "- 🎨 Refined visual rendering of note grid, headers, and pitch labels for better contrast and UX",
+  "- ⚙️ WebAudioFont engine support finalized for broader instrument playback",
+  "- 🎧 Fixed WAV export context handling for improved reliability",
+
+  "🐞 Known Issues",
+  "- 🚫 Note placement during live playback of large sequences causes performance issues",
+  "- 🧵 Several other small bugs and edge cases remain to be addressed",
+
+  "🛣️ Roadmap",
+  "- 🤖 AI-assisted generation and track extension tools (May rollout)",
+  "- ⌨️ Customizable keyboard shortcuts and input presets",
+];
 
 // ====== Handlers ======
 
