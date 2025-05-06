@@ -50,7 +50,10 @@ export async function loadInstrument(
   }
   const instrumentMap = contextInstrumentMap.get(context)!;
 
-  const cacheKey = `${libraryRaw}/${instrumentName}`;
+  // Handle cache hit
+  const contextId = String((context ?? getAudioContext()) as unknown as number);
+  const cacheKey = `${libraryRaw}/${instrumentName}@${contextId}`;
+  
   if (instrumentMap.has(cacheKey)) {
     return instrumentMap.get(cacheKey)!;
   }
@@ -65,7 +68,14 @@ export async function loadInstrument(
 
   const gainProxy = context.createGain();
   gainProxy.connect(pannerNode);
-  pannerNode.connect(destination || getMasterGain());
+  
+  // Validate destination belongs to same context
+  if (destination && (destination.context !== context)) {
+    console.warn('[loadInstrument] Ignoring mismatched destination from different context');
+    destination = null;
+  }
+
+  pannerNode.connect(destination || getMasterGain(context));
 
   const commonOptions = {
     instrument: instrumentName,
@@ -129,6 +139,7 @@ export async function loadInstrument(
     pannerNode.pan.value = Math.max(-1, Math.min(1, newPan));
   };
 
+  // Set the instrument in the cache
   instrumentMap.set(cacheKey, inst);
   return inst;
 }

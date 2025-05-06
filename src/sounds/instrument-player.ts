@@ -3,6 +3,8 @@
 import { getSf2Player } from './players/sf2-player.js';
 import { getWebAudioFontPlayer } from './players/webaudiofont-player.js';
 import { EngineName, EnginePlayer } from './interfaces/Engine.js';
+import { getPreviewContext, getPreviewDestination } from './audio/previewContext.js';
+import { getAudioContext } from './audio/audio.js';
 
 
 // // Registry of available players
@@ -77,35 +79,48 @@ export function stopNoteByPitch(pitch: string): void {
     engine.stopNoteByPitch(pitch);
 }
 
-// This is used by the sequencer to play notes for an instrument
+
 export async function loadAndPlayNote(
-    instrumentName: string,
-    pitch: string,
-    durationSec: number,
-    velocity: number = 100,
-    loop: boolean = false,
-    startTime: number | null = null,
-    context: AudioContext | null = null,
-    destination: AudioNode | null = null,
-    volume?: number,
-    pan?: number
-  ): Promise<null> {  
-    const engineName = instrumentName.split('/')[0] as EngineName;
-    const engine = enginePlayers[engineName];
-    if (!engine) throw new Error(`Engine "${engineName}" not available`);
-    return await engine.loadAndPlayNote(
-      instrumentName,
-      pitch,
-      durationSec,
-      velocity,
-      loop,
-      startTime,
-      context,
-      destination,
-      volume,
-      pan
-    );
+  instrumentName: string,
+  pitch: string,
+  durationSec: number = 1,
+  velocity: number = 100,
+  loop: boolean = false,
+  startTime: number | null = null,
+  context: AudioContext | null = null,
+  destination: AudioNode | null = null,
+  volume?: number,
+  pan?: number
+): Promise<null> {
+  const engineName = instrumentName.split('/')[0] as EngineName;
+  const engine = enginePlayers[engineName];
+  if (!engine) throw new Error(`Engine "${engineName}" not available`);
+
+  let ctx = context ?? getAudioContext();
+  let dst = destination;
+
+  if (ctx.state === 'suspended') {
+    console.warn('[loadAndPlayNote] Using preview context due to suspended main context');
+    ctx = getPreviewContext();
+    dst = getPreviewDestination();
+  }
+
+  return await engine.loadAndPlayNote(
+    instrumentName,
+    pitch,
+    durationSec,
+    velocity,
+    loop,
+    startTime,
+    ctx,
+    dst,
+    volume,
+    pan
+  );
 }
+
+
+
   
 export function getAvailableEngines(): EngineName[] {
   return Object.keys(enginePlayers) as EngineName[];

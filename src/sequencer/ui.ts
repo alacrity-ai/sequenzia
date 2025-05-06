@@ -8,6 +8,7 @@ import { getTimeSignature, getTotalMeasures } from './transport.js';
 import { showVelocityModal } from './ui/modals/velocity/velocityModeMenu.js';
 import { showErrorModal } from '../global/errorGeneric.js';
 import Sequencer from './sequencer.js';
+import { isKeyboardListenersAttached } from '../keyboard/keyboard-interaction.js';
 
 let isInitialized = false;
 let isPlaying = false;
@@ -163,7 +164,7 @@ export function setupUI({
     }
 
     // === VELOCITY SHORTCUT ===
-    if (e.key === 'v' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.key === 'v' && !e.ctrlKey && !e.metaKey && !e.altKey && !isKeyboardListenersAttached()) {
       const selection = getActiveSelection();
       if (!selection || selection.selectedNotes.length === 0) {
         showErrorModal('No notes selected. Please select notes before adjusting velocity.');

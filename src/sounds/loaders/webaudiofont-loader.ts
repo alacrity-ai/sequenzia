@@ -58,15 +58,17 @@ export async function loadInstrument(
     squelchLoadingScreen?: boolean
   ): Promise<Instrument> {
     const [libraryRaw, instrumentDisplayName] = fullName.split('/');
-    const cacheKey = `${libraryRaw}/${instrumentDisplayName}`;
-  
+    const contextId = String(context as unknown as number);
+    const cacheKey = `${libraryRaw}/${instrumentDisplayName}@${contextId}`;
+    
     if (!contextInstrumentMap.has(context)) {
       contextInstrumentMap.set(context, new Map());
     }
     const instrumentMap = contextInstrumentMap.get(context)!;
+    
     if (instrumentMap.has(cacheKey)) {
       return instrumentMap.get(cacheKey)!;
-    }
+    }    
   
     await loadWebAudioFontPlayer();
 
@@ -90,10 +92,21 @@ export async function loadInstrument(
       throw new Error(`Could not find WebAudioFont entry for library=${libraryRaw} and instrument=${instrumentDisplayName}`);
     }
 
-    // Setup the panner node
+    // Fallback to correct master gain if destination is from another context
+    if (destination && destination.context !== context) {
+      console.warn('[WebAudioFont] Ignoring mismatched destination from another context');
+      destination = null;
+    }
+
+    // Destination used must be same-context
+    const outputNode = destination || getMasterGain(context);
+
+    // Create panner node safely
     const pannerNode = context.createStereoPanner();
     pannerNode.pan.value = pan ?? 0;
-    pannerNode.connect(destination || getMasterGain());
+    pannerNode.connect(outputNode);
+
+
     const isDrumKit = matched.displayName.startsWith('Drum Kit');
     console.log('Is drum kit: ', isDrumKit);
     if (!isDrumKit) {

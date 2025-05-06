@@ -5,6 +5,11 @@ import { isKeyboardLoopEnabled } from '../setup/keyboard/keyboardInstrumentState
 import { KeyMap } from './keys.js';
 
 let listenersAttached = false;
+
+export function isKeyboardListenersAttached(): boolean {
+  return listenersAttached;
+}
+
 let getKeyMapRef: (() => KeyMap) | null = null;
 let keydownListener: ((e: KeyboardEvent) => void) | null = null;
 let keyupListener: ((e: KeyboardEvent) => void) | null = null;

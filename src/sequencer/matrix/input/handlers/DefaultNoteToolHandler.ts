@@ -196,6 +196,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
 
       // Play the note 
       this.noteManager.previewNote(pitch, duration);
+      
       // Play the note animation
       this.playNoteAnimation({
         start: snapped.x,

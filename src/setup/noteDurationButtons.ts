@@ -1,5 +1,6 @@
 import { sequencers } from './sequencers.js';
 import { SEQUENCER_CONFIG as config } from '../sequencer/constants/sequencerConstants.js';
+import { isKeyboardListenersAttached } from '../keyboard/keyboard-interaction.js';
 
 const durationHotkeys: Record<string, number> = {
   Digit1: 4,
@@ -120,7 +121,8 @@ export function setupNoteDurationButtons(): void {
     if (
       target.tagName === 'INPUT' ||
       target.tagName === 'TEXTAREA' ||
-      target.isContentEditable
+      target.isContentEditable ||
+      isKeyboardListenersAttached()
     ) {
       return;
     }

@@ -1,18 +1,31 @@
 // src/sequencer/sequencer.ts
-import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
-import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
-import { getTempo, getTotalMeasures } from './transport.js';
-import { loadInstrument } from '../sounds/instrument-loader.js';
-import { loadAndPlayNote } from '../sounds/instrument-player.js';
-import { pitchToMidi, midiRangeBetween } from './matrix/utils/noteUtils.js';
-import { DRUM_MIDI_TO_NAME } from '../sounds/loaders/constants/drums.js';
-import { drawMiniContour } from './ui/renderers/drawMiniContour.js';
 import type { Note } from './interfaces/Note.js';
 import type { SequencerConfig } from './interfaces/SequencerConfig.js';
-import { Instrument } from '../sounds/interfaces/Instrument.js';
+import type { Instrument } from '../sounds/interfaces/Instrument.js';
+
+import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
+import { getPreviewContext } from '../sounds/audio/previewContext.js';
+import { exportNotesToOffline } from './services/offlineExportService.js';
+
+import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
+import { getTotalMeasures } from './transport.js';
+import { updateTrackStyle } from './ui/helpers/updateTrackStyle.js';
+import { setCollapsed } from './ui/helpers/setCollapsed.js';
+import { updateNoteRange, updateToDrumNoteRange } from './services/rangeUpdateService.js';
+
+import { loadInstrument } from '../sounds/instrument-loader.js';
+import { loadAndPlayNote } from '../sounds/instrument-player.js';
+
 import { engine as playbackEngine } from '../main.js';
 import { createGridInSequencerBody } from './matrix/utils/createGridInSequencerBody.js';
 import { Grid } from './matrix/Grid.js';
+import {
+  stopScheduledNotes,
+  preparePlayback,
+  resumeAnimationsFromCurrentTime,
+  reschedulePlayback
+} from './services/playbackService.js';
+
 
 export default class Sequencer {
   container: HTMLElement | null;
@@ -23,9 +36,20 @@ export default class Sequencer {
   squelchLoadingScreen: boolean;
   colorIndex: number = 0;
 
+  matrix?: Grid;
+
   id: number = 0;
   mute: boolean = false;
   solo: boolean = false;
+  collapsed: boolean = false;
+
+  private animationCanvas?: HTMLCanvasElement;
+  private _scheduledAnimations: ReturnType<typeof setTimeout>[] = [];
+
+  refreshPanUI?: () => void;
+  refreshVolumeUI?: () => void;
+  private _volume: number = 100 / 127;
+  private _pan: number = 0.0;
 
   static allSequencers: Sequencer[] = [];
 
@@ -43,21 +67,10 @@ export default class Sequencer {
       seq.stopScheduledNotes();
       if (seq.shouldPlay) {
         void seq.reschedulePlayback(startAt, startBeat);
+        void seq.resumeAnimationsFromCurrentTime(startAt, startBeat);
       }
     }
-  }  
-
-  collapsed: boolean = false;
-
-  private animationCanvas?: HTMLCanvasElement;
-  matrix?: Grid;
-
-  private _scheduledAnimations: ReturnType<typeof setTimeout>[] = [];
-
-  refreshPanUI?: () => void;
-  refreshVolumeUI?: () => void;
-  private _volume: number = 100 / 127; // ≈ 0.7874
-  private _pan: number = 0.0; // Centered by default (-1.0 = left, 1.0 = right)
+  }
 
   constructor(
     containerEl: HTMLElement | null,
@@ -148,13 +161,25 @@ export default class Sequencer {
       : !this.mute;
   }  
 
+  get scheduledAnimations(): number[] {
+    return this._scheduledAnimations as unknown[] as number[];
+  }
+
+  set scheduledAnimations(val: number[]) {
+    this._scheduledAnimations = val as unknown[] as ReturnType<typeof setTimeout>[];
+  }
+
+  get animCanvas(): HTMLCanvasElement | undefined {
+    return this.animationCanvas;
+  }
+
   toggleMute(): void {
     this.mute = !this.mute;
     if (this.mute) {
       this.solo = false;
     }
     this.stopScheduledNotes();
-    this.updateTrackStyle();
+    updateTrackStyle(this);
   
     if (playbackEngine.isActive()) {
       Sequencer.rescheduleAll();
@@ -166,237 +191,73 @@ export default class Sequencer {
     if (this.solo) {
       this.mute = false;
     }
-    this.updateTrackStyle();
+    updateTrackStyle(this);
   
     if (playbackEngine.isActive()) {
       Sequencer.rescheduleAll();
     }
   }
 
-  async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {
-    if (!this.matrix) return;
-
-    if (!this._instrument) {
-      await this.initInstrument();
-    }
-  
-    this.stopScheduledNotes();
-  
-    if (!this._instrument?.start) {
-      console.warn(`[SEQ:${this.id}] Instrument does not support scheduled playback.`);
-      return;
-    }
-  
-    const bpm = getTempo();
-    const beatDuration = 60 / bpm;
-    const notes = this.matrix.notes;
-    notes.sort((a, b) => a.start - b.start);
-  
-    let i = 0;
-    while (i < notes.length && notes[i].start < startBeat) {
-      i++;
-    }
-  
-    // Anchor wall-clock time (ms) to the same logical start point as AudioContext time (s)
-    const startWallTime = performance.now(); // ms
-
-    for (; i < notes.length; i++) {
-      const note = notes[i];
-      const midi = pitchToMidi(note.pitch);
-      if (midi === null) continue;
-
-      const offsetBeats = note.start - startBeat;
-      const noteTime = startAt + offsetBeats * beatDuration; // seconds (AudioContext)
-      const duration = note.duration * beatDuration;         // seconds
-      const velocity = note.velocity ?? 100;
-
-      try {
-        console.log(`[SEQ:${this.id}] Scheduling note ${note.pitch} at ${noteTime.toFixed(3)}`);
-        
-        // Schedule audio playback
-        this._instrument.start({
-          note: midi,
-          time: noteTime,
-          duration,
-          velocity
-        });
-
-        if (!this.collapsed) {
-          // Compute corresponding wall-clock time in ms
-          const wallTime = startWallTime + offsetBeats * beatDuration * 1000;
-          const delay = wallTime - performance.now();
-          const clampedDelay = Math.max(0, delay);
-          
-          const scheduled = setTimeout(() => {
-            this.matrix?.playNoteAnimation(note);
-          }, clampedDelay);
-          this._scheduledAnimations.push(scheduled);          
-        }
-
-      } catch (err) {
-        console.warn(`[SEQ:${this.id}] Failed to schedule note`, note, err);
-      }
-    }
-
+  setCollapsed(val: boolean): void {
+    setCollapsed(this, val);
   }
 
+  async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {
+    await preparePlayback(
+      this._instrument as Instrument,
+      () => this.initInstrument(),
+      this.matrix?.notes ?? [],
+      this.collapsed,
+      this.matrix ?? null,
+      this._scheduledAnimations as unknown[] as number[],
+      startAt,
+      startBeat
+    );
+  }  
+
   stopScheduledNotes(): void {
-    if (this._instrument) {
-      this._instrument.stop();
-    }
-  
-    for (const timeoutId of this._scheduledAnimations) {
-      clearTimeout(timeoutId);
-    }
-  
-    this._scheduledAnimations = [];
+    stopScheduledNotes(this._instrument, this._scheduledAnimations as unknown[] as number[]);
   }  
 
   resumeAnimationsFromCurrentTime(startAt: number, startBeat: number): void {
-    if (!this.matrix || this.collapsed) return;
-  
-    const bpm = getTempo();
-    const beatDuration = 60 / bpm;
-    const nowWall = performance.now(); // current wall-clock time (ms)
-    const nowAudio = getAudioContext().currentTime; // current audio time (s)
-  
-    // Calculate how much real time has elapsed since playback started
-    const elapsedAudioSeconds = nowAudio - startAt;
-    const elapsedBeats = elapsedAudioSeconds / beatDuration;
-  
-    // Determine the current beat position
-    const currentBeat = startBeat + elapsedBeats;
-  
-    const startWallTime = nowWall - elapsedBeats * beatDuration * 1000; // anchor wall time
-  
-    for (const note of this.matrix.notes) {
-      if (note.start < currentBeat) continue; // note already passed
-  
-      const offsetBeats = note.start - currentBeat;
-      const delay = offsetBeats * beatDuration * 1000;
-  
-      if (delay >= 0) {
-        const timeoutId = setTimeout(() => {
-          this.matrix?.playNoteAnimation(note);
-        }, delay);
-        this._scheduledAnimations.push(timeoutId);
-      }
-    }
-  }  
+    resumeAnimationsFromCurrentTime(
+      this.matrix?.notes ?? [],
+      startAt,
+      startBeat,
+      this.matrix ?? null,
+      this.collapsed,
+      this._scheduledAnimations as unknown[] as number[]
+    );
+  }
   
   async reschedulePlayback(startAt: number, startBeat: number = 0): Promise<void> {
-    if (!this.matrix) return;
-  
-    this.stopScheduledNotes();
-  
-    if (!this._instrument) {
-      await this.initInstrument();
-    }
-  
-    if (this.mute || !this.shouldPlay || !this._instrument?.start) return;
-  
-    const bpm = getTempo();
-    const beatDuration = 60 / bpm;
-    const startWallTime = performance.now(); // anchor for wall-clock animation scheduling
-  
-    const nowAudio = getAudioContext().currentTime;
-  
-    const notes = this.matrix.notes.filter(n => n.start >= startBeat);
-  
-    for (const note of notes) {
-      const midi = pitchToMidi(note.pitch);
-      if (midi === null) continue;
-  
-      const offsetBeats = note.start - startBeat;
-      const noteTime = startAt + offsetBeats * beatDuration; // audio time (s)
-      const duration = note.duration * beatDuration;
-      const velocity = note.velocity ?? 100;
-  
-      if (noteTime <= nowAudio + 0.01) continue; // skip notes in the immediate past
-  
-      try {
-        console.log(`[SEQ:${this.id}] Re-scheduling note ${note.pitch} at ${noteTime.toFixed(3)}`);
-        this._instrument.start({
-          note: midi,
-          time: noteTime,
-          duration,
-          velocity
-        });
-  
-        if (!this.collapsed) {
-          const wallTime = startWallTime + offsetBeats * beatDuration * 1000; // ms
-          const delay = wallTime - performance.now(); // calculate live delay
-  
-          if (delay >= 0) {
-            const timeoutId = setTimeout(() => {
-              this.matrix?.playNoteAnimation(note);
-            }, delay);
-            this._scheduledAnimations.push(timeoutId);
-          }
-        }
-  
-      } catch (err) {
-        console.warn(`[SEQ:${this.id}] Failed to re-schedule note`, note, err);
-      }
-    }
-  }    
+    await reschedulePlayback(
+      this._instrument as Instrument,
+      () => this.initInstrument(),
+      this.matrix?.notes ?? [],
+      this.matrix ?? null,
+      this.collapsed,
+      this.mute,
+      this.shouldPlay,
+      this._scheduledAnimations as unknown[] as number[],
+      startAt,
+      startBeat
+    );
+  }
 
   async exportToOffline(signal?: AbortSignal, notesOverride?: Note[]): Promise<void> {
     const notes = notesOverride ?? this.matrix?.notes;
     if (!notes || notes.length === 0) return;
   
-    const beatToSec = 60 / getTempo();
-  
-    if (signal?.aborted) {
-      console.log('ABORTED Before loading instrument');
-      return;
-    }
-  
-    const instrument = await loadInstrument(
+    await exportNotesToOffline(
       this.instrumentName,
       this.context,
       this.destination,
+      notes,
       this._volume,
-      this._pan
+      this._pan,
+      signal
     );
-  
-    if (signal?.aborted) {
-      console.log('ABORTED Right after loading instrument');
-      return;
-    }
-  
-    for (const note of notes) {
-      if (signal?.aborted) {
-        console.log('ABORTED During note export');
-        return;
-      }
-  
-      const rawStartSec = note.start * beatToSec;
-      const startSec = Math.max(0.01, rawStartSec);
-      const durationSec = note.duration * beatToSec;
-      const velocity = note.velocity ?? 100;
-      const midi = pitchToMidi(note.pitch);
-      if (midi == null) continue;
-  
-      const parts = this.instrumentName.split('/');
-      const library = parts.length >= 3 ? parts[1] : parts[0];
-  
-      const mappedNote = (library === 'drummachines' && instrument.__midiMap)
-        ? instrument.__midiMap.get(midi) ?? midi
-        : midi;
-  
-      try {
-        instrument.start({
-          note: mappedNote,
-          duration: durationSec,
-          velocity,
-          time: startSec,
-          loop: false,
-        });
-      } catch (err) {
-        console.warn(`[SEQ:${this.id}] Failed to start note in export:`, note, err);
-      }
-    }
   }  
 
   // Used by grid when placing/manipulating notes
@@ -408,43 +269,16 @@ export default class Sequencer {
       velocity,
       loop,
       null,
-      this.context,
+      getPreviewContext(),
       this.destination,
       this.volume,
       this.pan
     );
-  }
+  }  
 
   updateTotalMeasures(): void {
     if (!this.matrix) return;
     this.matrix.setMeasures(getTotalMeasures());
-  }
-
-  // Fades the opacity of the track if muted
-  updateTrackStyle(): void {
-    if (!this.container) return;
-  
-    const muteBtn = this.container.querySelector('.mute-btn');
-    const soloBtn = this.container.querySelector('.solo-btn');
-    const body = this.container.querySelector('.sequencer-body');
-    const contour = this.container.querySelector('.mini-contour');
-  
-    // Button styles
-    muteBtn?.classList.toggle('bg-red-600', this.mute);
-    muteBtn?.classList.toggle('bg-gray-700', !this.mute);
-  
-    soloBtn?.classList.toggle('bg-yellow-200', this.solo);
-    soloBtn?.classList.toggle('bg-gray-700', !this.solo);
-  
-    const shouldFade = this.mute && !this.solo;
-  
-    // Fade scrollable grid area
-    body?.classList.toggle('opacity-40', shouldFade);
-    body?.classList.toggle('opacity-100', !shouldFade);
-  
-    // Fade mini contour
-    contour?.classList.toggle('opacity-40', shouldFade);
-    contour?.classList.toggle('opacity-100', !shouldFade);
   }
   
   redraw(): void {
@@ -516,72 +350,28 @@ export default class Sequencer {
    * @param range Tuple of [lowNote, highNote] (e.g., ['C3', 'C5'])
    */
   updateNoteRange(range: [string, string]): void {
-    if (!this.matrix) return;
-
-    // Validate the range
-    const [lowNote, highNote] = range;
-    const lowMidi = pitchToMidi(lowNote);
-    const highMidi = pitchToMidi(highNote);
-
-    if (lowMidi === null || highMidi === null) {
-      console.warn(`Invalid note range: ${range}`);
-      return;
-    }
-
-    if (lowMidi >= highMidi) {
-      console.warn(`Invalid note range: low note must be lower than high note`);
-      return;
-    }
-
-    // Update the config
-    this.config.noteRange = range;
-    this.config.visibleNotes = midiRangeBetween(highNote, lowNote) + 1;
-
-    // Update mini contour
-    const miniCanvas = this.container?.querySelector('.mini-contour') as HTMLCanvasElement;
-    if (miniCanvas) {
-      drawMiniContour(miniCanvas, this.matrix.notes, this.config, this.colorIndex);
-    }
-
-    this.matrix.setNoteRange(lowMidi, highMidi);
+    updateNoteRange({
+      config: this.config,
+      container: this.container,
+      matrix: this.matrix!,
+      instrumentName: this.instrumentName,
+      colorIndex: this.colorIndex,
+      getNotes: () => this.matrix?.notes ?? []
+    }, range);
   }
-
+  
+  // Updates the note range for this sequencer to the default drum note range
   updateToDrumNoteRange(): void {
-    if (!this.instrumentName.toLowerCase().includes('drum kit')) {
-      this.updateNoteRange(['A0', 'C9']);
-      this.matrix?.setCustomLabels(null);
-    } else {
-      this.updateNoteRange(['B1', 'A5']);
-      this.matrix?.setCustomLabels(DRUM_MIDI_TO_NAME);
-    }
+    updateToDrumNoteRange({
+      config: this.config,
+      container: this.container,
+      matrix: this.matrix!,
+      instrumentName: this.instrumentName,
+      colorIndex: this.colorIndex,
+      getNotes: () => this.matrix?.notes ?? []
+    });
   }
   
-  setCollapsed(val: boolean): void {
-    this.collapsed = val;
-  
-    if (val) {
-      // Prevent animation rendering
-      this.animationCanvas?.classList.add('hidden');
-  
-      // Cancel pending animation timeouts
-      for (const timeoutId of this._scheduledAnimations) {
-        clearTimeout(timeoutId);
-      }
-      this._scheduledAnimations = [];
-  
-    } else {
-      this.animationCanvas?.classList.remove('hidden');
-  
-      // If we are playing, re-schedule animations from the current time
-      if (playbackEngine.isActive()) {
-        this.resumeAnimationsFromCurrentTime(
-          playbackEngine.getStartTime(),
-          playbackEngine.getStartBeat()
-        );
-      }
-    }
-  }  
-
   destroy(): void {
     this.stopScheduledNotes();
     this.container?.remove();
