@@ -124,7 +124,6 @@ export async function loadInstrument(
     });
     instrument.__midiMap = midiMap;
   }
-  
 
   // === Augment with volume and pan setters ===
   const inst = instrument as Instrument;

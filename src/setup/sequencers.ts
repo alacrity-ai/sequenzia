@@ -13,7 +13,7 @@ import { getAppState, setAppState } from '../appState/appState.js';
 import { clearHistory } from '../appState/stateHistory.js';
 import { notifyStateUpdated } from '../appState/onStateUpdated.js';
 import { SEQUENCER_CONFIG as config } from '../sequencer/constants/sequencerConstants.js';
-import type { SequencerState } from '../appState/interfaces/AppState.js';
+import type { AppState, SequencerState } from '../appState/interfaces/AppState.js';
 
 export const sequencers: Sequencer[] = [];
 
@@ -162,7 +162,7 @@ export function getSequencerById(id: number): Sequencer | undefined {
   return sequencers.find(seq => seq.id === targetId);
 }
 
-export function destroyAllSequencers(): void {
+export function destroyAllSequencers(): AppState {
   sequencers.slice().forEach(seq => seq.destroy());
   sequencers.length = 0;
 
@@ -171,8 +171,9 @@ export function destroyAllSequencers(): void {
   newState.sequencers = [];
 
   clearHistory();
-  setAppState(newState);
+  setAppState(newState); // Sets the appstate
   notifyStateUpdated(newState);
+  return newState;
 }
 
 export function setupAddTrackButton(): void {

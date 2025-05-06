@@ -381,6 +381,7 @@ export default class Sequencer {
   
   destroy(): void {
     this.stopScheduledNotes();
+    this.matrix?.destroy();
     this.container?.remove();
   }
 }

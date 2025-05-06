@@ -1,9 +1,16 @@
 import { getTempo } from '../transport.js';
 import { pitchToMidi } from '../matrix/utils/noteUtils.js';
 import { getAudioContext } from '../../sounds/audio/audio.js';
+import { startInstrumentNote } from '../../sounds/utils/startInstrumentNote.js';
 import type { Note } from '../interfaces/Note.js';
 import type { Instrument } from '../../sounds/interfaces/Instrument.js';
 import type { Grid } from '../matrix/Grid.js';
+
+export interface ScheduledNoteHandle {
+    sourceNode?: AudioBufferSourceNode;
+    cancel?: () => void;
+  }
+  
 
 export function stopScheduledNotes(
   instrument: Instrument | null,
@@ -58,24 +65,22 @@ export async function preparePlayback(
     const duration = note.duration * beatDuration;
     const velocity = note.velocity ?? 100;
 
-    try {
-      instrument.start({
-        note: midi,
+    startInstrumentNote({
+        instrument,
+        midi,
         time: noteTime,
         duration,
         velocity
       });
-
-      if (!collapsed) {
+  
+    if (!collapsed) {
         const wallTime = startWallTime + offsetBeats * beatDuration * 1000;
         const delay = Math.max(0, wallTime - performance.now());
         const timeoutId = setTimeout(() => {
-          matrix?.playNoteAnimation(note);
+            matrix?.playNoteAnimation(note);
         }, delay) as unknown as number;;
+    
         scheduledAnimations.push(timeoutId);
-      }
-    } catch (err) {
-      console.warn('[playback] Failed to schedule note:', note, err);
     }
   }
 }
@@ -109,6 +114,7 @@ export function resumeAnimationsFromCurrentTime(
       const timeoutId = setTimeout(() => {
         matrix?.playNoteAnimation(note);
       }, delay) as unknown as number;;
+      
       scheduledAnimations.push(timeoutId);
     }
   }
@@ -154,25 +160,22 @@ export async function reschedulePlayback(
     const duration = note.duration * beatDuration;
     const velocity = note.velocity ?? 100;
 
-    try {
-      instrument.start({
-        note: midi,
+    startInstrumentNote({
+        instrument,
+        midi,
         time: noteTime,
         duration,
         velocity
       });
 
-      if (!collapsed) {
+    if (!collapsed) {
         const wallTime = startWallTime + offsetBeats * beatDuration * 1000;
         const delay = Math.max(0, wallTime - performance.now());
         const timeoutId = setTimeout(() => {
-          matrix?.playNoteAnimation(note);
+            matrix?.playNoteAnimation(note);
         }, delay) as unknown as number;;
+        
         scheduledAnimations.push(timeoutId);
-      }
-
-    } catch (err) {
-      console.warn('[playback] Failed to re-schedule note:', note, err);
     }
   }
 }

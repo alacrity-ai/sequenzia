@@ -2,9 +2,11 @@
 
 import { updateTempo, updateTimeSignature, updateTotalMeasures, getTempo, getTotalMeasures } from '../sequencer/transport.js';
 import { destroyAllSequencers, sequencers } from '../setup/sequencers.js';
+import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../appState/diffEngine/types/sequencer/deleteSequencer.js';
 import { collapseAllSequencers } from '../helpers.js';
 import { refreshGlobalMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
 import { drawGlobalPlayhead } from '../playhead/global-playhead.js';
+import { engine as playbackEngine } from '../main.js';
 import { recordDiff } from '../appState/appState.js';
 import { createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
 import { createCheckpointDiff, createReverseCheckpointDiff } from '../appState/diffEngine/types/internal/checkpoint.js';
@@ -17,6 +19,10 @@ import { GlobalConfig } from '../userconfig/interfaces/GlobalConfig.js';
  * @param globalConfig - The imported global configuration
  */
 export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): void {
+  if (playbackEngine.isActive()) {
+    void playbackEngine.pause();
+  }  
+
   // Update global tempo, time signature, measures
   updateTempo(globalConfig.bpm);
   updateTimeSignature(globalConfig.beatsPerMeasure);
@@ -30,7 +36,26 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
   if (measuresInput) measuresInput.value = String(getTotalMeasures());
 
   // Destroy current sequencers
-  destroyAllSequencers();
+  // destroyAllSequencers();
+
+  for (const seq of sequencers.slice()) {
+    recordDiff(
+      createDeleteSequencerDiff(
+        seq.id,
+        seq.instrumentName,
+        seq.matrix?.getNoteManager().getAll() ?? [],
+        seq.volume,
+        seq.pan
+      ),
+      createReverseDeleteSequencerDiff(
+        seq.id,
+        seq.instrumentName,
+        seq.matrix?.getNoteManager().getAll() ?? [],
+        seq.volume,
+        seq.pan
+      )
+    );
+  }
 
   // Create new sequencers from imported tracks
   for (const [i, state] of tracks.entries()) {
@@ -59,6 +84,7 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
     createCheckpointDiff('Session Loaded'),
     createReverseCheckpointDiff('Session Loaded')
   );
+  playbackEngine.setSequencers(sequencers);
 
   collapseAllSequencers();
   const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
