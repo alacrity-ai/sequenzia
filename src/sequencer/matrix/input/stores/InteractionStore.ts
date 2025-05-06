@@ -151,4 +151,15 @@ export class InteractionStore {
   public isActivelyDragging(): boolean {
     return this.isDraggingNotes || this.isInitiatingSelectionDrag;
   }
+
+  // ---- Just Deleted a note
+  private lastDeletionTime: number = 0;
+
+  setLastDeletionTime(): void {
+    this.lastDeletionTime = performance.now();
+  }
+
+  getLastDeletionTime(): number {
+    return this.lastDeletionTime;
+  }
 }

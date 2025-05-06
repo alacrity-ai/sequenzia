@@ -22,8 +22,8 @@ import { recordDiff } from '../../../../appState/appState.js';
 export class DefaultNoteToolHandler implements GridInteractionHandler {
     private initialMouseX: number = 0;
     private initialMouseY: number = 0;
-    private readonly dragThreshold: number = 10; // Set high for testing
-
+    private readonly dragThreshold: number = 10;
+    
     constructor(
       private readonly canvas: HTMLCanvasElement,
       private readonly noteManager: NoteManager,
@@ -145,6 +145,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
     public onMouseUp(e: MouseEvent): void {
       if (e.button !== 0) return;
 
+      // Guard against clicking on scrollbar or another non-grid element
       if (this.store.isOnNonGridElement()) {
         this.store.setSnappedCursorGridPosition(null);
         this.store.setHoveredNoteKey(null);
@@ -160,6 +161,10 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
       // First: are we hovering over a note? Then select it instead of placing
       const hoveredKey = this.store.getHoveredNoteKey();
       if (hoveredKey) {
+        // Guard against Chrome mouseup registering as left click even on right click
+        if (performance.now() - this.store.getLastDeletionTime() < 100) {
+          return;
+        }        
         const [pitch, start] = hoveredKey.split(':');
         const selectedNote = this.noteManager.findAtPosition(pitch, Number(start));
         if (selectedNote) {
@@ -208,7 +213,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
     // Right click: Delete note
     public onContextMenu(e: MouseEvent): void {
       e.preventDefault(); // Suppress native context menu
-    
+
       if (this.store.isOnNonGridElement()) return;
     
       // Use hovered note key, not snapped position
@@ -226,6 +231,8 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
         createDeleteNotesDiff(this.getSequencerId(), [noteToDelete]),
         createReverseDeleteNotesDiff(this.getSequencerId(), [noteToDelete])
       );
+
+      this.store.setLastDeletionTime();
     }
   
     public onMouseLeave(): void {
@@ -249,8 +256,9 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
     }
     
     public onEnter(): void {
-      // Optional: change cursor/tool indicator
+      // Stub
     }
+
     public onExit(): void {
       // Clear both preview and hovered note state
       this.store.setSnappedCursorGridPosition(null);
