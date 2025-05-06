@@ -50,6 +50,6 @@ export function setupSequencerGripHandler(
  * Shows or hides the vertical grip resizer for the sequencer.
  */
 export function toggleSequencerGripHandle(wrapper: HTMLElement, show: boolean): void {
-    wrapper.querySelector('.cursor-grab')?.classList.toggle('hidden', !show);
-  }
+  wrapper.querySelector('.cursor-grab')?.classList.toggle('hidden', !show);
+}
   

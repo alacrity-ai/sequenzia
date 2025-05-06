@@ -1,6 +1,6 @@
 // src/sequencer/matrix/utils/pruneNotesToTimeline.ts
 
-import { Note } from '../../interfaces/Note.js';
+import { Note } from '../../../shared/interfaces/Note.js';
 
 export function pruneNotesToTimeline(notes: Note[], totalBeats: number): Note[] {
     return notes

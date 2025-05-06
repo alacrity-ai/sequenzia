@@ -1,10 +1,10 @@
 // src/sequencer/services/rangeUpdateService.ts
 
-import { pitchToMidi, midiRangeBetween } from '../matrix/utils/noteUtils.js';
+import { pitchToMidi, midiRangeBetween } from '../../shared/utils/musical/noteUtils.js';
 import { drawMiniContour } from '../ui/renderers/drawMiniContour.js';
 import { DRUM_MIDI_TO_NAME } from '../../sounds/loaders/constants/drums.js';
 import type { Grid } from '../matrix/Grid.js';
-import type { Note } from '../interfaces/Note.js';
+import type { Note } from '../../shared/interfaces/Note.js';
 import type { SequencerConfig } from '../interfaces/SequencerConfig.js';
 
 interface RangeUpdateContext {

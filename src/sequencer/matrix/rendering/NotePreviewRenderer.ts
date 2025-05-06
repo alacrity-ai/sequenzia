@@ -1,7 +1,7 @@
 // src/sequencer/matrix/rendering/NotePreviewRenderer.ts
 
 import { drawRoundedRect } from '../utils/roundedRect.js';
-import { noteToMidi } from '../utils/noteUtils.js';
+import { noteToMidi } from '../../../shared/utils/musical/noteUtils.js';
 
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';

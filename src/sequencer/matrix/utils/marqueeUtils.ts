@@ -1,11 +1,9 @@
 // src/sequencer/matrix/utils/gridPosition.ts
-import { pitchToMidi } from '../../../sounds/audio/pitch-utils.js';
-import { rowToNote } from './noteUtils.js';
-import { noteToRowIndex } from './noteUtils.js';
+import { noteToRowIndex } from '../../../shared/utils/musical/noteUtils.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { GridSnappingContext } from '../interfaces/GridSnappingContext.js';
-import type { Note } from '../../interfaces/Note.js';
+import type { Note } from '../../../shared/interfaces/Note.js';
 
 interface MarqueeSelectionBox {
   startX: number;

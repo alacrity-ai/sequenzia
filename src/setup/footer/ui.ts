@@ -214,65 +214,64 @@ export function setupUI({
     }
   });
 
-
-// === Export Type Modal Buttons ===
-if (exportJsonBtn) {
-  exportJsonBtn.addEventListener('click', () => {
-    exportModal?.classList.add('hidden');
-    onSave?.('json');
-  });
-}
-
-if (exportWavBtn) {
-  exportWavBtn.addEventListener('click', () => {
-    exportModal?.classList.add('hidden');
-    requestAnimationFrame(() => {
-      onSave?.('wav');
+  // === Export Type Modal Buttons ===
+  if (exportJsonBtn) {
+    exportJsonBtn.addEventListener('click', () => {
+      exportModal?.classList.add('hidden');
+      onSave?.('json');
     });
-  });
-}
-
-if (exportMidiBtn) {
-  exportMidiBtn.addEventListener('click', () => {
-    exportModal?.classList.add('hidden');
-    onSave?.('midi');
-  });
-}
-
-if (exportCancelBtn) {
-  exportCancelBtn.addEventListener('click', () => {
-    exportModal?.classList.add('hidden');
-  });
-}
-
-// === User Config Button ===
-configBtn?.addEventListener('click', () => {
-  const configModal = document.getElementById('userconfig-modal') as HTMLElement | null;
-  configModal?.classList.remove('hidden');
-});
-
-// Initialize the User Config Modal
-initConfigModal();
-
-// Initialize Footer Bar inputs with correct values
-if (measuresInput) measuresInput.value = String(getTotalMeasures());
-if (beatsPerMeasureInput) beatsPerMeasureInput.value = String(getTimeSignature());
-
-measuresInput?.addEventListener('change', (e: Event) => {
-  const target = e.target as HTMLInputElement;
-  const measures = parseInt(target.value, 10);
-  if (!isNaN(measures) && measures > 0) {
-    onMeasuresChange?.(measures);
   }
-});
 
-beatsPerMeasureInput?.addEventListener('change', (e: Event) => {
-  const target = e.target as HTMLInputElement;
-  const beats = parseInt(target.value, 10);
-  if (!isNaN(beats) && beats > 0) {
-    onBeatsPerMeasureChange?.(beats);
+  if (exportWavBtn) {
+    exportWavBtn.addEventListener('click', () => {
+      exportModal?.classList.add('hidden');
+      requestAnimationFrame(() => {
+        onSave?.('wav');
+      });
+    });
   }
-});
+
+  if (exportMidiBtn) {
+    exportMidiBtn.addEventListener('click', () => {
+      exportModal?.classList.add('hidden');
+      onSave?.('midi');
+    });
+  }
+
+  if (exportCancelBtn) {
+    exportCancelBtn.addEventListener('click', () => {
+      exportModal?.classList.add('hidden');
+    });
+  }
+
+  // === User Config Button ===
+  configBtn?.addEventListener('click', () => {
+    const configModal = document.getElementById('userconfig-modal') as HTMLElement | null;
+    configModal?.classList.remove('hidden');
+  });
+
+  // Initialize the User Config Modal
+  initConfigModal();
+
+  // Initialize Footer Bar inputs with correct values
+  if (measuresInput) measuresInput.value = String(getTotalMeasures());
+  if (beatsPerMeasureInput) beatsPerMeasureInput.value = String(getTimeSignature());
+
+  measuresInput?.addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const measures = parseInt(target.value, 10);
+    if (!isNaN(measures) && measures > 0) {
+      onMeasuresChange?.(measures);
+    }
+  });
+
+  beatsPerMeasureInput?.addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const beats = parseInt(target.value, 10);
+    if (!isNaN(beats) && beats > 0) {
+      onBeatsPerMeasureChange?.(beats);
+    }
+  });
 }
 
 // =========================

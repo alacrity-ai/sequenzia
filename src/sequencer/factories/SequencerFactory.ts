@@ -10,7 +10,8 @@ import { recordDiff } from '../../appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from '../../appState/diffEngine/types/sequencer/createSequencer.js';
 import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../../appState/diffEngine/types/sequencer/deleteSequencer.js';
 import { SEQUENCER_CONFIG as config } from '../constants/sequencerConstants.js';
-import { initZoomControls, toggleZoomControls } from '../ui/controls/zoomControls.js';
+import { initZoomControls } from '../ui/controls/zoomControls.js';
+import { setCollapsed } from '../ui/helpers/setCollapsed.js';
 
 import { ListenerRegistry } from '../../setup/stores/ListenerRegistry.js';
 import type { SequencerState } from '../../appState/interfaces/AppState.js';
@@ -54,6 +55,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   }
   drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
 
+  seq.miniContour = mini;
   seq.updateTrackLabel();
   seq.initInstrument();
 
@@ -63,14 +65,11 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   const collapseBtn = wrapper.querySelector('.collapse-btn') as HTMLElement;
   const collapseIcon = collapseBtn.querySelector('use')!;
   const body = wrapper.querySelector('.sequencer-body') as HTMLElement;
+  seq.body = body;
+  seq.collapseIcon = collapseIcon;
 
   registry.on(collapseBtn, 'click', () => {
-    const hidden = body.classList.toggle('hidden');
-    collapseIcon.setAttribute('href', hidden ? '#icon-caret-up' : '#icon-caret-down');
-    mini.classList.toggle('hidden', !hidden);
-    // toggleZoomControls(wrapper, !hidden);
-    seq.setCollapsed(hidden);
-    if (hidden) drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
+    setCollapsed(seq, !seq.collapsed);
   });
 
   const deleteBtn = wrapper.querySelector('.delete-btn') as HTMLElement;

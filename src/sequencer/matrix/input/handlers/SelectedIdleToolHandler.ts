@@ -3,7 +3,7 @@
 import type { GridInteractionHandler } from '../interfaces/GridInteractionHandler.js';
 import type { GridScroll } from '../../scrollbars/GridScroll.js';
 import type { GridConfig } from '../../interfaces/GridConfigTypes.js';
-import type { Note } from '../../../interfaces/Note.js';
+import type { Note } from '../../../../shared/interfaces/Note.js';
 import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.js';
 import type { InteractionStore } from '../stores/InteractionStore.js';
 import type { InteractionController } from '../interfaces/InteractionController.js';
@@ -16,7 +16,7 @@ import { getRelativeMousePos } from '../../utils/gridPosition.js';
 import { getSnappedNotePosition } from '../../utils/snapPosition.js';
 import { getRawBeatFromEvent, getSnappedFromEvent } from '../../utils/snapping.js';
 
-import { rowToNote } from '../../utils/noteUtils.js';
+import { rowToNote } from '../../../../shared/utils/musical/noteUtils.js';
 import { recordDiff } from '../../../../appState/appState.js';
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../../appState/diffEngine/types/grid/deleteNotes.js';
 import { NoteManager } from '../../notes/NoteManager.js';

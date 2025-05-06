@@ -1,7 +1,7 @@
 // src/test/utils.ts
 
 import { vi } from 'vitest';
-import { Note } from '../sequencer/interfaces/Note';
+import { Note } from '../shared/interfaces/Note';
 import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig';
 
 /**

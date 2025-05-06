@@ -1,4 +1,4 @@
-import { Note } from './Note.js';
+import { Note } from '../../shared/interfaces/Note.js';
 
 export interface Clipboard {
   notes: Note[];

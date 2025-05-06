@@ -21,15 +21,17 @@ import { LabelColumnRenderer } from './rendering/LabelColumnRenderer.js';
 import { MarqueeRenderer } from './rendering/MarqueeRenderer.js';
 import { SEQUENCER_CONFIG as sequencerConfig } from '../constants/sequencerConstants.js';
 import { setClipboard, getClipboard } from '../clipboard.js';
-import { computeBlackKeyMidiMap } from './utils/noteUtils.js';
-
 import { EventEmitter } from './events/EventEmitter.js';
+
 import type { GridEvents } from './interfaces/GridEvents.js';
-import type { Note } from '../interfaces/Note.js';
 import type { TrackedNote } from './interfaces/TrackedNote.js';
 import type { InteractionContextData } from './input/interfaces/InteractionContextData.js';
 import type { GridSnappingContext } from './interfaces/GridSnappingContext.js';
 import type { SequencerContext } from './interfaces/SequencerContext.js';
+
+import type { Note } from '../../shared/interfaces/Note.js';
+import { computeBlackKeyMidiMap } from '../../shared/utils/musical/noteUtils.js'
+
 
 export class Grid {
   private gridManager: GridManager;

@@ -5,7 +5,7 @@ import type { GridConfig } from '../../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../../scrollbars/GridScroll.js';
 import type { InteractionStore } from '../stores/InteractionStore.js';
 import type { NoteManager } from '../../notes/NoteManager.js';
-import type { Note } from '../../../interfaces/Note.js';
+import type { Note } from '../../../../shared/interfaces/Note.js';
 import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.js';
 import type { InteractionController } from '../interfaces/InteractionController.js';
 import type { CursorController } from '../cursor/CursorController.js';
@@ -15,7 +15,7 @@ import { CursorState } from '../interfaces/CursorState.js';
 import { InteractionMode } from '../interfaces/InteractionEnum.js';
 import { getRelativeMousePos } from '../../utils/gridPosition.js';
 import { getSnappedNotePosition } from '../../utils/snapPosition.js';
-import { rowToNote, noteToMidi, midiToPitch } from '../../utils/noteUtils.js';
+import { rowToNote, noteToMidi, midiToPitch } from '../../../../shared/utils/musical/noteUtils.js';
 import { createMoveNotesDiff, createReverseMoveNotesDiff } from '../../../../appState/diffEngine/types/grid/moveNotes.js';
 import { recordDiff } from '../../../../appState/appState.js';
 

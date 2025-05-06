@@ -1,7 +1,7 @@
 import { loadInstrument } from '../../sounds/instrument-loader.js';
-import { pitchToMidi } from '../matrix/utils/noteUtils.js';
+import { pitchToMidi } from '../../shared/utils/musical/noteUtils.js';
 import { getTempo } from '../transport.js';
-import type { Note } from '../interfaces/Note.js';
+import type { Note } from '../../shared/interfaces/Note.js';
 
 export async function exportNotesToOffline(
   instrumentName: string,

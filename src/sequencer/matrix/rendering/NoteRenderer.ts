@@ -7,7 +7,7 @@ import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
 import { drawRoundedRect } from '../utils/roundedRect.js';
 import { createVisibleNotesFilter } from '../utils/createNoteVisibilityFilter.js'
-import { noteToRowIndex, getPitchClassIndex } from '../utils/noteUtils.js';
+import { noteToRowIndex, getPitchClassIndex } from '../../../shared/utils/musical/noteUtils.js';
 import { NOTE_COLOR_SCHEMES } from './colors/noteColorSchemes.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
 import { getTrackColor } from './colors/helpers/getTrackColor.js';

@@ -1,6 +1,6 @@
 // src/appState/interfaces/AppState.ts
 
-import { Note } from '../../sequencer/interfaces/Note.js';
+import { Note } from '../../shared/interfaces/Note.js';
 import { SequencerConfig } from '../../sequencer/interfaces/SequencerConfig.js';
 
 export interface SequencerState {

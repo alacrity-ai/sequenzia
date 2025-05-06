@@ -1,6 +1,6 @@
 // src/sequencer/matrix/notes/NoteManager.ts
 
-import type { Note } from '../../interfaces/Note.js';
+import type { Note } from '../../../shared/interfaces/Note.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { SequencerContext } from '../interfaces/SequencerContext.js';

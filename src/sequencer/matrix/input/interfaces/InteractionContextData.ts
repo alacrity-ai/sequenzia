@@ -6,7 +6,7 @@ import type { InteractionStore } from '../stores/InteractionStore.js';
 import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.js';
 import type { SequencerContext } from '../../interfaces/SequencerContext.js';
 import type { CursorController } from '../cursor/CursorController.js';
-import type { Note } from '../../../interfaces/Note.js';
+import type { Note } from '../../../../shared/interfaces/Note.js';
 import type { Clipboard } from '../../../interfaces/Clipboard.js';
 import { NoteManager } from '../../notes/NoteManager.js';
 

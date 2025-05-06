@@ -1,6 +1,6 @@
 // src/sequencer/matrix/interfaces/GridEvents.ts
 
-import type { Note } from '../../interfaces/Note.js';
+import type { Note } from '../../../shared/interfaces/Note.js';
 
 export type GridEvents = {
   notePlaced: Note;

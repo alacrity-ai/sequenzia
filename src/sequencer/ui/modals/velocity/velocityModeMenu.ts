@@ -1,6 +1,6 @@
 // src/sequencer/grid/interaction/velocity/velocityModeMenu.ts
 
-import type { Note } from '../../../interfaces/Note.js';
+import type { Note } from '../../../../shared/interfaces/Note.js';
 import { applyVelocityChange } from './velocityService.js';
 
 let currentNotes: Note[] = [];

@@ -3,7 +3,7 @@
 import { pitchToMidi } from '../../../sounds/audio/pitch-utils.js';
 import { TRACK_COLORS } from '../../matrix/rendering/colors/constants/trackColors.js';
 import { getTotalBeats, getTimeSignature, getTotalMeasures } from '../../transport.js';
-import { Note } from '../../interfaces/Note.js';
+import { Note } from '../../../shared/interfaces/Note.js';
 
 interface Sequencer {
   notes: Note[];

@@ -1,7 +1,7 @@
 // src/sequencer/matrix/utils/transformPastedNotes.ts
 
-import type { Note } from '../../interfaces/Note.js';
-import { noteToMidi, midiToPitch } from './noteUtils.js';
+import type { Note } from '../../../shared/interfaces/Note.js';
+import { noteToMidi, midiToPitch } from '../../../shared/utils/musical/noteUtils.js';
 import { getTotalBeats } from '../../transport.js';
 
 interface PasteTransformOptions {

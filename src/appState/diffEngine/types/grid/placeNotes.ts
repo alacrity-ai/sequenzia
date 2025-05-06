@@ -2,7 +2,7 @@
 
 import { AppState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
-import { Note } from '../../../../sequencer/interfaces/Note.js';
+import { Note } from '../../../../shared/interfaces/Note.js';
 
 /**
  * Applies a PLACE_NOTES diff to add notes to a sequencer.

@@ -19,7 +19,7 @@ import {
   createReverseResizeNotesDiff
 } from '../../../../appState/diffEngine/types/grid/resizeNotes.js';
 import { InteractionMode } from '../interfaces/InteractionEnum.js';
-import type { Note } from '../../../interfaces/Note.js';
+import type { Note } from '../../../../shared/interfaces/Note.js';
 
 export class SizingToolHandler implements GridInteractionHandler {
   private originalNotes: Note[] = [];

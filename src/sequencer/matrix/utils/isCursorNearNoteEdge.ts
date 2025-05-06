@@ -1,4 +1,4 @@
-import type { Note } from '../../interfaces/Note.js';
+import type { Note } from '../../../shared/interfaces/Note.js';
 
 /**
  * Determines if the cursor is near the right edge of a given note.

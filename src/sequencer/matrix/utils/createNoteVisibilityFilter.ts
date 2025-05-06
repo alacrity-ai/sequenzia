@@ -2,7 +2,7 @@
 
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
-import { noteToRowIndex } from './noteUtils.js';
+import { noteToRowIndex } from '../../../shared/utils/musical/noteUtils.js';
 
 
 /**

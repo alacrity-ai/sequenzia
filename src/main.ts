@@ -1,4 +1,7 @@
 // src/main.ts
+import { logMessage } from './shared/logging/logger.js';
+import { devLog } from './shared/state/devMode.js';
+import { registerDevTools } from './shared/dev/devTools.js';
 import { hideSplashScreen } from './global/splashscreen.js';
 import { setupHeaderModeToggler } from './global/headerModeToggler.js';
 import { setupGlobalUndoRedo } from './global/undo-redo.js';
@@ -43,6 +46,9 @@ import {
 // === Immediately show splash screen //
 showSplashScreen();
 
+// === Dev Mode Toggle
+registerDevTools();
+
 // === Playback Engine
 import { PlaybackEngine } from './sequencer/playback.js';
 export const engine = new PlaybackEngine(getSequencers());
@@ -79,7 +85,7 @@ setupKeyboard(pianoCanvas);
 // === Visualizer ===
 const waveform = document.getElementById('waveform') as HTMLCanvasElement;
 const visualizerMode = document.getElementById('visualizer-mode') as HTMLButtonElement;
-const visualizer = setupVisualizer(waveform, visualizerMode);
+void setupVisualizer(waveform, visualizerMode);
 
 // Lock in the initial application state so undo never goes before this point
 recordDiff(
@@ -193,3 +199,7 @@ setupUI({
 });
 
 hideSplashScreen();
+logMessage('Sequenzia initialized');
+devLog('Current config: ', config);
+devLog('Current sequencers: ', sequencers[0]);
+devLog('Current state: ', getAppState());

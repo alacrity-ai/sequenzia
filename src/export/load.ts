@@ -3,7 +3,7 @@
 import { TrackData } from '../sequencer/interfaces/Track.js';
 import { GlobalConfig } from '../userconfig/interfaces/GlobalConfig.js';
 import { Session } from '../sequencer/interfaces/Session.js';
-import { Note } from '../sequencer/interfaces/Note.js';
+import { Note } from '../shared/interfaces/Note.js';
 import { TrackTuple, NoteTuple } from '../sequencer/interfaces/TrackTuple.js';
 
 /**

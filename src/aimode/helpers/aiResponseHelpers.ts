@@ -1,4 +1,4 @@
-import { Note } from '../../sequencer/interfaces/Note.js';
+import { Note } from '../../shared/interfaces/Note.js';
 import { Track } from '../../sequencer/interfaces/Track.js';
 
 interface AIParsedResponse {

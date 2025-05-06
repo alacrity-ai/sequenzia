@@ -2,8 +2,8 @@
 
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
-import type { Note } from '../../interfaces/Note.js';
-import { pitchToMidi } from '../utils/noteUtils.js';
+import type { Note } from '../../../shared/interfaces/Note.js';
+import { pitchToMidi } from '../../../shared/utils/musical/noteUtils.js';
 import { getTempo } from '../../transport.js';
 
 interface ActiveNoteAnimation {

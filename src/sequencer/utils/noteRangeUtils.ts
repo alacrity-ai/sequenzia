@@ -1,6 +1,6 @@
-import { pitchToMidi, midiRangeBetween } from '../matrix/utils/noteUtils.js';
+import { pitchToMidi, midiRangeBetween } from '../../shared/utils/musical/noteUtils.js';
 import type { SequencerConfig } from '../interfaces/SequencerConfig.js';
-import type { Note } from '../interfaces/Note.js';
+import type { Note } from '../../shared/interfaces/Note.js';
 
 export function validateNoteRange(low: string, high: string): [number, number] | null {
   const lowMidi = pitchToMidi(low);

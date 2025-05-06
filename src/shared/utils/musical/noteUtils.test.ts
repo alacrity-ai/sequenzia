@@ -5,10 +5,9 @@ import {
   pitchToMidi,
   midiToPitch,
   noteToMidi,
-  noteToFrequency,
   getPitchClass,
   isBlackKey,
-} from './pitch-utils';
+} from './noteUtils.js';
 
 describe('pitch-utils', () => {
   describe('pitchToMidi', () => {
@@ -66,27 +65,6 @@ describe('pitch-utils', () => {
       expect(noteToMidi('R2')).toBeNull();
       expect(noteToMidi(null as unknown as string)).toBeNull();
       expect(noteToMidi(undefined as unknown as string)).toBeNull();
-    });
-  });
-
-  describe('noteToFrequency', () => {
-    it('should compute frequency correctly using equal temperament', () => {
-      expect(noteToFrequency('A4')).toBeCloseTo(440, 5);
-      expect(noteToFrequency('C4')).toBeCloseTo(261.63, 1);
-      expect(noteToFrequency('A3')).toBeCloseTo(220, 5);
-    });
-
-    it('should compute frequency correctly using well temperament', () => {
-      const freq = noteToFrequency('A4', { useEqualTemperament: false });
-      expect(freq).toBeCloseTo(440, 5); // A4 has 0 cents offset
-
-      const c4Freq = noteToFrequency('C4', { useEqualTemperament: false });
-      expect(c4Freq).toBeLessThan(261.63); // C4 slightly lower than ET
-    });
-
-    it('should return null for invalid notes', () => {
-      expect(noteToFrequency('')).toBeNull();
-      expect(noteToFrequency(null as unknown as string)).toBeNull();
     });
   });
 

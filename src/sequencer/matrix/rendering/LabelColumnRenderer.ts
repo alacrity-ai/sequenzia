@@ -2,8 +2,8 @@
 
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
-import { rowToNote } from '../utils/noteUtils.js';
-import { computeBlackKeyMidiMap } from '../utils/noteUtils.js';
+import { rowToNote } from '../../../shared/utils/musical/noteUtils.js';
+import { computeBlackKeyMidiMap } from '../../../shared/utils/musical/noteUtils.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
 import { GRID_COLOR_SCHEMES } from '../rendering/colors/constants/colorSchemes.js';
 

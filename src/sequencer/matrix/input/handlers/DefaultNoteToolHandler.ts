@@ -4,7 +4,7 @@ import type { GridInteractionHandler } from '../interfaces/GridInteractionHandle
 import type { InteractionStore } from '../stores/InteractionStore.js';
 import type { GridScroll } from '../../scrollbars/GridScroll.js';
 import type { GridConfig } from '../../interfaces/GridConfigTypes.js';
-import type { Note } from '../../../interfaces/Note.js';
+import type { Note } from '../../../../shared/interfaces/Note.js';
 import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.js';
 import type { InteractionController } from '../interfaces/InteractionController.js';
 import type { CursorController } from '../cursor/CursorController.js';
@@ -14,7 +14,7 @@ import { abortIfOutOfGridBounds } from '../../utils/gridGuards.js';
 import { CursorState } from '../interfaces/CursorState.js';
 import { InteractionMode } from '../interfaces/InteractionEnum.js';
 import { NoteManager } from '../../notes/NoteManager.js';
-import { rowToNote } from '../../utils/noteUtils.js';
+import { rowToNote } from '../../../../shared/utils/musical/noteUtils.js';
 import { createPlaceNotesDiff, createReversePlaceNotesDiff } from '../../../../appState/diffEngine/types/grid/placeNotes.js';
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../../appState/diffEngine/types/grid/deleteNotes.js';
 import { recordDiff } from '../../../../appState/appState.js';

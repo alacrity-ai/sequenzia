@@ -1,8 +1,8 @@
 import { getTempo } from '../transport.js';
-import { pitchToMidi } from '../matrix/utils/noteUtils.js';
+import { pitchToMidi } from '../../shared/utils/musical/noteUtils.js';
 import { getAudioContext } from '../../sounds/audio/audio.js';
 import { startInstrumentNote } from '../../sounds/utils/startInstrumentNote.js';
-import type { Note } from '../interfaces/Note.js';
+import type { Note } from '../../shared/interfaces/Note.js';
 import type { Instrument } from '../../sounds/interfaces/Instrument.js';
 import type { Grid } from '../matrix/Grid.js';
 

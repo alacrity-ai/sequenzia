@@ -1,6 +1,6 @@
 // src/sequencer/interfaces/Track.ts
 
-import { Note } from './Note.js';
+import { Note } from '../../shared/interfaces/Note.js';
 
 export interface Track {
   n: Note[];

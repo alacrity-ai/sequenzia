@@ -1,6 +1,6 @@
 // src/sequencer/matrix/input/stores/InteractionStore.ts
   
-import { Note } from '../../../interfaces/Note.js';
+import { Note } from '../../../../shared/interfaces/Note.js';
 import { SnappedNotePosition } from '../../interfaces/SnappedNotePosition.js';
 import type { SelectionBox } from '../../interfaces/SelectionBox.js';
 

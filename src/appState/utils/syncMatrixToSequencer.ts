@@ -2,7 +2,7 @@
 
 import { engine as playbackEngine } from '../../main.js';
 
-import type { Note } from '../../sequencer/interfaces/Note.js';
+import type { Note } from '../../shared/interfaces/Note.js';
 import type { Grid } from '../../sequencer/matrix/Grid.js';
 import type { InteractionStore } from '../../sequencer/matrix/input/stores/InteractionStore.js';
 import type Sequencer from '../../sequencer/sequencer.js';

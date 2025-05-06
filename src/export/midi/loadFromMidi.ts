@@ -4,7 +4,7 @@ import { Midi } from '@tonejs/midi';
 import { Session } from '../../sequencer/interfaces/Session.js';
 import { TrackData } from '../../sequencer/interfaces/Track.js';
 import { GlobalConfig } from '../../userconfig/interfaces/GlobalConfig.js';
-import { Note } from '../../sequencer/interfaces/Note.js';
+import { Note } from '../../shared/interfaces/Note.js';
 import { GM_INSTRUMENTS } from './instrumentMapping.js';
 import { getDrumMachineInstruments } from '../../sounds/loaders/sf2-loader.js';
 import { getWebAudioFontDrumKit } from '../../sounds/loaders/catalogues/webaudiofont-catalogue.js';

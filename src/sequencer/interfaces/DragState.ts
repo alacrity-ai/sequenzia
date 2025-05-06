@@ -1,6 +1,6 @@
 // src/sequencer/interfaces/DragState.ts
 
-import { Note } from './Note.js';
+import { Note } from '../../shared/interfaces/Note.js';
 
 export interface DragState {
   startX: number;

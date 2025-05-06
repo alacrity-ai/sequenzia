@@ -2,7 +2,7 @@
 
 import { pitchToMidi } from '../sounds/audio/pitch-utils.js';
 import { Clipboard } from './interfaces/Clipboard.js';
-import { Note } from './interfaces/Note.js';
+import { Note } from '../shared/interfaces/Note.js';
 
 // Shared clipboard instance
 let clipboard: Clipboard = {

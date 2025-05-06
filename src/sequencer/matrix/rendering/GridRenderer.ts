@@ -3,7 +3,6 @@
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
-import { computeBlackKeyMidiMap } from '../utils/noteUtils.js';
 import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
 import { GRID_COLOR_SCHEMES } from './colors/constants/colorSchemes.js';
 

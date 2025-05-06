@@ -1,5 +1,5 @@
 // src/sequencer/sequencer.ts
-import type { Note } from './interfaces/Note.js';
+import type { Note } from '../shared/interfaces/Note.js';
 import type { SequencerConfig } from './interfaces/SequencerConfig.js';
 import type { Instrument } from '../sounds/interfaces/Instrument.js';
 
@@ -42,6 +42,9 @@ export default class Sequencer {
   mute: boolean = false;
   solo: boolean = false;
   collapsed: boolean = false;
+  miniContour: HTMLCanvasElement | null = null;
+  body: HTMLElement | null = null;
+  collapseIcon: SVGUseElement | null = null;
 
   private _scheduledAnimations: ReturnType<typeof setTimeout>[] = [];
 

@@ -1,6 +1,6 @@
 // src/sequencer/matrix/utils/isNearNoteRightEdge.ts
 
-import type { Note } from '../../interfaces/Note.js';
+import type { Note } from '../../../shared/interfaces/Note.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 
 /**

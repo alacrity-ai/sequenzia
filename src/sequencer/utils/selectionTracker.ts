@@ -2,7 +2,7 @@
 
 import { getSequencers } from '../factories/SequencerFactory.js';
 
-import type { Note } from '../../sequencer/interfaces/Note.js';
+import type { Note } from '../../shared/interfaces/Note.js';
 import type { Grid } from '../matrix/Grid.js';
 
 /**

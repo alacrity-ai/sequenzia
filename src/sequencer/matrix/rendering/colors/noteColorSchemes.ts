@@ -1,8 +1,8 @@
 // src/sequencer/matrix/rendering/colors/noteColorSchemes.ts
 
-import { hexToHSL } from '../../utils/colorConversion.js';
-import { pitchToMidi } from '../../utils/noteUtils.js';
-import { Note } from '../../../interfaces/Note.js';
+import { hexToHSL } from '../../../../shared/utils/visual/colorConversion.js';
+import { pitchToMidi } from '../../../../shared/utils/musical/noteUtils.js';
+import { Note } from '../../../../shared/interfaces/Note.js';
 import { SCRIABIN_COLOR_MAP } from './constants/pitchColorMap.js';
 
 import type { NoteColorContext, NoteColorFunction } from './interfaces/NoteColorContext.js';
