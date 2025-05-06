@@ -97,9 +97,24 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
     if (this.store.isDraggingToSelect()) {
       const hoveredKey = this.store.getHoveredNoteKey();
   
-      // If drag began over a hovered note — enter Dragging mode with current selection
+      // Drag handling
       if (hoveredKey && distance >= this.dragThreshold) {
-        this.store.setDragAnchorNoteKey(hoveredKey);
+        const [pitch, startStr] = hoveredKey.split(':');
+        const start = parseFloat(startStr);
+        const hoveredNote = this.noteManager.findAtPosition(pitch, start);
+      
+        if (!hoveredNote) return;
+      
+        const selected = this.store.getSelectedNotes();
+        const isHoveredNoteSelected = selected.some(
+          n => n.pitch === hoveredNote.pitch && n.start === hoveredNote.start
+        );
+      
+        if (!isHoveredNoteSelected) {
+          this.store.setSelectedNotes([hoveredNote]);
+        }
+      
+        this.store.setDragAnchorNoteKey(`${hoveredNote.pitch}:${hoveredNote.start}`);
         this.store.endSelectionDrag();
         this.controller.transitionTo(InteractionMode.Dragging);
         return;
