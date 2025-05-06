@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/styles.css" />
   <link rel="shortcut icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
   <link rel="icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
-  <script type="module" crossorigin src="/sequenzia/assets/index-0fuF-ux_.js"></script>
+  <script type="module" crossorigin src="/sequenzia/assets/index-Dv4XDDX9.js"></script>
 </head>
 
 <body class="bg-black text-gray-200 font-sans pb-36">
@@ -194,11 +194,7 @@
         
             <!-- Main Body: Scrollable canvas area -->
             <div class="sequencer-body flex border-t border-purple-700 pt-2 h-[720px]">
-              <div id="grid-scroll-container" class="relative overflow-auto h-full w-full">
-                <canvas class="note-grid absolute top-0 left-0"></canvas>
-                <canvas class="note-animate-canvas absolute top-0 left-0 z-10 pointer-events-none"></canvas>
-                <canvas class="playhead-canvas absolute top-0 left-0 z-20 pointer-events-none"></canvas>
-              </div>
+                <!-- Grid Matrix will be injected here -->
             </div>
         
             <!-- Grip Handle -->
@@ -294,18 +290,18 @@
         <div id="note-duration-panel" class="flex gap-3">
           <!-- Note Edit Mode Controls -->
           <div class="flex gap-2 border-r border-purple-800 pr-3 mr-1">
-            <button id="note-placement-mode-btn"
+            <button id="note-placement-options-btn"
                     class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    title="Note Placement Mode (Q)">
+                    title="Note Placement (Q)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-music"></use>
               </svg>
             </button>
-            <button id="select-mode-btn"
+            <button id="note-editing-options-btn"
                     class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    title="Select Mode (W)">
+                    title="Note Editing (W)">
               <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-draw-square"></use>
+                <use href="#icon-ruler"></use>
               </svg>
             </button>
           </div>
@@ -334,18 +330,18 @@
           </div>
 
           <!-- Select Mode Controls (Initially Hidden) -->
-          <div id="select-mode-controls" class="flex gap-2 hidden">
+          <div id="note-editing-controls" class="flex gap-2 hidden">
             <!-- Velocity and Quantize Buttons -->
             <button id="velocity-mode-menu-btn"
-                    class="select-mode-velocity bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Adjust Velocity (1)">
+                    class="note-editing-velocity bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Adjust Velocity (V)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-chart-bar"></use>
               </svg>
             </button>
             <button id="quantize-mode-menu-btn"
-                    class="select-mode-quantize bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Quantize Notes (2)">
+                    class="note-editing-quantize bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+                    title="Quantize Notes (C)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-clock"></use>
               </svg>
@@ -355,25 +351,25 @@
             <div class="border-l border-purple-800 mx-2"></div>
             
             <!-- Existing Copy/Cut/Paste Buttons -->
-            <button class="select-mode-copy bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+            <button class="note-editing-copy bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Copy (CTRL+C)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-copy"></use>
               </svg>
             </button>
-            <button class="select-mode-cut bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+            <button class="note-editing-cut bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Cut (CTRL+X)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-cut"></use>
               </svg>
             </button>
-            <button class="select-mode-paste bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+            <button class="note-editing-paste bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Paste (CTRL+V)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-paste"></use>
               </svg>
             </button>
-            <button class="select-mode-delete bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
+            <button class="note-editing-delete bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
                     title="Delete (Del)">
               <svg class="w-6 h-6" aria-hidden="true">
                 <use href="#icon-trash"></use>
