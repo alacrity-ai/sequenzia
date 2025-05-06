@@ -55,7 +55,8 @@ export async function loadInstrument(
     destination: AudioNode | null = null,
     volume?: number,
     pan?: number,
-    squelchLoadingScreen?: boolean
+    squelchLoadingScreen?: boolean,
+    allowSharedInstance: boolean = true
   ): Promise<Instrument> {
     const [libraryRaw, instrumentDisplayName] = fullName.split('/');
     const contextId = String(context as unknown as number);
@@ -66,7 +67,7 @@ export async function loadInstrument(
     }
     const instrumentMap = contextInstrumentMap.get(context)!;
     
-    if (instrumentMap.has(cacheKey)) {
+    if (allowSharedInstance && instrumentMap.has(cacheKey)) {
       return instrumentMap.get(cacheKey)!;
     }    
   
@@ -196,7 +197,9 @@ export async function loadInstrument(
         load: Promise.resolve()
       };      
   
-      instrumentMap.set(cacheKey, instrument);
+      if (allowSharedInstance) {
+        instrumentMap.set(cacheKey, instrument);
+      }
       return instrument;
     }
   
@@ -296,8 +299,9 @@ export async function loadInstrument(
       }
     };
 
-  
-    instrumentMap.set(cacheKey, instrument as Instrument);
+    if (allowSharedInstance) {
+      instrumentMap.set(cacheKey, instrument as Instrument);
+    }
     return instrument as Instrument;      
 }  
 

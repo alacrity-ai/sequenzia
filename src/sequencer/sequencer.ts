@@ -109,7 +109,7 @@ export default class Sequencer {
 
   async initInstrument(): Promise<void> {
     try {
-      this._instrument = await loadInstrument(this.instrumentName, this.context, this.destination, this._volume, this._pan);
+      this._instrument = await loadInstrument(this.instrumentName, this.context, this.destination, this._volume, this._pan, false, false);
       this.updateToDrumNoteRange();
     } catch (err) {
       console.warn(`[SEQ:${this.id}] Failed to load instrument '${this.instrumentName}':`, err);

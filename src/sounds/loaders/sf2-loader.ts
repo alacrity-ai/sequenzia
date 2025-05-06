@@ -28,7 +28,8 @@ export async function loadInstrument(
   destination: AudioNode | null = null,
   volume?: number, // float 0.0–1.0
   pan?: number, // Value -1.0 to 1.0
-  squelchLoadingScreen?: boolean
+  squelchLoadingScreen?: boolean,
+  allowSharedInstance: boolean = true
 ): Promise<Instrument> {
   const parts = fullName.split('/');
   let engine = 'sf2';
@@ -54,7 +55,7 @@ export async function loadInstrument(
   const contextId = String((context ?? getAudioContext()) as unknown as number);
   const cacheKey = `${libraryRaw}/${instrumentName}@${contextId}`;
   
-  if (instrumentMap.has(cacheKey)) {
+  if (allowSharedInstance && instrumentMap.has(cacheKey)) {
     return instrumentMap.get(cacheKey)!;
   }
 
@@ -140,7 +141,9 @@ export async function loadInstrument(
   };
 
   // Set the instrument in the cache
-  instrumentMap.set(cacheKey, inst);
+  if (allowSharedInstance) {
+    instrumentMap.set(cacheKey, inst);
+  }  
   return inst;
 }
 
