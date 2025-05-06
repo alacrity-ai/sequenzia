@@ -8,7 +8,7 @@ import { getPreviewContext } from '../sounds/audio/previewContext.js';
 import { exportNotesToOffline } from './services/offlineExportService.js';
 
 import { initZoomControls } from './grid/interaction/zoomControlButtonHandlers.js';
-import { getTotalMeasures } from './transport.js';
+import { getTotalMeasures, getTimeSignature } from './transport.js';
 import { updateTrackStyle } from './ui/helpers/updateTrackStyle.js';
 import { setCollapsed } from './ui/helpers/setCollapsed.js';
 import { updateNoteRange, updateToDrumNoteRange } from './services/rangeUpdateService.js';
@@ -279,6 +279,11 @@ export default class Sequencer {
   updateTotalMeasures(): void {
     if (!this.matrix) return;
     this.matrix.setMeasures(getTotalMeasures());
+  }
+
+  updateBeatsPerMeasure(): void {
+    if (!this.matrix) return;
+    this.matrix.setBeatsPerMeasure(getTimeSignature());
   }
   
   redraw(): void {

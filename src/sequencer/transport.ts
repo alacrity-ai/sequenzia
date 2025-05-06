@@ -72,6 +72,10 @@ export function updateTimeSignature(beats: number, record: boolean = true): void
     beatsInput.value = String(beats);
   }
 
+  getSequencers().forEach(seq => {
+    seq.updateBeatsPerMeasure();
+  });
+
   // LEGACY GRID:
   // getSequencers().forEach(seq => {
   //   if (seq.grid?.resizeAndRedraw) {
@@ -102,11 +106,6 @@ export function updateTotalMeasures(measures: number, record: boolean = true): v
   if (measuresInput && measuresInput.value !== String(measures)) {
     measuresInput.value = String(measures);
   }
-
-  // LEGACY GRID:
-  // getSequencers().forEach(seq => {
-  //   seq.grid?.scheduleRedraw();
-  // });
 }
 
 export function getTotalMeasures(): number {
