@@ -18,6 +18,9 @@ export function setCollapsed(seq: Sequencer, val: boolean): void {
     } else {
       seq.animCanvas?.classList.remove('hidden');
   
+      // Call resize to redraw the grid
+      seq.matrix?.resize();
+
       // If we are playing, re-schedule animations from the current time
       if (playbackEngine.isActive()) {
           seq.resumeAnimationsFromCurrentTime(
