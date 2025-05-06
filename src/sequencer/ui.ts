@@ -1,16 +1,14 @@
 // src/sequencer/ui.ts
 
-import { GRID_CONFIG as config } from './grid/helpers/constants.js';
-import { isSplashScreenVisible } from '../global/splashscreen.js';
+import { SEQUENCER_CONFIG as config, SNAP_RESOLUTIONS, durationHotkeys } from './constants/sequencerConstants.js';
 import { initConfigModal } from '../userconfig/initUserConfig.js';
-import { getActiveSelection } from '../setup/stores/selectionTracker.js';
-import { getEditMode, EditModes } from '../setup/stores/editModeStore.js';
+import { getActiveSelection } from './utils/selectionTracker.js';
+import type { Grid } from './matrix/Grid.js';
 import { getTimeSignature, getTotalMeasures } from './transport.js';
-import { showVelocityModal } from './grid/interaction/velocity/velocityModeMenu.js';
+import { showVelocityModal } from './ui/modals/velocity/velocityModeMenu.js';
 import { showErrorModal } from '../global/errorGeneric.js';
-import { SNAP_RESOLUTIONS, durationHotkeys } from './grid/helpers/constants.js';
-import { isGlobalLoading } from '../export/save.js';
 import Sequencer from './sequencer.js';
+import { isKeyboardListenersAttached } from '../keyboard/keyboard-interaction.js';
 
 let isInitialized = false;
 let isPlaying = false;
@@ -53,9 +51,6 @@ export function setupUI({
   const playBtn = document.getElementById('play-button') as HTMLElement;
   const playBtnIcon = playBtn.querySelector('use') as SVGUseElement;
   const stopBtn = document.getElementById('stop-button') as HTMLElement;
-  const durationSelect = document.getElementById('note-duration') as HTMLSelectElement;
-  const dottedNoteBtn = document.getElementById('dotted-note-btn') as HTMLElement;
-  const tripletNoteBtn = document.getElementById('triplet-note-btn') as HTMLElement;
   const snapSelect = document.getElementById('snap-resolution') as HTMLSelectElement;
   const loopToggle = document.getElementById('loop-toggle') as HTMLInputElement;
   const tempoInput = document.getElementById('tempo-input') as HTMLInputElement;
@@ -71,7 +66,6 @@ export function setupUI({
   const exportMidiBtn = document.getElementById('export-midi') as HTMLElement;
   const exportCancelBtn = document.getElementById('export-cancel') as HTMLElement;
 
-  durationSelect.value = String(config.currentDuration || 1);
   snapSelect.value = String(config.snapResolution || 0.25);
 
   // === Loading Midi / Json ===
@@ -170,7 +164,7 @@ export function setupUI({
     }
 
     // === VELOCITY SHORTCUT ===
-    if (e.key === '1' && getEditMode() === EditModes.SELECT) {
+    if (e.key === 'v' && !e.ctrlKey && !e.metaKey && !e.altKey && !isKeyboardListenersAttached()) {
       const selection = getActiveSelection();
       if (!selection || selection.selectedNotes.length === 0) {
         showErrorModal('No notes selected. Please select notes before adjusting velocity.');
@@ -181,63 +175,7 @@ export function setupUI({
       showVelocityModal(selection.selectedNotes);
       return;
     }
-
-    // Note duration hotkeys
-    if (getEditMode() !== EditModes.NOTE_PLACEMENT) return;
-
-    if (Object.prototype.hasOwnProperty.call(durationHotkeys, e.code)) {
-      e.preventDefault();
-      const duration = durationHotkeys[e.code];
-      durationSelect.value = String(duration);
-      durationSelect.dispatchEvent(new Event('change'));
-    }    
-
-    if (e.key === '.') {
-      e.preventDefault();
-      dottedNoteBtn?.click();
-      return;
-    }
-
-    if (e.key === '/') {
-      e.preventDefault();
-      tripletNoteBtn?.click();
-      return;
-    }
   });
-
-  // === Note Duration Select ===
-  durationSelect.addEventListener('change', (e: Event) => {
-    const target = e.target as HTMLSelectElement;
-    const newDuration = parseFloat(target.value);
-    highlightActiveDuration(newDuration);
-    onDurationChange(newDuration);
-
-    getSequencers().forEach(seq => {
-      const grid = seq.grid;
-      if (grid?.getPreviewNote) {
-        const note = grid.getPreviewNote();
-        if (note) {
-          note.duration = newDuration;
-          grid.scheduleRedraw();
-        }
-      }
-    });
-  });
-
-  // === Highlight Active Duration ===
-  function highlightActiveDuration(duration: number): void {
-    const buttons = document.querySelectorAll<HTMLElement>('.note-duration-btn');
-    buttons.forEach(btn => {
-      const btnVal = parseFloat(btn.dataset.value ?? '0');
-
-      btn.classList.remove('bg-purple-700', 'bg-gray-800');
-      if (btnVal === duration) {
-        btn.classList.add('bg-purple-700');
-      } else {
-        btn.classList.add('bg-gray-800');
-      }
-    });
-  }
 
   // === Snap Resolution Select ===
   snapSelect.addEventListener('change', (e: Event) => {
@@ -335,8 +273,6 @@ beatsPerMeasureInput?.addEventListener('change', (e: Event) => {
     onBeatsPerMeasureChange?.(beats);
   }
 });
-
-highlightActiveDuration(parseFloat(durationSelect.value));
 }
 
 // =========================
@@ -369,7 +305,10 @@ export function updateMeasuresInput(measures: number): void {
   }
 }
 
-export function setupSequencerGripHandler(sequencerElement: HTMLElement): void {
+export function setupSequencerGripHandler(
+  sequencerElement: HTMLElement,
+  matrix: Grid
+): void {
   const gripHandle = sequencerElement.querySelector('.cursor-grab') as HTMLElement | null;
   if (!gripHandle) return;
 
@@ -388,7 +327,7 @@ export function setupSequencerGripHandler(sequencerElement: HTMLElement): void {
     startY = e.clientY;
     startHeight = body.offsetHeight;
     gripHandle.classList.replace('cursor-grab', 'cursor-grabbing');
-    document.body.style.userSelect = 'none'; // Prevent accidental text selection
+    document.body.style.userSelect = 'none';
   });
 
   window.addEventListener('mousemove', (e: MouseEvent) => {
@@ -396,10 +335,11 @@ export function setupSequencerGripHandler(sequencerElement: HTMLElement): void {
 
     const deltaY = e.clientY - startY;
     let newHeight = startHeight + deltaY;
-
-    // Clamp the height within allowed bounds
     newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
     body.style.height = `${newHeight}px`;
+
+    // 🟣 Notify grid that its parent resized
+    matrix.resize();
   });
 
   window.addEventListener('mouseup', () => {

@@ -1,7 +1,7 @@
 // src/appState/interfaces/AppState.ts
 
 import { Note } from '../../sequencer/interfaces/Note.js';
-import { GridConfig } from '../../sequencer/interfaces/GridConfig.js';
+import { SequencerConfig } from '../../sequencer/interfaces/SequencerConfig.js';
 
 export interface SequencerState {
   id: number;
@@ -20,7 +20,7 @@ export interface AppState {
 
 export interface CreateSequencerOptions {
   id: number;
-  config: GridConfig;
+  config: SequencerConfig;
   notes: Note[];
   instrument: string;
   volume?: number;

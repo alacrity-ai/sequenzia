@@ -4,12 +4,12 @@ import { setEditMode } from './stores/editModeStore.js';
 
 export function setupEditModeControls(): void {
   // Mode buttons
-  const notePlacementModeBtn = document.getElementById('note-placement-mode-btn') as HTMLElement | null;
-  const selectModeBtn = document.getElementById('select-mode-btn') as HTMLElement | null;
+  const notePlacementModeBtn = document.getElementById('note-placement-options-btn') as HTMLElement | null;
+  const selectModeBtn = document.getElementById('note-editing-options-btn') as HTMLElement | null;
 
   // Control panels
   const noteDurationControls = document.getElementById('note-duration-controls') as HTMLElement | null;
-  const selectModeControls = document.getElementById('select-mode-controls') as HTMLElement | null;
+  const selectModeControls = document.getElementById('note-editing-controls') as HTMLElement | null;
   const velocityModeControls = document.getElementById('velocity-mode-controls') as HTMLElement | null;
 
   if (!notePlacementModeBtn || !selectModeBtn || 
@@ -50,7 +50,7 @@ export function setupEditModeControls(): void {
   selectModeBtn.addEventListener('click', () => {
     updateButtonStates(selectModeBtn);
     updateControlPanels(selectModeControls);
-    setEditMode('select');
+    setEditMode('note-editing');
   });
 
   window.addEventListener('keydown', (e: KeyboardEvent) => {

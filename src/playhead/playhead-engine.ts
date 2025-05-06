@@ -1,5 +1,6 @@
 // src/playhead/playhead-engine.ts
 
+import { updateAllMatrixPlayheads } from './helpers/updateAllGridPlayheads.js';
 import { PlaybackEngine } from '../sequencer/playback.js';
 import { getTotalBeats } from '../sequencer/transport.js';
 import { drawGlobalPlayhead } from './global-playhead.js';
@@ -20,12 +21,7 @@ export function startMasterPlayheadLoop(engine: PlaybackEngine): void {
     drawGlobalPlayhead(globalX);
 
     // 2. Each sequencer grid
-    for (const seq of engine['sequencers']) {
-      if (seq?.grid?.drawPlayhead) {
-        const localX = seq.grid.getXForBeat(currentBeat);
-        seq.grid.drawPlayhead(localX);
-      }
-    }
+    updateAllMatrixPlayheads(engine, currentBeat);
 
     animationFrameId = requestAnimationFrame(drawFrame);
   }
@@ -47,9 +43,7 @@ export function resetPlayheads(engine: PlaybackEngine): void {
   
     // Reset each sequencer grid's playhead
     for (const seq of engine['sequencers']) {
-      if (seq?.grid?.drawPlayhead) {
-        seq.grid.drawPlayhead(0);
-      }
-    }
+      seq.matrix?.setPlayheadPixelX(0);
+    }    
 }
   

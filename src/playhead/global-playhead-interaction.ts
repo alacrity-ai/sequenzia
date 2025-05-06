@@ -1,20 +1,21 @@
 // src/playhead/global-playhead-interaction.ts
 
+import { updateAllMatrixPlayheads } from './helpers/updateAllGridPlayheads.js';
 import { drawGlobalPlayhead } from './global-playhead.js';
 import { getTotalBeats } from '../sequencer/transport.js';
 import { getSnappedBeat } from '../sequencer/grid/helpers/geometry.js';
-import type { GridConfig } from '../sequencer/interfaces/GridConfig.js';
+import type { SequencerConfig } from '../sequencer/interfaces/SequencerConfig.js';
 import { engine as playbackEngine } from '../main.js';
 
 let isDragging = false;
 let canvas: HTMLCanvasElement | null = null;
-let globalConfig: GridConfig | null = null;
+let globalConfig: SequencerConfig | null = null;
 let wasAutoPaused = false;
 
 /**
  * Initializes global playhead dragging interaction on a given canvas.
  */
-export function initGlobalPlayheadInteraction(targetCanvas: HTMLCanvasElement, targetConfig: GridConfig): void {
+export function initGlobalPlayheadInteraction(targetCanvas: HTMLCanvasElement, targetConfig: SequencerConfig): void {
   canvas = targetCanvas;
   globalConfig = targetConfig;
 
@@ -41,7 +42,7 @@ function onMouseMove(e: MouseEvent): void {
 function onMouseUp(e: MouseEvent): void {
   if (!isDragging) return;
 
-  // ✅ Always update on mouse up — even if no move occurred
+  // Always update on mouse up — even if no move occurred
   updatePlayheadFromEvent(e);
 
   isDragging = false;
@@ -67,5 +68,6 @@ function updatePlayheadFromEvent(e: MouseEvent): void {
   const snappedX = (snappedBeat / totalBeats) * canvas.width;
 
   playbackEngine.seek(snappedBeat); // actual transport update
+  updateAllMatrixPlayheads(playbackEngine, playbackEngine.getCurrentBeat());
   drawGlobalPlayhead(snappedX);     // visual update
 }

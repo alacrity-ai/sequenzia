@@ -1,4 +1,4 @@
-import { drawGlobalMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
+import { drawGlobalMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
 import { getSequencers } from '../setup/sequencers.js';
 import { getTotalBeats } from '../sequencer/transport.js';
 import { drawExtendPlayhead } from './drawing/ExtendMiniContour.js';
@@ -85,7 +85,7 @@ export function setupExtendModeControls(): void {
       const label = document.createElement('label');
       label.htmlFor = id;
       label.className = 'text-sm text-gray-200';
-      label.textContent = seq.config.name || `Track ${index + 1}`;
+      label.textContent = `Track ${index + 1}`;
 
       checkbox.addEventListener('change', () => {
         redrawMiniContour();

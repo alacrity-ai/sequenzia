@@ -4,7 +4,7 @@ import { refreshInstrumentSelectorModal } from './instrumentSelector.js';
 import { setupVolumeBar } from './controls/sequencerVolume';
 import { setupPanBar } from './controls/sequencerPan';
 import { setupSequencerGripHandler } from '../sequencer/ui.js';
-import { drawMiniContour } from '../sequencer/grid/drawing/mini-contour.js';
+import { drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
 import { getAudioContext as audioCtx, getMasterGain } from '../sounds/audio/audio.js';
 import { recordDiff } from '../appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
@@ -12,7 +12,7 @@ import { createDeleteSequencerDiff, createReverseDeleteSequencerDiff } from '../
 import { getAppState, setAppState } from '../appState/appState.js';
 import { clearHistory } from '../appState/stateHistory.js';
 import { notifyStateUpdated } from '../appState/onStateUpdated.js';
-import { GRID_CONFIG as config } from '../sequencer/grid/helpers/constants.js'; // Imported as 'config'
+import { SEQUENCER_CONFIG as config } from '../sequencer/constants/sequencerConstants.js';
 import type { SequencerState } from '../appState/interfaces/AppState.js';
 
 export const sequencers: Sequencer[] = [];
@@ -38,6 +38,11 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   seq.solo = false;
   seq.volume = 100 / 127;
 
+  // Set notes into the matrix early
+  if (initialState?.notes && seq.matrix) {
+    seq.matrix.setNotes(initialState.notes);
+  }
+
   const mini = wrapper.querySelector('canvas.mini-contour') as HTMLCanvasElement;
   if (initialState) {
     seq.setState({
@@ -57,6 +62,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
   setupVolumeBar(wrapper, seq);
   setupPanBar(wrapper, seq);
 
+  // Setup the collapse button
   const collapseBtn = wrapper.querySelector('.collapse-btn') as HTMLElement;
   const collapseIcon = collapseBtn.querySelector('use')!;
   const body = wrapper.querySelector('.sequencer-body') as HTMLElement;
@@ -70,6 +76,7 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     if (hidden) drawMiniContour(mini, seq.notes, seq.config, seq.colorIndex);
   });
 
+  // Setup the delete button
   const deleteBtn = wrapper.querySelector('.delete-btn') as HTMLElement;
   deleteBtn.addEventListener('click', () => {
     const modal = document.getElementById('delete-confirm-modal') as HTMLElement;
@@ -133,16 +140,10 @@ export function createSequencer(initialState?: SequencerState): { seq: Sequencer
     instrumentSelectModal.classList.remove('hidden');
   });  
 
-  setupSequencerGripHandler(wrapper);
+  setupSequencerGripHandler(wrapper, seq.matrix!);
   sequencers.push(seq);
   return { seq, wrapper };
 }
-
-// export function refreshPlaybackAt(currentBeat: number): void {
-//   sequencers.forEach(seq => {
-//     seq.seekTo(currentBeat);
-//   });
-// }
 
 export function toggleZoomControls(wrapper: HTMLElement, show: boolean): void {
   wrapper.querySelector('.zoom-in-btn')?.classList.toggle('hidden', !show);

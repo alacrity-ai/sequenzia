@@ -2,8 +2,6 @@
 
 import { AppState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
-import { drawGlobalMiniContour } from '../../../../sequencer/grid/drawing/mini-contour.js';
-import { sequencers } from '../../../../setup/sequencers.js';
 
 /**
  * Local interface for a note resize operation.
@@ -31,19 +29,13 @@ export function applyRESIZE_NOTES(state: AppState, diff: Diff): AppState {
     }
   }
 
-  // ✅ Refresh global mini contour properly (use live sequencers)
-  const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
-  if (globalMiniCanvas) {
-    drawGlobalMiniContour(globalMiniCanvas, sequencers);
-  }
-
   return newState;
 }
 
 /**
  * Creates a forward diff to resize notes.
  */
-export function createResizeNotesDiff(sequencerId: string, resizes: ResizeEntry[]): Diff {
+export function createResizeNotesDiff(sequencerId: number, resizes: ResizeEntry[]): Diff {
   return {
     type: 'RESIZE_NOTES',
     sequencerId,
@@ -55,7 +47,7 @@ export function createResizeNotesDiff(sequencerId: string, resizes: ResizeEntry[
  * Creates a reverse diff to restore old note durations.
  */
 export function createReverseResizeNotesDiff(
-  sequencerId: string,
+  sequencerId: number,
   resizes: Array<{ pitch: string; start: number; oldDuration: number }>
 ): Diff {
   const reverseResizes = resizes.map(r => ({

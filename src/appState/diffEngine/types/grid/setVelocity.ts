@@ -3,8 +3,6 @@
 import { AppState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
 import { Note } from '../../../../sequencer/interfaces/Note.js';
-import { drawGlobalMiniContour } from '../../../../sequencer/grid/drawing/mini-contour.js';
-import { sequencers } from '../../../../setup/sequencers.js';
 
 /**
  * Applies a SET_NOTE_VELOCITY diff, updating the velocity of specific notes.
@@ -25,12 +23,6 @@ export function applySET_NOTE_VELOCITY(state: AppState, diff: Diff): AppState {
     if (match) {
       match.velocity = updatedNote.velocity;
     }
-  }
-
-  // ✅ Refresh global mini contour (using LIVE sequencers array)
-  const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
-  if (globalMiniCanvas) {
-    drawGlobalMiniContour(globalMiniCanvas, sequencers);
   }
 
   return newState;

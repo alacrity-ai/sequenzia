@@ -5,7 +5,8 @@ import { Instrument } from '../interfaces/Instrument.js';
 import { showLoadingModal, hideLoadingModal } from '../../global/loadingModal.js';
 import * as smplr from 'smplr';
 
-let activeInstrumentLoads = 0;
+import { beginInstrumentLoad, endInstrumentLoad } from './loadingStore.js';
+
 
 // Cache instruments per AudioContext
 const contextInstrumentMap: Map<AudioContext, Map<string, Instrument>> = new Map();
@@ -49,7 +50,10 @@ export async function loadInstrument(
   }
   const instrumentMap = contextInstrumentMap.get(context)!;
 
-  const cacheKey = `${libraryRaw}/${instrumentName}`;
+  // Handle cache hit
+  const contextId = String((context ?? getAudioContext()) as unknown as number);
+  const cacheKey = `${libraryRaw}/${instrumentName}@${contextId}`;
+  
   if (instrumentMap.has(cacheKey)) {
     return instrumentMap.get(cacheKey)!;
   }
@@ -64,7 +68,14 @@ export async function loadInstrument(
 
   const gainProxy = context.createGain();
   gainProxy.connect(pannerNode);
-  pannerNode.connect(destination || getMasterGain());
+  
+  // Validate destination belongs to same context
+  if (destination && (destination.context !== context)) {
+    console.warn('[loadInstrument] Ignoring mismatched destination from different context');
+    destination = null;
+  }
+
+  pannerNode.connect(destination || getMasterGain(context));
 
   const commonOptions = {
     instrument: instrumentName,
@@ -128,6 +139,7 @@ export async function loadInstrument(
     pannerNode.pan.value = Math.max(-1, Math.min(1, newPan));
   };
 
+  // Set the instrument in the cache
   instrumentMap.set(cacheKey, inst);
   return inst;
 }
@@ -169,6 +181,7 @@ export function getAvailableSoundfontKits(): string[] {
 }
 
 export async function getAvailableInstruments(library: string): Promise<string[]> {
+  console.log('GET AVAILABLE INSTRUMENTS CALLED')
   const libraryNormalized = library.toLowerCase();
 
   if (libraryNormalized === 'splendidgrandpiano') {
@@ -186,7 +199,7 @@ export async function getAvailableInstruments(library: string): Promise<string[]
 
   // Otherwise treat it as a Soundfont
   const dummyInstrument = 'acoustic_grand_piano'; // preload safe assumption
-  await loadInstrument(`${library}/${dummyInstrument}`);
+  await loadInstrument(`${library}/${dummyInstrument}`, getAudioContext(), null, 0, 0, true);
   const instruments = smplr.getSoundfontNames();
   return instruments ?? [];
 }
@@ -196,26 +209,12 @@ export function getDrumMachineInstruments() {
   return smplr.getDrumMachineNames();
 }
 
-// Internal loading feedback utilities
-function onInstrumentLoadStart(): void {
-  activeInstrumentLoads++;
-  if (activeInstrumentLoads === 1) showLoadingModal();
-}
-
-function onInstrumentLoadEnd(): void {
-  activeInstrumentLoads--;
-  if (activeInstrumentLoads <= 0) {
-    activeInstrumentLoads = 0;
-    // hideLoadingModal();
-  }
-}
-
 async function withLoading<T>(loadPromise: Promise<T>): Promise<void> {
-  onInstrumentLoadStart();
+  beginInstrumentLoad();
   try {
     await loadPromise;
   } finally {
-    onInstrumentLoadEnd();
+    endInstrumentLoad();
   }
 }
 

@@ -10,6 +10,6 @@ export interface GridTestElements {
   
   export interface GridTestData {
     dummyNotes: Array<any>; // or refine with your Note type
-    dummyConfig: any; // again, refine if you have a GridConfig type
+    dummyConfig: any; // again, refine if you have a SequencerConfig type
   }
   

@@ -2,6 +2,7 @@
 
 import { loadInstrument } from '../loaders/sf2-loader.js';
 import { getAudioContext } from '../audio/audio.js';
+import { getPreviewContext } from '../audio/previewContext.js';
 import { pitchToMidi } from '../audio/pitch-utils.js';
 import { Instrument } from '../interfaces/Instrument.js';
 import { EnginePlayer } from '../interfaces/Engine.js';
@@ -15,7 +16,7 @@ let activeName: string | null = null;
 async function setActiveInstrument(name: string): Promise<void> {
   if (activeName === name) return;
 
-  const inst = await loadInstrument(name);
+  const inst = await loadInstrument(name, getPreviewContext());
   activeInstrument = inst as Instrument;
   activeName = name;
 }
@@ -31,7 +32,7 @@ function playNote(
 ): (() => void) | null {
   if (!activeInstrument) return null;
 
-  const ctx = getAudioContext();
+  const ctx = getPreviewContext();
   const now = ctx.currentTime;
   const midi = pitchToMidi(pitch);
   if (midi === null) return null; // defensive

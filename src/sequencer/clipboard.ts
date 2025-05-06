@@ -27,6 +27,7 @@ export function setClipboard(notes: Note[]): void {
       pitch: n.pitch,
       start: n.start,
       duration: n.duration,
+      velocity: n.velocity ?? 100,
     })),
     anchorBeat,
     anchorMidi,

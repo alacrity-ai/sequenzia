@@ -3,8 +3,6 @@
 import { AppState } from '../../../interfaces/AppState.js';
 import { Diff } from '../../../interfaces/Diff.js';
 import { Note } from '../../../../sequencer/interfaces/Note.js';
-import { drawGlobalMiniContour } from '../../../../sequencer/grid/drawing/mini-contour.js';
-import { sequencers } from '../../../../setup/sequencers.js';
 
 /**
  * Applies a PLACE_NOTES diff to add notes to a sequencer.
@@ -15,12 +13,6 @@ export function applyPLACE_NOTES(state: AppState, diff: Diff): AppState {
   if (!seq) return state;
 
   seq.notes.push(...(diff.notes as Note[]));
-
-  // ✅ Refresh global mini contour (using LIVE sequencers array)
-  const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
-  if (globalMiniCanvas) {
-    drawGlobalMiniContour(globalMiniCanvas, sequencers);
-  }
 
   return newState;
 }

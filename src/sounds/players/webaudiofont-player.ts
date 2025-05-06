@@ -2,6 +2,7 @@
 
 import { loadInstrument } from '../loaders/webaudiofont-loader.js';
 import { getAudioContext } from '../audio/audio.js';
+import { getPreviewContext } from '../audio/previewContext.js';
 import { pitchToMidi } from '../audio/pitch-utils.js';
 import { Instrument } from '../interfaces/Instrument.js';
 import { EnginePlayer } from '../interfaces/Engine.js';
@@ -16,7 +17,7 @@ async function setActiveInstrument(name: string): Promise<void> {
     if (activeName === name) return;
   
     const [, library, displayName] = name.split('/');
-    const inst = await loadInstrument(`${library}/${displayName}`);
+    const inst = await loadInstrument(`${library}/${displayName}`, getPreviewContext());
     activeInstrument = inst;
     activeName = name;
   }
@@ -32,7 +33,7 @@ async function setActiveInstrument(name: string): Promise<void> {
   ): (() => void) | null {
     if (!activeInstrument) return null;
   
-    const ctx = getAudioContext();
+    const ctx = getPreviewContext();
     const now = ctx.currentTime;
     const midi = pitchToMidi(pitch);
     if (midi === null) return null;

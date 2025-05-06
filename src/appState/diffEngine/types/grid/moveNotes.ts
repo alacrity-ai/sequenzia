@@ -38,7 +38,7 @@ export function applyMOVE_NOTES(state: AppState, diff: Diff): AppState {
 /**
  * Creates a forward diff to move notes.
  */
-export function createMoveNotesDiff(sequencerId: string, from: Note[], to: Note[]): Diff {
+export function createMoveNotesDiff(sequencerId: number, from: Note[], to: Note[]): Diff {
   return {
     type: 'MOVE_NOTES',
     sequencerId,
@@ -50,6 +50,6 @@ export function createMoveNotesDiff(sequencerId: string, from: Note[], to: Note[
 /**
  * Creates a reverse diff to move notes back to original position.
  */
-export function createReverseMoveNotesDiff(sequencerId: string, from: Note[], to: Note[]): Diff {
+export function createReverseMoveNotesDiff(sequencerId: number, from: Note[], to: Note[]): Diff {
   return createMoveNotesDiff(sequencerId, to, from);
 }

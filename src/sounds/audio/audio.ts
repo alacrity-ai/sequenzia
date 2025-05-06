@@ -1,10 +1,9 @@
-// audio/audio.ts
+// src/sounds/audio/audio.ts
 
 import { playNote as genericPlayNote } from '../instrument-player.js';
 
-// — Audio context —
+// — Audio context singleton (main transport) —
 let _audioCtx: AudioContext | null = null;
-
 export function getAudioContext(): AudioContext {
   if (!_audioCtx) {
     _audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -12,26 +11,28 @@ export function getAudioContext(): AudioContext {
   return _audioCtx;
 }
 
-// — Visualization chain —
-// (initialize later, not at module load)
-let _analyserNode: AnalyserNode | null = null;
-let _masterGain: GainNode | null = null;
+// — Context-aware caches —
+const gainMap = new WeakMap<AudioContext, GainNode>();
+const analyserMap = new WeakMap<AudioContext, AnalyserNode>();
 
-export function getAnalyserNode(): AnalyserNode {
-  if (!_analyserNode) {
-    _analyserNode = getAudioContext().createAnalyser();
-    _analyserNode.fftSize = 2048;
+export function getAnalyserNode(context: AudioContext = getAudioContext()): AnalyserNode {
+  if (!analyserMap.has(context)) {
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 2048;
+    analyserMap.set(context, analyser);
   }
-  return _analyserNode;
+  return analyserMap.get(context)!;
 }
 
-export function getMasterGain(): GainNode {
-  if (!_masterGain) {
-    _masterGain = getAudioContext().createGain();
-    getAnalyserNode().connect(getAudioContext().destination);
-    _masterGain.connect(getAnalyserNode());
+export function getMasterGain(context: AudioContext = getAudioContext()): GainNode {
+  if (!gainMap.has(context)) {
+    const gain = context.createGain();
+    const analyser = getAnalyserNode(context);
+    gain.connect(analyser);
+    analyser.connect(context.destination);
+    gainMap.set(context, gain);
   }
-  return _masterGain;
+  return gainMap.get(context)!;
 }
 
 /**

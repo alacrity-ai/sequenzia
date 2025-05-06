@@ -31,6 +31,11 @@
   - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats
 
 ## Future Todos
+- Sequencer Grid:
+  - [ ] Re-implement sequencer grid drawing entirely.
+    - [ ] Replace the existing sequencer element with one based from the example in: gridtest.html
+    - [ ] Thoroughly test after integration
+    - [ ] Style pass, to make sure it looks as good as the original or better
 - Note Editing:
   - [ ] Add Quantize Modal for Quantizing groups of selected notes
   - [ ] Add Recording for keyboard
@@ -42,7 +47,10 @@
 - Small Bugs:
   - [x] Drum tracks on Wav export throw: Sample not found: '50', Sample not found: '53', etc
   - [x] Double check that we aren't loading instruments/updating state when every note is played. The playhead looks a bit stuttery on playback
+  - [ ] If loading midi files back to back, will crash on second load
+  - [ ] If paused, note placement does not preview sound
   - [ ] When pasting a cluster of notes, it's possible for some of those notes to be pasted out of bounds (into the piano roll label on the left)
+  - [ ] If previewing a note (note placement mode) while playblack is ocurring, significant slowdown ensues
 
 ## Phase 0: Refactor to TS
 - [x] Complete all js -> ts refactoring
