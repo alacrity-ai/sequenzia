@@ -1,6 +1,6 @@
 // src/userconfig/defaultUserConfig.ts
 
-import type { UserConfig } from '../interfaces/UserConfig.js';
+import type { UserConfig } from './interfaces/UserConfig.js';
 
 export const defaultUserConfig: UserConfig = {
   ai: {

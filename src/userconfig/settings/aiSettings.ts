@@ -1,6 +1,6 @@
 import { OpenAIModel } from '../interfaces/OpenAISettings.js';
-import { getUserConfig, updateUserConfig } from './userConfigStore.js';
-import { saveToLocalStorage } from './sharedSettings.js';
+import { getUserConfig, updateUserConfig } from '../store/userConfigStore.js';
+import { saveToLocalStorage } from '../utils/localStorage.js';
 
 export const VALID_MODELS: OpenAIModel[] = [
   'gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'o3-mini', 'o4-mini'

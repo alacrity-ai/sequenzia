@@ -1,6 +1,6 @@
 // js/userconfig/settings/sequencerSettings.js
 
-import { getUserConfig, updateUserConfig } from './userConfigStore.js';
+import { getUserConfig, updateUserConfig } from '../store/userConfigStore.js';
 import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
 import { UserConfig } from '../interfaces/UserConfig.js';
 

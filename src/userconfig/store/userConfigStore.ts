@@ -1,6 +1,6 @@
 // js/userconfig/settings/userConfig.js
 
-import { defaultUserConfig } from './defaultUserConfig.js';
+import { defaultUserConfig } from '../defaultUserConfig.js';
 import type { UserConfig } from '../interfaces/UserConfig.js';
 
 const userConfig: UserConfig = structuredClone(defaultUserConfig);

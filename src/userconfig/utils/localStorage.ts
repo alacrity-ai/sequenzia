@@ -1,7 +1,7 @@
 // js/userconfig/settings/sharedSettings.js
 
-import { defaultUserConfig } from './defaultUserConfig.js';
-import { getUserConfig, updateUserConfig } from './userConfigStore.js';
+import { defaultUserConfig } from '../defaultUserConfig.js';
+import { getUserConfig, updateUserConfig } from '../store/userConfigStore.js';
 import type { UserConfig } from '../interfaces/UserConfig.js';
 
 function isBrowser(): boolean {

@@ -1,7 +1,7 @@
 // src/sequencer/matrix/renderers/HeaderPlayheadRenderer.ts
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
-import { getUserConfig } from '../../../userconfig/settings/userConfigStore.js';
+import { getUserConfig } from '../../../userconfig/store/userConfigStore.js';
 import { GRID_COLOR_SCHEMES } from '../rendering/colors/constants/colorSchemes.js';
 
 export class HeaderPlayheadRenderer {
