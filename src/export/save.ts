@@ -17,16 +17,18 @@ let globalLoading: boolean = false;
  * @example
  * // Format specification v3:
  * {
- *   v: 3,                    // version
- *   t: "2023-...",          // timestamp
- *   c: {                     // configuration
- *     b: 120,               // bpm
- *     bpm: 4,               // beats per measure
- *     tm: 8                 // total measures
+ *   v: 3,                     // version
+ *   t: "2023-...",            // timestamp
+ *   c: {                      // configuration
+ *     b: 120,                 // bpm
+ *     bpm: 4,                 // beats per measure
+ *     tm: 8                   // total measures
  *   },
- *   i: ["piano", "drums"],  // instruments
- *   tr: [{                  // tracks
- *     n: [[pitch, start, duration], ...]  // notes
+ *   i: ["piano", "drums"],    // instruments (matches track order)
+ *   vlm: [90.0, 80.0, 100.0], // volume, matches track order
+ *   pan: [-1.0, 0.0, 1.0],    // pan matches track order
+ *   tr: [{                    // tracks
+ *     n: [[pitch, start, duration, velocity], ...]  // notes
  *   }, ...]
  * }
  */

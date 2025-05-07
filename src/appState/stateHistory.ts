@@ -70,3 +70,17 @@ export function clearHistory(): void {
   history.length = 0;
   pointer = -1;
 }
+
+// Optional test-only exports (safe to tree-shake in production)
+export const __test__ = {
+  getHistory: (): HistoryEntry[] => history,
+  getPointer: (): number => pointer,
+  injectEntryAt: (index: number, entry: Partial<HistoryEntry>) => {
+    if (history[index]) {
+      Object.assign(history[index], entry);
+    }
+  },
+  resetPointer: (value: number) => {
+    pointer = value;
+  }
+};
