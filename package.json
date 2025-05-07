@@ -13,16 +13,21 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.5",
     "@types/node": "^22.15.2",
     "gh-pages": "^6.3.0",
     "jsdom": "^26.1.0",
+    "tailwindcss": "^4.1.5",
     "typescript": "^5.8.3",
     "vite": "^6.3.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.2"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.5",
     "@tonejs/midi": "^2.0.28",
+    "autoprefixer": "^10.4.21",
+    "flowbite": "^3.1.2",
     "smplr": "^0.16.3",
     "webaudiofont": "^3.0.4"
   }

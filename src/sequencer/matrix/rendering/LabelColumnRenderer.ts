@@ -4,7 +4,7 @@ import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import { rowToNote } from '../../../shared/utils/musical/noteUtils.js';
 import { computeBlackKeyMidiMap } from '../../../shared/utils/musical/noteUtils.js';
-import { getUserConfig } from '../../../userconfig/store/userConfigStore.js';
+import { getUserConfig } from '../../../userSettings/store/userConfigStore.js';
 import { GRID_COLOR_SCHEMES } from '../rendering/colors/constants/colorSchemes.js';
 
 export class LabelColumnRenderer {

@@ -1,14 +1,13 @@
 // src/sequencer/ui.ts
 
 import { SEQUENCER_CONFIG as config, SNAP_RESOLUTIONS, durationHotkeys } from '../../sequencer/constants/sequencerConstants.js';
-import { initConfigModal } from '../../userconfig/initUserConfig.js';
 import { getActiveSelection } from '../../sequencer/utils/selectionTracker.js';
 import { getTimeSignature, getTotalMeasures } from '../../sequencer/transport.js';
 import { showVelocityModal } from '../../sequencer/ui/modals/velocity/velocityModeMenu.js';
 import { showErrorModal } from '../../global/errorGeneric.js';
 import Sequencer from '../../sequencer/sequencer.js';
 import { isKeyboardListenersAttached } from '../../keyboard/input/keyboard-interaction.js';
-
+import { UserConfigModalController } from '../../userSettings/userConfig.js';
 
 let isInitialized = false;
 let isPlaying = false;
@@ -245,13 +244,13 @@ export function setupUI({
   }
 
   // === User Config Button ===
+  let configModalController: UserConfigModalController | null = null;
   configBtn?.addEventListener('click', () => {
-    const configModal = document.getElementById('userconfig-modal') as HTMLElement | null;
-    configModal?.classList.remove('hidden');
+    if (!configModalController) {
+      configModalController = new UserConfigModalController();
+    }
+    configModalController.show();
   });
-
-  // Initialize the User Config Modal
-  initConfigModal();
 
   // Initialize Footer Bar inputs with correct values
   if (measuresInput) measuresInput.value = String(getTotalMeasures());

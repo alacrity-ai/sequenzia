@@ -1,6 +1,6 @@
 // js/userconfig/settings/sharedSettings.js
 
-import { defaultUserConfig } from '../defaultUserConfig.js';
+import { defaultUserConfig } from '../store/defaultUserSettings.js';
 import { getUserConfig, updateUserConfig } from '../store/userConfigStore.js';
 import type { UserConfig } from '../interfaces/UserConfig.js';
 

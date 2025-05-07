@@ -1,8 +1,15 @@
 import { getAssetPath } from './assetHelpers.js';
 
 export function showSplashScreen(): void {
+    const modalMountRoot = document.getElementById('modal-mount-root');
     const splashModal = document.getElementById('splash-modal');
     const splashLogo = document.getElementById('splash-logo') as HTMLImageElement | null;
+  
+    // Remove hidden from the modal mount root
+    if (modalMountRoot) {
+      modalMountRoot.classList.remove('content-hidden');
+      modalMountRoot.classList.add('content-visible');
+    }
   
     if (splashLogo) {
       splashLogo.src = getAssetPath('static/logo.png');

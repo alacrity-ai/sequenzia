@@ -9,7 +9,7 @@ import { drawRoundedRect } from '../utils/roundedRect.js';
 import { createVisibleNotesFilter } from '../utils/createNoteVisibilityFilter.js'
 import { noteToRowIndex, getPitchClassIndex } from '../../../shared/utils/musical/noteUtils.js';
 import { NOTE_COLOR_SCHEMES } from './colors/noteColorSchemes.js';
-import { getUserConfig } from '../../../userconfig/store/userConfigStore.js';
+import { getUserConfig } from '../../../userSettings/store/userConfigStore.js';
 import { getTrackColor } from './colors/helpers/getTrackColor.js';
 
 export class NoteRenderer {
