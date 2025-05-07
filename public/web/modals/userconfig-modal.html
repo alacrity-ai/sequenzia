@@ -1,5 +1,5 @@
 <!-- Enhanced User Configuration Modal -->
-<div id="userconfig-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] hidden">
+<div id="userconfig-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] hidden">
   <div class="relative flex flex-col bg-gradient-to-br from-gray-800 to-gray-900 border border-purple-700 shadow-2xl rounded-2xl px-10 py-8 animate-fade-in w-[500px] max-w-full text-white">
 
     <!-- Animated Halo Glow -->
@@ -34,14 +34,14 @@
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">Grid Color Scheme</label>
         <select id="grid-color-select"
-                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500 cursor-pointer">
         </select>
       </div>
 
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">Note Color Scheme</label>
         <select id="note-color-select"
-                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500 cursor-pointer">
         </select>
       </div>
     </div>
@@ -61,7 +61,7 @@
       <div class="mb-8">
         <label class="block text-sm font-medium mb-2">OpenAI Model</label>
         <select id="openai-model-select" 
-                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500">
+                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500 cursor-pointer">
           <option value="gpt-4o">gpt-4o</option>
           <option value="gpt-4o-mini">gpt-4o-mini</option>
           <option value="gpt-4.1">gpt-4.1</option>
@@ -75,11 +75,11 @@
     <!-- Footer Buttons -->
     <div class="flex gap-3 mt-4 z-10">
       <button id="config-save" 
-              class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg transition-all text-sm">
+              class="cursor-pointer flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg transition-all text-sm">
         Save
       </button>
       <button id="config-close-bottom" 
-              class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded-lg transition-all text-sm">
+              class="cursor-pointer flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded-lg transition-all text-sm">
         Close
       </button>
     </div>

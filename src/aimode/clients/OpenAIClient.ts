@@ -1,6 +1,6 @@
 // src/aimode/clients/OpenAIClient.ts
 
-import { getOpenAIKey, getOpenAIModel } from '../../userconfig/settings/aiSettings.js';
+import { getOpenAIKey, getOpenAIModel } from '../../userSettings/store/userConfigStore.js';
 import { OpenAIMessage } from '../interfaces/OpenAIMessage.js';
 import { OpenAISchema } from '../interfaces/OpenAISchema.js';
 import { ResponseCompletionOptions } from '../interfaces/ResponseCompletionOptions.js';

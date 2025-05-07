@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@import "./sequenzia.css";
+/* Flowbite theme */
+@import "flowbite/src/themes/default";

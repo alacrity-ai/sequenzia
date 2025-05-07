@@ -1,0 +1,167 @@
+* {
+    user-select: none;
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in-up 0.75s ease-out forwards;
+  }
+  
+
+  /* Prevent button focus outlines */
+  button:focus {
+    outline: none;
+  }
+
+  .button-locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+  }
+  
+  .button-locked::after {
+    content: '🔒';
+    position: absolute;
+    font-size: 10px;
+    top: -5px;
+    right: -5px;
+  }
+
+  .side-button {
+    padding: 0.25rem 0.5rem;           /* Equivalent to Tailwind px-2 py-1 */
+    border-radius: 0.25rem;            /* Tailwind rounded */
+    color: white;                      /* Tailwind text-white */
+    width: 36px;
+    height: 36px;
+    display: flex;                     /* Tailwind flex */
+    align-items: center;              /* Tailwind items-center */
+    justify-content: center;          /* Tailwind justify-center */
+    border: 1px solid rgb(146, 51, 234); /* border-purple-800 */
+    background-color: transparent;
+    transition: background-color 0.2s;
+    cursor: pointer;
+  }
+  
+  .side-button-primary {
+    background-color: rgb(126 34 206);     /* Tailwind bg-purple-600 */
+  }
+  
+  .side-button-primary:hover {
+    background-color: rgb(199, 41, 238);    /* Tailwind hover:bg-purple-700 */
+  }
+  
+  .side-button-secondary {
+    background-color: rgb(55, 65, 81);     /* Tailwind bg-gray-700 */
+  }
+  
+  .side-button-secondary:hover {
+    background-color: rgb(215, 68, 255);   /* Tailwind hover:bg-purple-700 */
+  }
+
+  .side-button-activated {
+    background-color: rgb(255, 155, 25);   /* Tailwind bg-purple-600 */
+  }
+  
+  .side-button-activated:hover {
+    background-color: rgb(255, 200, 129);  /* Tailwind hover:bg-purple-700 */
+  }
+  
+  /* Blue variant for info buttons (Help, What's New, Reload) */
+  .side-button-info {
+    background-color: rgb(0, 21, 66);   /* Tailwind bg-blue-600 */
+    border: 1px solid rgb(88, 177, 255);
+  }
+
+  .side-button-info:hover {
+    background-color: rgb(88, 177, 255);   /* Tailwind hover:bg-blue-700 */
+    border: 1px solid rgb(88, 177, 255);
+  }
+
+  /* Blue variant for info buttons (Help, What's New, Reload) */
+  .side-button-load {
+    background-color: rgb(0, 0, 0);   
+    /* beautiful pink border */
+    border: 1px solid rgb(215, 68, 255);
+  }
+
+  .side-button-load:hover {
+    background-color: rgb(215, 68, 255);
+    border: 1px solid rgb(255, 213, 88);
+  }
+  
+  /* Hide the main content until fully loaded */
+  .content-hidden {
+    opacity: 0;
+  }
+  
+  .content-visible {
+    opacity: 1;
+    transition: opacity 0.5s ease-in;
+  }
+  
+  /* Entire scrollbar */
+::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* Track (background) */
+  ::-webkit-scrollbar-track {
+    background: #1f1f1f; /* dark gray or match bg */
+  }
+  
+  /* Thumb (draggable handle) */
+  ::-webkit-scrollbar-thumb {
+    background: #a855f7; /* Tailwind 'purple-500' */
+    border-radius: 6px;
+    border: 2px solid #1f1f1f; /* match track for padding effect */
+  }
+  
+  /* Thumb on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #ec4899; /* Tailwind 'pink-500' */
+  }
+  
+  /* Scrollbar corner (bottom-right box when both scrollbars appear) */
+  ::-webkit-scrollbar-corner {
+    background: #292929; /* Match your track color or background */
+    border-radius: 6px;
+  }
+  
+  .volume-fill.overdrive {
+    background: linear-gradient(to right, #ff1f8f, #ff92bc); /* hot pink gradient */
+  }
+  
+  .volume-thumb.overdrive {
+    background-color: #ff1f8f;
+    border-color: #ff1f8f;
+  }
+  
+  .volume-fill.precise {
+    background: linear-gradient(to right, #22c55e, #a3e635); /* lime/green gradient */
+  }
+  
+  .volume-thumb.precise {
+    background-color: #22c55e;
+    border-color: #22c55e;
+  }
+  
+  .pan-fill.precise {
+    background: linear-gradient(to right, #22c55e, #a3e635); /* lime/green gradient */
+  }
+  
+  .pan-thumb.precise {
+    background-color: #22c55e;
+    border-color: #22c55e;
+  }

@@ -10,14 +10,14 @@ import { recordDiff } from '../appState/appState.js';
 import { createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
 import { createCheckpointDiff, createReverseCheckpointDiff } from '../appState/diffEngine/types/internal/checkpoint.js';
 import { TrackData } from '../sequencer/interfaces/Track.js';
-import { GlobalConfig } from '../userconfig/interfaces/GlobalConfig.js';
+import type { SongConfig } from '../shared/interfaces/SongConfig.js';
 
 /**
  * Loads the given tracks and globalConfig into the app state, replacing existing session.
  * @param tracks - The imported track data
  * @param globalConfig - The imported global configuration
  */
-export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): void {
+export function loadSession(tracks: TrackData[], globalConfig: SongConfig): void {
   if (playbackEngine.isActive()) {
     void playbackEngine.pause();
   }  

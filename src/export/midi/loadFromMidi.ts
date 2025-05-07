@@ -3,7 +3,7 @@
 import { Midi } from '@tonejs/midi';
 import { Session } from '../../sequencer/interfaces/Session.js';
 import { TrackData } from '../../sequencer/interfaces/Track.js';
-import { GlobalConfig } from '../../userconfig/interfaces/GlobalConfig.js';
+import type { SongConfig } from '../../shared/interfaces/SongConfig.js';
 import { Note } from '../../shared/interfaces/Note.js';
 import { GM_INSTRUMENTS } from './instrumentMapping.js';
 import { getDrumMachineInstruments } from '../../sounds/loaders/sf2-loader.js';
@@ -33,7 +33,7 @@ export async function importSessionFromMIDI(file: File): Promise<Session> {
     const totalBeats = latestNoteEnd * (bpm / 60);
     const estimatedTotalMeasures = Math.ceil(totalBeats / beatsPerMeasure) || 8;
   
-    const globalConfig: GlobalConfig = {
+    const globalConfig: SongConfig = {
       bpm,
       beatsPerMeasure,
       totalMeasures: estimatedTotalMeasures,

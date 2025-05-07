@@ -1,4 +1,7 @@
 // src/main.ts
+import './styles/tailwind.css';
+import 'flowbite';
+
 import { logMessage } from './shared/logging/logger.js';
 import { devLog } from './shared/state/devMode.js';
 import { registerDevTools } from './shared/dev/devTools.js';
