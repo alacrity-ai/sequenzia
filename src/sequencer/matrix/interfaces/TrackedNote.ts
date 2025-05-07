@@ -1,6 +1,6 @@
 // src/sequencer/matrix/interfaces/TrackedNote.ts
 
-import { Note } from '../../interfaces/Note.js';
+import { Note } from '../../../shared/interfaces/Note.js';
 import { NoteInteractionState } from './NoteInteractionState.js';
 
 export interface TrackedNote {
