@@ -8,6 +8,7 @@ vi.mock('../../transport.js', () => ({
   getTotalBeats: vi.fn()
 }));
 
+// @ts-ignore
 const mockedGetTotalBeats = getTotalBeats as vi.Mock;
 
 describe('transformPastedNotes', () => {

@@ -58,7 +58,7 @@ describe('getSnappedNotePosition', () => {
   it('snaps to triplet resolution (snap = 1 → effective = 2/3)', () => {
     const mouse = { x: 150, y: 60 }; // beatX = 2
     const result = getSnappedNotePosition(mouse, mockScroll, mockConfig, 1, true);
-    expect(result).toEqual({ x: 2, y: 1 }); // ✅ correct expectation
+    expect(result).toEqual({ x: 2, y: 1 });
   });  
 
   it('returns null if rowY is below grid', () => {
@@ -86,6 +86,6 @@ describe('getSnappedNotePosition', () => {
     const mouse = { x: 250, y: 60 };
   
     const result = getSnappedNotePosition(mouse, mockScroll, zoomedConfig, 1);
-    expect(result).toEqual({ x: 1, y: 0 }); // ✅ correct expectation
+    expect(result).toEqual({ x: 1, y: 0 });
   });  
 });

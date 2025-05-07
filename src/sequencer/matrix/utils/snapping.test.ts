@@ -65,7 +65,9 @@ describe('snapping utils', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // @ts-ignore
     (getRelativeMousePos as vi.Mock).mockReturnValue(mockMousePos);
+    // @ts-ignore
     (getGridRelativeMousePos as vi.Mock).mockReturnValue(mockMousePos);
   });
 
@@ -77,6 +79,7 @@ describe('snapping utils', () => {
 
   it('returns snapped position from mouse event via getSnappedNotePosition', () => {
     const expected: SnappedNotePosition = { x: 4, y: 2 };
+    // @ts-ignore
     (getSnappedNotePosition as vi.Mock).mockReturnValue(expected);
 
     const result = getSnappedFromEvent(mockEvent, document.createElement('div'), mockGrid, mockScroll, mockConfig);
@@ -99,6 +102,7 @@ describe('snapping utils', () => {
       isTripletMode: () => true
     } as GridSnappingContext;
 
+    // @ts-ignore
     (getSnappedNotePosition as vi.Mock).mockReturnValue(expected);
 
     const result = getSnappedFromEvent(mockEvent, document.createElement('div'), altGrid, mockScroll, mockConfig);

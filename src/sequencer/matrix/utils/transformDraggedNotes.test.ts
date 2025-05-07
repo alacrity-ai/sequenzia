@@ -31,6 +31,7 @@ describe('transformDraggedNotes', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // @ts-ignore
     (getTotalBeats as vi.Mock).mockReturnValue(16);
   });
 
