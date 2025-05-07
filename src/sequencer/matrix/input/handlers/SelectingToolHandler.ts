@@ -64,14 +64,14 @@ export class SelectingToolHandler implements GridInteractionHandler {
     this.requestRedraw();
   }  
 
-  public onMouseUp(_e: MouseEvent): void {
+  public onMouseUp(e: MouseEvent): void {
     const box = this.store.getMarqueeBox();
     if (!box) {
-      this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+      this.controller.transitionTo(InteractionMode.NoteTool);
       return;
     }
   
-    const selected = getNotesInMarquee(
+    const notesInBox = getNotesInMarquee(
       this.noteManager.getAll(),
       box,
       this.scroll,
@@ -79,21 +79,29 @@ export class SelectingToolHandler implements GridInteractionHandler {
       this.grid
     );
   
-    if (selected.length > 0) {
+    const isMac = navigator.platform.toUpperCase().includes('MAC');
+    const isCtrlHeld = isMac ? e.metaKey : e.ctrlKey;
+  
+    if (notesInBox.length > 0) {
+      const currentSelection = this.store.getSelectedNotes();
+      const newSelection = isCtrlHeld
+        ? this.noteManager.mergeSelections(currentSelection, notesInBox)
+        : notesInBox;
+  
+      this.store.setSelectedNotes(newSelection);
       this.store.clearHighlightedNotes();
-      this.store.setSelectedNotes(selected);
       this.store.setMarqueeBox(null);
       this.controller.transitionTo(InteractionMode.SelectedIdle);
     } else {
       this.store.clearSelection();
-      this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+      this.controller.transitionTo(InteractionMode.NoteTool);
     }
-  } 
+  }  
 
   public onMouseLeave(): void {
     this.store.clearHighlightedNotes();
     this.store.setMarqueeBox(null);
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }  
 
   public onExit(): void {

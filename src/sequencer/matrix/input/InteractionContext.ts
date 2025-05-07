@@ -1,5 +1,6 @@
 // src/sequencer/matrix/input/InteractionContext.ts
 
+import { devLog } from '../../../shared/state/devMode.js';
 import { InteractionMode } from './interfaces/InteractionEnum.js';
 import { GridInteractionHandler } from './interfaces/GridInteractionHandler.js';
 import { DefaultNoteToolHandler } from './handlers/DefaultNoteToolHandler.js';
@@ -13,7 +14,7 @@ import type { InteractionContextData } from './interfaces/InteractionContextData
 import type { InteractionController } from './interfaces/InteractionController.js';
 
 export class InteractionContext {
-  private mode: InteractionMode = InteractionMode.DefaultNoteTool;
+  private mode: InteractionMode = InteractionMode.NoteTool;
   private activeHandler: GridInteractionHandler | null = null;
 
   private lastMouseX: number = 0;
@@ -21,7 +22,7 @@ export class InteractionContext {
 
   constructor(private readonly data: InteractionContextData) {
     // Set initial mode
-    this.transitionTo(InteractionMode.DefaultNoteTool);
+    this.transitionTo(InteractionMode.NoteTool);
   }
 
   public handleMouseDown(e: MouseEvent): void {
@@ -61,6 +62,7 @@ export class InteractionContext {
   }  
 
   public transitionTo(mode: InteractionMode): void {
+    devLog(`Transitioning to mode: ${InteractionMode[mode]} from ${InteractionMode[this.mode]}`);
     this.activeHandler?.onExit?.();
     this.mode = mode;
     this.activeHandler = this.createHandlerForMode(mode);
@@ -75,7 +77,7 @@ export class InteractionContext {
     };
 
     switch (mode) {
-      case InteractionMode.DefaultNoteTool:
+      case InteractionMode.NoteTool:
         return new DefaultNoteToolHandler(
           this.data.canvas,
           this.data.noteManager,

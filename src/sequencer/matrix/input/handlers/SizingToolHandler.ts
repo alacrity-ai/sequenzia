@@ -10,9 +10,6 @@ import type { InteractionController } from '../interfaces/InteractionController.
 import type { CursorController } from '../cursor/CursorController.js';
 
 import { CursorState } from '../interfaces/CursorState.js';
-import { getRelativeMousePos } from '../../utils/gridPosition.js';
-import { getSnappedNotePosition } from '../../utils/snapPosition.js';
-import { getSnappedFromEvent } from '../../utils/snapping.js';
 import { recordDiff } from '../../../../appState/appState.js';
 import {
   createResizeNotesDiff,
@@ -46,7 +43,7 @@ export class SizingToolHandler implements GridInteractionHandler {
   public onEnter(): void {
     const selected = this.store.getSelectedNotes();
     if (!selected.length) {
-      this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+      this.controller.transitionTo(InteractionMode.NoteTool);
       return;
     }
   
@@ -126,11 +123,11 @@ export class SizingToolHandler implements GridInteractionHandler {
 
     this.store.clearPreviewNotes();
     this.store.clearSelection();
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }
 
   public onMouseLeave(): void {
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }
 
   public onExit(): void {

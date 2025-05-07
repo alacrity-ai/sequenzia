@@ -79,7 +79,6 @@ export function stopNoteByPitch(pitch: string): void {
     engine.stopNoteByPitch(pitch);
 }
 
-
 export async function loadAndPlayNote(
   instrumentName: string,
   pitch: string,

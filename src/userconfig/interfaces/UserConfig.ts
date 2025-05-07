@@ -1,10 +1,13 @@
 // src/userconfig/interfaces/UserConfig.ts
 
-import { OpenAIModel } from './OpenAISettings.js';
+import type { OpenAISettings } from './OpenAISettings.js';
+import type { LayoutSettings } from './LayoutSettings.js';
+import type { ThemeSettings } from './ThemeSettings.js';
+import type { InteractionSettings } from './InteractionSettings.js';
 
 export interface UserConfig {
-  openaiApiKey: string;
-  openaiModel: OpenAIModel;
-  gridColorScheme: string;
-  noteColorScheme: string;
+  ai: OpenAISettings;
+  layout: LayoutSettings;
+  theme: ThemeSettings;
+  interaction: InteractionSettings;
 }

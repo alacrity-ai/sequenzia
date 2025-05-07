@@ -1,5 +1,5 @@
 import { OpenAIModel } from '../interfaces/OpenAISettings.js';
-import { getUserConfig, updateUserConfig } from './userConfig.js';
+import { getUserConfig, updateUserConfig } from './userConfigStore.js';
 import { saveToLocalStorage } from './sharedSettings.js';
 
 export const VALID_MODELS: OpenAIModel[] = [
@@ -10,21 +10,21 @@ export const VALID_MODELS: OpenAIModel[] = [
  * Retrieves the OpenAI API key from user config.
  */
 export function getOpenAIKey(): string {
-  return getUserConfig().openaiApiKey;
+  return getUserConfig().ai.openaiApiKey;
 }
 
 /**
  * Retrieves the selected OpenAI model from user config.
  */
 export function getOpenAIModel(): OpenAIModel {
-  return getUserConfig().openaiModel as OpenAIModel;
+  return getUserConfig().ai.openaiModel as OpenAIModel;
 }
 
 /**
  * Updates the OpenAI API key.
  */
 export function setOpenAIKey(key: string): void {
-  updateUserConfig({ openaiApiKey: key });
+  updateUserConfig({ai: { openaiApiKey: key }});
 }
 
 /**
@@ -35,7 +35,7 @@ export function setOpenAIModel(model: OpenAIModel): void {
   if (!VALID_MODELS.includes(model)) {
     throw new Error(`Invalid model: ${model}. Must be one of: ${VALID_MODELS.join(', ')}`);
   }
-  updateUserConfig({ openaiModel: model });
+  updateUserConfig({ai: { openaiModel: model }});
 }
 
 /**

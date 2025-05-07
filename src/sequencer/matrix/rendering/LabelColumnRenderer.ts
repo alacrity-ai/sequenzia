@@ -4,7 +4,7 @@ import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import { rowToNote } from '../../../shared/utils/musical/noteUtils.js';
 import { computeBlackKeyMidiMap } from '../../../shared/utils/musical/noteUtils.js';
-import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
+import { getUserConfig } from '../../../userconfig/settings/userConfigStore.js';
 import { GRID_COLOR_SCHEMES } from '../rendering/colors/constants/colorSchemes.js';
 
 export class LabelColumnRenderer {
@@ -26,7 +26,7 @@ export class LabelColumnRenderer {
       behavior: { zoom }
     } = this.config;
 
-    const { gridColorScheme: schemeKey } = getUserConfig();
+    const { gridColorScheme: schemeKey } = getUserConfig().theme;
     const scheme = GRID_COLOR_SCHEMES[schemeKey];
 
     const totalRows = highestMidi - lowestMidi + 1;

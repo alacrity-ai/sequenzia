@@ -3,7 +3,7 @@
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
-import { getUserConfig } from '../../../userconfig/settings/userConfig.js';
+import { getUserConfig } from '../../../userconfig/settings/userConfigStore.js';
 import { GRID_COLOR_SCHEMES } from './colors/constants/colorSchemes.js';
 
 export class GridRenderer {
@@ -35,7 +35,7 @@ export class GridRenderer {
       behavior: { zoom }
     } = this.config;
   
-    const { gridColorScheme: schemeKey } = getUserConfig();
+    const { gridColorScheme: schemeKey } = getUserConfig().theme;
     const scheme = GRID_COLOR_SCHEMES[schemeKey];
   
     const totalRows = this.config.layout.highestMidi - this.config.layout.lowestMidi + 1;

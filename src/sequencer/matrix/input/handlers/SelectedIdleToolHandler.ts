@@ -24,7 +24,7 @@ import { NoteManager } from '../../notes/NoteManager.js';
 export class SelectedIdleToolHandler implements GridInteractionHandler {
   private initialMouseX: number = 0;
   private initialMouseY: number = 0;
-  private readonly dragThreshold: number = 5;
+  private readonly dragThreshold: number = 3;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -122,7 +122,9 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
   
       // Otherwise, drag began over empty space — retry marquee selection
       if (!hoveredKey && distance >= this.dragThreshold) {
-        this.store.clearSelection();
+        if (!e.ctrlKey && !e.metaKey) {
+          this.store.clearSelection();
+        }
         this.store.endSelectionDrag();
         this.controller.transitionTo(InteractionMode.Selecting);
         return;
@@ -164,24 +166,51 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
 
   public onMouseUp(e: MouseEvent): void {
     if (e.button !== 0 || this.store.isOnNonGridElement()) return;
-
+  
     this.store.endSelectionDrag();
-
-    const hoveredKey = this.store.getHoveredNoteKey();
-    if (hoveredKey) {
-      const [pitch, start] = hoveredKey.split(':');
-      const note = this.noteManager.findNoteUnderCursor(pitch, Number(start));
-      if (note) {
-        this.store.setSelectedNotes([note]);
+  
+    const noteAtPosition = this.noteManager.findNoteAtMousePosition(
+      e,
+      this.canvas,
+      this.scroll,
+      this.config,
+      this.noteManager
+    );
+  
+    if (noteAtPosition) {
+      const key = `${noteAtPosition.pitch}:${noteAtPosition.start}`;
+      const selected = this.store.getSelectedNotes();
+      const isAlreadySelected = selected.some(n => `${n.pitch}:${n.start}` === key);
+  
+      const isMac = navigator.platform.toUpperCase().includes('MAC');
+      const isCtrlHeld = isMac ? e.metaKey : e.ctrlKey;
+  
+      if (isCtrlHeld) {
+        if (isAlreadySelected) {
+          // Remove the note from selection
+          const newSelection = selected.filter(n => `${n.pitch}:${n.start}` !== key);
+          this.store.setSelectedNotes(newSelection);
+        } else {
+          // Add the note to selection
+          this.noteManager.previewNote(noteAtPosition.pitch, 0.25);
+          this.store.setSelectedNotes([...selected, noteAtPosition]);
+        }
         this.controller.transitionTo(InteractionMode.SelectedIdle);
         return;
       }
+  
+      // Regular left-click: replace selection with just this note
+      this.store.setSelectedNotes([noteAtPosition]);
+      this.noteManager.previewNote(noteAtPosition.pitch, 0.25);
+      this.controller.transitionTo(InteractionMode.SelectedIdle);
+      return;
     }
-
+  
     // Clicked on empty space — drop selection and return to default mode
     this.store.clearSelection();
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }
+  
 
   public onContextMenu(e: MouseEvent): void {
     e.preventDefault();
@@ -216,7 +245,7 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
   
     // In both cases: clear selection and revert to default mode
     this.store.clearSelection();
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }  
 
   public onKeyDown(e: KeyboardEvent): void {
@@ -242,7 +271,7 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
       );
   
       this.store.clearSelection();
-      this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+      this.controller.transitionTo(InteractionMode.NoteTool);
       return;
     }
   
@@ -266,7 +295,7 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
       );
   
       this.store.clearSelection();
-      this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+      this.controller.transitionTo(InteractionMode.NoteTool);
     }
   }  
 }

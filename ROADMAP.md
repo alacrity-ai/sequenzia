@@ -31,6 +31,10 @@
   - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats
 
 ## Future Todos
+- QOL:
+  - [ ] Smarter snap durations, auto shift down to the note value you're on
+  - [ ] Add alternate note placement mode option in the user config (on mouse down note placement into sizing)
+  - [ ] Hold down alt or something to see all the hotkeys on all UI elements.
 - Sequencer Grid:
   - [x] Re-implement sequencer grid drawing entirely.
     - [x] Replace the existing sequencer element with one based from the example in: gridtest.html

@@ -1,6 +1,6 @@
 // js/userconfig/settings/sequencerSettings.js
 
-import { getUserConfig, updateUserConfig } from './userConfig.js';
+import { getUserConfig, updateUserConfig } from './userConfigStore.js';
 import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
 import { UserConfig } from '../interfaces/UserConfig.js';
 
@@ -43,19 +43,20 @@ export function initSequencerSettings(): void {
 
   // Set initial values
   const config: UserConfig = getUserConfig();
-  gridSelect.value = config.gridColorScheme;
-  noteSelect.value = config.noteColorScheme;
+  gridSelect.value = config.theme.gridColorScheme;
+  noteSelect.value = config.theme.noteColorScheme;
 
   // Listeners
   gridSelect.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLSelectElement;
-    updateUserConfig({ gridColorScheme: target.value });
+    updateUserConfig({ theme: { gridColorScheme: target.value } });
     getSequencers().forEach(seq => seq.matrix?.requestRedraw());
   });
-
+  
   noteSelect.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLSelectElement;
-    updateUserConfig({ noteColorScheme: target.value });
+    updateUserConfig({ theme: { noteColorScheme: target.value } });
     getSequencers().forEach(seq => seq.matrix?.requestRedraw());
   });
+  
 }

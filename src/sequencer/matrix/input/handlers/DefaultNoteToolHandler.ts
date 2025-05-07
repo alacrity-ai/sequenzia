@@ -22,7 +22,7 @@ import { recordDiff } from '../../../../appState/appState.js';
 export class DefaultNoteToolHandler implements GridInteractionHandler {
     private initialMouseX: number = 0;
     private initialMouseY: number = 0;
-    private readonly dragThreshold: number = 5;
+    private readonly dragThreshold: number = 3;
     
     constructor(
       private readonly canvas: HTMLCanvasElement,
@@ -168,6 +168,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
         const [pitch, start] = hoveredKey.split(':');
         const selectedNote = this.noteManager.findAtPosition(pitch, Number(start));
         if (selectedNote) {
+          this.noteManager.previewNote(selectedNote.pitch, 0.25);
           this.store.setSelectedNotes([selectedNote]);
           this.controller.transitionTo(InteractionMode.SelectedIdle);
           return;

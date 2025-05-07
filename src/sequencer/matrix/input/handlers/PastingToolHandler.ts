@@ -72,12 +72,12 @@ export class PastingToolHandler implements GridInteractionHandler {
     );
   
     this.store.clearPreviewNotes();
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }  
 
   public onMouseLeave(): void {
     this.store.clearPreviewNotes();
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }  
 
   public onExit(): void {

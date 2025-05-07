@@ -15,7 +15,7 @@ import { CursorState } from '../interfaces/CursorState.js';
 import { InteractionMode } from '../interfaces/InteractionEnum.js';
 import { getRelativeMousePos } from '../../utils/gridPosition.js';
 import { getSnappedNotePosition } from '../../utils/snapPosition.js';
-import { rowToNote, noteToMidi, midiToPitch } from '../../../../shared/utils/musical/noteUtils.js';
+import { rowToNote } from '../../../../shared/utils/musical/noteUtils.js';
 import { createMoveNotesDiff, createReverseMoveNotesDiff } from '../../../../appState/diffEngine/types/grid/moveNotes.js';
 import { recordDiff } from '../../../../appState/appState.js';
 
@@ -41,7 +41,7 @@ export class DraggingToolHandler implements GridInteractionHandler {
   public onEnter(): void {
     const selected = this.store.getSelectedNotes();
     if (!selected.length) {
-      this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+      this.controller.transitionTo(InteractionMode.NoteTool);
       return;
     }
   
@@ -117,13 +117,13 @@ export class DraggingToolHandler implements GridInteractionHandler {
 
     this.store.clearPreviewNotes();
     this.store.clearSelection();
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }
 
   public onMouseLeave(): void {
     // Fake that a drag never ocurred, as we have left the grid
     this.hasMoved = false;
-    this.controller.transitionTo(InteractionMode.DefaultNoteTool);
+    this.controller.transitionTo(InteractionMode.NoteTool);
   }
 
   public onExit(): void {

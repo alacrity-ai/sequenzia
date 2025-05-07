@@ -13,42 +13,40 @@ export function getRelativeMousePos(e: MouseEvent, canvas: HTMLElement): { x: nu
 }
 
 export function getRelativeMousePosFromXY(x: number, y: number, canvas: HTMLCanvasElement): { x: number, y: number } {
-    const rect = canvas.getBoundingClientRect();
-    return {
-        x: x - rect.left,
-        y: y - rect.top,
-    };
+  const rect = canvas.getBoundingClientRect();
+  return {
+      x: x - rect.left,
+      y: y - rect.top,
+  };
 }
 
 export function getGridRelativeMousePos(
-    e: MouseEvent,
-    canvas: HTMLElement,
-    scroll: GridScroll,
-    config: GridConfig
-  ): { x: number; y: number } {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - rect.left + scroll.getX() - config.layout.labelWidth,
-      y: e.clientY - rect.top + scroll.getY() - config.layout.headerHeight,
-    };
-  }
+  e: MouseEvent,
+  canvas: HTMLElement,
+  scroll: GridScroll,
+  config: GridConfig
+): { x: number; y: number } {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: e.clientX - rect.left + scroll.getX() - config.layout.labelWidth,
+    y: e.clientY - rect.top + scroll.getY() - config.layout.headerHeight,
+  };
+}
 
-  export function getGridRelativeMousePosFromXY(
-    x: number,
-    y: number,
-    canvas: HTMLCanvasElement,
-    scroll: GridScroll,
-    config: GridConfig
-  ): { x: number; y: number } {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: x - rect.left + scroll.getX() - config.layout.labelWidth,
-      y: y - rect.top + scroll.getY() - config.layout.headerHeight,
-    };
-  }
-  
+export function getGridRelativeMousePosFromXY(
+  x: number,
+  y: number,
+  canvas: HTMLCanvasElement,
+  scroll: GridScroll,
+  config: GridConfig
+): { x: number; y: number } {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: x - rect.left + scroll.getX() - config.layout.labelWidth,
+    y: y - rect.top + scroll.getY() - config.layout.headerHeight,
+  };
+}
 
-  
 export function getGridCellAt(
   mouse: { x: number; y: number },
   scroll: GridScroll,

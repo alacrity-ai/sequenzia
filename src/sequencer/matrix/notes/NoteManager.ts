@@ -1,11 +1,16 @@
 // src/sequencer/matrix/notes/NoteManager.ts
 
+import { devLog } from '../../../shared/state/devMode.js';
 import type { Note } from '../../../shared/interfaces/Note.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { SequencerContext } from '../interfaces/SequencerContext.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
-
+import { getGridRelativeMousePos, getRelativeMousePos } from '../utils/gridPosition.js';
+import { getSnapResolution } from '../../transport.js';
+import { getSnappedNotePosition } from '../utils/snapPosition.js';
+import { rowToNote } from '../../../shared/utils/musical/noteUtils.js';
+import type { GridScroll } from '../scrollbars/GridScroll.js';
 
 export class NoteManager {
   private notes: Note[] = [];
@@ -88,6 +93,37 @@ export class NoteManager {
     }
   }
   
+  /**
+  * Finds the note (if any) under the current mouse cursor on the grid.
+  */
+  public findNoteAtMousePosition(
+    e: MouseEvent,
+    canvas: HTMLCanvasElement,
+    scroll: GridScroll,
+    config: GridConfig,
+    noteManager: NoteManager
+  ): Note | undefined {
+    const mouse = getRelativeMousePos(e, canvas);
+    devLog('Raw mouse pos (grid-relative)', mouse);
+  
+    const snap = getSnapResolution();
+    const snapped = getSnappedNotePosition(mouse, scroll, config, snap);
+    if (!snapped) {
+      devLog('Snapped position is invalid', { mouse, snap });
+      return undefined;
+    }
+  
+    const pitch = rowToNote(snapped.y, config.layout.lowestMidi, config.layout.highestMidi);
+    const beat = snapped.x;
+  
+    devLog('Snapped grid position', snapped);
+    devLog('Computed pitch and beat', { pitch, beat });
+  
+    const note = noteManager.findNoteUnderCursor(pitch, beat);
+    devLog('Note under cursor (if any)', note);
+  
+    return note;
+  }
 
   public findAtPosition(pitch: string, start: number): Note | undefined {
     return this.noteIndex.get(`${pitch}:${start}`);
@@ -174,6 +210,24 @@ export class NoteManager {
     }
 
     return undefined;
+  }
+
+  /**
+   * Merges two note arrays without duplicates (by pitch + start key).
+   */
+  public mergeSelections(a: Note[], b: Note[]): Note[] {
+    const seen = new Set<string>();
+    const merged: Note[] = [];
+
+    for (const note of [...a, ...b]) {
+      const key = `${note.pitch}:${note.start}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(note);
+      }
+    }
+
+    return merged;
   }
 
   /** Optionally use this in interactions to preview a note */

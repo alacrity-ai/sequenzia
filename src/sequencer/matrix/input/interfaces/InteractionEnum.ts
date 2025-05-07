@@ -1,7 +1,7 @@
 // src/sequencer/matrix/input/interfaces/InteractionEnum.ts
 
 export enum InteractionMode {
-    DefaultNoteTool,
+    NoteTool,
     Selecting,
     SelectedIdle,
     Dragging,
