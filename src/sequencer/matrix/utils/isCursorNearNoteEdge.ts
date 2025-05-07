@@ -1,3 +1,5 @@
+// src/sequencer/matrix/utils/isCursorNearNoteEdge.ts
+
 import type { Note } from '../../../shared/interfaces/Note.js';
 
 /**

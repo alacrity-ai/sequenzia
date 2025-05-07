@@ -1,4 +1,5 @@
-// src/sequencer/matrix/utils/gridPosition.ts
+// src/sequencer/matrix/utils/marqueeUtils.ts
+
 import { noteToRowIndex } from '../../../shared/utils/musical/noteUtils.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';

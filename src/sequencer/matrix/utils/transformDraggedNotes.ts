@@ -1,3 +1,5 @@
+// src/sequencer/matrix/utils/transformDraggedNotes.ts
+
 import type { Note } from '../../../shared/interfaces/Note.js';
 import { noteToMidi, midiToPitch } from '../../../shared/utils/musical/noteUtils.js';
 import { getTotalBeats } from '../../transport.js';
