@@ -51,13 +51,13 @@ const notes: Note[] = [
 ];
 
 describe('getNotesInMarquee', () => {
-  // it('returns notes fully within the marquee selection region', () => {
-  //   const box = {
-  //     startX: 200,    // corresponds to beat 2
-  //     currentX: 400,  // beat 4
-  //     startY: 0,
-  //     currentY: 200   // several pitch rows
-  //   };
+  it('returns notes fully within the marquee selection region', () => {
+    const box = {
+      startX: 200,    // corresponds to beat 2
+      currentX: 400,  // beat 4
+      startY: 0,
+      currentY: 200   // several pitch rows
+    };
 
   //   const result = getNotesInMarquee(notes, box, {} as GridScroll, mockConfig, mockGrid);
   //   expect(result.map(n => n.pitch)).toEqual(['C4', 'E4']);
