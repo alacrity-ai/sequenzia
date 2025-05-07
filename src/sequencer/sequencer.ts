@@ -201,6 +201,10 @@ export default class Sequencer {
     setCollapsed(this, val);
   }
 
+  resetInteractionMode(): void {
+    this.matrix?.getInteractionContext().reset();
+  }
+
   async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {
     await preparePlayback(
       this._instrument as Instrument,

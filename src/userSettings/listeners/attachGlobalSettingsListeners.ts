@@ -1,5 +1,6 @@
 // src/userSettings/listeners/attachGlobalSettingsListeners.ts
 import { getUserConfig, updateUserConfig } from '../store/userConfigStore.js';
+import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
 import type { ListenerAttachment } from '../interfaces/ListenerAttachment.js';
 import type { NoteToolFlavor } from '../interfaces/GlobalSettings.js';
 
@@ -19,6 +20,7 @@ export function attachGlobalSettingsListeners(sectionEl: HTMLElement): ListenerA
     const input = e.target as HTMLInputElement;
     const newMode: NoteToolFlavor = input.checked ? 'express' : 'default';
     updateUserConfig({ global: { noteToolMode: newMode } });
+    getSequencers().forEach(seq => seq.resetInteractionMode());
   };
 
   toggle.addEventListener('change', handleChange);

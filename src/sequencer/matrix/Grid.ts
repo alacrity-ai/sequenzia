@@ -361,9 +361,12 @@ export class Grid {
     return this.interactionStore;
   }
 
-  // Get the note manager for the grid
   public getNoteManager(): NoteManager {
     return this.noteManager;
+  }
+
+  public getInteractionContext(): InteractionContext {
+    return this.interactionContext;
   }
 
   public emit<K extends keyof GridEvents>(event: K, payload: GridEvents[K]): void {

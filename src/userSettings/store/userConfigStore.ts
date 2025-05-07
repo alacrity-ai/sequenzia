@@ -2,6 +2,7 @@
 import { defaultUserConfig } from './defaultUserSettings.js';
 import type { UserConfig } from '../interfaces/UserConfig.js';
 import { loadFromLocalStorage } from '../utils/localStorage.js';
+import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
 
 const userConfig: UserConfig = structuredClone(defaultUserConfig);
 
@@ -26,6 +27,11 @@ type DeepPartial<T> = {
 
 export function updateUserConfig(newConfig: DeepPartial<UserConfig>): void {
   mergeDeep(userConfig, newConfig);
+
+  // Refresh Sequencer UI
+  for (const seq of getSequencers()) {
+    seq.redraw();
+  }
 }
 
 function mergeDeep(target: any, source: any) {

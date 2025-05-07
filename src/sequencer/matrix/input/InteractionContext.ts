@@ -9,6 +9,8 @@ import { SelectedIdleToolHandler } from './handlers/SelectedIdleToolHandler.js';
 import { PastingToolHandler } from './handlers/PastingToolHandler.js';
 import { DraggingToolHandler } from './handlers/DraggingToolHandler.js';
 import { SizingToolHandler } from './handlers/SizingToolHandler.js';
+import { ExpressNoteToolHandler } from './handlers/ExpressNoteToolHandler.js';
+import { getUserConfig } from '../../../userSettings/store/userConfigStore.js';
 
 import type { InteractionContextData } from './interfaces/InteractionContextData.js';
 import type { InteractionController } from './interfaces/InteractionController.js';
@@ -21,10 +23,9 @@ export class InteractionContext {
   private lastMouseY: number = 0;
 
   constructor(private readonly data: InteractionContextData) {
-    // Set initial mode
     this.transitionTo(InteractionMode.NoteTool);
   }
-
+  
   public handleMouseDown(e: MouseEvent): void {
     this.lastMouseX = e.clientX;
     this.lastMouseY = e.clientY;
@@ -69,6 +70,10 @@ export class InteractionContext {
     this.activeHandler?.onEnter?.();
   }
 
+  public reset(): void {
+    this.transitionTo(InteractionMode.NoteTool);
+  }
+
   private createHandlerForMode(mode: InteractionMode): GridInteractionHandler {
     const controller: InteractionController = {
       transitionTo: (mode) => this.transitionTo(mode),
@@ -77,8 +82,14 @@ export class InteractionContext {
     };
 
     switch (mode) {
-      case InteractionMode.NoteTool:
-        return new DefaultNoteToolHandler(
+      case InteractionMode.NoteTool: {
+        const { global: { noteToolMode } } = getUserConfig();
+      
+        const ctor = noteToolMode === 'express'
+          ? ExpressNoteToolHandler
+          : DefaultNoteToolHandler;
+      
+        const args = [
           this.data.canvas,
           this.data.noteManager,
           this.data.scroll,
@@ -91,7 +102,10 @@ export class InteractionContext {
           this.data.cursorController,
           this.data.getClipboard,
           this.data.playNoteAnimation
-        );
+        ] as const;
+      
+        return new ctor(...args);
+      }      
       case InteractionMode.Selecting:
         return new SelectingToolHandler(
           this.data.canvas,

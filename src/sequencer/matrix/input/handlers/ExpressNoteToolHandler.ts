@@ -20,7 +20,7 @@ import { createPlaceNotesDiff, createReversePlaceNotesDiff } from '../../../../a
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '../../../../appState/diffEngine/types/grid/deleteNotes.js';
 import { recordDiff } from '../../../../appState/appState.js';
 
-export class DefaultNoteToolHandler implements GridInteractionHandler {
+export class ExpressNoteToolHandler implements GridInteractionHandler {
     private initialMouseX: number = 0;
     private initialMouseY: number = 0;
     private readonly dragThreshold: number = 3;
@@ -258,7 +258,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
     }
     
     public onEnter(): void {
-      devLog('DefaultNoteToolHandler entered');
+      devLog('ExpressNoteToolHandler entered');
     }
 
     public onExit(): void {

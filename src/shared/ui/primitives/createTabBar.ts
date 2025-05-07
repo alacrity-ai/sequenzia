@@ -1,6 +1,11 @@
 // src/shared/ui/primitives/createTabBar.ts
 import { h } from '../domUtils.js';
 
+/*
+Creates a navigation bar, with clickable icons
+e.g.:
+[icon] [icon] [icon]
+*/
 export interface TabDefinition {
   key: string;               // e.g., "global-settings"
   icon: string;              // e.g., "⚙️"

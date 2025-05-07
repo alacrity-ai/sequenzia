@@ -1,7 +1,7 @@
 // src/userSettings/ui/sections/GlobalSettingsSection.ts
 import { h } from '../../../shared/ui/domUtils.js';
 import { createTooltipPair } from '../../../shared/ui/primitives/createTooltipPair.js';
-import { createLabeledToggle } from '../../../shared/ui/primitives/createLabeledToggle.js';
+import { createToggleSwitch } from '../../../shared/ui/primitives/createToggleSwitch.js';
 
 export function createGlobalSettingsSection(): HTMLElement {
     const { trigger: tooltipTrigger, tooltip } = createTooltipPair(
@@ -19,7 +19,7 @@ export function createGlobalSettingsSection(): HTMLElement {
       ]
     );
   
-    const toggle = createLabeledToggle({
+    const toggle = createToggleSwitch({
       id: 'note-tool-toggle',
       label: 'Note Placement:',
       stateA: 'Default',
