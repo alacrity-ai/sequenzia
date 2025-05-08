@@ -1,11 +1,27 @@
 // src/shared/ui/domUtils.ts
 
+/**
+ * Generic props object passed to `h()` to define attributes, event listeners, styles, etc.
+ */
 export type Props = Record<string, any>;
 
-function flattenAndFilter(
-  children: any[]
-): (HTMLElement | string)[] {
-  const flat: (HTMLElement | string)[] = [];
+/**
+ * Generic type for any valid HTML or SVG tag name.
+ */
+type TagName = keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap;
+
+
+/**
+ * Flattens and filters an arbitrarily nested array of children.
+ * 
+ * Skips `null`, `undefined`, and `false` entries.
+ * Recursively unpacks nested arrays for JSX-like syntax flexibility.
+ * 
+ * @param children - An array of possibly-nested elements to render inside a DOM node
+ * @returns A flat array of valid strings or HTMLElements
+ */
+function flattenAndFilter(children: any[]): (HTMLElement | SVGElement | string)[] {
+  const flat: (HTMLElement | SVGElement | string)[] = [];
 
   for (const child of children) {
     if (Array.isArray(child)) {
@@ -18,10 +34,42 @@ function flattenAndFilter(
   return flat;
 }
 
+/**
+ * HyperScript-style helper to declaratively create DOM elements with attributes and children.
+ * 
+ * Example:
+ * ```ts
+ * const button = h('button', {
+ *   class: 'btn-primary',
+ *   onClick: () => alert('Clicked!'),
+ *   dataset: { action: 'submit' }
+ * }, 'Save');
+ * ```
+ * 
+ * Supported features:
+ * - Standard attributes (e.g. `id`, `href`, `disabled`, etc.)
+ * - `class` or `className` sets the element's class string
+ * - `style` can be an object of inline styles
+ * - `dataset` allows assigning `data-*` attributes
+ * - Event listeners via `onClick`, `onInput`, etc.
+ * - Supports nested and filtered children (skips null/false)
+ * 
+ * @param tag - HTML tag name (e.g. 'div', 'button', 'span')
+ * @param props - An object of attributes, event handlers, class/style/data
+ * @param children - A variadic list of strings, elements, or nested arrays thereof
+ * @returns A fully constructed HTMLElement with all attributes and children applied
+ */
 export function h<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   props: Props = {},
-  ...children: (HTMLElement | string | null | false | undefined | (HTMLElement | string | null | false | undefined)[])[]
+  ...children: (
+    | HTMLElement
+    | string
+    | null
+    | false
+    | undefined
+    | (HTMLElement | string | null | false | undefined)[]
+  )[]
 ): HTMLElementTagNameMap[K] {
   const el = document.createElement(tag);
 

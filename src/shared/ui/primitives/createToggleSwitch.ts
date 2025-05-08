@@ -1,22 +1,47 @@
-// src/shared/ui/primitives/createToggleSwitch.ts
-
 import { h } from '../domUtils.js';
 
+/**
+ * Options to configure a horizontal toggle switch.
+ */
 export interface ToggleSwitchOptions {
+  /** HTML `id` for the underlying `<input type="checkbox">` element. Example: `"note-tool-toggle"` */
   id: string;
+
+  /** Label shown above the toggle row. Example: `"Note Placement:"` */
   label: string;
+
+  /** Left-hand label (unchecked state). Example: `"Default"` */
   stateA: string;
+
+  /** Right-hand label (checked state). Example: `"Express"` */
   stateB: string;
+
+  /** Optional tooltip trigger element (e.g. `createTooltipPair().trigger`) to display at the end */
   tooltipTrigger?: HTMLElement;
 }
 
 /**
- * Creates a horizontal toggle row:
- * [Label]
- * [State A Label] [toggle] [State B Label] [optional tooltip trigger]
+ * Creates a stylized toggle switch row for forms or modals.
+ * Layout:
+ *   [Label]
+ *   [stateA] [switch] [stateB] [optional tooltip trigger]
+ *
+ * This is a purely presentational helper — attach behavior separately.
+ *
+ * Example usage:
+ * ```ts
+ * const toggle = createToggleSwitch({
+ *   id: 'note-tool-toggle',
+ *   label: 'Note Placement:',
+ *   stateA: 'Default',
+ *   stateB: 'Express',
+ *   tooltipTrigger: createTooltipPair(...).trigger
+ * });
+ * ```
  */
 export function createToggleSwitch(options: ToggleSwitchOptions): HTMLElement {
   const { id, label, stateA, stateB, tooltipTrigger } = options;
+
   const toggle = h('div', { class: 'mb-6' },
     h('label', {
       class: 'block text-sm font-medium mb-2 text-white',
@@ -52,7 +77,6 @@ export function createToggleSwitch(options: ToggleSwitchOptions): HTMLElement {
       tooltipTrigger ?? null
     )
   );
-  
-    return toggle;
-  }
-  
+
+  return toggle;
+}

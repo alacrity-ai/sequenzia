@@ -14,7 +14,7 @@ import { attachThemeSettingsListeners } from './listeners/attachThemeSettingsLis
 import { attachGlobalSettingsListeners } from './listeners/attachGlobalSettingsListeners.js';
 
 import { getUserConfig, updateUserConfig } from './store/userConfigStore.js';
-import { saveToLocalStorage } from './utils/localStorage.js';
+import { saveUserConfigToLocalStorage } from './utils/localStorage.js';
 import type { UserConfig } from './interfaces/UserConfig.js';
 
 export class UserConfigModalController {
@@ -37,7 +37,7 @@ export class UserConfigModalController {
   
       // Attach listeners + retain refreshers
       const modalDetach = attachModalListeners(this.modal, {
-        onSave: () => saveToLocalStorage(),
+        onSave: () => saveUserConfigToLocalStorage(),
         onClose: () => updateUserConfig(this.initialSnapshot)
       });
   

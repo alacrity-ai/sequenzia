@@ -1,4 +1,5 @@
 import { getAssetPath } from './assetHelpers.js';
+import { getAssetPath } from '@/global/assetHelpers.js';
 
 export function showSplashScreen(): void {
     const modalMountRoot = document.getElementById('modal-mount-root');

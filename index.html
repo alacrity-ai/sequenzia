@@ -218,7 +218,7 @@
   <div id="footer-main" class="fixed bottom-0 left-0 right-0 z-40 content-hidden">
     <!-- 🔁 Global Mini Contour Fixed Above Footer -->
     <div class="fixed bottom-[170px] left-0 right-0 z-30 bg-black">
-      <div class="relative flex items-start gap-2 w-[1260px] mx-auto px-100">
+      <div id="globalControls-miniContour-body" class="relative flex items-start gap-2 w-[1260px] mx-auto px-100">
         <!-- Mini Contour -->
         <div class="flex-1">
           <div class="absolute w-[1260px] left-0 bg-gray-800 rounded border border-purple-700">
@@ -227,7 +227,7 @@
           </div>
         </div>
     
-        <!-- Side Button - Absolutely Positioned -->
+        <!-- Collapse Expand Button - Absolutely Positioned -->
         <div class="absolute left-[calc(100%+10px)] flex-col gap-2">
           <button id="global-mini-expand-btn"
                   class="side-button side-button-primary"
@@ -240,8 +240,7 @@
       </div>
     </div>
 
-    <div id="transport-ui"
-    class="relative w-[1260px] mx-auto bg-gray-900 border-t border-purple-800">
+    <div id="transport-ui" class="relative w-[1260px] mx-auto bg-gray-900 border-t border-purple-800">
 
       <!-- Left Side Button Column -->
       <div class="absolute left-0 top-[60px] z-40 -translate-x-[46px] flex flex-col gap-2">

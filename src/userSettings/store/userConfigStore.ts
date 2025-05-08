@@ -1,13 +1,9 @@
 // src/userSettings/store/userConfigStore.ts
 import { defaultUserConfig } from './defaultUserSettings.js';
 import type { UserConfig } from '../interfaces/UserConfig.js';
-import { loadFromLocalStorage } from '../utils/localStorage.js';
 import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
 
 const userConfig: UserConfig = structuredClone(defaultUserConfig);
-
-// ✅ Load from localStorage on first import
-loadFromLocalStorage();
 
 export function getUserConfig(): UserConfig {
   return userConfig;

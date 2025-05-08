@@ -16,7 +16,7 @@ export class UserConfigModal {
     // Section containers for each tab
     this.globalSection = h('div', {
       id: 'userconfig-global-settings',
-      class: 'settings-section hidden z-10'
+      class: 'settings-section z-10'
     });
 
     this.themeSection = h('div', {
@@ -26,14 +26,14 @@ export class UserConfigModal {
 
     this.aiSection = h('div', {
       id: 'userconfig-ai-settings',
-      class: 'settings-section z-10'
+      class: 'settings-section hidden z-10'
     });
 
     // Tab bar
     const tabBar = createTabBar([
-        { key: 'global-settings', icon: '⚙️', title: 'Global Settings' },
+        { key: 'global-settings', icon: '⚙️', title: 'Global Settings', isActive: true },
         { key: 'theme-settings', icon: '🎹', title: 'Theme Settings' },
-        { key: 'ai-settings', icon: '🤖', title: 'AI Settings', isActive: true }
+        { key: 'ai-settings', icon: '🤖', title: 'AI Settings' }
       ]);
 
     // Action buttons

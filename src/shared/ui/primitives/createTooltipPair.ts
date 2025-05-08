@@ -3,7 +3,10 @@
 import { h } from '../domUtils.js';
 
 /**
- * Tooltip + trigger return type
+ * A pair of elements: the trigger (e.g. "?") and the associated tooltip element.
+ * 
+ * This allows you to place the trigger inline in your layout,
+ * while positioning the tooltip container elsewhere in the DOM if needed.
  */
 export interface TooltipPair {
   trigger: HTMLElement;
@@ -11,9 +14,26 @@ export interface TooltipPair {
 }
 
 /**
- * Creates a tooltip trigger + tooltip element pair.
- * Returns both for separate placement if needed.
- * e.g. (?) ← trigger span with tooltip shown on hover
+ * Creates a visually consistent tooltip trigger + tooltip element pair.
+ *
+ * Example usage:
+ * ```ts
+ * const { trigger, tooltip } = createTooltipPair(
+ *   'tooltip-id',
+ *   '?',
+ *   [
+ *     h('p', {}, 'Helpful explanation here.'),
+ *     h('p', {}, 'Another detail...')
+ *   ]
+ * );
+ *
+ * parent.appendChild(trigger);
+ * parent.appendChild(tooltip); // or elsewhere
+ * ```
+ *
+ * @param id - A unique string used for `id` on the tooltip and `data-tooltip-target` on the trigger.
+ * @param triggerText - The text to render inside the tooltip trigger element. Default: `'?'`
+ * @param tooltipContent - Either a single HTMLElement or an array of HTMLElements (wrapped with spacing).
  */
 export function createTooltipPair(
   id: string,
