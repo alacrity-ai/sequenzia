@@ -110,7 +110,6 @@ setupAddTrackButton();
 
 registerVelocityModeHandlers();
 registerVelocityMenuHandlers();
-registerSaveWavMenuHandlers();
 setupHeaderModeToggler();
 
 // setupWhatsNewButton();
@@ -118,97 +117,6 @@ setupHeaderModeToggler();
 // setupControlModeSwitch();
 // setupNoteDurationButtons();
 // initFooterUI();
-
-// === UI Wiring ===
-// setupUI({
-//   getSequencers: () => sequencers,
-//   onPlay: async () => {
-//     await engine.start();
-//     startMasterPlayheadLoop(engine);
-//   },
-//   onPause: async () => {
-//     await engine.pause();
-//     cancelMasterPlayheadLoop();
-//   },
-//   onResume: async () => {
-//     await engine.resume();
-//   },  
-//   onStop: () => {
-//     engine.stop();
-//     cancelMasterPlayheadLoop();
-//     resetPlayheads(engine);
-//   },
-//   onDurationChange: (val: number) => {
-//     config.currentDuration = val;
-//     sequencers.forEach(seq => (seq.config.currentDuration = val));
-//   },
-//   onSnapChange: (val: number) => {
-//     config.snapResolution = val;
-//     sequencers.forEach(seq => (seq.config.snapResolution = val));
-//   },
-//   onToggleLoop: (enabled: boolean) => {
-//     config.loopEnabled = enabled;
-//     sequencers.forEach(seq => (seq.config.loopEnabled = enabled));
-//     setLoopEnabled(enabled);
-//   },
-//   onTempoChange: (tempo: number) => {
-//     updateTempo(tempo);
-//   },
-//   onSave: async (format: string) => {
-//     const appState = getAppState(); // ✅
-  
-//     if (format === 'json') {
-//       const { url, filename } = exportSessionToJSON(appState);
-//       const a = document.createElement('a');
-//       a.href = url;
-//       a.download = filename;
-//       a.click();
-//       URL.revokeObjectURL(url);
-//     } else if (format === 'wav') {
-//       showSaveWavOptionsModal();
-//     } else if (format === 'midi') {
-//       const { url, filename } = await exportSessionToMIDI(appState);
-//       const a = document.createElement('a');
-//       a.href = url;
-//       a.download = filename;
-//       a.click();
-//       URL.revokeObjectURL(url);
-//     }    
-//   },  
-//   onLoad: async (file: File) => {
-//     try {
-//       const extension = file.name.split('.').pop()?.toLowerCase();
-  
-//       if (extension === 'json') {
-//         const { tracks, globalConfig } = await importSessionFromJSON(file);
-//         loadSession(tracks, globalConfig);
-//       } else if (extension === 'mid' || extension === 'midi') {
-//         const { tracks, globalConfig } = await importSessionFromMIDI(file);
-//         loadSession(tracks, globalConfig);
-//       } else {
-//         throw new Error('Unsupported file type.');
-//       }
-//     } catch (err) {
-//       if (err instanceof Error) {
-//         alert('Failed to load file: ' + err.message);
-//       } else {
-//         alert('Failed to load file: Unknown error');
-//       }
-//     }
-//   },
-//   onMeasuresChange: (totalMeasures: number) => {
-//     updateTotalMeasures(totalMeasures);
-
-//     const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
-//     if (canvas) drawGlobalMiniContour(canvas, sequencers);
-//   },
-//     onBeatsPerMeasureChange: (beatsPerMeasure: number) => {
-//     updateTimeSignature(beatsPerMeasure);
-
-//     const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
-//     if (canvas) drawGlobalMiniContour(canvas, sequencers);
-//   }
-// });
 
 hideSplashScreen();
 logMessage('Sequenzia initialized');
