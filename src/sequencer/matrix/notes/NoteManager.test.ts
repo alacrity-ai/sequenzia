@@ -9,10 +9,6 @@ import type { GridConfig } from '../interfaces/GridConfigTypes';
 const mockPlayNote = vi.fn();
 
 vi.mock('../../transport', () => ({}));
-
-vi.mock('../../factories/SequencerFactory', () => ({
-    getSequencers: () => [],
-  }));
   
 vi.mock('../../ui/controls/instrumentSelector', () => ({
     setupInstrumentSelector: vi.fn(),
@@ -29,18 +25,27 @@ vi.mock('../../../playhead/global-playhead-interaction', () => ({
     destroyGlobalPlayheadInteraction: vi.fn(),
   }));
 
-vi.mock('../../factories/SequencerFactory', async () => {
-    const actual = await vi.importActual<any>('../../factories/SequencerFactory');
-    return {
-      ...actual,
-      // Explicitly export the mock internal variable
-      sequencers: [],
-      getSequencers: () => [],
-      registerSequencer: vi.fn(),
-      unregisterSequencer: vi.fn(),
-    };
-  });
-  
+vi.mock('../../factories/SequencerFactory', () => {
+  return {
+    getSequencers: () => [],
+    registerSequencer: vi.fn(),
+    unregisterSequencer: vi.fn(),
+    sequencers: [],
+    createSequencer: vi.fn(() => ({
+      seq: {},         // return mock shape of a Sequencer
+      wrapper: {}      // return mock shape of a wrapper if needed
+    }))
+  };
+});
+
+vi.mock('../../../shared/playback/transportService', () => ({
+  getTempo: () => 120,
+  updateTempo: vi.fn(),
+  updateTotalMeasures: vi.fn(),
+  updateTimeSignature: vi.fn(),
+  setLoopEnabled: vi.fn(),
+}));
+
 
 const config: GridConfig = {
   totalMeasures: 16,
