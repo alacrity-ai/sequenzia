@@ -1,9 +1,10 @@
 // src/appState/resyncFromState.ts
 
 import { getAppState } from './appState.js';
-import { updateTempo, updateTimeSignature, updateTotalMeasures } from '../sequencer/transport.js';
+import { updateTempo, updateTimeSignature, updateTotalMeasures } from '@/shared/playback/transportService.js';
 import { createSequencer, sequencers } from '../sequencer/factories/SequencerFactory.js';
-import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
+import { drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
 import { AppState, SequencerState } from './interfaces/AppState.js';
 import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig.js';
 import { syncLiveMatrixWithSerializedNotes } from './utils/syncMatrixToSequencer.js';
@@ -76,6 +77,6 @@ export function resyncFromState(state: AppState = getAppState()): void {
   // 🔁 Global mini-contour update
   const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
   if (canvas) {
-    drawGlobalMiniContour(canvas, sequencers);
+    drawGlobalMiniContour();
   }
 }

@@ -1,6 +1,6 @@
-import { drawGlobalMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
+import { drawGlobalMiniContourInCanvas } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
 import { getSequencers } from '../sequencer/factories/SequencerFactory.js';
-import { getTotalBeats } from '../sequencer/transport.js';
+import { getTotalBeats } from '@/shared/playback/transportService.js';
 import { drawExtendPlayhead } from './drawing/ExtendMiniContour.js';
 
 let controlsInitialized = false;
@@ -173,6 +173,6 @@ function redrawMiniContour(): void {
 
   const selectedSequencers = getSequencers().filter((_, i) => selectedIndices.includes(i));
 
-  drawGlobalMiniContour(contourCanvas, selectedSequencers);
+  drawGlobalMiniContourInCanvas(contourCanvas, selectedSequencers);
   drawExtendPlayhead(ctx, width, height, startBeat);
 }

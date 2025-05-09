@@ -1,6 +1,6 @@
-// src/playhead/helpers/updateAllGridPlayheads.ts
+// src/shared/playback/helpers/updateAllGridPlayheads.ts
 
-import { PlaybackEngine } from '../../sequencer/playback.js';
+import type { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 
 export function updateAllMatrixPlayheads(engine: PlaybackEngine, currentBeat: number): void {
   for (const seq of engine['sequencers']) {

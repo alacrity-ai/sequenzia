@@ -1,85 +1,69 @@
-// src/globalControls/ui/GlobalControls.ts
-
-import { h } from '@/shared/ui/domUtils';
+import { h } from '@/shared/ui/domUtils.js';
+import { createBottomDrawer } from '@/shared/ui/primitives/createBottomDrawer.js';
+import { GLOBAL_CONFIG_CONTROLS_WIDTH } from '../constants.js';
 
 export class GlobalControls {
-  private mainWrapper: HTMLElement;
-  private miniContourWrapper: HTMLElement;
-  private innerWrapper: HTMLElement;
-  private leftSideButtonsWrapper: HTMLElement;
-  private toolbarWrapper: HTMLElement;
-  private transportWrapper: HTMLElement;
+  private drawer: HTMLElement;
+
+  private globalPlayheadRow: HTMLElement;
+  private globalToolsRow: HTMLElement;
+  private globalTransportRow: HTMLElement;
 
   constructor() {
-    // Individual sections
-    this.miniContourWrapper = h('div', {
-      id: 'globalControls-miniContour-wrapper',
-      class: 'fixed bottom-[170px] left-0 right-0 z-30 bg-black',
+    this.globalPlayheadRow = h('div', {
+      id: 'global-playhead-row',
+      class: 'w-full mb-2'
     });
 
-    this.leftSideButtonsWrapper = h('div', {
-      id: 'globalControls-leftSideButtons-wrapper',
-      class: 'absolute left-0 top-[60px] z-40 -translate-x-[46px] flex flex-col gap-2',
+    this.globalToolsRow = h('div', {
+      id: 'global-tools-row',
+      class: 'w-full mb-2'
     });
 
-    this.toolbarWrapper = h('div', {
-      id: 'globalControls-toolbar-wrapper',
-      class: 'flex justify-left gap-3 p-2 pl-32 border-b border-purple-800',
+    this.globalTransportRow = h('div', {
+      id: 'global-transport-row',
+      class: 'w-full'
     });
 
-    this.transportWrapper = h('div', {
-      id: 'globalControls-transport-wrapper',
-      class: 'flex justify-center gap-6 px-4 py-8 text-sm',
-    });
+    const drawer = createBottomDrawer({
+      id: 'global-controls-drawer',
+      ariaLabel: ' ',
+      edgeOffsetClass: 'bottom-[40px]',
+      toggleHandleHeightClass: 'py-2',
+      startExpanded: true,
+    }, [
+      this.globalPlayheadRow,
+      this.globalToolsRow,
+      this.globalTransportRow
+    ], GLOBAL_CONFIG_CONTROLS_WIDTH);
 
-    this.innerWrapper = h('div', {
-      id: 'globalControls-inner-wrapper',
-      class: 'relative w-[1260px] mx-auto bg-gray-900 border-t border-purple-800',
-    },
-      this.leftSideButtonsWrapper,
-      this.toolbarWrapper,
-      this.transportWrapper
-    );
+    this.drawer = drawer;
 
-    this.mainWrapper = h('div', {
-      id: 'globalControls-main-wrapper',
-      class: 'fixed bottom-0 left-0 right-0 z-40 content-hidden',
-    },
-      this.miniContourWrapper,
-      this.innerWrapper
-    );
-
-    // Inject into footer
     const footer = document.getElementById('footer-main');
     if (footer) {
-      footer.appendChild(this.mainWrapper);
+      footer.appendChild(this.drawer);
     } else {
       console.warn('footer-main container not found. GlobalControls not injected.');
     }
   }
 
   public render(): HTMLElement {
-    return this.mainWrapper;
+    return this.drawer;
   }
 
   public destroy(): void {
-    this.mainWrapper.remove();
+    this.drawer.remove();
   }
 
-  // Accessors for injecting child components
-  public getMiniContourWrapper(): HTMLElement {
-    return this.miniContourWrapper;
+  public getGlobalPlayheadRow(): HTMLElement {
+    return this.globalPlayheadRow;
   }
 
-  public getToolbarWrapper(): HTMLElement {
-    return this.toolbarWrapper;
+  public getGlobalToolsRow(): HTMLElement {
+    return this.globalToolsRow;
   }
 
-  public getTransportWrapper(): HTMLElement {
-    return this.transportWrapper;
-  }
-
-  public getLeftSideButtonsWrapper(): HTMLElement {
-    return this.leftSideButtonsWrapper;
+  public getGlobalTransportRow(): HTMLElement {
+    return this.globalTransportRow;
   }
 }

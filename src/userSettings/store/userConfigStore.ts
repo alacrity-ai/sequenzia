@@ -1,9 +1,15 @@
 // src/userSettings/store/userConfigStore.ts
 import { defaultUserConfig } from './defaultUserSettings.js';
-import type { UserConfig } from '../interfaces/UserConfig.js';
 import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
+import { UIOrchestrator } from '@/shared/ui/UIOrchestrator.js';
+import { getSkinByName } from '../skins/index.js';
+
+import type { UserConfig } from '../interfaces/UserConfig.js';
+import type { InterfaceSkin } from '../skins/interfaces/Skin.js';
 
 const userConfig: UserConfig = structuredClone(defaultUserConfig);
+
+let lastSkin = userConfig.theme.skin;
 
 export function getUserConfig(): UserConfig {
   return userConfig;
@@ -15,6 +21,18 @@ export function getOpenAIKey(): string {
 
 export function getOpenAIModel(): string {
   return userConfig.ai.openaiModel;
+}
+
+export function getCurrentSkin(): InterfaceSkin {
+  return getSkinByName(userConfig.theme.skin);
+}
+
+export function getLastSkin(): InterfaceSkin {
+  return getSkinByName(lastSkin);
+}
+
+export function updateLastSkin(skinName: string): void {
+  lastSkin = skinName;
 }
 
 type DeepPartial<T> = {

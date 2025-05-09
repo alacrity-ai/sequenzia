@@ -1,6 +1,12 @@
 // src/main.ts
+console.log('Importing styles/tailwind.css');
 import './styles/tailwind.css';
+console.log('Importing flowbite...');
 import 'flowbite';
+
+import { GlobalControlsController } from '@/globalControls';
+import { UserConfigModalController } from './userSettings/userConfig.js';
+import { UIOrchestrator } from './shared/ui/UIOrchestrator.js';
 
 import { logMessage } from './shared/logging/logger.js';
 import { devLog } from './shared/state/devMode.js';
@@ -29,33 +35,41 @@ import { importSessionFromJSON } from './export/load.js';
 import { importSessionFromMIDI } from './export/midi/loadFromMidi.js';
 import { loadSession } from './export/loadSession.js';
 import { setupNoteDurationButtons } from './setup/footer/noteDurationButtons.js';
-import { drawGlobalMiniContour } from './sequencer/ui/renderers/drawMiniContour.js';
-import { initGlobalPlayhead } from './playhead/global-playhead.js';
-import { startMasterPlayheadLoop, cancelMasterPlayheadLoop, resetPlayheads } from './playhead/playhead-engine.js';
-import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';
+// import { startMasterPlayheadLoop, cancelMasterPlayheadLoop, resetPlayheads } from './playhead/playhead-engine.js';
+// import { initGlobalPlayheadInteraction } from './playhead/global-playhead-interaction.js';
 import { setupControlModeSwitch } from './setup/footer/controlModeSwitch.js';
+import { PlaybackEngine } from './shared/playback/PlaybackEngine.js';
 import { onStateUpdated } from './appState/onStateUpdated.js';
 import { resyncFromState } from './appState/resyncFromState.js';
 import { getAppState, recordDiff } from './appState/appState.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './appState/diffEngine/types/sequencer/createSequencer.js';
 import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/diffEngine/types/internal/checkpoint.js';
 import { setupInstrumentSelector } from './sequencer/ui/controls/instrumentSelector.js';
-import { 
-  updateTotalMeasures, 
-  updateTimeSignature, 
-  updateTempo, 
-  setLoopEnabled } from './sequencer/transport.js';
+
 
 // === Immediately show splash screen //
+devLog('Showing splash screen...');
 showSplashScreen();
 
 // === Dev Mode Toggle
+devLog('Registering dev tools...');
 registerDevTools();
 
+// === UI Orchestrator
+const orchestrator = UIOrchestrator.getInstance();
+
+// === Userconfig Init
+const userConfigModalController = new UserConfigModalController();
+orchestrator.registerReloadable(() => userConfigModalController.reload());
+
 // === Playback Engine
-import { PlaybackEngine } from './sequencer/playback.js';
 export const engine = new PlaybackEngine(getSequencers());
-engine.setOnResumeCallback(() => startMasterPlayheadLoop(engine));
+
+// === Global Controls ===
+devLog('Initializing global controls...');
+const globalControls = new GlobalControlsController(engine, userConfigModalController);
+orchestrator.registerReloadable(() => globalControls.reload());
+globalControls.show();
 
 // === State Sync ===
 onStateUpdated(resyncFromState);
@@ -63,17 +77,8 @@ onStateUpdated(resyncFromState);
 // === Instrument Selector ===
 setupInstrumentSelector();
 
-// === Playhead ===
-function refreshGlobalMiniContour(): void {
-  const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
-  if (canvas) drawGlobalMiniContour(canvas, sequencers);
-}
-const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement;
-const globalPlayheadCanvas = document.getElementById('global-mini-playhead') as HTMLCanvasElement;
-initGlobalPlayhead(globalPlayheadCanvas);
-initGlobalPlayheadInteraction(globalPlayheadCanvas, config);
-
 // === Initial Sequencer ===
+devLog('Creating initial sequencer...');
 const firstId = 0;
 const firstInstrument = 'sf2/fluidr3-gm/acoustic_grand_piano';
 recordDiff(
@@ -82,10 +87,12 @@ recordDiff(
 );
 
 // === Virtual Piano Keyboard ===
+devLog('Setting up virtual piano keyboard...');
 const pianoCanvas = document.getElementById('piano') as HTMLCanvasElement;
 setupKeyboard(pianoCanvas);
 
 // === Visualizer ===
+devLog('Setting up visualizer...');
 const waveform = document.getElementById('waveform') as HTMLCanvasElement;
 const visualizerMode = document.getElementById('visualizer-mode') as HTMLButtonElement;
 void setupVisualizer(waveform, visualizerMode);
@@ -97,109 +104,111 @@ recordDiff(
 );
 
 // === Additional UI Setup ===
+devLog('Setting up additional UI...');
 setupGlobalUndoRedo(undo, redo);
-refreshGlobalMiniContour();
 setupAddTrackButton();
-setupNoteDurationButtons();
+
 registerVelocityModeHandlers();
 registerVelocityMenuHandlers();
 registerSaveWavMenuHandlers();
-setupControlModeSwitch();
-initFooterUI();
-setupWhatsNewButton();
-setupHelpButton();
 setupHeaderModeToggler();
 
+// setupWhatsNewButton();
+// setupHelpButton();
+// setupControlModeSwitch();
+// setupNoteDurationButtons();
+// initFooterUI();
+
 // === UI Wiring ===
-setupUI({
-  getSequencers: () => sequencers,
-  onPlay: async () => {
-    await engine.start();
-    startMasterPlayheadLoop(engine);
-  },
-  onPause: async () => {
-    await engine.pause();
-    cancelMasterPlayheadLoop();
-  },
-  onResume: async () => {
-    await engine.resume();
-  },  
-  onStop: () => {
-    engine.stop();
-    cancelMasterPlayheadLoop();
-    resetPlayheads(engine);
-  },
-  onDurationChange: (val: number) => {
-    config.currentDuration = val;
-    sequencers.forEach(seq => (seq.config.currentDuration = val));
-  },
-  onSnapChange: (val: number) => {
-    config.snapResolution = val;
-    sequencers.forEach(seq => (seq.config.snapResolution = val));
-  },
-  onToggleLoop: (enabled: boolean) => {
-    config.loopEnabled = enabled;
-    sequencers.forEach(seq => (seq.config.loopEnabled = enabled));
-    setLoopEnabled(enabled);
-  },
-  onTempoChange: (tempo: number) => {
-    updateTempo(tempo);
-  },
-  onSave: async (format: string) => {
-    const appState = getAppState(); // ✅
+// setupUI({
+//   getSequencers: () => sequencers,
+//   onPlay: async () => {
+//     await engine.start();
+//     startMasterPlayheadLoop(engine);
+//   },
+//   onPause: async () => {
+//     await engine.pause();
+//     cancelMasterPlayheadLoop();
+//   },
+//   onResume: async () => {
+//     await engine.resume();
+//   },  
+//   onStop: () => {
+//     engine.stop();
+//     cancelMasterPlayheadLoop();
+//     resetPlayheads(engine);
+//   },
+//   onDurationChange: (val: number) => {
+//     config.currentDuration = val;
+//     sequencers.forEach(seq => (seq.config.currentDuration = val));
+//   },
+//   onSnapChange: (val: number) => {
+//     config.snapResolution = val;
+//     sequencers.forEach(seq => (seq.config.snapResolution = val));
+//   },
+//   onToggleLoop: (enabled: boolean) => {
+//     config.loopEnabled = enabled;
+//     sequencers.forEach(seq => (seq.config.loopEnabled = enabled));
+//     setLoopEnabled(enabled);
+//   },
+//   onTempoChange: (tempo: number) => {
+//     updateTempo(tempo);
+//   },
+//   onSave: async (format: string) => {
+//     const appState = getAppState(); // ✅
   
-    if (format === 'json') {
-      const { url, filename } = exportSessionToJSON(appState);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else if (format === 'wav') {
-      showSaveWavOptionsModal();
-    } else if (format === 'midi') {
-      const { url, filename } = await exportSessionToMIDI(appState);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }    
-  },  
-  onLoad: async (file: File) => {
-    try {
-      const extension = file.name.split('.').pop()?.toLowerCase();
+//     if (format === 'json') {
+//       const { url, filename } = exportSessionToJSON(appState);
+//       const a = document.createElement('a');
+//       a.href = url;
+//       a.download = filename;
+//       a.click();
+//       URL.revokeObjectURL(url);
+//     } else if (format === 'wav') {
+//       showSaveWavOptionsModal();
+//     } else if (format === 'midi') {
+//       const { url, filename } = await exportSessionToMIDI(appState);
+//       const a = document.createElement('a');
+//       a.href = url;
+//       a.download = filename;
+//       a.click();
+//       URL.revokeObjectURL(url);
+//     }    
+//   },  
+//   onLoad: async (file: File) => {
+//     try {
+//       const extension = file.name.split('.').pop()?.toLowerCase();
   
-      if (extension === 'json') {
-        const { tracks, globalConfig } = await importSessionFromJSON(file);
-        loadSession(tracks, globalConfig);
-      } else if (extension === 'mid' || extension === 'midi') {
-        const { tracks, globalConfig } = await importSessionFromMIDI(file);
-        loadSession(tracks, globalConfig);
-      } else {
-        throw new Error('Unsupported file type.');
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        alert('Failed to load file: ' + err.message);
-      } else {
-        alert('Failed to load file: Unknown error');
-      }
-    }
-  },
-  onMeasuresChange: (totalMeasures: number) => {
-    updateTotalMeasures(totalMeasures);
+//       if (extension === 'json') {
+//         const { tracks, globalConfig } = await importSessionFromJSON(file);
+//         loadSession(tracks, globalConfig);
+//       } else if (extension === 'mid' || extension === 'midi') {
+//         const { tracks, globalConfig } = await importSessionFromMIDI(file);
+//         loadSession(tracks, globalConfig);
+//       } else {
+//         throw new Error('Unsupported file type.');
+//       }
+//     } catch (err) {
+//       if (err instanceof Error) {
+//         alert('Failed to load file: ' + err.message);
+//       } else {
+//         alert('Failed to load file: Unknown error');
+//       }
+//     }
+//   },
+//   onMeasuresChange: (totalMeasures: number) => {
+//     updateTotalMeasures(totalMeasures);
 
-    const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
-    if (canvas) drawGlobalMiniContour(canvas, sequencers);
-  },
-  onBeatsPerMeasureChange: (beatsPerMeasure: number) => {
-    updateTimeSignature(beatsPerMeasure);
+//     const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
+//     if (canvas) drawGlobalMiniContour(canvas, sequencers);
+//   },
+//     onBeatsPerMeasureChange: (beatsPerMeasure: number) => {
+//     updateTimeSignature(beatsPerMeasure);
 
-    const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
-    if (canvas) drawGlobalMiniContour(canvas, sequencers);
-  }
-});
+//     const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
+//     if (canvas) drawGlobalMiniContour(canvas, sequencers);
+//   }
+// });
 
 hideSplashScreen();
 logMessage('Sequenzia initialized');

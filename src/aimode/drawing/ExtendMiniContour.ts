@@ -1,6 +1,6 @@
 // src/aimode/drawing/ExtendMiniContour.ts
 
-import { getTotalBeats } from '../../sequencer/transport.js';
+import { getTotalBeats } from '@/shared/playback/transportService.js';
 import { aiContext } from '../aiConfig.js';
 
 /**

@@ -2,5 +2,6 @@
 export interface ThemeSettings {
     gridColorScheme: string;
     noteColorScheme: string;
+    skin: string;
   }
   

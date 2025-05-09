@@ -1,7 +1,7 @@
 import type { SnappedNotePosition } from '../interfaces/SnappedNotePosition.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import type { CursorController } from '../input/cursor/CursorController.js';
-import { getTotalBeats } from '../../transport.js';
+import { getTotalBeats } from '@/shared/playback/transportService.js';
 import { CursorState } from '../input/interfaces/CursorState.js';
 
 /**

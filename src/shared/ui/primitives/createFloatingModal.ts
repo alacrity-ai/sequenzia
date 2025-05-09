@@ -1,5 +1,8 @@
 import { h } from '../domUtils.js';
 
+import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
+
+
 /**
  * Preset size definitions for modals.
  * 
@@ -59,6 +62,7 @@ export function createFloatingModal(
   content: HTMLElement | HTMLElement[],
   options: ModalOptions = {}
 ): HTMLElement {
+  const skin = getCurrentSkin();
   const preset = options.sizePreset ? MODAL_SIZE_PRESETS[options.sizePreset] : undefined;
 
   const widthClass = options.widthClass || preset?.widthClass || 'w-[500px]';
@@ -71,7 +75,7 @@ export function createFloatingModal(
   const modalInner = h('div', {
     class: [
       'relative flex flex-col',
-      'bg-gradient-to-br from-gray-800 to-gray-900',
+      skin.menuBackground,
       'border border-purple-700 shadow-2xl rounded-2xl',
       'px-10 py-8 animate-fade-in text-white',
       widthClass,

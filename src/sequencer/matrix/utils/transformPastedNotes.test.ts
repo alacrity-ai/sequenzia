@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { transformPastedNotes } from './transformPastedNotes';
 import type { Note } from '../../../shared/interfaces/Note.js';
-import { getTotalBeats } from '../../transport.js';
+import { getTotalBeats } from '@/shared/playback/transportService.js';
 
 // Mock getTotalBeats
-vi.mock('../../transport.js', () => ({
+vi.mock('@/shared/playback/transportService.js', () => ({
   getTotalBeats: vi.fn()
 }));
 

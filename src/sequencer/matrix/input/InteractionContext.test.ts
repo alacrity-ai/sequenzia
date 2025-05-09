@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InteractionContext } from './InteractionContext';
 import { InteractionMode } from './interfaces/InteractionEnum';
 
-vi.mock('../../transport.js', () => ({}));
+vi.mock('@/shared/playback/transportService.js', () => ({}));
 vi.mock('../../../main.js', () => ({}));
 
 // Stub all handlers up front

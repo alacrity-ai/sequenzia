@@ -1,5 +1,7 @@
 // src/userSettings/listeners/attachModalListeners.ts
 import { UserConfigModal } from '../ui/UserConfigModal.js';
+import { UIOrchestrator } from '@/shared/ui/UIOrchestrator.js';
+import { updateLastSkin, getCurrentSkin, getLastSkin } from '../store/userConfigStore.js';
 
 interface ModalListenerOptions {
   onSave?: () => void;
@@ -48,9 +50,17 @@ export function attachModalListeners(modal: UserConfigModal, options: ModalListe
   };
 
   const saveHandler = () => {
+    // Call save first — this updates the config
     options.onSave?.();
+  
+    // Refresh the skin
+    const currentSkin = getCurrentSkin();
+    updateLastSkin(currentSkin.name);
+    UIOrchestrator.getInstance().reloadAll();
+
     modal.hide();
   };
+  
 
   closeBtn.addEventListener('click', closeHandler);
   saveBtn.addEventListener('click', saveHandler);

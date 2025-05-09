@@ -1,125 +1,116 @@
-// src/sequencer/transport.ts
+// // src/sequencer/transport.ts
 
-import { getSequencers } from './factories/SequencerFactory.js';
-import { recordDiff } from '../appState/appState.js';
-import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState/diffEngine/types/global/changeTempo.js';
-import { createSetTimeSignatureDiff, createReverseSetTimeSignatureDiff } from '../appState/diffEngine/types/global/changeTimeSignature.js';
-import { createSetTotalMeasuresDiff, createReverseSetTotalMeasuresDiff } from '../appState/diffEngine/types/global/changeMeasures.js';
-import { SEQUENCER_CONFIG as config } from './constants/sequencerConstants.js';
-import { engine as playbackEngine } from '../main.js';
+// import { getSequencers } from './factories/SequencerFactory.js';
+// import { recordDiff } from '../appState/appState.js';
+// import { createChangeTempoDiff, createReverseChangeTempoDiff } from '../appState/diffEngine/types/global/changeTempo.js';
+// import { createSetTimeSignatureDiff, createReverseSetTimeSignatureDiff } from '../appState/diffEngine/types/global/changeTimeSignature.js';
+// import { createSetTotalMeasuresDiff, createReverseSetTotalMeasuresDiff } from '../appState/diffEngine/types/global/changeMeasures.js';
+// import { SEQUENCER_CONFIG as config } from './constants/sequencerConstants.js';
+// import { engine as playbackEngine } from '../main.js';
 
-let beatDuration: number = 500; // ms per beat
-let startTime: number | null = null;
-let loop: boolean = false;
-let beatsPerMeasure: number = 4;
-let totalMeasures: number = 8;
+// let beatDuration: number = 500; // ms per beat
+// let startTime: number | null = null;
+// let loop: boolean = false;
+// let beatsPerMeasure: number = 4;
+// let totalMeasures: number = 8;
 
-export function getTotalBeats(): number {
-  return getTotalMeasures() * getTimeSignature();
-}
+// export function getTotalBeats(): number {
+//   return getTotalMeasures() * getTimeSignature();
+// }
 
-export function updateTempo(bpm: number, record: boolean = true): void {
-  // Record the change in tempo if requested
-  const prevBpm = getTempo();
+// export function updateTempo(bpm: number, record: boolean = true): void {
+//   // Record the change in tempo if requested
+//   const prevBpm = getTempo();
 
-  if (record) {
-    recordDiff(
-      createChangeTempoDiff(bpm),
-      createReverseChangeTempoDiff(prevBpm)
-    );
-    return;
-  }
+//   if (record) {
+//     recordDiff(
+//       createChangeTempoDiff(bpm),
+//       createReverseChangeTempoDiff(prevBpm)
+//     );
+//     return;
+//   }
 
-  // Update the beat duration based on the new BPM
-  const now = performance.now();
-  const beat = playbackEngine.getCurrentBeat();
-  beatDuration = (60 / bpm) * 1000;
+//   // Update the beat duration based on the new BPM
+//   const now = performance.now();
+//   const beat = playbackEngine.getCurrentBeat();
+//   beatDuration = (60 / bpm) * 1000;
 
-  // Update the start time based on the new beat duration
-  if (startTime !== null) {
-    startTime = now - beat * beatDuration;
-  }
+//   // Update the start time based on the new beat duration
+//   if (startTime !== null) {
+//     startTime = now - beat * beatDuration;
+//   }
 
-  if (playbackEngine.isActive()) {
-    playbackEngine.syncAfterTempoChange(prevBpm);
-  }  
+//   if (playbackEngine.isActive()) {
+//     playbackEngine.syncAfterTempoChange(prevBpm);
+//   }  
 
-  // Update the tempo input field
-  const tempoInput = document.getElementById('tempo-input') as HTMLInputElement | null;
-  if (tempoInput && tempoInput.value !== String(bpm)) {
-    tempoInput.value = String(bpm);
-  }
-}
+//   // Update the tempo input field
+//   const tempoInput = document.getElementById('tempo-input') as HTMLInputElement | null;
+//   if (tempoInput && tempoInput.value !== String(bpm)) {
+//     tempoInput.value = String(bpm);
+//   }
+// }
 
-export function getTempo(): number {
-  return 60 / (beatDuration / 1000);
-}
+// export function getTempo(): number {
+//   return 60 / (beatDuration / 1000);
+// }
 
-export function updateTimeSignature(beats: number, record: boolean = true): void {
-  if (record) {
-    const prev = getTimeSignature();
-    recordDiff(
-      createSetTimeSignatureDiff(beats),
-      createReverseSetTimeSignatureDiff(prev)
-    );
-    return;
-  }
+// export function updateTimeSignature(beats: number, record: boolean = true): void {
+//   if (record) {
+//     const prev = getTimeSignature();
+//     recordDiff(
+//       createSetTimeSignatureDiff(beats),
+//       createReverseSetTimeSignatureDiff(prev)
+//     );
+//     return;
+//   }
 
-  beatsPerMeasure = beats;
+//   beatsPerMeasure = beats;
 
-  const beatsInput = document.getElementById('beats-per-measure-input') as HTMLInputElement | null;
-  if (beatsInput && beatsInput.value !== String(beats)) {
-    beatsInput.value = String(beats);
-  }
+//   const beatsInput = document.getElementById('beats-per-measure-input') as HTMLInputElement | null;
+//   if (beatsInput && beatsInput.value !== String(beats)) {
+//     beatsInput.value = String(beats);
+//   }
 
-  getSequencers().forEach(seq => {
-    seq.updateBeatsPerMeasure();
-  });
+//   getSequencers().forEach(seq => {
+//     seq.updateBeatsPerMeasure();
+//   });
+// }
 
-  // LEGACY GRID:
-  // getSequencers().forEach(seq => {
-  //   if (seq.grid?.resizeAndRedraw) {
-  //     seq.grid.resizeAndRedraw();
-  //   } else {
-  //     seq.grid?.scheduleRedraw();
-  //   }
-  // });
-}
+// export function getTimeSignature(): number {
+//   return beatsPerMeasure;
+// }
 
-export function getTimeSignature(): number {
-  return beatsPerMeasure;
-}
+// export function updateTotalMeasures(measures: number, record: boolean = true): void {
+//   if (record) {
+//     const prev = getTotalMeasures();
+//     recordDiff(
+//       createSetTotalMeasuresDiff(measures),
+//       createReverseSetTotalMeasuresDiff(prev)
+//     );
+//     return;
+//   }
 
-export function updateTotalMeasures(measures: number, record: boolean = true): void {
-  if (record) {
-    const prev = getTotalMeasures();
-    recordDiff(
-      createSetTotalMeasuresDiff(measures),
-      createReverseSetTotalMeasuresDiff(prev)
-    );
-    return;
-  }
+//   totalMeasures = measures;
 
-  totalMeasures = measures;
+//   const measuresInput = document.getElementById('measures-input') as HTMLInputElement | null;
+//   if (measuresInput && measuresInput.value !== String(measures)) {
+//     measuresInput.value = String(measures);
+//   }
+// }
 
-  const measuresInput = document.getElementById('measures-input') as HTMLInputElement | null;
-  if (measuresInput && measuresInput.value !== String(measures)) {
-    measuresInput.value = String(measures);
-  }
-}
+// export function getTotalMeasures(): number {
+//   return totalMeasures;
+// }
 
-export function getTotalMeasures(): number {
-  return totalMeasures;
-}
+// export function setLoopEnabled(enabled: boolean): void {
+//   loop = enabled;
+// }
 
-export function setLoopEnabled(enabled: boolean): void {
-  loop = enabled;
-}
+// export function isLoopEnabled(): boolean {
+//   return loop;
+// }
 
-export function isLoopEnabled(): boolean {
-  return loop;
-}
-
-export function getSnapResolution(): number {
-  return config.snapResolution;
-}
+// export function getSnapResolution(): number {
+//   return config.snapResolution;
+// }

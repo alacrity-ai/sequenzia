@@ -1,7 +1,7 @@
 // src/export/save.ts
 
 import { Session } from '../sequencer/interfaces/Session.js';
-import { getTempo } from '../sequencer/transport.js';
+import { getTempo } from '@/shared/playback/transportService.js';
 import { AppState } from '../appState/interfaces/AppState.js';
 import { showLoadingModal, hideLoadingModal, setGlobalLoading } from '../global/loadingModal.js';
 import Sequencer from '../sequencer/sequencer.js';

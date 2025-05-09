@@ -9,6 +9,7 @@ export const defaultUserConfig: UserConfig = {
   theme: {
     gridColorScheme: 'Darkroom',
     noteColorScheme: 'Track Color',
+    skin: 'Default'
   },
   ai: {
     openaiApiKey: '',

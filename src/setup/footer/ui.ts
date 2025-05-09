@@ -2,7 +2,7 @@
 
 import { SEQUENCER_CONFIG as config, SNAP_RESOLUTIONS, durationHotkeys } from '../../sequencer/constants/sequencerConstants.js';
 import { getActiveSelection } from '../../sequencer/utils/selectionTracker.js';
-import { getTimeSignature, getTotalMeasures } from '../../sequencer/transport.js';
+import { getTimeSignature, getTotalMeasures } from '@/shared/playback/transportService.js';
 import { showVelocityModal } from '../../sequencer/ui/modals/velocity/velocityModeMenu.js';
 import { showErrorModal } from '../../global/errorGeneric.js';
 import Sequencer from '../../sequencer/sequencer.js';
@@ -242,15 +242,6 @@ export function setupUI({
       exportModal?.classList.add('hidden');
     });
   }
-
-  // === User Config Button ===
-  let configModalController: UserConfigModalController | null = null;
-  configBtn?.addEventListener('click', () => {
-    if (!configModalController) {
-      configModalController = new UserConfigModalController();
-    }
-    configModalController.show();
-  });
 
   // Initialize Footer Bar inputs with correct values
   if (measuresInput) measuresInput.value = String(getTotalMeasures());

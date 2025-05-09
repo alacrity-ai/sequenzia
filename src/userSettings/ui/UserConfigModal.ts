@@ -3,6 +3,8 @@
 import { h } from '../../shared/ui/domUtils.js';
 import { createFloatingModal } from '../../shared/ui/primitives/createFloatingModal.js';
 import { createTabBar } from '../../shared/ui/primitives/createTabBar.js';
+import { createButton } from '@/shared/ui/primitives/createButton.js';
+
 
 export class UserConfigModal {
   private modal: HTMLElement;
@@ -37,16 +39,16 @@ export class UserConfigModal {
       ]);
 
     // Action buttons
-    this.saveButton = h('button', {
+    this.saveButton = createButton({
         id: 'userconfig-save',
-        class: 'cursor-pointer flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg transition-all text-sm',
-        textContent: 'Save'
+        text: 'Save',
+        kind: 'primary'
       });
   
-      this.closeButton = h('button', {
+      this.closeButton = createButton({
         id: 'userconfig-close-bottom',
-        class: 'cursor-pointer flex-1 bg-gray-600 hover:bg-gray-700 py-2 rounded-lg transition-all text-sm',
-        textContent: 'Cancel'
+        text: 'Cancel',
+        kind: 'secondary'
       });
 
     // Footer

@@ -1,5 +1,15 @@
 // src/userSettings/settings/themeConstants.ts
 
+// Added this
+export const SKINS: string[] = [
+    'Default',
+    'Blue Dream',
+    'Modern Light',
+    'Synthwave',
+    'Verdant Alloy',
+    'Sunset'
+  ];
+
 export const GRID_COLOR_SCHEMES: string[] = [
     'Darkroom',
     'Seashell',
