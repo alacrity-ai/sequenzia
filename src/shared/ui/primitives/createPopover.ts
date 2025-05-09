@@ -34,13 +34,13 @@ export function createPopover(
   const skin = getCurrentSkin();
   const id = options.id || `popover-${Math.random().toString(36).slice(2, 9)}`;
 
-  // === Create the content container
+  // === Create content container
   const content = h('div', {
     id,
     'data-popover': '',
     role: 'tooltip',
     class: [
-      'absolute z-500 inline-block w-64 text-sm transition-opacity duration-300',
+      'absolute z-[9999] inline-block w-64 text-sm transition-opacity duration-300',
       'border rounded-lg shadow-xs opacity-0 invisible',
       skin.menuBackground,
       skin.textColor,
@@ -68,7 +68,6 @@ export function createPopover(
   }, ...contentBody);
   content.appendChild(body);
 
-  // Append content to DOM (must be present before instantiating Popover)
   document.body.appendChild(content);
 
   const flowbiteOptions: FBPopoverOptions = {
@@ -85,11 +84,11 @@ export function createPopover(
     override: options.overrideInstance ?? true
   };
 
-  // === Instantiate popover manually (no auto-wiring)
   const instance = new Popover(content, trigger, flowbiteOptions, instanceOptions);
 
   return { trigger, content, instance };
 }
+
 
 
 /*

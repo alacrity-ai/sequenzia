@@ -47,16 +47,18 @@ export function attachPlayheadListeners(container: HTMLElement): ListenerAttachm
   const updatePlayheadFromEvent = (e: MouseEvent) => {
     if (!canvas) return;
 
+    const DPR = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    let x = (e.clientX - rect.left) * scaleX;
+    const logicalWidth = canvas.width / DPR;
 
-    x = Math.max(0, Math.min(canvas.width, x));
+    // Get x coordinate in CSS pixel space
+    let x = (e.clientX - rect.left) * (logicalWidth / rect.width);
+    x = Math.max(0, Math.min(logicalWidth, x));
 
     const totalBeats = getTotalBeats();
-    const unsnappedBeat = (x / canvas.width) * totalBeats;
+    const unsnappedBeat = (x / logicalWidth) * totalBeats;
     const snappedBeat = getSnappedBeat(unsnappedBeat, config);
-    const snappedX = (snappedBeat / totalBeats) * canvas.width;
+    const snappedX = (snappedBeat / totalBeats) * logicalWidth;
 
     playbackEngine.seek(snappedBeat);
     updateAllMatrixPlayheads(playbackEngine, playbackEngine.getCurrentBeat());

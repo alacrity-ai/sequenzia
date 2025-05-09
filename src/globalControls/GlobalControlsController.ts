@@ -13,7 +13,6 @@ import { attachPlayheadListeners } from './listeners/GlobalPlayheadListeners.js'
 
 import { initGlobalPlayheadRenderer } from './renderers/GlobalPlayheadRenderer.js';
 import { PlaybackService } from './services/PlaybackService.js';
-import { refreshGlobalMiniContour } from './renderers/GlobalMiniContourRenderer.js';
 
 import { SaveModalController } from './modals/saveModal/saveModalController.js';
 import { WavOptionsModal } from './modals/saveModal/wavOptionsModal.js';
@@ -53,7 +52,7 @@ export class GlobalControlsController {
 
     const contour = createGlobalMiniContour();
     const toolbar = createGlobalToolbar();
-    const { element: transport, mount: mountTransportControls } = createTransportControls();
+    const transport = createTransportControls();
     const sideButtons = createGlobalSideButtons();
 
     this.controls.getGlobalPlayheadRow().appendChild(contour);
@@ -97,9 +96,6 @@ export class GlobalControlsController {
       playheadListeners.refreshUI
     ];
 
-    console.log('Mini canvas  :', this.miniCanvas);
-    this.miniCanvas && refreshGlobalMiniContour(this.miniCanvas);
-    mountTransportControls();
     this.initPlayhead();
   }
 

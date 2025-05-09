@@ -18,7 +18,9 @@ export function initGlobalPlayheadRenderer(canvasElement: HTMLCanvasElement): vo
 export function drawGlobalPlayhead(x: number): void {
   if (!ctx || !canvas) return;
 
-  const { width, height } = canvas;
+  const DPR = window.devicePixelRatio || 1;
+  const width = canvas.width / DPR;
+  const height = canvas.height / DPR;
   ctx.clearRect(0, 0, width, height);
 
   const lineX = Math.round(x) + 0.5;

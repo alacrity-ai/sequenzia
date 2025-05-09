@@ -12,6 +12,7 @@ let currentAppState: AppState = {
   timeSignature: [4, 4],
   totalMeasures: 8,
   sequencers: [],
+  songKey: 'CM'
 };
 
 /**

@@ -32,6 +32,7 @@ export class SaveLoadService {
                 bpm: appState.tempo,
                 beatsPerMeasure: appState.timeSignature[0],
                 totalMeasures: appState.totalMeasures,
+                songKey: appState.songKey
             },
             tracks: sequencers.map(seq => ({
                 notes: seq.notes,

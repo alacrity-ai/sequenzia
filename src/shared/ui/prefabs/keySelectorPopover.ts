@@ -3,8 +3,11 @@ import { createButton } from '../primitives/createButton.js';
 import { createPopover } from '../primitives/createPopover.js';
 import { createToggleSwitch } from '../primitives/createToggleSwitch.js';
 import { createHorizontalDivider } from '../primitives/createHorizontalDivider.js';
-import { getSongKey, setSongKey } from '@/shared/stores/songInfoStore.js';
+import { getSongKey, updateSongKey } from '@/shared/playback/transportService.js';
 import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
+
+import { onStateUpdated } from '@/appState/onStateUpdated.js';
+import type { AppState } from '@/appState/interfaces/AppState.js';
 
 import type { SongKey } from '@/shared/types/SongKey.ts';
 
@@ -24,10 +27,7 @@ function extractPitchMode(key: string): [KeyName, Mode] {
   return [pitch, mode];
 }
 
-export function createKeySelectorPopover(): {
-  trigger: HTMLElement;
-  mount: () => void;
-} {
+export function createKeySelectorPopover(): HTMLElement {
   const skin = getCurrentSkin();
   let [selectedPitch, selectedMode] = extractPitchMode(getCurrentKey());
 
@@ -43,7 +43,7 @@ export function createKeySelectorPopover(): {
     selectedPitch = pitch;
     selectedMode = mode;
     const key = `${pitch}${mode}` as SongKey;
-    setSongKey(key);
+    updateSongKey(key);
     triggerButton.textContent = key;
     updateHighlight();
   };
@@ -86,19 +86,6 @@ export function createKeySelectorPopover(): {
 
   const contentBody = [sharpRow, naturalRow, createHorizontalDivider(), toggleSwitch];
 
-  let popoverInstance: ReturnType<typeof createPopover>['instance'] | null = null;
-
-  const mount = () => {
-    if (popoverInstance) return; // Prevent double mounting
-    const { instance } = createPopover(triggerButton, contentBody, {
-      title: 'Key Selector',
-      placement: 'bottom',
-      triggerType: 'click'
-    });
-    popoverInstance = instance;
-    console.debug('[KeyPopover] Popover instance created:', popoverInstance);
-  };
-
   function updateHighlight(): void {
     const allButtons = [...naturalRow.children, ...sharpRow.children];
     allButtons.forEach(btn => {
@@ -109,9 +96,28 @@ export function createKeySelectorPopover(): {
     toggleInput.checked = selectedMode === 'm';
   }
 
-  return { trigger: triggerButton, mount };
-}
+  createPopover(triggerButton, contentBody, {
+    title: 'Key Selector',
+    placement: 'bottom',
+    triggerType: 'click'
+  });
 
+  onStateUpdated((state: AppState) => {
+    const [pitch, mode] = extractPitchMode(state.songKey);
+
+    triggerButton.textContent = state.songKey;
+    toggleInput.checked = mode === 'm';
+
+    const allButtons = [...naturalRow.children, ...sharpRow.children];
+    allButtons.forEach(btn => {
+        if (!(btn instanceof HTMLButtonElement)) return;
+        const btnKey = btn.textContent || '';
+        btn.className = keyButtonClass(btnKey as KeyName, pitch);
+    });
+  });
+
+  return triggerButton;
+}
 
 // === Styling helpers ===
 

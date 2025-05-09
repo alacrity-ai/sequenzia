@@ -1,7 +1,7 @@
-// src/globalControls/services/transportService.ts
+// src/shared/playback/transportService.ts
 
 import { getSequencers } from '@/sequencer/factories/SequencerFactory.js';
-import { recordDiff } from '@/appState/appState.js';
+import { getAppState, recordDiff } from '@/appState/appState.js';
 import {
   createChangeTempoDiff,
   createReverseChangeTempoDiff
@@ -14,6 +14,12 @@ import {
   createSetTotalMeasuresDiff,
   createReverseSetTotalMeasuresDiff
 } from '@/appState/diffEngine/types/global/changeMeasures.js';
+import {
+  createChangeSongKeyDiff,
+  createReverseChangeSongKeyDiff
+} from '@/appState/diffEngine/types/global/changeSongKey.js';
+import type { SongKey } from '@/shared/types/SongKey.ts';
+
 import { SEQUENCER_CONFIG as config } from '@/sequencer/constants/sequencerConstants.js';
 import { engine as playbackEngine } from '@/main.js';
 
@@ -84,6 +90,21 @@ export function updateTotalMeasures(measures: number, record = true): void {
   totalMeasures = measures;
 }
 
+export function updateSongKey(newKey: SongKey, record = true): void {
+  const prevKey = getAppState().songKey;
+
+  if (record) {
+    recordDiff(
+      createChangeSongKeyDiff(newKey),
+      createReverseChangeSongKeyDiff(prevKey)
+    );
+  } else {
+    // Unrecorded mutation fallback
+    const state = getAppState();
+    state.songKey = newKey;
+  }
+}
+
 export function getBeatDuration(): number {
   return beatDuration / 1000; // return in seconds
 }
@@ -94,6 +115,10 @@ export function getTimeSignature(): number {
 
 export function getTotalMeasures(): number {
   return totalMeasures;
+}
+
+export function getSongKey(): SongKey {
+  return getAppState().songKey;
 }
 
 export function setLoopEnabled(enabled: boolean): void {

@@ -33,7 +33,8 @@ describe('importSessionFromJSON', () => {
       globalConfig: {
         bpm: 90,
         beatsPerMeasure: 3,
-        totalMeasures: 16
+        totalMeasures: 16,
+        songKey: 'CM'
       },
       tracks: [
         {

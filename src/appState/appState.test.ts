@@ -27,7 +27,8 @@ describe('appState', () => {
     tempo: 120,
     timeSignature: [4, 4],
     totalMeasures: 8,
-    sequencers: []
+    sequencers: [],
+    songKey: 'CM'
   };
 
   beforeEach(() => {
@@ -45,6 +46,7 @@ describe('appState', () => {
       tempo: 90,
       timeSignature: [6, 8],
       totalMeasures: 12,
+      songKey: 'GM',
       sequencers: [
         {
           id: 1,
@@ -78,6 +80,7 @@ describe('appState', () => {
       tempo: 120,
       timeSignature: [4, 4],
       totalMeasures: 16,
+      songKey: 'CM',
       sequencers: [{ id: 1, instrument: 'piano', notes: [] }]
     };
   

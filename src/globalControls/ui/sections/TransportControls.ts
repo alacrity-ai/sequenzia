@@ -1,21 +1,16 @@
 import { h } from '@/shared/ui/domUtils.js';
-import { NOTE_RESOLUTION_OPTIONS } from '../../constants.js';
 import { createToggleSwitch } from '@/shared/ui/primitives/createToggleSwitch.js';
 import { createVerticalDivider } from '@/shared/ui/primitives/createVerticalDivider.js';
 import { createCircularIconButton } from '@/shared/ui/primitives/createCircularIconButton.js';
 import { createNumberInput } from '@/shared/ui/primitives/createNumberInput.js';
-import { createSelectInput } from '@/shared/ui/primitives/createSelectInput.js';
 import { createLabel } from '@/shared/ui/primitives/createLabel.js';
 import { createSpacer } from '@/shared/ui/primitives/createSpacer.js';
 import { createKeySelectorPopover } from '@/shared/ui/prefabs/keySelectorPopover.js';
 import { icon } from '@/shared/ui/primitives/createIconImg.js';
 
-export function createTransportControls(): {
-  element: HTMLElement;
-  mount: () => void;
-} {
+export function createTransportControls(): HTMLElement {
   // === 🔁 Key selector prefab: extract trigger and deferred mount
-  const keySelector = createKeySelectorPopover();
+  const triggerBtn = createKeySelectorPopover();
 
   const element = h('div', {
     class: 'flex justify-center items-center gap-4 flex-wrap'
@@ -48,10 +43,10 @@ export function createTransportControls(): {
     h('div', {
       class: 'flex items-center gap-4 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
     },
-      // 🔁 Key Selector
+      // Key Selector
       h('div', { class: 'flex flex-col items-start gap-1' },
         createLabel('Key'),
-        keySelector.trigger // Only trigger here — wiring happens in mount()
+        triggerBtn
       ),
 
       // Tempo
@@ -106,10 +101,5 @@ export function createTransportControls(): {
     )
   );
 
-  return {
-    element,
-    mount: () => {
-      keySelector.mount(); // ensure popover is wired once DOM is present
-    }
-  };
+  return element;
 }

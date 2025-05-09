@@ -2,6 +2,7 @@
 
 import { Note } from '../../shared/interfaces/Note.js';
 import { SequencerConfig } from '../../sequencer/interfaces/SequencerConfig.js';
+import type { SongKey } from '../../shared/types/SongKey.js';
 
 export interface SequencerState {
   id: number;
@@ -16,6 +17,7 @@ export interface AppState {
   timeSignature: [number, number];
   totalMeasures: number;
   sequencers: SequencerState[];
+  songKey: SongKey;
 }
 
 export interface CreateSequencerOptions {

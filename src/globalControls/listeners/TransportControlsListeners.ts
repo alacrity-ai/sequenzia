@@ -7,12 +7,14 @@ import {
   updateTotalMeasures,
   setLoopEnabled
 } from '@/shared/playback/transportService.js';
+import { onStateUpdated } from '@/appState/onStateUpdated.js';
 
 import type { PlaybackService } from '../services/PlaybackService.js';
 import type { ListenerAttachment } from '@/userSettings/interfaces/ListenerAttachment.js';
 import type { UserConfigModalController } from '@/userSettings/userConfig.js';
 import type { SaveModalController } from '../modals/saveModal/saveModalController.js';
 import type { LoadModalController } from '../modals/loadModal/loadModalController.js';
+import type { AppState } from '@/appState/interfaces/AppState.js';
 
 export function attachTransportListeners(
   container: HTMLElement,
@@ -97,6 +99,12 @@ export function attachTransportListeners(
       updateTimeSignature(value, true);
     }
   };
+
+  onStateUpdated((state: AppState) => {
+    if (tempoInput) tempoInput.value = String(state.tempo);
+    if (measuresInput) measuresInput.value = String(state.totalMeasures);
+    if (beatsInput) beatsInput.value = String(state.timeSignature[0]);
+  });
 
   const handleLoopToggle = () => {
     setLoopEnabled(loopToggle?.checked ?? false);

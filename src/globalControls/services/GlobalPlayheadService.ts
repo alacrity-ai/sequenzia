@@ -13,23 +13,25 @@ let animationFrameId: number | null = null;
  * Draws both the global playhead and each matrix's local playhead.
  */
 export function startGlobalPlayheadLoop(engine: PlaybackEngine, canvasWidth: number): void {
-    const totalBeats = getTotalBeats();
-  
-    function drawFrame() {
-      if (!engine.isActive()) return;
-  
-      const currentBeat = engine.getCurrentBeat();
-      const globalX = (currentBeat / totalBeats) * canvasWidth;
-  
-      drawGlobalPlayhead(globalX);
-      updateAllMatrixPlayheads(engine, currentBeat);
-  
-      animationFrameId = requestAnimationFrame(drawFrame);
-    }
-  
-    cancelGlobalPlayheadLoop();
+  const totalBeats = getTotalBeats();
+  const DPR = window.devicePixelRatio || 1;
+  const logicalWidth = canvasWidth / DPR;
+
+  function drawFrame() {
+    if (!engine.isActive()) return;
+
+    const currentBeat = engine.getCurrentBeat();
+    const globalX = (currentBeat / totalBeats) * logicalWidth;
+
+    drawGlobalPlayhead(globalX);
+    updateAllMatrixPlayheads(engine, currentBeat);
+
     animationFrameId = requestAnimationFrame(drawFrame);
   }
+
+  cancelGlobalPlayheadLoop();
+  animationFrameId = requestAnimationFrame(drawFrame);
+}
   
 
 /**

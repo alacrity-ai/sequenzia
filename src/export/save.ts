@@ -23,6 +23,7 @@ let globalLoading: boolean = false;
  *     b: 120,                 // bpm
  *     bpm: 4,                 // beats per measure
  *     tm: 8                   // total measures
+ *     sk: 'CM'                 // song key
  *   },
  *   i: ["piano", "drums"],    // instruments (matches track order)
  *   vlm: [90.0, 80.0, 100.0], // volume, matches track order
@@ -38,6 +39,7 @@ export function exportSessionToJSON(appState: AppState): { url: string, filename
   const bpm = appState.tempo;
   const beatsPerMeasure = appState.timeSignature[0];
   const totalMeasures = appState.totalMeasures;
+  const songKey = appState.songKey;
 
   const payload = {
     v: 3,
@@ -45,7 +47,8 @@ export function exportSessionToJSON(appState: AppState): { url: string, filename
     c: {
       b: bpm,
       bpm: beatsPerMeasure,
-      tm: totalMeasures
+      tm: totalMeasures,
+      sk: songKey
     },
     i: appState.sequencers.map(s => s.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano'),
     vlm: appState.sequencers.map(s => s.volume ?? (100 / 127)), // Default ≈ 0.787

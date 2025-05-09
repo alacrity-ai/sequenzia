@@ -37,6 +37,7 @@ export async function importSessionFromMIDI(file: File): Promise<Session> {
       bpm,
       beatsPerMeasure,
       totalMeasures: estimatedTotalMeasures,
+      songKey: 'CM'
     };
   
     const availableSf2Drums = await getDrumMachineInstruments();

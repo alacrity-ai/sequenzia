@@ -16,8 +16,9 @@ export function drawGlobalMiniContour(
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const W = canvas.width;
-  const H = canvas.height;
+  const DPR = window.devicePixelRatio || 1;
+  const W = canvas.width / DPR;
+  const H = canvas.height / DPR;
   ctx.clearRect(0, 0, W, H);
 
   const totalBeats = getTotalBeats();
@@ -55,6 +56,7 @@ export function drawGlobalMiniContour(
  */
 export function refreshGlobalMiniContour(
   canvas: HTMLCanvasElement,
+  sequencers: Sequencer[]
 ): void {
-  drawGlobalMiniContour(canvas, getSequencers());
+  drawGlobalMiniContour(canvas, sequencers);
 }

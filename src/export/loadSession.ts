@@ -1,6 +1,6 @@
 // src/export/loadSession.ts
 
-import { updateTempo, updateTimeSignature, updateTotalMeasures, getTempo, getTotalMeasures } from '@/shared/playback/transportService.js';
+import { updateTempo, updateSongKey, updateTimeSignature, updateTotalMeasures, getTempo, getTotalMeasures } from '@/shared/playback/transportService.js';
 import { destroyAllSequencers, sequencers } from '../sequencer/factories/SequencerFactory.js';
 import { collapseAllSequencers } from '../sequencer/utils/collapseAll.js';
 import { refreshGlobalMiniContour } from '@/globalControls/renderers/GlobalMiniContourRenderer.js';
@@ -26,6 +26,7 @@ export function loadSession(tracks: TrackData[], globalConfig: SongConfig): void
   updateTempo(globalConfig.bpm);
   updateTimeSignature(globalConfig.beatsPerMeasure);
   updateTotalMeasures(globalConfig.totalMeasures);
+  updateSongKey(globalConfig.songKey);
 
   // Update UI footer inputs if present
   const tempoInput = document.getElementById('tempo-input') as HTMLInputElement | null;
