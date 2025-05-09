@@ -1,4 +1,4 @@
-// src/sequencer/interfaces/Note.ts
+// src/shared/interfaces/Note.ts
 
 export interface Note {
     pitch: string;    // E.g., "C4"
