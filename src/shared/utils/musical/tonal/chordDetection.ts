@@ -4,6 +4,18 @@ import type { DetectedChord } from '@/shared/interfaces/Chord.js';
 import { getPitchClass } from '@/shared/utils/musical/noteUtils';
 
 /**
+ * Strips overly specific modifiers like "no5", "no3", "add9" from chord symbols.
+ * Useful to simplify chord vocabulary for AI and UI use.
+ */
+function normalizeChordSymbol(symbol: string): string {
+  return symbol
+    .replace(/no[35]/gi, '')
+    .replace(/add\d+/gi, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+/**
  * Given an array of Note objects, extract pitch classes and detect the most likely chord.
  * Returns structured chord metadata or null if no match found.
  *
@@ -23,11 +35,9 @@ export function detectChordFromNotes(notes: Note[]): DetectedChord | null {
 
   return {
     name: chord.name,
-    symbol: chord.symbol,
+    symbol: normalizeChordSymbol(chord.symbol),
     type: chord.type,
     quality: chord.quality,
     notes: chord.notes,
   };
 }
-
-

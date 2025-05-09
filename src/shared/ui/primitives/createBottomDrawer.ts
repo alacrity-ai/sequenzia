@@ -1,3 +1,5 @@
+// src/shared/ui/primitives/createBottomDrawer.ts
+
 import { h } from '../domUtils.js';
 import { Drawer } from 'flowbite';
 import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';

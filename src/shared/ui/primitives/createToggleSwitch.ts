@@ -1,3 +1,5 @@
+// src/shared/ui/primitives/createToggleSwitch.ts
+
 import { h } from '../domUtils.js';
 import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
 

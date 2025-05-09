@@ -53,7 +53,7 @@ export class GlobalControlsController {
 
     const contour = createGlobalMiniContour();
     const toolbar = createGlobalToolbar();
-    const transport = createTransportControls();
+    const { element: transport, mount: mountTransportControls } = createTransportControls();
     const sideButtons = createGlobalSideButtons();
 
     this.controls.getGlobalPlayheadRow().appendChild(contour);
@@ -99,6 +99,7 @@ export class GlobalControlsController {
 
     console.log('Mini canvas  :', this.miniCanvas);
     this.miniCanvas && refreshGlobalMiniContour(this.miniCanvas);
+    mountTransportControls();
     this.initPlayhead();
   }
 
