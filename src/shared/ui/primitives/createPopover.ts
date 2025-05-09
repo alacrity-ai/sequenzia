@@ -18,9 +18,10 @@ export interface PopoverOptions {
 }
 
 /**
- * Creates a skinned popover with a trigger and content container.
- * Returns { trigger, content, instance } so you can wire behavior flexibly.
- * Caller must append `trigger` to DOM before invoking this.
+ * Creates a skinned, animated popover and wires it to the given trigger.
+ * Handles DOM creation, styling, and flowbite behavior overrides.
+ *
+ * Returns { trigger, content, instance } so you can optionally manage or dispose the popover later.
  */
 export function createPopover(
   trigger: HTMLElement,
@@ -88,32 +89,3 @@ export function createPopover(
 
   return { trigger, content, instance };
 }
-
-
-
-/*
-// Example Usage
-
-import { createPopover } from '@/shared/ui/primitives/createPopover.ts';
-import { createButton } from '@/shared/ui/primitives/createButton.ts';
-import { createParagraph } from '@/shared/ui/primitives/createParagraph.ts';
-
-const triggerButton = createButton({
-  text: 'Select Key',
-  kind: 'secondary'
-});
-
-const contentElements = [
-  createParagraph('Choose a key from the list below.'),
-  // You could inject your key buttons here
-];
-
-const { trigger, content, instance } = createPopover(triggerButton, contentElements, {
-  title: 'Key Selection',
-  placement: 'bottom',
-  triggerType: 'click'
-});
-
-document.getElementById('some-ui-region')?.appendChild(trigger);
-
-*/

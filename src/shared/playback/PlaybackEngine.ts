@@ -122,10 +122,31 @@ export class PlaybackEngine {
   public seek(toBeat: number): void {
     this.startBeat = toBeat;
     this.startTime = this.context.currentTime;
-    this.isPlaying = false;
+
+    const wasPlaying = this.isPlaying;
 
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+
+    if (wasPlaying) {
+      // Reschedule all tracks at the new beat position
+      const scheduleAt = this.context.currentTime + 0.05;
+      this.startTime = scheduleAt;
+
+      this.scheduleAll(scheduleAt, this.startBeat).then(() => {
+        this.animationFrameId = requestAnimationFrame(this.tick);
+      });
+
+      // Resume the context if needed (safety net)
+      if (this.context.state === 'suspended') {
+        this.context.resume();
+      }
+
+      this.isPlaying = true;
+    } else {
+      this.isPlaying = false;
     }
   }
 

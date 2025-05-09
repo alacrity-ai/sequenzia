@@ -41,7 +41,6 @@ export function createBottomDrawer(
       edgeOffset,
       drawerClass
     ].join(' '),
-    tabindex: '-1',
     'aria-labelledby': `${id}-label`,
     'data-drawer-placement': 'bottom',
     'data-drawer-edge': 'true',

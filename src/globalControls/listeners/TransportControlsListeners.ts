@@ -122,6 +122,23 @@ export function attachTransportListeners(
     userConfigModalController.show();
   };
 
+  // === Keyboard Shortcuts
+
+  const handleSpacebar = (e: KeyboardEvent) => {
+    const activeTag = (document.activeElement as HTMLElement)?.tagName;
+    const isTypingContext = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+
+    if (e.key === ' ' && !isTypingContext) {
+      e.preventDefault(); // Prevent default scroll
+
+      if (e.shiftKey) {
+        handleStop(); // SHIFT + Space
+      } else {
+        handlePlay(); // Regular Space
+      }
+    }
+  };
+
   // Attach listeners
   playBtn?.addEventListener('click', handlePlay);
   stopBtn?.addEventListener('click', handleStop);
@@ -135,6 +152,8 @@ export function attachTransportListeners(
   saveBtn?.addEventListener('click', handleSave);
   loadBtn?.addEventListener('click', handleLoad);
   configBtn?.addEventListener('click', handleConfigClick);
+
+  window.addEventListener('keydown', handleSpacebar);
 
   return {
     detach: () => {
@@ -150,6 +169,8 @@ export function attachTransportListeners(
       saveBtn?.removeEventListener('click', handleSave);
       loadBtn?.removeEventListener('click', handleLoad);
       configBtn?.removeEventListener('click', handleConfigClick);
+
+      window.removeEventListener('keydown', handleSpacebar);
     },
     refreshUI
   };

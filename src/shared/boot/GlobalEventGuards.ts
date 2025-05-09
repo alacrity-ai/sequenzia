@@ -11,13 +11,29 @@ export function registerGlobalEventGuards(): void {
   window.addEventListener('drop', (e) => e.preventDefault());
   window.addEventListener('dragover', (e) => e.preventDefault());
 
-  // (Optional: disable touch scrolling entirely)
-  // window.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-
-  // Optional: override browser shortcuts
   window.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && ['s', 'p'].includes(e.key.toLowerCase())) {
-      e.preventDefault(); // prevent ⌘+S, ⌘+P default browser behavior
+    const blockedKeys = [
+      ' ',         // space
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'Tab',
+      'Home',
+      'End',
+      'PageUp',
+      'PageDown',
+    ];
+
+    const isMacShortcut = e.metaKey;
+    const isCtrlShortcut = e.ctrlKey;
+
+    // Block key if it's one of the above, or a reserved shortcut (like Cmd+S)
+    if (
+      blockedKeys.includes(e.key) ||
+      ((isMacShortcut || isCtrlShortcut) && ['s', 'p'].includes(e.key.toLowerCase()))
+    ) {
+      e.preventDefault();
     }
   });
 }
