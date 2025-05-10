@@ -22,6 +22,7 @@ import { MarqueeRenderer } from './rendering/MarqueeRenderer.js';
 import { SEQUENCER_CONFIG as sequencerConfig } from '../constants/sequencerConstants.js';
 import { setClipboard, getClipboard } from '../clipboard.js';
 import { EventEmitter } from './events/EventEmitter.js';
+import { getSnapResolution, getIsTripletMode } from '@/shared/playback/transportService.js';
 
 import type { GridEvents } from './interfaces/GridEvents.js';
 import type { TrackedNote } from './interfaces/TrackedNote.js';
@@ -342,7 +343,7 @@ export class Grid {
 
   // Whether the grid is in triplet mode or not, effects snapping/note placement
   public isTripletMode(): boolean {
-    return this.sequencerConfig.isTripletMode;
+    return getIsTripletMode();
   }
 
   // The duration of a note to be placed, e.g. 1 = whole note, 0.5 = half note, etc.
@@ -353,7 +354,7 @@ export class Grid {
   // The resolution to snap notes to, note placement, dragging, highlighting all snap to this
   // e.g. 0.25 = quarter note, 0.125 = 8th note, 0.0625 = 16th note
   public getSnapResolution(): number {
-    return this.sequencerConfig.snapResolution;
+    return getSnapResolution();
   }
 
   // Interaction store for the grid, used for hover/selection/etc. state

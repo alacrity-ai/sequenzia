@@ -27,7 +27,11 @@ describe('appState', () => {
     tempo: 120,
     timeSignature: [4, 4],
     totalMeasures: 8,
+    snapResolution: 0.25,
+    noteDuration: 1,
     sequencers: [],
+    isTripletMode: false,
+    isDottedMode: false,
     songKey: 'CM'
   };
 
@@ -47,6 +51,10 @@ describe('appState', () => {
       timeSignature: [6, 8],
       totalMeasures: 12,
       songKey: 'GM',
+      snapResolution: 0.5,
+      noteDuration: 0.5,
+      isTripletMode: false,
+      isDottedMode: false,
       sequencers: [
         {
           id: 1,
@@ -81,6 +89,10 @@ describe('appState', () => {
       timeSignature: [4, 4],
       totalMeasures: 16,
       songKey: 'CM',
+      snapResolution: 0.25,
+      noteDuration: 1,
+      isTripletMode: false,
+      isDottedMode: false,
       sequencers: [{ id: 1, instrument: 'piano', notes: [] }]
     };
   

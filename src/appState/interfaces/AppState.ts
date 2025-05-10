@@ -18,6 +18,10 @@ export interface AppState {
   totalMeasures: number;
   sequencers: SequencerState[];
   songKey: SongKey;
+  snapResolution: number;
+  noteDuration: number;
+  isTripletMode: boolean;
+  isDottedMode: boolean;
 }
 
 export interface CreateSequencerOptions {

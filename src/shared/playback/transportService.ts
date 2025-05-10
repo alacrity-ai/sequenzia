@@ -18,19 +18,28 @@ import {
   createChangeSongKeyDiff,
   createReverseChangeSongKeyDiff
 } from '@/appState/diffEngine/types/global/changeSongKey.js';
+import { createChangeSnapResolutionDiff, 
+         createReverseChangeSnapResolutionDiff 
+} from '@/appState/diffEngine/types/global/changeSnapResolution.js';
+import {
+  createChangeNoteDurationDiff,
+  createReverseChangeNoteDurationDiff
+} from '@/appState/diffEngine/types/global/changeNoteDuration.js';
+import {
+  createSetNoteModifierModeDiff,
+  createReverseSetNoteModifierModeDiff
+} from '@/appState/diffEngine/types/global/setNoteModifierMode.js';
+
 import type { SongKey } from '@/shared/types/SongKey.ts';
 
-import { SEQUENCER_CONFIG as config } from '@/sequencer/constants/sequencerConstants.js';
 import { engine as playbackEngine } from '@/main.js';
 
 let beatDuration = 500; // ms per beat
 let startTime: number | null = null;
 let loop = false;
-let beatsPerMeasure = 4;
-let totalMeasures = 8;
 
 export function getTotalBeats(): number {
-  return totalMeasures * beatsPerMeasure;
+  return getAppState().totalMeasures * getAppState().timeSignature[0];
 }
 
 export function getTempo(): number {
@@ -62,7 +71,7 @@ export function updateTempo(bpm: number, record = true): void {
 }
 
 export function updateTimeSignature(beats: number, record = true): void {
-  const prev = beatsPerMeasure;
+  const prev = getAppState().timeSignature[0];
 
   if (record) {
     recordDiff(
@@ -72,12 +81,11 @@ export function updateTimeSignature(beats: number, record = true): void {
     return;
   }
 
-  beatsPerMeasure = beats;
   getSequencers().forEach(seq => seq.updateBeatsPerMeasure());
 }
 
 export function updateTotalMeasures(measures: number, record = true): void {
-  const prev = totalMeasures;
+  const prev = getAppState().totalMeasures;
 
   if (record) {
     recordDiff(
@@ -86,8 +94,6 @@ export function updateTotalMeasures(measures: number, record = true): void {
     );
     return;
   }
-
-  totalMeasures = measures;
 }
 
 export function updateSongKey(newKey: SongKey, record = true): void {
@@ -98,11 +104,62 @@ export function updateSongKey(newKey: SongKey, record = true): void {
       createChangeSongKeyDiff(newKey),
       createReverseChangeSongKeyDiff(prevKey)
     );
-  } else {
-    // Unrecorded mutation fallback
-    const state = getAppState();
-    state.songKey = newKey;
   }
+  return;
+}
+
+export function getSnapResolution(): number {
+  return getAppState().snapResolution;
+}
+
+export function updateSnapResolution(value: number, record = true): void {
+  const prev = getSnapResolution();
+
+  if (record) {
+    recordDiff(
+      createChangeSnapResolutionDiff(value),
+      createReverseChangeSnapResolutionDiff(prev)
+    );
+    return;
+  }
+}
+
+export function updateNoteDuration(value: number, record = true): void {
+  const prev = getAppState().noteDuration;
+
+  if (record) {
+    recordDiff(
+      createChangeNoteDurationDiff(value),
+      createReverseChangeNoteDurationDiff(prev)
+    );
+    return;
+  }
+}
+
+export function updateNoteModifierMode(triplet: boolean, dotted: boolean, record = true): void {
+  const state = getAppState();
+  const prevTriplet = state.isTripletMode;
+  const prevDotted = state.isDottedMode;
+
+  if (record) {
+    recordDiff(
+      createSetNoteModifierModeDiff(triplet, dotted),
+      createReverseSetNoteModifierModeDiff(prevTriplet, prevDotted)
+    );
+    return;
+  }
+}
+
+export function getIsTripletMode(): boolean {
+  return getAppState().isTripletMode;
+}
+
+export function getIsDottedMode(): boolean {
+  return getAppState().isDottedMode;
+}
+
+export function getNoteDuration(): number {
+  return getAppState().noteDuration;
 }
 
 export function getBeatDuration(): number {
@@ -110,11 +167,11 @@ export function getBeatDuration(): number {
 }
 
 export function getTimeSignature(): number {
-  return beatsPerMeasure;
+  return getAppState().timeSignature[0];
 }
 
 export function getTotalMeasures(): number {
-  return totalMeasures;
+  return getAppState().totalMeasures;
 }
 
 export function getSongKey(): SongKey {
@@ -127,8 +184,4 @@ export function setLoopEnabled(enabled: boolean): void {
 
 export function isLoopEnabled(): boolean {
   return loop;
-}
-
-export function getSnapResolution(): number {
-  return config.snapResolution;
 }

@@ -12,7 +12,11 @@ let currentAppState: AppState = {
   timeSignature: [4, 4],
   totalMeasures: 8,
   sequencers: [],
-  songKey: 'CM'
+  songKey: 'CM',
+  snapResolution: 1,
+  noteDuration: 1,
+  isTripletMode: false,
+  isDottedMode: false
 };
 
 /**

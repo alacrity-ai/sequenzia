@@ -10,6 +10,7 @@ import { attachToolbarListeners } from './listeners/GlobalToolbarListeners.js';
 import { attachSideButtonListeners } from './listeners/GlobalSideButtonsListeners.js';
 import { attachTransportListeners } from './listeners/TransportControlsListeners.js';
 import { attachPlayheadListeners } from './listeners/GlobalPlayheadListeners.js';
+import { attachGlobalControlsListeners } from './listeners/GlobalControlsListeners.js';
 
 import { initGlobalPlayheadRenderer } from './renderers/GlobalPlayheadRenderer.js';
 import { PlaybackService } from './services/PlaybackService.js';
@@ -79,13 +80,15 @@ export class GlobalControlsController {
     );
     const sideButtonListeners = attachSideButtonListeners(sideButtons);
     const playheadListeners = attachPlayheadListeners(this.controls.getGlobalPlayheadRow());
+    const globalControlsListeners = attachGlobalControlsListeners();
 
     this.detachFns = [
       contourListeners.detach,
       toolbarListeners.detach,
       transportListeners.detach,
       sideButtonListeners.detach,
-      playheadListeners.detach
+      playheadListeners.detach,
+      globalControlsListeners.detach
     ];
 
     this.refreshFns = [
@@ -93,7 +96,8 @@ export class GlobalControlsController {
       toolbarListeners.refreshUI,
       transportListeners.refreshUI,
       sideButtonListeners.refreshUI,
-      playheadListeners.refreshUI
+      playheadListeners.refreshUI,
+      globalControlsListeners.refreshUI
     ];
 
     this.initPlayhead();

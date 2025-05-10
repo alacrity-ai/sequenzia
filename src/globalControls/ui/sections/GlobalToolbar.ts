@@ -50,7 +50,7 @@ export function createGlobalToolbar(): HTMLElement {
         ...NOTE_RESOLUTION_OPTIONS.map(opt =>
         h('button', {
             class: [
-            'bg-transparent hover:bg-purple-700',
+            'bg-transparent hover:bg-gray-700',
             'text-white',
             'cursor-pointer px-3 py-1 rounded text-2xl',
             'w-[52px] h-[42px] flex items-center justify-center'
