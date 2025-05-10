@@ -24,7 +24,8 @@ export function createGlobalMiniContour(): HTMLElement {
 
   const playheadCanvas = h('canvas', {
     id: 'global-mini-playhead',
-    class: `absolute top-0 left-0 ${WIDTH} ${COLLAPSED_HEIGHT} z-10`
+    class: `absolute top-0 left-0 ${WIDTH} ${COLLAPSED_HEIGHT} z-10`,
+    style: 'cursor: pointer;'
   });
 
   const canvasWrapper = h('div', {

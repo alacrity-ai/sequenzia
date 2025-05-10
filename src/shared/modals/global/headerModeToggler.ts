@@ -44,11 +44,11 @@ export function setupHeaderModeToggler(): void {
         showFeatureModal();
       });
     }
-
-    // Quantize Notes Button
-    const quantizeBtn = document.getElementById('quantize-mode-menu-btn');
-    if (quantizeBtn) {
-      quantizeBtn.addEventListener('click', () => {
+  
+    // AI Toolbar Toggle
+    const aiToolbarBtn = document.getElementById('ai-mode-btn');
+    if (aiToolbarBtn) {
+      aiToolbarBtn.addEventListener('click', () => {
         // Placeholder logic
         showFeatureModal();
       });

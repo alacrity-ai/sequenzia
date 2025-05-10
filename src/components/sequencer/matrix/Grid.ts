@@ -33,6 +33,7 @@ import type { SequencerContext } from './interfaces/SequencerContext.js';
 
 import type { Note } from '@/shared/interfaces/Note.js';
 import { computeBlackKeyMidiMap } from '@/shared/utils/musical/noteUtils.js'
+import { getMidiNoteMap } from '@/shared/stores/songInfoStore.js';
 
 
 export class Grid {
@@ -116,7 +117,7 @@ export class Grid {
     this.inputTracker = new InputTracker(this.interactionContext, mainContainer)
 
     // Create renderers
-    this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore, () => this.getBlackKeyMap());
+    this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore, () => this.getBlackKeyMap(), () => getMidiNoteMap());
     this.noteRenderer = new NoteRenderer(this.scroll, this.config, this.noteManager, this.interactionStore, this.sequencerContext.getId());
     this.notePreviewRenderer = new NotePreviewRenderer(this.scroll, this.config, this.interactionStore, () => this.getNoteDuration());
     this.animationRenderer = new AnimationRenderer(this.scroll, this.config);

@@ -5,6 +5,14 @@ import { createPopover } from '@/shared/ui/primitives/createPopover.js';
 import { createToggleSwitch } from '@/shared/ui/primitives/createToggleSwitch.js';
 import { icon } from '@/shared/ui/primitives/createIconImg.js';
 import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
+import {
+  isKeyGridHighlightingEnabled,
+  setKeyGridHighlightingEnabled,
+  isSnapToInKeyEnabled,
+  setSnapToInKeyEnabled,
+  isSnapToGridEnabled,
+  setSnapToGridEnabled
+} from '@/shared/stores/songInfoStore.js';
 
 /**
  * Creates the grid settings popover trigger button and content.
@@ -15,6 +23,7 @@ export function createGridSettingsPopover(): HTMLElement {
   const triggerButton = h('button', {
     id: 'note-placement-options-btn',
     class: 'bg-gray-800 px-3 py-1 rounded text-white hover:bg-purple-700 w-[52px] h-[42px] flex items-center justify-center',
+    title: 'Grid Settings',
     style: 'cursor: pointer;'
   }, icon('icon-music', 'Placement'));
 
@@ -25,36 +34,36 @@ export function createGridSettingsPopover(): HTMLElement {
     stateB: 'Key Guides',
     inline: true
   });
-
-  gridGuidesToggle.querySelector('input')?.addEventListener('change', (e) => {
+  const gridGuidesInput = gridGuidesToggle.querySelector('input')!;
+  gridGuidesInput.addEventListener('change', (e) => {
     const isChecked = (e.target as HTMLInputElement).checked;
-    console.log(`Grid Key Guides ${isChecked ? 'enabled' : 'disabled'}`);
+    setKeyGridHighlightingEnabled(isChecked);
   });
 
-  // === Toggle 2: Snap to Key Guides
+  // === Toggle 2: Snap to Key
   const snapToKeyToggle = createToggleSwitch({
     id: 'toggle-snap-key',
     stateA: 'Off',
     stateB: 'Snap to Keys',
     inline: true
   });
-
-  snapToKeyToggle.querySelector('input')?.addEventListener('change', (e) => {
+  const snapToKeyInput = snapToKeyToggle.querySelector('input')!;
+  snapToKeyInput.addEventListener('change', (e) => {
     const isChecked = (e.target as HTMLInputElement).checked;
-    console.log(`Snap to Key Guides ${isChecked ? 'enabled' : 'disabled'}`);
+    setSnapToInKeyEnabled(isChecked);
   });
 
-  // === Toggle 3: Snap to Grid (after break)
+  // === Toggle 3: Snap to Grid
   const snapToGridToggle = createToggleSwitch({
     id: 'toggle-snap-grid',
     stateA: 'Off',
     stateB: 'Snap to Grid',
     inline: true
   });
-
-  snapToGridToggle.querySelector('input')?.addEventListener('change', (e) => {
+  const snapToGridInput = snapToGridToggle.querySelector('input')!;
+  snapToGridInput.addEventListener('change', (e) => {
     const isChecked = (e.target as HTMLInputElement).checked;
-    console.log(`Snap to Grid ${isChecked ? 'enabled' : 'disabled'}`);
+    setSnapToGridEnabled(isChecked);
   });
 
   // === Content Body
@@ -68,7 +77,15 @@ export function createGridSettingsPopover(): HTMLElement {
   createPopover(triggerButton, contentBody, {
     title: 'Grid Settings',
     placement: 'bottom',
-    triggerType: 'click'
+    triggerType: 'click',
+    onShow: () => {
+      requestAnimationFrame(() => {
+        gridGuidesInput.checked = isKeyGridHighlightingEnabled();
+        snapToKeyInput.checked = isSnapToInKeyEnabled();
+        snapToGridInput.checked = isSnapToGridEnabled();
+      });
+    }
+
   });
 
   return triggerButton;

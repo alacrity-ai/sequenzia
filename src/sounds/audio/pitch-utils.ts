@@ -64,7 +64,7 @@ export function noteToFrequency(
   return A4_FREQ * Math.pow(2, semitoneDiff / 12) * tuningAdjustment;
 }
 
-const NOTE_TO_MIDI: Record<string, number> = {
+export const NOTE_TO_MIDI: Record<string, number> = {
   'C': 0,  'C#': 1,  'Db': 1,
   'D': 2,  'D#': 3,  'Eb': 3,
   'E': 4,  'Fb': 4,  'E#': 5,

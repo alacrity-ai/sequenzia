@@ -15,6 +15,17 @@ import {
 } from '@/shared/playback/transportService.js';
 import { onStateUpdated } from '@/appState/onStateUpdated.js';
 
+// Handle AI-Mode Button (Not implemented yet)
+const handleAIModeClick = () => {
+  // TODO: Implement AI mode logic
+};
+
+
+// Handle Edit / Note Mode Button (Not implemented yet)
+const handleEditModeClick = () => {
+  // TODO: Implement note mode logic
+};
+
 const durationHotkeys: Record<string, number> = {
   Digit1: 4,
   Digit2: 2,

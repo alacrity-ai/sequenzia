@@ -10,4 +10,5 @@ export interface GridColorScheme {
     gridLine: string;
     beatLine: string;
     measureLine: string;
+    outOfKey: string;
   }

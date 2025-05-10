@@ -3,7 +3,7 @@
 
 const SEMIS_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const SEMIS_FLAT  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-const NOTE_TO_MIDI: Record<string, number> = {
+export const NOTE_TO_MIDI: Record<string, number> = {
     'C': 0,  'C#': 1,  'Db': 1,
     'D': 2,  'D#': 3,  'Eb': 3,
     'E': 4,  'Fb': 4,  'E#': 5,

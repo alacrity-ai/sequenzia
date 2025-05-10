@@ -37,7 +37,7 @@ export function createKeySelectorPopover(): HTMLElement {
     id: 'key-selector-trigger',
     text: `${selectedPitch}${selectedMode}`,
     kind: 'secondary',
-    additionalClasses: 'w-14 px-2 py-[10px] text-center truncate'
+    additionalClasses: 'w-14 px-2 py-[10px] text-center truncate',
   });
 
   const updateKey = (pitch: KeyName, mode: Mode) => {

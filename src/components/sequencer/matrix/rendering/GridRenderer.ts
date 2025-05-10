@@ -5,6 +5,7 @@ import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { InteractionStore } from '../input/stores/InteractionStore.js';
 import { getUserConfig } from '../../../userSettings/store/userConfigStore.js';
 import { GRID_COLOR_SCHEMES } from './colors/constants/colorSchemes.js';
+import { isKeyGridHighlightingEnabled } from '@/shared/stores/songInfoStore.js';
 
 export class GridRenderer {
   private scroll: GridScroll;
@@ -15,7 +16,8 @@ export class GridRenderer {
     scroll: GridScroll,
     config: GridConfig,
     interactionStore: InteractionStore,
-    private getBlackKeyMap: () => Map<number, boolean>
+    private getBlackKeyMap: () => Map<number, boolean>,
+    private getInKeyMap: () => Map<number, boolean>
   ) {
     this.scroll = scroll;
     this.config = config;
@@ -54,41 +56,51 @@ export class GridRenderer {
     const startBeat = Math.max(0, Math.floor((scrollX - labelWidth) / cellWidth));
     const endBeat = Math.min(totalBeats, startBeat + visibleBeats + 2);
   
-    // Horizontal lines and key shading
-    for (let r = 0; r <= totalRows; r++) {
+    const keyGridHighlightingEnabled = isKeyGridHighlightingEnabled();
+    const inKeyMap = this.getInKeyMap();
+
+    // === Horizontal rows (note backgrounds + horizontal lines)
+    for (let r = 0; r < totalRows; r++) {
       const y = r * cellHeight;
-  
+      const midi = this.config.layout.highestMidi - r;
+
+      let fill: string;
+
+      if (keyGridHighlightingEnabled) {
+        const inKey = inKeyMap.get(midi);
+        fill = inKey ? scheme.whiteKey : scheme.blackKey;
+      } else {
+        const isBlack = this.getBlackKeyMap().get(midi);
+        fill = isBlack ? scheme.blackKey : scheme.whiteKey;
+      }
+
+      ctx.fillStyle = fill;
+      ctx.fillRect(0, y, totalBeats * cellWidth, cellHeight);
+
+      // always draw horizontal line
       ctx.strokeStyle = scheme.gridLine;
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(totalBeats * cellWidth, y);
       ctx.stroke();
-  
-      if (r < totalRows) {
-        const midi = this.config.layout.highestMidi - r;
-        const isBlack = this.getBlackKeyMap().get(midi);
-        ctx.fillStyle = isBlack ? scheme.blackKey : scheme.whiteKey;
-        ctx.fillRect(0, y, totalBeats * cellWidth, cellHeight);
-      }
     }
-  
-    // Vertical lines for beats and measures
+
+    // === Vertical columns (beat and measure lines)
     for (let i = startBeat; i <= totalBeats; i++) {
       if (i < 0) continue;
-  
+
       const x = i * cellWidth;
-      if (i % beatsPerMeasure === 0) {
-        ctx.strokeStyle = scheme.measureLine;
-      } else {
-        ctx.strokeStyle = scheme.beatLine;
-      }
-  
+      ctx.strokeStyle = (i % beatsPerMeasure === 0)
+        ? scheme.measureLine
+        : scheme.beatLine;
+
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, totalRows * cellHeight);
       ctx.stroke();
     }
-  
+
+
     ctx.restore();
   }
   

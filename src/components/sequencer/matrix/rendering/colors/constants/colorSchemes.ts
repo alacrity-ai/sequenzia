@@ -14,6 +14,7 @@ export const GRID_COLOR_SCHEMES: Record<string, GridColorScheme> = {
       gridLine: '#333',
       beatLine: '#4e3d63',
       measureLine: '#8561c2',
+      outOfKey: 'rgb(255, 1, 1)', // or themed as needed
     },
     Seashell: {
       whiteKey: '#fefefe',
@@ -25,6 +26,8 @@ export const GRID_COLOR_SCHEMES: Record<string, GridColorScheme> = {
       gridLine: '#ccc',
       beatLine: '#bbb',
       measureLine: '#999',
+      outOfKey: 'rgba(255, 255, 255, 0.05)', // or themed as needed
+
     },
     Cyberpunk: {
       whiteKey: '#162447',
@@ -36,6 +39,8 @@ export const GRID_COLOR_SCHEMES: Record<string, GridColorScheme> = {
       gridLine: '#1f4068',
       beatLine: '#e43f5a',
       measureLine: '#ffcc00',
+      outOfKey: 'rgba(255, 255, 255, 0.05)', // or themed as needed
+
     },
     'Classic Blue': {
       whiteKey: '#f5faff',
@@ -47,6 +52,8 @@ export const GRID_COLOR_SCHEMES: Record<string, GridColorScheme> = {
       gridLine: '#99bbdd',
       beatLine: '#88aacc',
       measureLine: '#336699',
+      outOfKey: 'rgba(255, 255, 255, 0.05)', // or themed as needed
+
     },
     Darkroom: {
       whiteKey: '#2c2c2c',
@@ -58,6 +65,8 @@ export const GRID_COLOR_SCHEMES: Record<string, GridColorScheme> = {
       gridLine: '#404040',
       beatLine: '#606060',
       measureLine: '#808080',
+      outOfKey: 'rgba(255, 255, 255, 0.05)', // or themed as needed
+
     }
   };
   

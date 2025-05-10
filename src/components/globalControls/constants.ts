@@ -13,10 +13,10 @@ export const GLOBAL_TRANSPORT_CANVAS_WIDTH: number = 1100;
  * Common musical resolution options (used for note durations and snapping).
  */
 export const NOTE_RESOLUTION_OPTIONS = [
-    { value: '4', label: '𝅝', title: 'Whole Note' },
-    { value: '2', label: '𝅗𝅥', title: 'Half Note' },
-    { value: '1', label: '𝅘𝅥', title: 'Quarter Note' },
-    { value: '0.5', label: '♪', title: 'Eighth Note' },
-    { value: '0.25', label: '♬', title: 'Sixteenth Note' },
-    { value: '0.125', label: '𝅘𝅥𝅰', title: '32nd Note' }
+    { value: '4', label: '𝅝', title: 'Whole' },
+    { value: '2', label: '𝅗𝅥', title: 'Half' },
+    { value: '1', label: '𝅘𝅥', title: 'Quarter' },
+    { value: '0.5', label: '♪', title: 'Eighth' },
+    { value: '0.25', label: '♬', title: 'Sixteenth' },
+    { value: '0.125', label: '𝅘𝅥𝅰', title: '32nd' }
   ];

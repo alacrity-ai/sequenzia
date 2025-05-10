@@ -43,3 +43,38 @@ export function recordDiff(forwardDiff: Diff, reverseDiff: Diff): void {
   pushDiff({ forwardDiff, reverseDiff });
   notifyStateUpdated(currentAppState);
 }
+
+
+// Helpers
+
+export function getCurrentTempo(): number {
+  return currentAppState.tempo;
+}
+
+export function getCurrentTimeSignature(): [number, number] {
+  return currentAppState.timeSignature;
+}
+
+export function getCurrentTotalMeasures(): number {
+  return currentAppState.totalMeasures;
+}
+
+export function getCurrentSongKey(): string {
+  return currentAppState.songKey;
+}
+
+export function getCurrentSnapResolution(): number {
+  return currentAppState.snapResolution;
+}
+
+export function getCurrentNoteDuration(): number {
+  return currentAppState.noteDuration;
+}
+
+export function getCurrentIsTripletMode(): boolean {
+  return currentAppState.isTripletMode;
+}
+
+export function getCurrentIsDottedMode(): boolean {
+  return currentAppState.isDottedMode;
+}

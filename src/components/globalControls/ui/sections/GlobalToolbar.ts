@@ -18,13 +18,15 @@ export function createGlobalToolbar(): HTMLElement {
         h('button', {
         id: 'note-mode-btn',
         class: 'bg-blue-600 px-3 py-1 rounded text-white hover:bg-blue-700 text-sm font-semibold w-[52px] h-[42px] flex items-center justify-center',
-        style: 'cursor: pointer;'
+        style: 'cursor: pointer;',
+        title: 'Note Options Toolbar'
         }, icon('icon-pen', 'Note Mode')),
     
         h('button', {
         id: 'ai-mode-btn',
         class: 'bg-gray-800 px-3 py-1 rounded text-white hover:bg-purple-700 text-sm font-semibold w-[52px] h-[42px] flex items-center justify-center',
-        style: 'cursor: pointer;'
+        style: 'cursor: pointer;',
+        title: 'AI Options Toolbar'
         }, icon('icon-brain-white', 'AI Mode'))
     ),
     
@@ -33,30 +35,24 @@ export function createGlobalToolbar(): HTMLElement {
         class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md cursor-pointer'
     },
         createGridSettingsPopover(),
-        // h('button', {
-        // id: 'note-placement-options-btn',
-        // class: 'bg-gray-800 px-3 py-1 rounded text-white hover:bg-purple-700 w-[52px] h-[42px] flex items-center justify-center',
-        // style: 'cursor: pointer;'
-        // }, icon('icon-music', 'Placement')),
-        
         createEditorSelectorPopover()
     ),
   
     // Group 3: Duration buttons
     h('div', {
-        class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
+    class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
     },
-        ...NOTE_RESOLUTION_OPTIONS.map(opt =>
-        h('button', {
+        ...NOTE_RESOLUTION_OPTIONS.map((opt, i) =>
+            h('button', {
             class: [
-            'bg-transparent hover:bg-gray-700',
-            'text-white',
-            'cursor-pointer px-3 py-1 rounded text-2xl',
-            'w-[52px] h-[42px] flex items-center justify-center'
+                'bg-transparent hover:bg-gray-700',
+                'text-white',
+                'cursor-pointer px-3 py-1 rounded text-2xl',
+                'w-[52px] h-[42px] flex items-center justify-center'
             ].join(' '),
             'data-value': opt.value,
-            title: opt.label
-        }, opt.label)
+            title: `${opt.title} (${i + 1} or Shift+${i + 1})`
+            }, opt.label)
         )
     ),
     

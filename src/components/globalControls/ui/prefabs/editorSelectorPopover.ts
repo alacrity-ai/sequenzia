@@ -30,7 +30,8 @@ export function createEditorSelectorPopover(): HTMLElement {
   const triggerButton = h('button', {
     id: 'note-editing-options-btn',
     class: 'bg-gray-800 px-3 py-1 rounded text-white hover:bg-purple-700 w-[52px] h-[42px] flex items-center justify-center',
-    style: 'cursor: pointer;'
+    style: 'cursor: pointer;',
+    title: 'Tools'
   }, icon('icon-chart-bar', 'Editing'));
 
   let instance: ReturnType<typeof createPopover>['instance'];

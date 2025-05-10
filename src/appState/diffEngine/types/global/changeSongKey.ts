@@ -3,6 +3,7 @@
 import type { AppState } from '@/appState/interfaces/AppState.js';
 import type { Diff } from '@/appState/interfaces/Diff.js';
 import type { SongKey } from '@/shared/types/SongKey.ts';
+import { updateMidiNoteMap } from '@/shared/stores/songInfoStore.js';
 
 /**
  * Applies a CHANGE_SONG_KEY diff to update the song key in the state.
@@ -10,6 +11,10 @@ import type { SongKey } from '@/shared/types/SongKey.ts';
 export function applyCHANGE_SONG_KEY(state: AppState, diff: Diff): AppState {
   const newState = structuredClone(state);
   newState.songKey = diff.songKey;
+
+  // Update derived store data
+  updateMidiNoteMap(diff.songKey);
+
   return newState;
 }
 
