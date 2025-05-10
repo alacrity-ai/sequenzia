@@ -27,16 +27,17 @@ import { setupInstrumentSelector } from '@/components/sequencer/ui/controls/inst
 
 // Global Controls and UI
 import { GlobalControlsController } from '@/components/globalControls/GlobalControlsController.js';
+import { GlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
 import { setupGlobalUndoRedo } from '@/shared/modals/global/undo-redo.js';
-import { setupHeaderModeToggler } from '@/shared/modals/global/headerModeToggler.js';
 import { showSplashScreen, hideSplashScreen } from '@/shared/modals/global/splashscreen.js';
+import { VisualizerController } from '@/components/visualizer/visualizerController.js';
+import { SideMenuController } from '@/components/topControls/components/sideMenu/sideMenuController.js';
 
 // User Config Modal
 import { UserConfigModalController } from '@/components/userSettings/userConfig.js';
 
 // Input / Visualizers
 import { setupKeyboard } from '@/components/keyboard/factory/setupKeyboard.js';
-import { setupVisualizer } from '@/components/visualizer/visualizer.js';
 
 // Setup (Deprecated)
 import { setupAddTrackButton } from '@/components/sequencer/ui/setupAddTrackButton.js';
@@ -60,10 +61,25 @@ orchestrator.registerReloadable(() => userConfigModalController.reload());
 // === Playback Engine
 export const engine = new PlaybackEngine(getSequencers());
 
+// === Top Controls ===
+const sideMenu = new SideMenuController();
+orchestrator.registerReloadable(() => sideMenu.reload());
+
 // === Global Controls ===
 const globalControls = new GlobalControlsController(engine, userConfigModalController);
 orchestrator.registerReloadable(() => globalControls.reload());
 globalControls.show();
+
+// === Global Popup Modals ===
+export const popupsController = new GlobalPopupController(() => {
+  console.warn('User cancelled loading.');
+});
+orchestrator.registerReloadable(() => popupsController.reload());
+
+// === Visualizer ===
+const visualizer = new VisualizerController();
+orchestrator.registerReloadable(() => visualizer.reload());
+visualizer.show();
 
 // === State Sync ===
 onStateUpdated(resyncFromState);
@@ -84,11 +100,6 @@ devLog('Setting up virtual piano keyboard...');
 const pianoCanvas = document.getElementById('piano') as HTMLCanvasElement;
 setupKeyboard(pianoCanvas);
 
-// === Visualizer ===
-const waveform = document.getElementById('waveform') as HTMLCanvasElement;
-const visualizerMode = document.getElementById('visualizer-mode') as HTMLButtonElement;
-void setupVisualizer(waveform, visualizerMode);
-
 // Lock in the initial application state so undo never goes before this point
 recordDiff(
   createCheckpointDiff('Initial App State'),
@@ -99,7 +110,6 @@ recordDiff(
 devLog('Setting up additional UI...');
 setupGlobalUndoRedo(undo, redo);
 setupAddTrackButton();
-setupHeaderModeToggler();
 
 hideSplashScreen();
 logMessage('Sequenzia initialized');

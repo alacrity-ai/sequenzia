@@ -3,7 +3,7 @@
 import { Session } from '@/components/sequencer/interfaces/Session.js';
 import { getTempo } from '@/shared/playback/transportService.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
-import { showLoadingModal, hideLoadingModal } from '@/shared/modals/global/loadingModal.js';
+import { showLoadingModal, hideLoadingModal } from '@/components/globalPopups/helpers/loadingModal.js';
 import Sequencer from '@/components/sequencer/sequencer.js';
 
 let globalLoading: boolean = false;

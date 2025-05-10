@@ -1,4 +1,4 @@
-// src/sequencer/ui/modals/velocity/velocityService.ts
+// src/components/globalControls/modals/velocity/velocityService.ts
 
 import { getSequencers } from '@/components/sequencer/factories/SequencerFactory.js';
 import { getActiveSelection } from '@/components/sequencer/utils/selectionTracker.js';

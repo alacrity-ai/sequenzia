@@ -1,4 +1,4 @@
-// src/globalControls/modals/velocity/velocityModalUI.ts
+// src/components/globalControls/modals/velocity/velocityModalUI.ts
 
 import { h } from '@/shared/ui/domUtils.js';
 import { createFloatingModal } from '@/shared/ui/primitives/createFloatingModal.js';

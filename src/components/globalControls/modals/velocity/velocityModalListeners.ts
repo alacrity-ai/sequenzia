@@ -1,3 +1,5 @@
+// src/components/globalControls/modals/velocity/velocityModalListeners.ts
+
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 import type { Note } from '@/shared/interfaces/Note.js';
 import { applyVelocityChange } from '@/components/globalControls/modals/velocity/velocityService.js';

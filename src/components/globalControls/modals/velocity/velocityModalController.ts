@@ -1,3 +1,5 @@
+// src/components/globalControls/modals/velocity/velocityModalController.ts
+
 import { createVelocityModal } from '@/components/globalControls/modals/velocity/velocityModalUI.js';
 import { attachVelocityModalListeners, showVelocityModal } from '@/components/globalControls/modals/velocity/velocityModalListeners.js';
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';

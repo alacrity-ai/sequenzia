@@ -1,4 +1,4 @@
-// src/globalControls/modals/loadModal/loadModalController.ts
+// src/components/globalControls/modals/loadModal/loadModalController.ts
 
 
 import { createLoadModal } from './loadModalUI.js';

@@ -1,6 +1,6 @@
-// src/globalControls/GlobalControlsController.ts
+// src/components/globalControls/GlobalControlsController.ts
 
-import { GlobalControls } from './ui/GlobalControls.js';
+import { GlobalControls } from '@/components/globalControls/ui/GlobalControls.js';
 
 import { createGlobalMiniContour } from '@/components/globalControls/ui/sections/GlobalMiniContour.js';
 import { createGlobalToolbar } from '@/components/globalControls/ui/sections/GlobalToolbar.js';
@@ -21,6 +21,7 @@ import { SaveModalController } from '@/components/globalControls/modals/saveModa
 import { WavOptionsModal } from '@/components/globalControls/modals/saveModal/wavOptionsModal.js';
 import { LoadModalController } from '@/components/globalControls/modals/loadModal/loadModalController.js';
 import { VelocityModalController } from '@/components/globalControls/modals/velocity/velocityModalController.js';
+import { WhatsNewModalController } from '@/components/globalControls/modals/whatsNew/whatsNewModalController.js';
 
 import type { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import type { UserConfigModalController } from '@/components/userSettings/userConfig.js';
@@ -41,6 +42,7 @@ export class GlobalControlsController {
   private loadModal!: LoadModalController;
   private wavOptionsModal!: WavOptionsModal;
   private velocityModal!: VelocityModalController;
+  private whatsNewModal!: WhatsNewModalController;
 
   constructor(engine: PlaybackEngine, userConfigModalController: UserConfigModalController) {
     this.engine = engine;
@@ -55,6 +57,7 @@ export class GlobalControlsController {
     this.saveModal = new SaveModalController(() => this.wavOptionsModal.show());
     this.loadModal = new LoadModalController();
     this.velocityModal = new VelocityModalController();
+    this.whatsNewModal = new WhatsNewModalController();
 
     const contour = createGlobalMiniContour();
     const toolbar = createGlobalToolbar();
@@ -83,7 +86,7 @@ export class GlobalControlsController {
       this.saveModal,
       this.loadModal
     );
-    const sideButtonListeners = attachSideButtonListeners(sideButtons);
+    const sideButtonListeners = attachSideButtonListeners(sideButtons, this.whatsNewModal);
     const playheadListeners = attachPlayheadListeners(this.controls.getGlobalPlayheadRow());
     const globalControlsListeners = attachGlobalControlsListeners({ velocity: this.velocityModal});
 
@@ -148,6 +151,7 @@ export class GlobalControlsController {
     this.saveModal?.destroy();
     this.loadModal?.destroy();
     this.velocityModal?.destroy();
+    this.whatsNewModal?.destroy();
   }
 
   public reload(): void {

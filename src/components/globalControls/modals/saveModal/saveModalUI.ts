@@ -1,4 +1,4 @@
-// src/globalControls/modals/saveModal/saveModalUI.ts
+// src/components/globalControls/modals/saveModal/saveModalUI.ts
 
 import { h } from '@/shared/ui/domUtils.js';
 import { createFloatingModal } from '@/shared/ui/primitives/createFloatingModal.js';

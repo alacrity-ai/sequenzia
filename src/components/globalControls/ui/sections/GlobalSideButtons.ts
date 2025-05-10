@@ -4,7 +4,9 @@ import { h } from '@/shared/ui/domUtils.js';
 import { icon } from '@/shared/ui/primitives/createIconImg.js';
 
 export function createGlobalSideButtons(): HTMLElement {
-  return h('div', {},
+  const wrapper = h('div', {
+    class: 'fixed left-[calc(50%-678px)] bottom-[20px] flex flex-col gap-2 z-[9999]'
+  },
     h('button', {
       id: 'footer-help-btn',
       class: 'side-button side-button-info',
@@ -15,6 +17,9 @@ export function createGlobalSideButtons(): HTMLElement {
       id: 'footer-whats-new-btn',
       class: 'side-button side-button-info',
       title: "What's New / Release Notes"
-    }, icon('icon-chart-mixed', "What's New"))
+    }, icon('icon-circle-plus', "What's New"))
   );
+
+  document.body.appendChild(wrapper);
+  return wrapper;
 }

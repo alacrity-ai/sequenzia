@@ -4,7 +4,7 @@ import type { ListenerAttachment } from '@/components/userSettings/interfaces/Li
 import type { VelocityModalController } from '@/components/globalControls/modals/velocity/velocityModalController.js';
 
 import { getActiveSelection } from '@/components/sequencer/utils/selectionTracker.js';
-import { showErrorModal } from '@/shared/modals/global/errorGeneric.js';
+import { popupsController } from '@/main.js';
 import { isKeyboardListenersAttached } from '@/components/keyboard/input/keyboard-interaction.js';
 
 /**
@@ -21,7 +21,7 @@ export function attachGlobalControlsListeners(
   const tryOpenVelocityModal = (): void => {
     const selection = getActiveSelection();
     if (!selection || selection.selectedNotes.length === 0) {
-      showErrorModal('No notes selected. Please select notes before adjusting velocity.');
+      popupsController.showError('No notes selected. Please select notes before adjusting velocity.');
       return;
     }
 

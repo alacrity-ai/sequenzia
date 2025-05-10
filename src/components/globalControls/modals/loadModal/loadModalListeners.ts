@@ -1,4 +1,4 @@
-// src/globalControls/modals/loadModal/loadModalListeners.ts
+// src/components/globalControls/modals/loadModal/loadModalListeners.ts
 
 import { SaveLoadService } from '@/components/globalControls/services/SaveLoadService.js';
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';

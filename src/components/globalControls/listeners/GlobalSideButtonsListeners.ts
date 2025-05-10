@@ -1,8 +1,9 @@
 // src/globalControls/listeners/GlobalSideButtonsListeners.ts
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
+import type { WhatsNewModalController } from '@/components/globalControls/modals/whatsNew/whatsNewModalController.js';
 
-export function attachSideButtonListeners(container: HTMLElement): ListenerAttachment {
+export function attachSideButtonListeners(container: HTMLElement, whatsNewModal: WhatsNewModalController): ListenerAttachment {
   const helpBtn = container.querySelector('#footer-help-btn');
   const whatsNewBtn = container.querySelector('#footer-whats-new-btn');
 
@@ -15,7 +16,7 @@ export function attachSideButtonListeners(container: HTMLElement): ListenerAttac
   };
 
   const handleWhatsNewClick = () => {
-    // TODO: Show what's new modal
+    whatsNewModal.show();
   };
 
   helpBtn?.addEventListener('click', handleHelpClick);

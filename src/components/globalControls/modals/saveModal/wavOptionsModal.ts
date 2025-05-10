@@ -1,4 +1,4 @@
-// src/globalControls/modals/saveModal/wavOptionsModal.ts
+// src/components/globalControls/modals/saveModal/wavOptionsModal.ts
 
 import { h } from '@/shared/ui/domUtils.js';
 import { createHeader } from '@/shared/ui/primitives/createHeader.js';
