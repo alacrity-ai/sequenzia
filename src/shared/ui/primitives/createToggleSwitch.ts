@@ -1,7 +1,7 @@
 // src/shared/ui/primitives/createToggleSwitch.ts
 
 import { h } from '../domUtils.js';
-import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
+import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 
 /**
  * Options to configure a horizontal toggle switch.
@@ -31,19 +31,6 @@ export interface ToggleSwitchOptions {
  * Layout:
  *   [Label]
  *   [stateA] [switch] [stateB] [optional tooltip trigger]
- *
- * This is a purely presentational helper — attach behavior separately.
- *
- * Example usage:
- * ```ts
- * const toggle = createToggleSwitch({
- *   id: 'note-tool-toggle',
- *   label: 'Note Placement:',
- *   stateA: 'Default',
- *   stateB: 'Express',
- *   tooltipTrigger: createTooltipPair(...).trigger
- * });
- * ```
  */
 export function createToggleSwitch(options: ToggleSwitchOptions): HTMLElement {
   const { id, label, stateA, stateB, tooltipTrigger, inline } = options;

@@ -1,7 +1,7 @@
 // src/appState/diffEngine/types/global/changeNoteDuration.ts
 
-import { AppState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Applies a CHANGE_NOTE_DURATION diff to update the note duration in the state.

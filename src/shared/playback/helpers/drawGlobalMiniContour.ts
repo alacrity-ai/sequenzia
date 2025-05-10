@@ -1,6 +1,8 @@
-import { drawGlobalMiniContour as redraw } from '@/globalControls/renderers/GlobalMiniContourRenderer.js';
-import { sequencers } from '@/sequencer/factories/SequencerFactory.js';
-import type Sequencer from '@/sequencer/sequencer.js';
+// src/shared/playback/helpers/drawGlobalMiniContour.ts
+
+import { drawGlobalMiniContour as redraw } from '@/components/globalControls/renderers/GlobalMiniContourRenderer.js';
+import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import type Sequencer from '@/components/sequencer/sequencer.js';
 
 export function drawGlobalMiniContour(): void {
   const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;

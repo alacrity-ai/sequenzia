@@ -1,8 +1,8 @@
 // src/appState/diffEngine/types/grid/cutNotes.ts
 
-import { AppState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
-import { Note } from '../../../../sequencer/interfaces/Note.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
+import { Note } from '@/shared/interfaces/Note.js';
 
 /**
  * Applies a CUT_NOTES diff to remove notes from a sequencer.

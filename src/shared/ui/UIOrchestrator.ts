@@ -1,4 +1,5 @@
 // src/shared/ui/UIOrchestrator.ts
+
 export class UIOrchestrator {
     private static instance: UIOrchestrator;
   

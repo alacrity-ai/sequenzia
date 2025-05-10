@@ -1,13 +1,13 @@
 // src/export/midi/loadFromMidi.ts
 
 import { Midi } from '@tonejs/midi';
-import { Session } from '../../sequencer/interfaces/Session.js';
-import { TrackData } from '../../sequencer/interfaces/Track.js';
-import type { SongConfig } from '../../shared/interfaces/SongConfig.js';
-import { Note } from '../../shared/interfaces/Note.js';
-import { GM_INSTRUMENTS } from './instrumentMapping.js';
-import { getDrumMachineInstruments } from '../../sounds/loaders/sf2-loader.js';
-import { getWebAudioFontDrumKit } from '../../sounds/loaders/catalogues/webaudiofont-catalogue.js';
+import { Session } from '@/components/sequencer/interfaces/Session.js';
+import { TrackData } from '@/components/sequencer/interfaces/Track.js';
+import type { SongConfig } from '@/shared/interfaces/SongConfig.js';
+import { Note } from '@/shared/interfaces/Note.js';
+import { GM_INSTRUMENTS } from '@/export/midi/instrumentMapping.js';
+import { getDrumMachineInstruments } from '@/sounds/loaders/sf2-loader.js';
+import { getWebAudioFontDrumKit } from '@/sounds/loaders/catalogues/webaudiofont-catalogue.js';
 
 /**
  * Imports a session from a MIDI file.

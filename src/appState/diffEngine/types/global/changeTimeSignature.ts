@@ -1,7 +1,7 @@
 // src/appState/diffEngine/types/global/changeTimeSignature.ts
 
-import { AppState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Applies a SET_TIME_SIGNATURE diff to update the time signature in the state.

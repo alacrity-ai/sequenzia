@@ -1,10 +1,10 @@
 // src/export/load.ts
 
-import { TrackData } from '../sequencer/interfaces/Track.js';
-import { GlobalConfig } from '../sequencer/interfaces/Session.js';
-import { Session } from '../sequencer/interfaces/Session.js';
-import { Note } from '../shared/interfaces/Note.js';
-import { TrackTuple, NoteTuple } from '../sequencer/interfaces/TrackTuple.js';
+import { TrackData } from '@/components/sequencer/interfaces/Track.js';
+import { GlobalConfig } from '@/components/sequencer/interfaces/Session.js';
+import { Session } from '@/components/sequencer/interfaces/Session.js';
+import { Note } from '@/shared/interfaces/Note.js';
+import { TrackTuple, NoteTuple } from '@/components/sequencer/interfaces/TrackTuple.js';
 
 /**
  * Imports a session from a JSON file.

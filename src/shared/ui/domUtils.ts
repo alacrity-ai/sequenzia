@@ -6,12 +6,6 @@
 export type Props = Record<string, any>;
 
 /**
- * Generic type for any valid HTML or SVG tag name.
- */
-type TagName = keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap;
-
-
-/**
  * Flattens and filters an arbitrarily nested array of children.
  * 
  * Skips `null`, `undefined`, and `false` entries.

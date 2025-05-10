@@ -1,13 +1,13 @@
 // src/appState/resyncFromState.ts
 
-import { getAppState } from './appState.js';
+import { getAppState } from '@/appState/appState.js';
 import { updateTempo, updateTimeSignature, updateTotalMeasures } from '@/shared/playback/transportService.js';
-import { createSequencer, sequencers } from '../sequencer/factories/SequencerFactory.js';
-import { drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
+import { createSequencer, sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { drawMiniContour } from '@/components/sequencer/ui/renderers/drawMiniContour.js';
 import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
-import { AppState, SequencerState } from './interfaces/AppState.js';
-import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig.js';
-import { syncLiveMatrixWithSerializedNotes } from './utils/syncMatrixToSequencer.js';
+import { AppState, SequencerState } from '@/appState/interfaces/AppState.js';
+import { SequencerConfig } from '@/components/sequencer/interfaces/SequencerConfig.js';
+import { syncLiveMatrixWithSerializedNotes } from '@/appState/utils/syncMatrixToSequencer.js';
 
 interface SerializedSequencer extends SequencerState {
   config?: Partial<SequencerConfig>; // optional loose config, typed better

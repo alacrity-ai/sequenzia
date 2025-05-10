@@ -21,27 +21,25 @@ import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './a
 import { PlaybackEngine } from './shared/playback/PlaybackEngine.js';
 
 // Sequencer System
-import { getSequencers, sequencers } from './sequencer/factories/SequencerFactory.js';
-import { SEQUENCER_CONFIG as config } from './sequencer/constants/sequencerConstants.js';
-import { registerVelocityModeHandlers } from './sequencer/ui/modals/velocity/velocityModalHandlers.js';
-import { registerVelocityMenuHandlers } from './sequencer/ui/modals/velocity/velocityModeMenu.js';
-import { setupInstrumentSelector } from './sequencer/ui/controls/instrumentSelector.js';
+import { getSequencers, sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
+import { setupInstrumentSelector } from '@/components/sequencer/ui/controls/instrumentSelector.js';
 
 // Global Controls and UI
-import { GlobalControlsController } from '@/globalControls';
-import { setupGlobalUndoRedo } from './global/undo-redo.js';
-import { setupHeaderModeToggler } from './global/headerModeToggler.js';
-import { showSplashScreen, hideSplashScreen } from './global/splashscreen.js';
+import { GlobalControlsController } from '@/components/globalControls/GlobalControlsController.js';
+import { setupGlobalUndoRedo } from '@/shared/modals/global/undo-redo.js';
+import { setupHeaderModeToggler } from '@/shared/modals/global/headerModeToggler.js';
+import { showSplashScreen, hideSplashScreen } from '@/shared/modals/global/splashscreen.js';
 
 // User Config Modal
-import { UserConfigModalController } from './userSettings/userConfig.js';
+import { UserConfigModalController } from '@/components/userSettings/userConfig.js';
 
 // Input / Visualizers
-import { setupKeyboard } from './keyboard/factory/setupKeyboard.js';
-import { setupVisualizer } from './visualizer/visualizer.js';
+import { setupKeyboard } from '@/components/keyboard/factory/setupKeyboard.js';
+import { setupVisualizer } from '@/components/visualizer/visualizer.js';
 
 // Setup (Deprecated)
-import { setupAddTrackButton } from './setup/setupAddTrackButton.js';
+import { setupAddTrackButton } from '@/components/sequencer/ui/setupAddTrackButton.js';
 
 // === Immediately show splash screen //
 showSplashScreen();
@@ -101,9 +99,6 @@ recordDiff(
 devLog('Setting up additional UI...');
 setupGlobalUndoRedo(undo, redo);
 setupAddTrackButton();
-
-registerVelocityModeHandlers();
-registerVelocityMenuHandlers();
 setupHeaderModeToggler();
 
 hideSplashScreen();

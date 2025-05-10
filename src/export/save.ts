@@ -1,10 +1,10 @@
 // src/export/save.ts
 
-import { Session } from '../sequencer/interfaces/Session.js';
+import { Session } from '@/components/sequencer/interfaces/Session.js';
 import { getTempo } from '@/shared/playback/transportService.js';
-import { AppState } from '../appState/interfaces/AppState.js';
-import { showLoadingModal, hideLoadingModal, setGlobalLoading } from '../global/loadingModal.js';
-import Sequencer from '../sequencer/sequencer.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { showLoadingModal, hideLoadingModal } from '@/shared/modals/global/loadingModal.js';
+import Sequencer from '@/components/sequencer/sequencer.js';
 
 let globalLoading: boolean = false;
 

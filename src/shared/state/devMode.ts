@@ -1,6 +1,6 @@
 // src/shared/state/devMode.ts
 
-import { logMessage, type LogLevel } from '../logging/logger.js';
+import { logMessage, type LogLevel } from '@/shared/logging/logger.js';
 
 const STORAGE_KEY = 'SEQUENZIA_DEV';
 

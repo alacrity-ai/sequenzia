@@ -1,5 +1,7 @@
-import { AppState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
+// src/appState/diffEngine/types/global/setNoteModifierMode.ts
+
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Applies a SET_NOTE_MODIFIER_MODE diff to update both triplet and dotted mode.

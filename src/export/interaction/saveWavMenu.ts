@@ -1,8 +1,8 @@
 // src/export/interaction/saveWavMenu.ts
 
-import { getAppState } from '../../appState/appState.js';
-import { exportSessionToWAV } from '../save.js';
-import { sequencers } from '../../sequencer/factories/SequencerFactory.js';
+import { getAppState } from '@/appState/appState.js';
+import { exportSessionToWAV } from '@/export/save.js';
+import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
 
 export interface SaveWavOptions {
   sampleRate: number;

@@ -1,7 +1,7 @@
 // src/shared/ui/primitives/createTooltipPair.ts
 
 import { h } from '../domUtils.js';
-import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
+import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 import { createParagraph } from './createParagraph.js';
 
 export interface TooltipPair {

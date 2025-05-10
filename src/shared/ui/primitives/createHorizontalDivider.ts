@@ -1,7 +1,7 @@
 // src/shared/ui/primitives/createHorizontalDivider.ts
 
 import { h } from '../domUtils.js';
-import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
+import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 
 /**
  * Creates a small horizontal divider (1px tall, full width, purple).

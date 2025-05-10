@@ -1,7 +1,7 @@
 // src/appState/diffEngine/types/global/changeSongKey.ts
 
-import type { AppState } from '../../../interfaces/AppState.js';
-import type { Diff } from '../../../interfaces/Diff.js';
+import type { AppState } from '@/appState/interfaces/AppState.js';
+import type { Diff } from '@/appState/interfaces/Diff.js';
 import type { SongKey } from '@/shared/types/SongKey.ts';
 
 /**

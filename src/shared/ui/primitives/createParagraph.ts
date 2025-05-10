@@ -1,7 +1,7 @@
 // src/shared/ui/primitives/createParagraph.ts
 
 import { h } from '../domUtils.js';
-import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
+import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 
 type ParagraphContent = string | HTMLElement;
 

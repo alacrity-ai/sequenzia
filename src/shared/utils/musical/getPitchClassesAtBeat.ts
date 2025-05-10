@@ -1,4 +1,4 @@
-import type Sequencer from '@/sequencer/sequencer.js';
+import type Sequencer from '@/components/sequencer/sequencer.js';
 import { getPitchClass } from '@/shared/utils/musical/noteUtils.js';
 
 /**

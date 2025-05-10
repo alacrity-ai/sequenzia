@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { loadAppStateFromJSON } from './stateLoader';
 import { serializeAppState } from './stateSerializer';
-import { setAppState, getAppState } from './appState';
 import type { AppState } from './interfaces/AppState';
 
 vi.mock('./appState', () => {
@@ -18,6 +17,11 @@ describe('AppState round-trip', () => {
       tempo: 111,
       timeSignature: [6, 8],
       totalMeasures: 12,
+      songKey: 'CM',
+      snapResolution: 0.25,
+      noteDuration: 1,
+      isTripletMode: false,
+      isDottedMode: false,
       sequencers: [
         {
           id: 5,

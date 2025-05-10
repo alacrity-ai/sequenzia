@@ -1,6 +1,6 @@
-import type { Note } from '../../../interfaces/Note.js';
-import type { RemiEvent } from '../../../interfaces/RemiEvent.js';
-import { remiDecode } from './remiUtils.js';
+import type { Note } from '@/shared/interfaces/Note.js';
+import type { RemiEvent } from '@/shared/interfaces/RemiEvent.js';
+import { remiDecode } from '@/shared/utils/musical/remi/remiUtils.js';
 
 /**
  * Merges a generated REMI continuation into the tail of an existing Note[].

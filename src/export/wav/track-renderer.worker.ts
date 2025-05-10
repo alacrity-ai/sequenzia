@@ -3,7 +3,7 @@
 // src/export/wav/track-renderer.worker.ts
 
 
-import { loadInstrument } from '../../sounds/instrument-loader-worker.js';
+import { loadInstrument } from '@/sounds/instrument-loader-worker.js';
 
 const ctx: DedicatedWorkerGlobalScope = self as any;
 

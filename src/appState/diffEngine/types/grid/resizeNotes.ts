@@ -1,7 +1,7 @@
 // src/appState/diffEngine/types/grid/resizeNotes.ts
 
-import { AppState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Local interface for a note resize operation.

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { importSessionFromJSON } from './load';
-import type { Session } from '../sequencer/interfaces/Session';
+import type { Session } from '@/components/sequencer/interfaces/Session';
 
 function createMockFileFromJSON(json: any): File {
   const jsonString = JSON.stringify(json);

@@ -1,7 +1,7 @@
 // src/shared/ui/primitives/createVerticalDivider.ts
 
 import { h } from '../domUtils.js';
-import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
+import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 
 /**
  * Creates a small vertical divider (1px wide, fixed height, purple).

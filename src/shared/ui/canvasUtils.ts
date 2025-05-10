@@ -1,3 +1,5 @@
+// src/shared/ui/canvasUtils.ts
+
 /**
  * Sets the internal resolution of a canvas based on desired CSS dimensions and devicePixelRatio.
  * Also updates the style to match.

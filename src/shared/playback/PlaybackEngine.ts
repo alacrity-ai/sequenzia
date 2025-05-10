@@ -1,6 +1,8 @@
+// src/shared/playback/PlaybackEngine.ts
+
 import { getAudioContext } from '@/sounds/audio/audio.js';
 import { isLoopEnabled, getTotalBeats, getTempo } from '@/shared/playback/transportService.js';
-import type Sequencer from '@/sequencer/sequencer.js';
+import type Sequencer from '@/components/sequencer/sequencer.js';
 
 export class PlaybackEngine {
   private context: AudioContext;

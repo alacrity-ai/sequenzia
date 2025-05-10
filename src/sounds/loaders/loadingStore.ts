@@ -1,6 +1,6 @@
 // src/sounds/loaders/loadingStore.ts
 
-import { showLoadingModal, hideLoadingModal } from '../../global/loadingModal.js';
+import { showLoadingModal, hideLoadingModal } from '@/shared/modals/global/loadingModal.js';
 
 let activeLoads = 0;
 

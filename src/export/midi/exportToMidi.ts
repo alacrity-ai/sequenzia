@@ -1,9 +1,9 @@
 // src/export/midi/exportToMidi.ts
 
-import { AppState } from '../../appState/interfaces/AppState.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
 import { Midi } from '@tonejs/midi';
-import { pitchToMidi } from '../../sounds/audio/pitch-utils.js';
-import { mapInstrumentNameToProgramNumber } from './instrumentMapping.js';
+import { pitchToMidi } from '@/sounds/audio/pitch-utils.js';
+import { mapInstrumentNameToProgramNumber } from '@/export/midi/instrumentMapping.js';
 
 /**
  * Exports the current AppState session to a downloadable MIDI file.
@@ -67,7 +67,7 @@ export async function exportSessionToMIDI(appState: AppState): Promise<{ url: st
       }
     }
   
-    const midiBlob = new Blob([midi.toArray()], { type: 'audio/midi' });
+    const midiBlob = new Blob([midi.toArray() as unknown as ArrayBuffer], { type: 'audio/midi' });
     const url = URL.createObjectURL(midiBlob);
   
     return {

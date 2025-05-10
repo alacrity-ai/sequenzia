@@ -1,5 +1,5 @@
-import { AppState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Applies a CHANGE_SNAP_RESOLUTION diff to update the snap resolution in the state.

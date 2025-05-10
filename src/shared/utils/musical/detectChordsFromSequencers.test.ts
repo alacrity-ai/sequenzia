@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import type { Note } from '@/shared/interfaces/Note';
-import type Sequencer from '@/sequencer/sequencer.js';
+import type Sequencer from '@/components/sequencer/sequencer.js';
 
 import { getPitchClassesAtBeat } from './getPitchClassesAtBeat';
 import { detectChordFromNotes } from './tonal/chordDetection';

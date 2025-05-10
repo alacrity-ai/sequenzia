@@ -2,7 +2,7 @@
 
 import { h } from '../domUtils.js';
 import { Drawer } from 'flowbite';
-import { getCurrentSkin } from '@/userSettings/store/userConfigStore.js';
+import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 
 interface BottomDrawerOptions {
   id?: string;

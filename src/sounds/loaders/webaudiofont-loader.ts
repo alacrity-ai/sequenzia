@@ -2,7 +2,6 @@
 
 import { getAudioContext, getMasterGain } from '../audio/audio.js';
 import { Instrument } from '../interfaces/Instrument.js';
-import { showLoadingModal, hideLoadingModal } from '../../global/loadingModal.js';
 import { pitchToMidi } from '../audio/pitch-utils.js';
 import { webAudioFontCatalogue } from './catalogues/webaudiofont-catalogue.js';
 import { DRUM_MIDI_RANGE } from './constants/drums.js';

@@ -1,6 +1,6 @@
 // src/shared/playback/transportService.ts
 
-import { getSequencers } from '@/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/factories/SequencerFactory.js';
 import { getAppState, recordDiff } from '@/appState/appState.js';
 import {
   createChangeTempoDiff,

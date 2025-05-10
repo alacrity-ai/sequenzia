@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { getPitchClassesAtBeat } from './getPitchClassesAtBeat';
 import type { Note } from '@/shared/interfaces/Note';
-import type Sequencer from '@/sequencer/sequencer.js';
+import type Sequencer from '@/components/sequencer/sequencer.js';
 
 // Helper to mock a Sequencer with a given note array
 function mockSequencer(notes: Note[]): Sequencer {

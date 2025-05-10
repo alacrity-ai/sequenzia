@@ -1,7 +1,7 @@
 // src/shared/dev/devTools.js
 
-import { getSequencers as getSeqs } from '../../../sequencer/factories/SequencerFactory.js';
-import { devLog } from '../../state/devMode.js';
+import { getSequencers as getSeqs } from '@/components/sequencer/factories/SequencerFactory.js';
+import { devLog } from '@/shared/state/devMode.js';
 
 export function getSequencers() {
   return getSeqs();

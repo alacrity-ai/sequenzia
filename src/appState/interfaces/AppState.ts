@@ -1,8 +1,8 @@
 // src/appState/interfaces/AppState.ts
 
-import { Note } from '../../shared/interfaces/Note.js';
-import { SequencerConfig } from '../../sequencer/interfaces/SequencerConfig.js';
-import type { SongKey } from '../../shared/types/SongKey.js';
+import { Note } from '@/shared/interfaces/Note.js';
+import { SequencerConfig } from '@/components/sequencer/interfaces/SequencerConfig.js';
+import type { SongKey } from '@/shared/types/SongKey.js';
 
 export interface SequencerState {
   id: number;
