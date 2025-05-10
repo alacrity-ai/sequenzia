@@ -1,4 +1,4 @@
-import { getTempo } from '../transport.js';
+import { getTempo } from '@/shared/playback/transportService.js';
 import { pitchToMidi } from '../../shared/utils/musical/noteUtils.js';
 import { getAudioContext } from '../../sounds/audio/audio.js';
 import { startInstrumentNote } from '../../sounds/utils/startInstrumentNote.js';

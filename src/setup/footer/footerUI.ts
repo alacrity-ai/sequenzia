@@ -1,7 +1,6 @@
 // src/setup/footerUI.js
 
-import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
-import { drawGlobalMiniContour } from '../../sequencer/ui/renderers/drawMiniContour.js';
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
 
 export function initFooterUI(): void {
   const expandBtn = document.getElementById('global-mini-expand-btn') as HTMLElement | null;
@@ -32,7 +31,7 @@ export function initFooterUI(): void {
   roundedFrame.style.height = `${initialHeight}px`;
   resizeCanvas(contourCanvas, initialHeight);
   resizeCanvas(playheadCanvas, initialHeight);
-  drawGlobalMiniContour(contourCanvas, getSequencers());
+  drawGlobalMiniContour();
 
   function toggleExpand(): void {
     isExpanded = !isExpanded;
@@ -48,7 +47,7 @@ export function initFooterUI(): void {
 
     footerSpacer.style.height = `${newHeight - 40 + 140}px`;
 
-    drawGlobalMiniContour(contourCanvas, getSequencers());
+    drawGlobalMiniContour();
   }
 
   expandBtn.addEventListener('click', toggleExpand);

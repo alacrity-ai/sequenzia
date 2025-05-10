@@ -9,6 +9,7 @@ import type { GridSnappingContext } from '../../interfaces/GridSnappingContext.j
 import type { InteractionController } from '../interfaces/InteractionController.js';
 import type { CursorController } from '../cursor/CursorController.js';
 
+import { devLog } from '../../../../shared/state/devMode.js';
 import { getSnappedFromEvent, getRawBeatFromEvent } from '../../utils/snapping.js';
 import { abortIfOutOfGridBounds } from '../../utils/gridGuards.js';
 import { CursorState } from '../interfaces/CursorState.js';
@@ -257,7 +258,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
     }
     
     public onEnter(): void {
-      // Stub
+      devLog('DefaultNoteToolHandler entered');
     }
 
     public onExit(): void {

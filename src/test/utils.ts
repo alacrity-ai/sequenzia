@@ -87,7 +87,7 @@ export function mockDependencies() {
     sequencers: []
   }));
 
-  vi.mock('../sequencer/transport.js', () => ({
+  vi.mock('@/shared/playback/transportService.js', () => ({
     getTotalBeats: () => 16
   }));
 

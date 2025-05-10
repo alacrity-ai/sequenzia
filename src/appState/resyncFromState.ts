@@ -1,9 +1,10 @@
 // src/appState/resyncFromState.ts
 
 import { getAppState } from './appState.js';
-import { updateTempo, updateTimeSignature, updateTotalMeasures } from '../sequencer/transport.js';
+import { updateTempo, updateTimeSignature, updateTotalMeasures } from '@/shared/playback/transportService.js';
 import { createSequencer, sequencers } from '../sequencer/factories/SequencerFactory.js';
-import { drawGlobalMiniContour, drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
+import { drawMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
 import { AppState, SequencerState } from './interfaces/AppState.js';
 import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig.js';
 import { syncLiveMatrixWithSerializedNotes } from './utils/syncMatrixToSequencer.js';
@@ -23,7 +24,7 @@ function sequencerIdsMatch(liveId: number | undefined, serializedId: number | un
  * @param state - Optional app state to sync from (defaults to current app state)
  */
 export function resyncFromState(state: AppState = getAppState()): void {
-  // 🔁 Update transport globals
+  // Update transport globals
   updateTempo(state.tempo, false);
   updateTimeSignature(state.timeSignature[0], false);
   updateTotalMeasures(state.totalMeasures, false);
@@ -33,7 +34,7 @@ export function resyncFromState(state: AppState = getAppState()): void {
     seq.updateTotalMeasures();
   }
 
-  // 🔁 Sync each serialized sequencer
+  // Sync each serialized sequencer
   for (const serialized of state.sequencers as SerializedSequencer[]) {
     const live = sequencers.find(seq => sequencerIdsMatch(seq.id, serialized.id));
 
@@ -49,7 +50,7 @@ export function resyncFromState(state: AppState = getAppState()): void {
 
       void createSequencer(initialState);
     } else {
-      // 🔁 Update existing live sequencer
+      // Update existing live sequencer
       live.instrumentName = serialized.instrument;
 
       // Update the volume and pan
@@ -73,9 +74,9 @@ export function resyncFromState(state: AppState = getAppState()): void {
     }
   }
 
-  // 🔁 Global mini-contour update
+  // Global mini-contour update
   const canvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
   if (canvas) {
-    drawGlobalMiniContour(canvas, sequencers);
+    drawGlobalMiniContour();
   }
 }

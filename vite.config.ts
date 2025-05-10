@@ -1,7 +1,9 @@
+/// <reference types="vitest" />
 // vite.config.ts
 
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -15,7 +17,8 @@ export default defineConfig({
     }
   },
   plugins: [
-    tsconfigPaths()
+    tsconfigPaths(),
+    tailwindcss()
   ],
   resolve: {
     alias: {
@@ -39,16 +42,5 @@ export default defineConfig({
         format: 'es',
       },
     },
-  },
-  worker: {
-    format: 'es',
-    rollupOptions: {
-      output: {
-        format: 'es'
-      }
-    }
-  },
-  optimizeDeps: {
-    exclude: ['track-renderer.worker.ts'] // ✅ ensure it's not optimized into node context
   }
 });

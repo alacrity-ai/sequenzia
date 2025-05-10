@@ -9,8 +9,9 @@ import {
   mergeTracksMaps
 } from '../helpers/trackHelpers.js';
 import { getMaxBeatsContext, getExtendBeatsAmount } from '../aiConfig.js';
-import { drawMiniContour, drawGlobalMiniContour } from '../../sequencer/ui/renderers/drawMiniContour.js';
-import { updateTotalMeasures, getTimeSignature } from '../../sequencer/transport.js';
+import { drawMiniContour } from '../../sequencer/ui/renderers/drawMiniContour.js';
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
+import { updateTotalMeasures, getTimeSignature } from '@/shared/playback/transportService.js';
 import { TrackTuple } from '../../sequencer/interfaces/TrackTuple.js';
 import { Track } from '../../sequencer/interfaces/Track.js'
 
@@ -86,7 +87,7 @@ export async function extendTracksWithAI(): Promise<void> {
 
     const globalMiniCanvas = document.getElementById('global-mini-contour') as HTMLCanvasElement | null;
     if (globalMiniCanvas) {
-      drawGlobalMiniContour(globalMiniCanvas, allSequencers);
+      drawGlobalMiniContour();
     }
 
     console.log('🎼 Sequencers updated with AI-generated continuation.');

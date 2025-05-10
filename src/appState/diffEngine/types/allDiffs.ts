@@ -4,6 +4,10 @@
 export { applyCHANGE_TEMPO as CHANGE_TEMPO } from './global/changeTempo.js';
 export { applySET_TIME_SIGNATURE as SET_TIME_SIGNATURE } from './global/changeTimeSignature.js';
 export { applySET_TOTAL_MEASURES as SET_TOTAL_MEASURES } from './global/changeMeasures.js';
+export { applyCHANGE_SONG_KEY as CHANGE_SONG_KEY } from './global/changeSongKey.js';
+export { applyCHANGE_SNAP_RESOLUTION as CHANGE_SNAP_RESOLUTION } from './global/changeSnapResolution.js';
+export { applyCHANGE_NOTE_DURATION as CHANGE_NOTE_DURATION } from './global/changeNoteDuration.js';
+export { applySET_NOTE_MODIFIER_MODE as SET_NOTE_MODIFIER_MODE } from './global/setNoteModifierMode.js';
 
 // SEQUENCER
 export { applyCREATE_SEQUENCER as CREATE_SEQUENCER } from './sequencer/createSequencer.js';

@@ -2,7 +2,7 @@
 
 import type { Note } from '../../../shared/interfaces/Note.js';
 import { noteToMidi, midiToPitch } from '../../../shared/utils/musical/noteUtils.js';
-import { getTotalBeats } from '../../transport.js';
+import { getTotalBeats } from '@/shared/playback/transportService.js';
 
 interface DragTransformOptions {
   originalNotes: Note[];

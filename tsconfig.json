@@ -12,7 +12,11 @@
       "forceConsistentCasingInFileNames": true,
       "isolatedModules": true,
       "skipLibCheck": true,
-      "types": ["vitest"]
+      "types": ["vitest"],
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["src/*"]
+      }
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist", "public"]

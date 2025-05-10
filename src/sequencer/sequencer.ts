@@ -7,7 +7,7 @@ import { getAudioContext, getMasterGain } from '../sounds/audio/audio.js';
 import { getPreviewContext } from '../sounds/audio/previewContext.js';
 import { exportNotesToOffline } from './services/offlineExportService.js';
 
-import { getTotalMeasures, getTimeSignature } from './transport.js';
+import { getTotalMeasures, getTimeSignature } from '@/shared/playback/transportService.js';
 import { updateTrackStyle } from './ui/helpers/updateTrackStyle.js';
 import { setCollapsed } from './ui/helpers/setCollapsed.js';
 import { updateNoteRange, updateToDrumNoteRange } from './services/rangeUpdateService.js';
@@ -199,6 +199,10 @@ export default class Sequencer {
 
   setCollapsed(val: boolean): void {
     setCollapsed(this, val);
+  }
+
+  resetInteractionMode(): void {
+    this.matrix?.getInteractionContext().reset();
   }
 
   async preparePlayback(startAt: number, startBeat: number = 0): Promise<void> {

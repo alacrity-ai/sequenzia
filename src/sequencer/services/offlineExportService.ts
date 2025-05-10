@@ -1,6 +1,6 @@
 import { loadInstrument } from '../../sounds/instrument-loader.js';
 import { pitchToMidi } from '../../shared/utils/musical/noteUtils.js';
-import { getTempo } from '../transport.js';
+import { getTempo } from '@/shared/playback/transportService.js';
 import type { Note } from '../../shared/interfaces/Note.js';
 
 export async function exportNotesToOffline(
