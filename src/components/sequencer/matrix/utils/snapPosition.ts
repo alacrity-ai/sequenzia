@@ -1,6 +1,6 @@
 // src/sequencer/matrix/utils/snapPosition.ts
 
-import { isSnapToInKeyEnabled, getMidiNoteMap } from '@/shared/stores/songInfoStore.js';
+import { isSnapToInKeyEnabled, isSnapToKeyOverrideActive, getMidiNoteMap } from '@/shared/stores/songInfoStore.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { SnappedNotePosition } from '../interfaces/SnappedNotePosition.js';
@@ -34,7 +34,7 @@ export function getSnappedNotePosition(
   if (snappedX < 0 || rowY < 0 || rowY >= totalRows) return null;
 
   // === Optional: Snap vertically to in-key notes
-  if (isSnapToInKeyEnabled()) {
+  if (isSnapToInKeyEnabled() && !isSnapToKeyOverrideActive()) {
     const inKeyMap = getMidiNoteMap();
     const rawMidi = highestMidi - rowY;
 

@@ -18,6 +18,7 @@ let keyGridHighlightingEnabled = loadJSON<boolean>(KEY_GRID_HIGHLIGHT) ?? false;
 let snapToGridEnabled = loadJSON<boolean>(KEY_SNAP_TO_GRID) ?? true;
 let snapToInKeyEnabled = loadJSON<boolean>(KEY_SNAP_TO_IN_KEY) ?? false;
 let currentMidiNoteMap: MidiNoteMap = getMidiNoteMapForKey(DEFAULT_SONG_KEY);
+let snapToKeyOverrideActive = false;
 
 // === Accessors & Mutators
 
@@ -54,4 +55,12 @@ export function getMidiNoteMap(): MidiNoteMap {
 
 export function updateMidiNoteMap(newKey: SongKey): void {
   currentMidiNoteMap = getMidiNoteMapForKey(newKey);
+}
+
+export function isSnapToKeyOverrideActive(): boolean {
+  return snapToKeyOverrideActive;
+}
+
+export function setSnapToKeyOverrideActive(active: boolean): void {
+  snapToKeyOverrideActive = active;
 }

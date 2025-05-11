@@ -1,7 +1,10 @@
-// src/globalControls/listeners/GlobalControlsListeners.ts
-
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 import type { VelocityModalController } from '@/components/globalControls/modals/velocity/velocityModalController.js';
+
+import {
+  setSnapToKeyOverrideActive,
+  isSnapToKeyOverrideActive
+} from '@/shared/stores/songInfoStore.js';
 
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import { getActiveSelection } from '@/components/sequencer/utils/selectionTracker.js';
@@ -28,7 +31,7 @@ export function attachGlobalControlsListeners(
     modals.velocity.show(selection.selectedNotes);
   };
 
-  // === Hotkey Shortcut ===
+  // === Hotkey Shortcuts ===
   const handleVelocityShortcut = (e: KeyboardEvent): void => {
     if (e.key.toLowerCase() !== 'v' || e.ctrlKey || e.metaKey || e.altKey) return;
 
@@ -42,10 +45,26 @@ export function attachGlobalControlsListeners(
     tryOpenVelocityModal();
   };
 
+  // === Snap-to-Key Override Shortcut (CTRL down to disable in-key snapping temporarily)
+  const handleSnapToKeyShortcut = (e: KeyboardEvent): void => {
+    if (e.type === 'keydown' && e.ctrlKey && !isSnapToKeyOverrideActive()) {
+      setSnapToKeyOverrideActive(true);
+    }
+
+    if (e.type === 'keyup' && e.key === 'Control' && isSnapToKeyOverrideActive()) {
+      setSnapToKeyOverrideActive(false);
+    }
+  };
+
   // === Dispatch Key Handler ===
   const handleKeydown = (e: KeyboardEvent): void => {
     handleVelocityShortcut(e);
+    handleSnapToKeyShortcut(e);
     // add: handleChordifierShortcut(e), handleQuantizeShortcut(e), etc.
+  };
+
+  const handleKeyup = (e: KeyboardEvent): void => {
+    handleSnapToKeyShortcut(e);
   };
 
   // === Handle Custom Events from UI (e.g. popovers) ===
@@ -60,11 +79,13 @@ export function attachGlobalControlsListeners(
   };
 
   window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('keyup', handleKeyup);
   document.body.addEventListener('editor-invoke', handleEditorInvoke);
 
   return {
     detach: () => {
       window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('keyup', handleKeyup);
       document.body.removeEventListener('editor-invoke', handleEditorInvoke);
     },
     refreshUI: () => {

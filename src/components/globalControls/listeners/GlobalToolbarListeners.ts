@@ -5,6 +5,7 @@ import type { ListenerAttachment } from '@/components/userSettings/interfaces/Li
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
 import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
+import { popupsController } from '@/main.js';
 
 import {
   updateSnapResolution,
@@ -32,6 +33,7 @@ export function attachToolbarListeners(
   const durationButtons = container.querySelectorAll<HTMLButtonElement>('button[data-value]');
   const dottedNoteBtn = container.querySelector<HTMLButtonElement>('#dotted-note-btn');
   const tripletNoteBtn = container.querySelector<HTMLButtonElement>('#triplet-note-btn');
+  const aiModeBtn = container.querySelector<HTMLButtonElement>('#ai-mode-btn');
 
   const highlightActiveDuration = () => {
     const snap = getSnapResolution();
@@ -178,12 +180,20 @@ dottedNoteBtn?.addEventListener('click', () => {
   };
 
   window.addEventListener('keydown', handleKeydown);
+  aiModeBtn?.addEventListener('click', () => {
+    popupsController.showFeatureBlocked();
+  });
+
   refreshUI();
 
   return {
     detach: () => {
       window.removeEventListener('keydown', handleKeydown);
       unsubscribe();
+
+      if (aiModeBtn) {
+        aiModeBtn.replaceWith(aiModeBtn.cloneNode(true));
+      }
 
       durationButtons.forEach(btn => {
         const clone = btn.cloneNode(true);

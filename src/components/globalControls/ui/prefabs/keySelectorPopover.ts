@@ -1,16 +1,15 @@
-// src/globalControls/ui/prefabs/keySelectorPopover.ts
+// src/components/globalControls/ui/prefabs/keySelectorPopover.ts
 
 import { h } from '@/shared/ui/domUtils.js';
 import { createButton } from '@/shared/ui/primitives/createButton.js';
 import { createPopover } from '@/shared/ui/primitives/createPopover.js';
-import { createToggleSwitch } from '@/shared/ui/primitives/createToggleSwitch.js';
+import { createToggleSwitch, ToggleSwitchController } from '@/shared/ui/primitives/createToggleSwitch.js';
 import { createHorizontalDivider } from '@/shared/ui/primitives/createHorizontalDivider.js';
 import { getSongKey, updateSongKey } from '@/shared/playback/transportService.js';
 import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 
 import { onStateUpdated } from '@/appState/onStateUpdated.js';
 import type { AppState } from '@/appState/interfaces/AppState.js';
-
 import type { SongKey } from '@/shared/types/SongKey.ts';
 
 const NATURAL_KEYS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
@@ -29,7 +28,12 @@ function extractPitchMode(key: string): [KeyName, Mode] {
   return [pitch, mode];
 }
 
-export function createKeySelectorPopover(): HTMLElement {
+export interface KeySelectorController {
+  trigger: HTMLElement;
+  refreshUI: () => void;
+}
+
+export function createKeySelectorPopover(): KeySelectorController {
   const skin = getCurrentSkin();
   let [selectedPitch, selectedMode] = extractPitchMode(getCurrentKey());
 
@@ -62,41 +66,38 @@ export function createKeySelectorPopover(): HTMLElement {
   const sharpRow = h('div', {
     class: 'flex w-full mb-1 gap-[6px] translate-x-[22px]'
   }, ...SHARP_KEYS.map(pitch => {
-    if (pitch === '') {
-      return h('div', { class: 'w-8' }); // spacer
-    }
+    if (pitch === '') return h('div', { class: 'w-8' }); // spacer
     return h('button', {
       class: keyButtonClass(pitch, selectedPitch),
       onClick: () => updateKey(pitch, selectedMode)
     }, pitch);
   }));
 
-  const toggleSwitch = createToggleSwitch({
+  const toggleSwitch: ToggleSwitchController = createToggleSwitch({
     id: 'key-mode-toggle',
     stateA: 'Major',
     stateB: 'Minor',
     inline: true
   });
 
-  const toggleInput = toggleSwitch.querySelector('input[type="checkbox"]') as HTMLInputElement;
-  toggleInput.checked = selectedMode === 'm';
+  toggleSwitch.setChecked(selectedMode === 'm');
 
-  toggleInput.addEventListener('change', () => {
-    const newMode: Mode = toggleInput.checked ? 'm' : 'M';
+  toggleSwitch.input.addEventListener('change', () => {
+    const newMode: Mode = toggleSwitch.getChecked() ? 'm' : 'M';
     updateKey(selectedPitch, newMode);
   });
 
-  const contentBody = [sharpRow, naturalRow, createHorizontalDivider(), toggleSwitch];
+  const contentBody = [sharpRow, naturalRow, createHorizontalDivider(), toggleSwitch.element];
 
-  function updateHighlight(): void {
+  const updateHighlight = (): void => {
     const allButtons = [...naturalRow.children, ...sharpRow.children];
     allButtons.forEach(btn => {
       if (!(btn instanceof HTMLButtonElement)) return;
       const btnKey = btn.textContent || '';
       btn.className = keyButtonClass(btnKey as KeyName, selectedPitch);
     });
-    toggleInput.checked = selectedMode === 'm';
-  }
+    toggleSwitch.setChecked(selectedMode === 'm');
+  };
 
   createPopover(triggerButton, contentBody, {
     title: 'Key Selector',
@@ -106,19 +107,24 @@ export function createKeySelectorPopover(): HTMLElement {
 
   onStateUpdated((state: AppState) => {
     const [pitch, mode] = extractPitchMode(state.songKey);
-
+    selectedPitch = pitch;
+    selectedMode = mode;
     triggerButton.textContent = state.songKey;
-    toggleInput.checked = mode === 'm';
-
-    const allButtons = [...naturalRow.children, ...sharpRow.children];
-    allButtons.forEach(btn => {
-        if (!(btn instanceof HTMLButtonElement)) return;
-        const btnKey = btn.textContent || '';
-        btn.className = keyButtonClass(btnKey as KeyName, pitch);
-    });
+    updateHighlight();
   });
 
-  return triggerButton;
+  const refreshUI = () => {
+    const [pitch, mode] = extractPitchMode(getSongKey());
+    selectedPitch = pitch;
+    selectedMode = mode;
+    triggerButton.textContent = `${pitch}${mode}`;
+    updateHighlight();
+  };
+
+  return {
+    trigger: triggerButton,
+    refreshUI
+  };
 }
 
 // === Styling helpers ===
@@ -136,5 +142,3 @@ function keyButtonClass(pitch: string, selected: string): string {
       : 'bg-gray-600 hover:bg-gray-500 hover:ring-1 hover:ring-white'
   ].join(' ');
 }
-
-

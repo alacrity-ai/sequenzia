@@ -1,5 +1,6 @@
 // src/components/topControls/topControlsController.ts
 
+import { SideMenuController } from './components/sideMenu/sideMenuController.js';
 import { KeyboardController } from './components/keyboard/keyboardController.js';
 // import { AiMenuController } from './components/aimenu/aiMenuController.js';
 // import { MixerController } from './components/mixer/mixerController.js';
@@ -10,6 +11,7 @@ export class TopControlsController {
   private container: HTMLElement;
   private activeMode: TopControlsMode = 'keyboard';
 
+  private sideMenuController!: SideMenuController;
   private keyboardController!: KeyboardController;
   // private aiMenuController!: AiMenuController;
   // private mixerController!: MixerController;
@@ -27,6 +29,7 @@ export class TopControlsController {
 
   private initialize(): void {
     // === Instantiate Controllers (but do not inject yet) ===
+    this.sideMenuController = new SideMenuController();
     this.keyboardController = new KeyboardController();
     // this.aiMenuController = new AiMenuController();
     // this.mixerController = new MixerController();
@@ -72,6 +75,7 @@ export class TopControlsController {
     this.detachFns.forEach(fn => fn());
     this.detachFns = [];
 
+    this.sideMenuController?.destroy();
     this.keyboardController?.destroy();
     // this.aiMenuController?.destroy();
     // this.mixerController?.destroy();

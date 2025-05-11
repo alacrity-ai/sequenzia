@@ -26,36 +26,41 @@ export interface ToggleSwitchOptions {
   inline?: boolean;
 }
 
+export interface ToggleSwitchController {
+  element: HTMLElement;
+  input: HTMLInputElement;
+  setChecked: (checked: boolean) => void;
+  getChecked: () => boolean;
+  update: () => void; // manual sync, if needed
+}
+
+
 /**
  * Creates a stylized toggle switch row for forms or modals.
  * Layout:
  *   [Label]
  *   [stateA] [switch] [stateB] [optional tooltip trigger]
  */
-export function createToggleSwitch(options: ToggleSwitchOptions): HTMLElement {
+export function createToggleSwitch(options: ToggleSwitchOptions): ToggleSwitchController {
   const { id, label, stateA, stateB, tooltipTrigger, inline } = options;
-
   const skin = getCurrentSkin();
 
-  // Create label spans for later manipulation
   const stateASpan = stateA ? h('span', {
-    class: `text-sm transition-opacity ${skin.textColor} opacity-100`,
+    class: `text-sm transition-opacity ${skin.textColor}`,
     textContent: stateA
   }) : null;
 
   const stateBSpan = h('span', {
-    class: `text-sm transition-opacity ${skin.textColor} opacity-50`,
+    class: `text-sm transition-opacity ${skin.textColor}`,
     textContent: stateB
   });
 
-  // Checkbox input
   const checkbox = h('input', {
     id,
     type: 'checkbox',
     class: 'sr-only peer'
   }) as HTMLInputElement;
 
-  // Switch visual track
   const switchTrack = h('div', {
     class: [
       'w-11 h-6 rounded-full peer relative',
@@ -70,37 +75,25 @@ export function createToggleSwitch(options: ToggleSwitchOptions): HTMLElement {
     ].join(' ')
   });
 
-  // Bind dynamic label state update
-  checkbox.addEventListener('change', () => {
-    if (stateASpan) stateASpan.style.opacity = checkbox.checked ? '0.5' : '1';
-    stateBSpan.style.opacity = checkbox.checked ? '1' : '0.5';
-  });
+  const updateLabelStates = () => {
+    const checked = checkbox.checked;
+    if (stateASpan) stateASpan.style.opacity = checked ? '0.5' : '1';
+    stateBSpan.style.opacity = checked ? '1' : '0.5';
+  };
 
-  // Initial state setup
-  if (stateASpan) stateASpan.style.opacity = '1';
-  stateBSpan.style.opacity = '0.5';
+  checkbox.addEventListener('change', updateLabelStates);
 
   const children = [];
-
   if (stateASpan) children.push(stateASpan);
-
-  children.push(
-    h('label', {
-      class: 'relative inline-flex items-center cursor-pointer'
-    }, checkbox, switchTrack)
-  );
-
+  children.push(h('label', { class: 'relative inline-flex items-center cursor-pointer' }, checkbox, switchTrack));
   children.push(stateBSpan);
-
-  if (tooltipTrigger) {
-    children.push(tooltipTrigger);
-  }
+  if (tooltipTrigger) children.push(tooltipTrigger);
 
   const mainRow = h('div', {
     class: 'flex items-center gap-3'
   }, ...children);
 
-  return inline
+  const container = inline
     ? mainRow
     : h('div', { class: 'mb-6' },
         label
@@ -111,4 +104,18 @@ export function createToggleSwitch(options: ToggleSwitchOptions): HTMLElement {
           : null,
         mainRow
       );
+
+  // Initialize visual state
+  requestAnimationFrame(updateLabelStates);
+
+  return {
+    element: container,
+    input: checkbox,
+    setChecked: (val: boolean) => {
+      checkbox.checked = val;
+      updateLabelStates();
+    },
+    getChecked: () => checkbox.checked,
+    update: updateLabelStates
+  };
 }

@@ -1,8 +1,11 @@
-// src/globalControls/ui/prefabs/gridSettingsPopover.ts
+// src/components/globalControls/ui/prefabs/gridSettingsPopover.ts
 
 import { h } from '@/shared/ui/domUtils.js';
 import { createPopover } from '@/shared/ui/primitives/createPopover.js';
-import { createToggleSwitch } from '@/shared/ui/primitives/createToggleSwitch.js';
+import { createToggleSwitch, ToggleSwitchController } from '@/shared/ui/primitives/createToggleSwitch.js';
+import { createAccentSpan } from '@/shared/ui/primitives/createAccentSpan';
+import { createParagraph } from '@/shared/ui/primitives/createParagraph.js';
+import { createTooltipPair } from '@/shared/ui/primitives/createTooltipPair.js';
 import { icon } from '@/shared/ui/primitives/createIconImg.js';
 import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 import {
@@ -14,10 +17,15 @@ import {
   setSnapToGridEnabled
 } from '@/shared/stores/songInfoStore.js';
 
+export interface GridSettingsPopoverController {
+  trigger: HTMLElement;
+  refreshToggles: () => void;
+}
+
 /**
- * Creates the grid settings popover trigger button and content.
+ * Creates the grid settings popover trigger and toggle UI.
  */
-export function createGridSettingsPopover(): HTMLElement {
+export function createGridSettingsPopover(): GridSettingsPopoverController {
   const skin = getCurrentSkin();
 
   const triggerButton = h('button', {
@@ -27,66 +35,116 @@ export function createGridSettingsPopover(): HTMLElement {
     style: 'cursor: pointer;'
   }, icon('icon-music', 'Placement'));
 
-  // === Toggle 1: Grid Key Guides
-  const gridGuidesToggle = createToggleSwitch({
+  // === Tooltip 1: Grid Key Guides
+  const gridGuidesTooltip = createTooltipPair(
+    'tooltip-grid-guides',
+    '?',
+    [
+      createParagraph(
+        createAccentSpan('Key Grid Highlighting:'),
+        ' colors each piano roll row based on the current song key.'
+      ),
+      createParagraph(
+        'In-key notes are shown as white rows. Out-of-key notes are shown as black rows.'
+      )
+    ]
+  );
+
+  const gridGuidesToggle: ToggleSwitchController = createToggleSwitch({
     id: 'toggle-grid-guides',
     stateA: 'Off',
     stateB: 'Transpose Grid to Key',
-    inline: true
+    inline: true,
+    tooltipTrigger: gridGuidesTooltip.trigger
   });
-  const gridGuidesInput = gridGuidesToggle.querySelector('input')!;
-  gridGuidesInput.addEventListener('change', (e) => {
-    const isChecked = (e.target as HTMLInputElement).checked;
-    setKeyGridHighlightingEnabled(isChecked);
+  gridGuidesToggle.input.addEventListener('change', () => {
+    setKeyGridHighlightingEnabled(gridGuidesToggle.getChecked());
   });
 
-  // === Toggle 2: Snap to Key
-  const snapToKeyToggle = createToggleSwitch({
+  // === Tooltip 2: Snap to Key
+  const snapToKeyTooltip = createTooltipPair(
+    'tooltip-snap-to-key',
+    '?',
+    [
+      createParagraph(
+        createAccentSpan('Snap to Key:'),
+        ' constrains vertical note placement to notes in the current key.'
+      ),
+      createParagraph(
+        'Hold ',
+        createAccentSpan('CTRL'),
+        ' while placing notes to temporarily allow chromatic input.'
+      )
+    ]
+  );
+
+  const snapToKeyToggle: ToggleSwitchController = createToggleSwitch({
     id: 'toggle-snap-key',
     stateA: 'Off',
     stateB: 'Snap Notes to Key',
-    inline: true
+    inline: true,
+    tooltipTrigger: snapToKeyTooltip.trigger
   });
-  const snapToKeyInput = snapToKeyToggle.querySelector('input')!;
-  snapToKeyInput.addEventListener('change', (e) => {
-    const isChecked = (e.target as HTMLInputElement).checked;
-    setSnapToInKeyEnabled(isChecked);
+  snapToKeyToggle.input.addEventListener('change', () => {
+    setSnapToInKeyEnabled(snapToKeyToggle.getChecked());
   });
 
-  // === Toggle 3: Snap to Grid
-  const snapToGridToggle = createToggleSwitch({
+  // === Tooltip 3: Snap to Grid
+  const snapToGridTooltip = createTooltipPair(
+    'tooltip-snap-to-grid',
+    '?',
+    [
+      createParagraph(
+        createAccentSpan('Snap to Grid:'),
+        ' constrains horizontal note placement to musical durations.'
+      ),
+      createParagraph(
+        'Notes will align to the selected beat value (e.g. quarter, eighth, sixteenth).'
+      )
+    ]
+  );
+
+  const snapToGridToggle: ToggleSwitchController = createToggleSwitch({
     id: 'toggle-snap-grid',
     stateA: 'Off',
     stateB: 'Snap Notes to Grid',
-    inline: true
+    inline: true,
+    tooltipTrigger: snapToGridTooltip.trigger
   });
-  const snapToGridInput = snapToGridToggle.querySelector('input')!;
-  snapToGridInput.addEventListener('change', (e) => {
-    const isChecked = (e.target as HTMLInputElement).checked;
-    setSnapToGridEnabled(isChecked);
+  snapToGridToggle.input.addEventListener('change', () => {
+    setSnapToGridEnabled(snapToGridToggle.getChecked());
   });
+
+  // === Refresh logic
+  const refreshToggles = () => {
+    gridGuidesToggle.setChecked(isKeyGridHighlightingEnabled());
+    snapToKeyToggle.setChecked(isSnapToInKeyEnabled());
+    snapToGridToggle.setChecked(isSnapToGridEnabled());
+  };
 
   // === Content Body
   const contentBody = [
-    h('div', { class: 'mb-1' }, gridGuidesToggle),
+    h('div', { class: 'mb-1' }, gridGuidesToggle.element),
+    gridGuidesTooltip.tooltip,
+
     h('div', { class: `my-2 border-t ${skin.borderColor} mb-3 mx-2` }),
-    h('div', { class: 'mb-1' }, snapToKeyToggle),
-    h('div', { class: 'mt-1' }, snapToGridToggle)
+
+    h('div', { class: 'mb-1' }, snapToKeyToggle.element),
+    snapToKeyTooltip.tooltip,
+
+    h('div', { class: 'mt-1' }, snapToGridToggle.element),
+    snapToGridTooltip.tooltip
   ];
 
   createPopover(triggerButton, contentBody, {
     title: 'Grid Settings',
     placement: 'bottom',
     triggerType: 'click',
-    onShow: () => {
-      requestAnimationFrame(() => {
-        gridGuidesInput.checked = isKeyGridHighlightingEnabled();
-        snapToKeyInput.checked = isSnapToInKeyEnabled();
-        snapToGridInput.checked = isSnapToGridEnabled();
-      });
-    }
-
+    onShow: () => requestAnimationFrame(refreshToggles)
   });
 
-  return triggerButton;
+  return {
+    trigger: triggerButton,
+    refreshToggles
+  };
 }

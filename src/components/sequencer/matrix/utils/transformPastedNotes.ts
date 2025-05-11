@@ -3,7 +3,7 @@
 import type { Note } from '@/shared/interfaces/Note.js';
 import { noteToMidi, midiToPitch } from '@/shared/utils/musical/noteUtils.js';
 import { getTotalBeats } from '@/shared/playback/transportService.js';
-import { isSnapToInKeyEnabled, getMidiNoteMap } from '@/shared/stores/songInfoStore.js';
+import { isSnapToInKeyEnabled, isSnapToKeyOverrideActive, getMidiNoteMap } from '@/shared/stores/songInfoStore.js';
 
 interface PasteTransformOptions {
   notes: Note[];
@@ -38,7 +38,7 @@ export function transformPastedNotes({
 
   const snapToInKey = isSnapToInKeyEnabled();
 
-  if (!snapToInKey) {
+  if (!snapToInKey || isSnapToKeyOverrideActive()) {
     // === Chromatic paste (default)
     const deltaMidi = targetMidi - anchorMidi;
 

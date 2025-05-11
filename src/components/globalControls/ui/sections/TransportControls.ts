@@ -1,14 +1,27 @@
 import { h } from '@/shared/ui/domUtils.js';
-import { createToggleSwitch } from '@/shared/ui/primitives/createToggleSwitch.js';
+import { createToggleSwitch, ToggleSwitchController } from '@/shared/ui/primitives/createToggleSwitch.js';
 import { createVerticalDivider } from '@/shared/ui/primitives/createVerticalDivider.js';
 import { createCircularIconButton } from '@/shared/ui/primitives/createCircularIconButton.js';
 import { createNumberInput } from '@/shared/ui/primitives/createNumberInput.js';
 import { createLabel } from '@/shared/ui/primitives/createLabel.js';
 import { createSpacer } from '@/shared/ui/primitives/createSpacer.js';
-import { createKeySelectorPopover } from '@/components/globalControls/ui/prefabs/keySelectorPopover.js';
+import { createKeySelectorPopover, KeySelectorController } from '@/components/globalControls/ui/prefabs/keySelectorPopover.js';
 import { icon } from '@/shared/ui/primitives/createIconImg.js';
 
-export function createTransportControls(): HTMLElement {
+export interface TransportControlsController {
+  element: HTMLElement;
+  refreshToggles: () => void;
+}
+
+export function createTransportControls(): TransportControlsController {
+  const loopToggle: ToggleSwitchController = createToggleSwitch({
+    id: 'loop-toggle',
+    stateB: 'Loop',
+    inline: true
+  });
+
+  const keySelector: KeySelectorController = createKeySelectorPopover();
+
   const element = h('div', {
     class: 'flex justify-center items-center gap-4 flex-wrap'
   },
@@ -26,12 +39,7 @@ export function createTransportControls(): HTMLElement {
         'Record', icon('icon-record', 'Record'), 'bg-red-600', 'hover:bg-red-700'),
 
       createSpacer('4'),
-      createToggleSwitch({
-        id: 'loop-toggle',
-        stateB: 'Loop',
-        inline: true
-      }),
-
+      loopToggle.element,
       createSpacer('4'),
       createVerticalDivider(),
     ),
@@ -43,7 +51,7 @@ export function createTransportControls(): HTMLElement {
       // Key Selector
       h('div', { class: 'flex flex-col items-start gap-1' },
         createLabel('Key'),
-        createKeySelectorPopover()
+        keySelector.trigger
       ),
 
       // Tempo
@@ -98,5 +106,14 @@ export function createTransportControls(): HTMLElement {
     )
   );
 
-  return element;
+  const refreshToggles = () => {
+    keySelector.refreshUI();
+    // If you want to sync loopToggle from a config or store, add here:
+    // loopToggle.setChecked(getUserConfig().transport.loopMode);
+  };
+
+  return {
+    element,
+    refreshToggles
+  };
 }

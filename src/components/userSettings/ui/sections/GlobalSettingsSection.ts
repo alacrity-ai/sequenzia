@@ -2,12 +2,19 @@
 
 import { h } from '@/shared/ui/domUtils.js';
 import { createTooltipPair } from '@/shared/ui/primitives/createTooltipPair.js';
-import { createToggleSwitch } from '@/shared/ui/primitives/createToggleSwitch.js';
+import { createToggleSwitch, ToggleSwitchController } from '@/shared/ui/primitives/createToggleSwitch.js';
 import { createParagraph } from '@/shared/ui/primitives/createParagraph.js';
 import { createAccentSpan } from '@/shared/ui/primitives/createAccentSpan.js';
 import { createHeader } from '@/shared/ui/primitives/createHeader.js';
+import { getUserConfig, updateUserConfig } from '@/components/userSettings/store/userConfigStore.js';
+import type { NoteToolFlavor } from '@/components/userSettings/interfaces/GlobalSettings.js';
 
-export function createGlobalSettingsSection(): HTMLElement {
+export interface GlobalSettingsSectionController {
+  element: HTMLElement;
+  refreshToggle: () => void;
+}
+
+export function createGlobalSettingsSection(): GlobalSettingsSectionController {
   const { trigger: tooltipTrigger, tooltip } = createTooltipPair(
     'tooltip-note-mode',
     '?',
@@ -23,7 +30,7 @@ export function createGlobalSettingsSection(): HTMLElement {
     ]
   );
 
-  const toggle = createToggleSwitch({
+  const toggle: ToggleSwitchController = createToggleSwitch({
     id: 'note-tool-toggle',
     label: 'Note Placement:',
     stateA: 'Default',
@@ -31,9 +38,24 @@ export function createGlobalSettingsSection(): HTMLElement {
     tooltipTrigger
   });
 
-  return h('div', {},
+  toggle.input.addEventListener('change', () => {
+    const newMode: NoteToolFlavor = toggle.getChecked() ? 'express' : 'default';
+    updateUserConfig({ global: { noteToolMode: newMode } });
+  });
+
+  const refreshToggle = () => {
+    const current = getUserConfig().global.noteToolMode;
+    toggle.setChecked(current === 'express');
+  };
+
+  const section = h('div', {},
     createHeader('Global Settings'),
-    toggle,
+    toggle.element,
     tooltip
   );
+
+  return {
+    element: section,
+    refreshToggle
+  };
 }

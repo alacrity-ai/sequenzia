@@ -1,5 +1,7 @@
 // src/components/globalControls/GlobalControlsController.ts
 
+import { initTooltips } from 'flowbite';
+
 import { GlobalControls } from '@/components/globalControls/ui/GlobalControls.js';
 
 import { createGlobalMiniContour } from '@/components/globalControls/ui/sections/GlobalMiniContour.js';
@@ -22,8 +24,6 @@ import { WavOptionsModal } from '@/components/globalControls/modals/saveModal/wa
 import { LoadModalController } from '@/components/globalControls/modals/loadModal/loadModalController.js';
 import { VelocityModalController } from '@/components/globalControls/modals/velocity/velocityModalController.js';
 import { WhatsNewModalController } from '@/components/globalControls/modals/whatsNew/whatsNewModalController.js';
-
-import { topControlsController } from '@/main.js';
 
 import type { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import type { UserConfigModalController } from '@/components/userSettings/userConfig.js';
@@ -62,13 +62,13 @@ export class GlobalControlsController {
     this.whatsNewModal = new WhatsNewModalController();
 
     const contour = createGlobalMiniContour();
-    const toolbar = createGlobalToolbar();
+    const toolbarController = createGlobalToolbar();
     const transport = createTransportControls();
     const sideButtons = createGlobalSideButtons();
 
     this.controls.getGlobalPlayheadRow().appendChild(contour);
-    this.controls.getGlobalToolsRow().appendChild(toolbar);
-    this.controls.getGlobalTransportRow().appendChild(transport);
+    this.controls.getGlobalToolsRow().appendChild(toolbarController.element);
+    this.controls.getGlobalTransportRow().appendChild(transport.element);
 
     const footer = document.getElementById('footer-main');
     if (footer) {
@@ -80,9 +80,9 @@ export class GlobalControlsController {
     this.contour = contour;
 
     const contourListeners = attachContourListeners(contour);
-    const toolbarListeners = attachToolbarListeners(toolbar);
+    const toolbarListeners = attachToolbarListeners(toolbarController.element);
     const transportListeners = attachTransportListeners(
-      transport,
+      transport.element,
       this.playbackService,
       this.userConfigModalController,
       this.saveModal,
@@ -98,7 +98,8 @@ export class GlobalControlsController {
       transportListeners.detach,
       sideButtonListeners.detach,
       playheadListeners.detach,
-      globalControlsListeners.detach
+      globalControlsListeners.detach,
+      toolbarController.refreshGridSettings
     ];
 
     this.refreshFns = [
@@ -107,9 +108,11 @@ export class GlobalControlsController {
       transportListeners.refreshUI,
       sideButtonListeners.refreshUI,
       playheadListeners.refreshUI,
-      globalControlsListeners.refreshUI
+      globalControlsListeners.refreshUI,
+      transport.refreshToggles
     ];
 
+    initTooltips();
     this.initPlayhead();
   }
 

@@ -12,7 +12,7 @@ export function attachSideButtonListeners(container: HTMLElement, whatsNewModal:
   };
 
   const handleHelpClick = () => {
-    // TODO: Open help modal or external documentation
+    window.open('https://github.com/alacrity-ai/sequenzia', '_blank');
   };
 
   const handleWhatsNewClick = () => {

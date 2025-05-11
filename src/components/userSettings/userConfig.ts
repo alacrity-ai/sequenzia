@@ -29,32 +29,32 @@ export class UserConfigModalController {
   private initializeUI(): void {
     this.modal = new UserConfigModal();
 
-    // Create and inject section content
+    // === Create sections
     const globalSection = createGlobalSettingsSection();
     const themeSection = createThemeSettingsSection();
     const aiSection = createAISettingsSection();
 
-    this.modal.getSectionContainer('global').appendChild(globalSection);
+    // === Inject into modal DOM
+    this.modal.getSectionContainer('global').appendChild(globalSection.element);
     this.modal.getSectionContainer('theme').appendChild(themeSection);
     this.modal.getSectionContainer('ai').appendChild(aiSection);
 
-    // Attach listeners
+    // === Attach listeners
     const modalDetach = attachModalListeners(this.modal, {
       onSave: () => saveUserConfigToLocalStorage(),
       onClose: () => updateUserConfig(this.initialSnapshot)
     });
 
-    const global = attachGlobalSettingsListeners(globalSection);
+    const global = attachGlobalSettingsListeners(globalSection.element);
     const theme = attachThemeSettingsListeners(themeSection);
     const ai = attachAISettingsListeners(aiSection);
 
     this.detachFns.push(modalDetach, global.detach, theme.detach, ai.detach);
-    this.refreshFns.push(global.refreshUI, theme.refreshUI, ai.refreshUI);
+    this.refreshFns.push(global.refreshUI, theme.refreshUI, ai.refreshUI, globalSection.refreshToggle);
 
-    // Activate tooltips
+    // === Tooltips
     initTooltips();
 
-    // Append modal to DOM
     document.body.appendChild(this.modal.render());
   }
 
