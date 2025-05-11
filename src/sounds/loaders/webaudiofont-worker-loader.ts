@@ -22,20 +22,7 @@ function getSafeWebAudioFontVolume(volume: number): number {
 }
 
 async function loadWebAudioFontPlayer(): Promise<void> {
-    if (player) return;
-  
-    const url = 'https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js';
-    const response = await fetch(url);
-    const scriptText = await response.text();
-    eval(scriptText); // Injects into global scope (`self` in workers)
-  
-    player = (self as any).WebAudioFontPlayer 
-      ? new (self as any).WebAudioFontPlayer()
-      : null;
-  
-    if (!player) {
-      throw new Error('Failed to load WebAudioFontPlayer in worker context.');
-    }
+  // NO OP
   }
   
 
@@ -87,7 +74,7 @@ export async function loadInstrument(
     const varName = `_tone_${matched.id}`;
     const url = `https://surikov.github.io/webaudiofontdata/sound/${matched.id}.js`;
     const { default: scriptText } = await import(/* @vite-ignore */ url);
-    eval(scriptText); // Loads `_tone_xxx` global
+
     const preset = (self as any)[varName];
     if (!preset) throw new Error(`Missing preset: ${varName}`);
 
@@ -163,7 +150,6 @@ export async function loadInstrument(
     const varName = `_drum_${midi}_${kitNumber}_${libraryName}_sf2_file`;
     const url = `https://surikov.github.io/webaudiofontdata/sound/${12800 + midi}_${kitNumber}_${libraryName}_sf2_file.js`;
     const { default: scriptText } = await import(/* @vite-ignore */ url);
-    eval(scriptText);
     const preset = (self as any)[varName];
     if (!preset) continue;
     player.loader.decodeAfterLoading(context, varName);

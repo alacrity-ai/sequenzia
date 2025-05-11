@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { mergeRemiContinuation } from './mergeRemiContinuation';
-import type { Note } from '../../../interfaces/Note';
-import type { RemiEvent } from '../../../interfaces/RemiEvent';
+import { mergeRemiContinuation } from '@/shared/utils/musical/remi/mergeRemiContinuation';
+import type { Note } from '@/shared/interfaces/Note';
+import type { RemiEvent } from '@/shared/interfaces/RemiEvent';
 
 describe('mergeRemiContinuation', () => {
   it('should correctly merge a simple continuation after the original melody', () => {

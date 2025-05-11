@@ -1,7 +1,7 @@
 // src/export/wav/renderTrackInMainThread.ts
 
-import { loadInstrument } from '../../sounds/instrument-loader-worker.js';
-import { pitchToMidi } from '../../sounds/audio/pitch-utils.js';
+import { loadInstrument } from '@/sounds/instrument-loader-worker.js';
+import { pitchToMidi } from '@/sounds/audio/pitch-utils.js';
 
 
 export async function renderTrackInMainThread(

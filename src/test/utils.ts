@@ -1,8 +1,8 @@
 // src/test/utils.ts
 
 import { vi } from 'vitest';
-import { Note } from '../shared/interfaces/Note';
-import { SequencerConfig } from '../sequencer/interfaces/SequencerConfig';
+import { Note } from '@/shared/interfaces/Note';
+import { SequencerConfig } from '@/components/sequencer/interfaces/SequencerConfig';
 
 /**
  * Creates a standard set of test elements for grid tests
@@ -87,7 +87,7 @@ export function mockDependencies() {
     sequencers: []
   }));
 
-  vi.mock('../sequencer/transport.js', () => ({
+  vi.mock('@/shared/playback/transportService.js', () => ({
     getTotalBeats: () => 16
   }));
 

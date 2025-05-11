@@ -1,11 +1,11 @@
 // src/appState/utils/syncLiveMatrixWithSerializedNotes.ts
 
-import { engine as playbackEngine } from '../../main.js';
+import { engine as playbackEngine } from '@/main.js';
 
-import type { Note } from '../../shared/interfaces/Note.js';
-import type { Grid } from '../../sequencer/matrix/Grid.js';
-import type { InteractionStore } from '../../sequencer/matrix/input/stores/InteractionStore.js';
-import type Sequencer from '../../sequencer/sequencer.js';
+import type { Note } from '@/shared/interfaces/Note.js';
+import type { Grid } from '@/components/sequencer/matrix/Grid.js';
+import type { InteractionStore } from '@/components/sequencer/matrix/input/stores/InteractionStore.js';
+import type Sequencer from '@/components/sequencer/sequencer.js';
 
 export function syncLiveMatrixWithSerializedNotes(
   matrix: Grid,

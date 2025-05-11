@@ -1,5 +1,5 @@
-import { isDevMode, enableDevMode, disableDevMode } from '../state/devMode.js';
-import { getAllDevTools } from './tools/index.js';
+import { isDevMode, enableDevMode, disableDevMode } from '@/shared/state/devMode.js';
+import { getAllDevTools } from '@/shared/dev/tools/index.js';
 
 const STORAGE_KEY = 'SEQUENZIA_DEV';
 

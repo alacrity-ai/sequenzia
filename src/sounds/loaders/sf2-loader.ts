@@ -2,7 +2,6 @@
 
 import { getAudioContext, getMasterGain } from '../audio/audio.js';
 import { Instrument } from '../interfaces/Instrument.js';
-import { showLoadingModal, hideLoadingModal } from '../../global/loadingModal.js';
 import * as smplr from 'smplr';
 
 import { beginInstrumentLoad, endInstrumentLoad } from './loadingStore.js';

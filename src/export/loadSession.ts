@@ -1,23 +1,23 @@
 // src/export/loadSession.ts
 
-import { updateTempo, updateTimeSignature, updateTotalMeasures, getTempo, getTotalMeasures } from '../sequencer/transport.js';
-import { destroyAllSequencers, sequencers } from '../sequencer/factories/SequencerFactory.js';
-import { collapseAllSequencers } from '../sequencer/utils/collapseAll.js';
-import { refreshGlobalMiniContour } from '../sequencer/ui/renderers/drawMiniContour.js';
-import { drawGlobalPlayhead } from '../playhead/global-playhead.js';
-import { engine as playbackEngine } from '../main.js';
-import { recordDiff } from '../appState/appState.js';
-import { createReverseCreateSequencerDiff } from '../appState/diffEngine/types/sequencer/createSequencer.js';
-import { createCheckpointDiff, createReverseCheckpointDiff } from '../appState/diffEngine/types/internal/checkpoint.js';
-import { TrackData } from '../sequencer/interfaces/Track.js';
-import { GlobalConfig } from '../userconfig/interfaces/GlobalConfig.js';
+import { updateTempo, updateSongKey, updateTimeSignature, updateTotalMeasures, getTempo, getTotalMeasures } from '@/shared/playback/transportService.js';
+import { destroyAllSequencers, sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { collapseAllSequencers } from '@/components/sequencer/utils/collapseAll.js';
+import { refreshGlobalMiniContour } from '@/components/globalControls/renderers/GlobalMiniContourRenderer.js';
+import { drawGlobalPlayhead } from '@/components/globalControls/renderers/GlobalPlayheadRenderer.js';
+import { engine as playbackEngine } from '@/main.js';
+import { recordDiff } from '@/appState/appState.js';
+import { createReverseCreateSequencerDiff } from '@/appState/diffEngine/types/sequencer/createSequencer.js';
+import { createCheckpointDiff, createReverseCheckpointDiff } from '@/appState/diffEngine/types/internal/checkpoint.js';
+import { TrackData } from '@/components/sequencer/interfaces/Track.js';
+import type { SongConfig } from '@/shared/interfaces/SongConfig.js';
 
 /**
  * Loads the given tracks and globalConfig into the app state, replacing existing session.
  * @param tracks - The imported track data
  * @param globalConfig - The imported global configuration
  */
-export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): void {
+export function loadSession(tracks: TrackData[], globalConfig: SongConfig): void {
   if (playbackEngine.isActive()) {
     void playbackEngine.pause();
   }  
@@ -26,6 +26,7 @@ export function loadSession(tracks: TrackData[], globalConfig: GlobalConfig): vo
   updateTempo(globalConfig.bpm);
   updateTimeSignature(globalConfig.beatsPerMeasure);
   updateTotalMeasures(globalConfig.totalMeasures);
+  updateSongKey(globalConfig.songKey);
 
   // Update UI footer inputs if present
   const tempoInput = document.getElementById('tempo-input') as HTMLInputElement | null;

@@ -1,4 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+/// <reference types="vitest" />
+
+import { describe, it, expect, vi, Mock } from 'vitest';
 import { serializeAppState } from './stateSerializer';
 import { getAppState } from './appState';
 import type { AppState } from './interfaces/AppState';
@@ -13,6 +15,11 @@ describe('serializeAppState', () => {
       tempo: 100,
       timeSignature: [3, 4],
       totalMeasures: 8,
+      songKey: 'CM',
+      snapResolution: 0.25,
+      noteDuration: 1,
+      isTripletMode: false,
+      isDottedMode: false,
       sequencers: [
         {
           id: 2,
@@ -24,7 +31,7 @@ describe('serializeAppState', () => {
       ]
     };
 
-    (getAppState as vi.Mock).mockReturnValue(mockState);
+    (getAppState as Mock).mockReturnValue(mockState);
 
     const result = serializeAppState();
     const expected = JSON.stringify(mockState, null, 2);

@@ -1,6 +1,6 @@
 // src/export/wav/renderTrackInWorker.ts
 
-import type { TrackData as SessionTrack } from '../../sequencer/interfaces/Track.js';
+import type { TrackData as SessionTrack } from '@/components/sequencer/interfaces/Track.js';
 
 export function renderTrackInWorker(
   state: SessionTrack,

@@ -10,7 +10,12 @@ describe('onStateUpdated', () => {
     tempo: 100,
     timeSignature: [4, 4],
     totalMeasures: 16,
-    sequencers: []
+    sequencers: [],
+    songKey: 'CM',
+    snapResolution: 0.25,
+    noteDuration: 1,
+    isTripletMode: false,
+    isDottedMode: false
   };
 
   it('invokes subscribed listener on state update', () => {

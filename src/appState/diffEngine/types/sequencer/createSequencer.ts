@@ -1,8 +1,8 @@
 // src/appState/diffEngine/types/sequencer/createSequencer.ts
 
-import { createSequencer, sequencers } from '../../../../sequencer/factories/SequencerFactory.js';
-import { AppState, SequencerState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
+import { createSequencer, sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { AppState, SequencerState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Applies a CREATE_SEQUENCER diff to add a new sequencer.

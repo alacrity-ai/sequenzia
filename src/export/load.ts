@@ -1,10 +1,10 @@
 // src/export/load.ts
 
-import { TrackData } from '../sequencer/interfaces/Track.js';
-import { GlobalConfig } from '../userconfig/interfaces/GlobalConfig.js';
-import { Session } from '../sequencer/interfaces/Session.js';
-import { Note } from '../shared/interfaces/Note.js';
-import { TrackTuple, NoteTuple } from '../sequencer/interfaces/TrackTuple.js';
+import { TrackData } from '@/components/sequencer/interfaces/Track.js';
+import { GlobalConfig } from '@/components/sequencer/interfaces/Session.js';
+import { Session } from '@/components/sequencer/interfaces/Session.js';
+import { Note } from '@/shared/interfaces/Note.js';
+import { TrackTuple, NoteTuple } from '@/components/sequencer/interfaces/TrackTuple.js';
 
 /**
  * Imports a session from a JSON file.
@@ -30,6 +30,7 @@ export async function importSessionFromJSON(file: File): Promise<Session> {
     bpm: data.c?.b ?? 120,
     beatsPerMeasure: data.c?.bpm ?? 4,
     totalMeasures: data.c?.tm ?? 8,
+    songKey: data.c?.sk ?? 'CM'
   };
 
   // Handle optional arrays

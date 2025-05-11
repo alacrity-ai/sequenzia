@@ -1,7 +1,7 @@
 // src/appState/diffEngine/types/internal/checkpoint.ts
 
-import { AppState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Applies a CHECKPOINT diff — simply clones state without changes.

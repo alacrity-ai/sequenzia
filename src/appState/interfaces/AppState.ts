@@ -1,7 +1,8 @@
 // src/appState/interfaces/AppState.ts
 
-import { Note } from '../../shared/interfaces/Note.js';
-import { SequencerConfig } from '../../sequencer/interfaces/SequencerConfig.js';
+import { Note } from '@/shared/interfaces/Note.js';
+import { SequencerConfig } from '@/components/sequencer/interfaces/SequencerConfig.js';
+import type { SongKey } from '@/shared/types/SongKey.js';
 
 export interface SequencerState {
   id: number;
@@ -16,6 +17,11 @@ export interface AppState {
   timeSignature: [number, number];
   totalMeasures: number;
   sequencers: SequencerState[];
+  songKey: SongKey;
+  snapResolution: number;
+  noteDuration: number;
+  isTripletMode: boolean;
+  isDottedMode: boolean;
 }
 
 export interface CreateSequencerOptions {

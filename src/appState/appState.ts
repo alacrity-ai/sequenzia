@@ -12,6 +12,11 @@ let currentAppState: AppState = {
   timeSignature: [4, 4],
   totalMeasures: 8,
   sequencers: [],
+  songKey: 'CM',
+  snapResolution: 1,
+  noteDuration: 1,
+  isTripletMode: false,
+  isDottedMode: false
 };
 
 /**
@@ -37,4 +42,39 @@ export function recordDiff(forwardDiff: Diff, reverseDiff: Diff): void {
   applyDiff(forwardDiff);
   pushDiff({ forwardDiff, reverseDiff });
   notifyStateUpdated(currentAppState);
+}
+
+
+// Helpers
+
+export function getCurrentTempo(): number {
+  return currentAppState.tempo;
+}
+
+export function getCurrentTimeSignature(): [number, number] {
+  return currentAppState.timeSignature;
+}
+
+export function getCurrentTotalMeasures(): number {
+  return currentAppState.totalMeasures;
+}
+
+export function getCurrentSongKey(): string {
+  return currentAppState.songKey;
+}
+
+export function getCurrentSnapResolution(): number {
+  return currentAppState.snapResolution;
+}
+
+export function getCurrentNoteDuration(): number {
+  return currentAppState.noteDuration;
+}
+
+export function getCurrentIsTripletMode(): boolean {
+  return currentAppState.isTripletMode;
+}
+
+export function getCurrentIsDottedMode(): boolean {
+  return currentAppState.isDottedMode;
 }

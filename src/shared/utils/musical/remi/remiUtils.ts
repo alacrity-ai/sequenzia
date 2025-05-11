@@ -1,9 +1,9 @@
 // src/shared/utils/musical/remiUtils.ts
 
-import type { Note } from '../../../interfaces/Note.js';
-import type { RemiEvent } from '../../../interfaces/RemiEvent.js';
-import type { RemiEncodeOptions } from '../../../interfaces/RemiEncoderOptions.js';
-import { devLog } from '../../../state/devMode.js';
+import type { Note } from '@/shared/interfaces/Note.js';
+import type { RemiEvent } from '@/shared/interfaces/RemiEvent.js';
+import type { RemiEncodeOptions } from '@/shared/interfaces/RemiEncoderOptions.js';
+import { devLog } from '@/shared/state/devMode.js';
 
 
 /**

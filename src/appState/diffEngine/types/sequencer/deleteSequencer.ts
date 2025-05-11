@@ -1,8 +1,8 @@
 // src/appState/diffEngine/types/sequencer/deleteSequencer.ts
 
-import { sequencers } from '../../../../sequencer/factories/SequencerFactory.js';
-import { AppState } from '../../../interfaces/AppState.js';
-import { Diff } from '../../../interfaces/Diff.js';
+import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { AppState } from '@/appState/interfaces/AppState.js';
+import { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Applies a DELETE_SEQUENCER diff to remove a sequencer.
