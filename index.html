@@ -5,110 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sequenzia</title>
   <!-- Tailwind via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./css/styles.css" />
   <link rel="shortcut icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
   <link rel="icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
-  <script type="module" crossorigin src="/sequenzia/assets/index-VrxXiQV4.js"></script>
+  <script type="module" crossorigin src="/sequenzia/assets/index-CjDU6nsh.js"></script>
 </head>
+
 
 <body class="bg-black text-gray-200 font-sans pb-36">
   <!-- Modal Mount -->
-  <div id="modal-mount-root"></div>
+  <div id="modal-mount-root" class="content-hidden"></div>
   <div id="content-main" class="flex flex-col items-center mt-10 space-y-6 content-hidden">
     <!-- MAIN CONTAINER -->
     <div class="flex flex-col w-[1260px] space-y-4 relative">
 
       <!-- Interactive Piano -->
-      <div class="flex items-start gap-2">
-      <!-- Left Side Button Column (ABSOLUTE) -->
-      <div class="absolute left-[-46px] flex flex-col gap-2 z-10">
-        <button id="piano-toggle-btn"
-                class="side-button side-button-info"
-                title="Toggle Piano View">
-          🎹
-        </button>
-        <button id="mixer-toggle-btn"
-                class="side-button side-button-info"
-                title="Toggle Mixer View">
-          🎛️
-        </button>
-        <button id="ai-toggle-btn"
-                class="side-button side-button-info"
-                title="Toggle AI View">
-          🤖
-        </button>
-      </div>
-
-        <!-- Piano Canvas -->
-        <canvas id="piano" width="1260" height="200"
-                class="rounded shadow-lg border border-purple-700"></canvas>
-        
-        <!-- Existing Right-side Controls -->
-        <div class="flex flex-col gap-2">
-          <!-- Piano Controls -->
-          <div class="flex flex-col gap-2">
-            <button id="octave-up"
-                    class="side-button side-button-primary"
-                    title="Octave Up">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-arrow-up"></use>
-              </svg>
-            </button>
-            <button id="octave-down"
-                    class="side-button side-button-primary"
-                    title="Octave Down">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-arrow-down"></use>
-              </svg>
-            </button>
-            <button id="global-instrument-select-btn"
-                    class="side-button side-button-primary"
-                    title="Select Instrument">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-list-instrument"></use>
-              </svg>
-            </button>
-            <button id="disable-keyboard-inputs"
-                    class="side-button side-button-secondary"
-                    title="Toggle Keyboard Input">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-keyboard"></use>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <div id="top-controls-container" class="flex items-start gap-2">
+        <!-- Piano/Mixer/AI Menus Injected Here -->
       </div>
 
       <!-- Waveform Visualizer + Mode Button -->
-      <div class="flex items-start gap-2">
-        <canvas
-          id="waveform"
-          width="1260"
-          height="100"
-          class="rounded border border-purple-800 bg-gray-900"
-        ></canvas>
-        <div class="flex flex-col gap-2">
-          <!-- Visualizer Controls -->
-          <div class="flex flex-col gap-2">
-            <button id="visualizer-mode"
-                    class="side-button side-button-primary"
-                    title="Change visualizer mode">📊</button>
-          </div>
-        </div>
+      <div id="visualizer-container" class="flex items-start gap-2">
+        <!-- Visualizer Injected Here -->
       </div>
 
       <!-- Sequencer Container -->
-      <div id="sequencers-container" class="flex flex-col space-y-4">
+      <div id="sequencers-container" class="flex flex-col space-y-4 mb-[320px]">
         <template id="sequencer-template">
-          <div class="sequencer flex flex-col space-y-2 p-4 bg-gray-900 rounded border border-purple-800">
+          <div class="sequencer flex flex-col space-y-2 p-4 bg-gradient-to-br from-gray-800 to-gray-900 rounded">
             
             <!-- Header -->
             <div class="sequencer-header flex justify-between items-center">
               
               <!-- Left Group: Instrument Button + Track Name -->
               <div class="flex items-center gap-2">
-                <button class="side-button-primary instrument-select-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Change Instrument">
+                <button class="side-button-primary cursor-pointer instrument-select-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Change Instrument">
                   <svg class="w-6 h-6" aria-hidden="true">
                     <use href="#icon-list-instrument"></use>
                   </svg>
@@ -147,17 +78,17 @@
                 <div class="border-l border-purple-800 mx-2 h-6"></div>
 
                 <!-- Zoom Buttons (hidden until expanded) -->
-                <button class="zoom-in-btn side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Zoom In">
+                <button class="zoom-in-btn cursor-pointer side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Zoom In">
                   <svg class="w-6 h-6" aria-hidden="true">
                     <use href="#icon-zoom-in"></use>
                   </svg>
                 </button>
-                <button class="zoom-out-btn side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Zoom Out">
+                <button class="zoom-out-btn cursor-pointer side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Zoom Out">
                   <svg class="w-6 h-6" aria-hidden="true">
                     <use href="#icon-zoom-out"></use>
                   </svg>
                 </button>
-                <button class="zoom-reset-btn side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Reset Zoom">
+                <button class="zoom-reset-btn cursor-pointer side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Reset Zoom">
                   <svg class="w-6 h-6" aria-hidden="true">
                     <use href="#icon-reset"></use>
                   </svg>
@@ -166,22 +97,22 @@
                 <div class="zoom-button-divider border-l border-purple-800 mx-2 h-6 hidden"></div>
         
                 <!-- Mute / Solo / Collapse / Delete -->
-                <button class="side-button-secondary mute-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Mute Track">
+                <button class="side-button-secondary cursor-pointer mute-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Mute Track">
                   <svg class="w-6 h-6" aria-hidden="true">
                     <use href="#icon-volume-mute"></use>
                   </svg>
                 </button>
-                <button class="side-button-secondary solo-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Solo Track">
+                <button class="side-button-secondary cursor-pointer solo-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Solo Track">
                   <svg class="w-6 h-6" aria-hidden="true">
                     <use href="#icon-headphones"></use>
                   </svg>
                 </button>
-                <button class="collapse-btn side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Expand/Collapse Track">
+                <button class="collapse-btn cursor-pointer side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Expand/Collapse Track">
                   <svg class="w-6 h-6" aria-hidden="true">
                     <use href="#icon-caret-down"></use>
                   </svg>
                 </button>
-                <button class="delete-btn side-button-secondary px-2 py-1 hover:bg-red-600 rounded text-white w-8 flex items-center justify-center" title="Delete Track">
+                <button class="delete-btn cursor-pointer side-button-secondary px-2 py-1 hover:bg-red-600 rounded text-white w-8 flex items-center justify-center" title="Delete Track">
                   <svg class="w-6 h-6" aria-hidden="true">
                     <use href="#icon-close-circle"></use>
                   </svg>
@@ -207,337 +138,13 @@
         </template>
         
         <!-- individual sequencers will be injected here -->
-        <button id="add-sequencer" class="self-end px-3 py-1 bg-green-600 rounded">＋ Add Track</button>
+        <button id="add-sequencer" class="self-end px-3 py-1 bg-green-600 rounded" style="cursor: pointer;">＋ Add Track</button>
       </div>
     </div>
   </div>
 
-  <!-- Transport Controls (sticky footer) -->
-  <!-- Spacer for fixed footer height -->
-  <div class="footer-spacer h-[120px]"></div> 
-
   <div id="footer-main" class="fixed bottom-0 left-0 right-0 z-40 content-hidden">
-    <!-- 🔁 Global Mini Contour Fixed Above Footer -->
-    <div class="fixed bottom-[170px] left-0 right-0 z-30 bg-black">
-      <div class="relative flex items-start gap-2 w-[1260px] mx-auto px-100">
-        <!-- Mini Contour -->
-        <div class="flex-1">
-          <div class="relative bg-gray-800 rounded border border-purple-700">
-            <canvas id="global-mini-contour" class="w-full h-full absolute top-0 left-0 z-0"></canvas>
-            <canvas id="global-mini-playhead" class="w-full h-full absolute top-0 left-0 z-10"></canvas>
-          </div>
-        </div>
-    
-        <!-- Side Button - Absolutely Positioned -->
-        <div class="absolute left-[calc(100%+10px)] flex-col gap-2">
-          <button id="global-mini-expand-btn"
-                  class="side-button side-button-primary"
-                  title="Expand Global Overview">
-            <svg class="w-6 h-6 text-white" aria-hidden="true">
-              <use href="#icon-caret-up"></use>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="transport-ui"
-    class="relative w-[1260px] mx-auto bg-gray-900 border-t border-purple-800">
-
-      <!-- Left Side Button Column -->
-      <div class="absolute left-0 top-[60px] z-40 -translate-x-[46px] flex flex-col gap-2">
-        <!-- Help -->
-        <button id="footer-help-btn"
-                class="side-button side-button-info"
-                title="Help / Documentation">
-          <svg class="w-6 h-6" aria-hidden="true">
-            <use href="#icon-lightbulb"></use>
-          </svg>
-        </button>
-
-        <!-- What's New -->
-        <button id="footer-whats-new-btn"
-                class="side-button side-button-info"
-                title="What’s New / Release Notes">
-          <svg class="w-6 h-6" aria-hidden="true">
-            <use href="#icon-chart-mixed"></use>
-          </svg>
-        </button>
-
-      </div>
-
-      <!-- Mode Selection and Note Duration Buttons Row -->
-      <div class="flex justify-left gap-3 p-2 pl-32 border-b border-purple-800">
-        <!-- Mode Selection Buttons -->
-        <div class="flex gap-2 border-r border-purple-800 pr-3 mr-1">
-          <button id="note-mode-btn" 
-                  class="bg-blue-600 px-4 py-1 rounded-lg text-white hover:bg-blue-700 border-2 border-blue-400"
-                  title="Note Edit Mode">
-            <svg class="w-6 h-6" aria-hidden="true">
-              <use href="#icon-pen"></use>
-            </svg>
-          </button>
-          <button id="ai-mode-btn"
-                  class="bg-gray-800 px-4 py-1 rounded-lg text-white hover:bg-purple-700 border-2 border-purple-400"
-                  title="AI Mode">
-            <svg class="w-6 h-6" aria-hidden="true">
-              <use href="#icon-brain"></use>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Note Duration Panel -->
-        <div id="note-duration-panel" class="flex gap-3">
-          <!-- Note Edit Mode Controls -->
-          <div class="flex gap-2 border-r border-purple-800 pr-3 mr-1">
-            <button id="note-placement-options-btn"
-                    class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    title="Note Placement (Q)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-music"></use>
-              </svg>
-            </button>
-            <button id="note-editing-options-btn"
-                    class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    title="Note Editing (W)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-ruler"></use>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Note Duration Controls -->
-          <div id="note-duration-controls" class="flex gap-2">
-            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    data-value="4" title="Whole-Note (1)">𝅝</button>
-            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    data-value="2" title="Half-Note (2)">𝅗𝅥</button>
-            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    data-value="1" title="Quarter-Note (3)">𝅘𝅥</button>
-            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    data-value="0.5" title="Eigth-Note (4)">♪</button>
-            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    data-value="0.25" title="Sixteenth-Note (5)">♬</button>
-            <button class="note-duration-btn bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    data-value="0.125" title="32nd-Note (6)">𝅘𝅥𝅰</button>
-            <div class="border-l border-purple-800 mx-2"></div>
-            <button id="dotted-note-btn"
-                    class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    title="Toggle Dotted Note (.)">•</button>
-            <button id="triplet-note-btn"
-                    class="bg-gray-800 px-4 py-1 rounded text-2xl text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                    title="Toggle Triplet (/)">³</button>
-          </div>
-
-          <!-- Select Mode Controls (Initially Hidden) -->
-          <div id="note-editing-controls" class="flex gap-2 hidden">
-            <!-- Velocity and Quantize Buttons -->
-            <button id="velocity-mode-menu-btn"
-                    class="note-editing-velocity bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Adjust Velocity (V)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-chart-bar"></use>
-              </svg>
-            </button>
-            <button id="quantize-mode-menu-btn"
-                    class="note-editing-quantize bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Quantize Notes (C)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-clock"></use>
-              </svg>
-            </button>
-            
-            <!-- Divider -->
-            <div class="border-l border-purple-800 mx-2"></div>
-            
-            <!-- Existing Copy/Cut/Paste Buttons -->
-            <button class="note-editing-copy bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Copy (CTRL+C)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-copy"></use>
-              </svg>
-            </button>
-            <button class="note-editing-cut bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Cut (CTRL+X)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-cut"></use>
-              </svg>
-            </button>
-            <button class="note-editing-paste bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Paste (CTRL+V)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-paste"></use>
-              </svg>
-            </button>
-            <button class="note-editing-delete bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Delete (Del)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-trash"></use>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Velocity Mode Controls (Initially Hidden) -->
-          <div id="velocity-mode-controls" class="flex gap-2 hidden">
-            <button class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 w-[52px] flex items-center justify-center"
-                    title="Velocity Tool (Coming Soon)">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-ruler"></use>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- AI Control Panel -->
-        <div id="ai-control-panel" class="flex gap-3 hidden">
-          <button id="ai-inpaint-btn"
-                  class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                  title="AI Inpaint">
-            <svg class="w-6 h-6" aria-hidden="true">
-              <use href="#icon-paintbrush"></use>
-            </svg>
-          </button>
-          <button id="ai-extend-btn"
-                  class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                  title="AI Extend">
-            <svg class="w-6 h-6" aria-hidden="true">
-              <use href="#icon-forward"></use>
-            </svg>
-          </button>
-          <button id="ai-generate-btn"
-                  class="bg-gray-800 px-4 py-1 rounded text-white hover:bg-purple-700 h-[42px] w-[52px] flex items-center justify-center"
-                  title="AI Generate">
-            <svg class="w-6 h-6" aria-hidden="true">
-              <use href="#icon-lightbulb"></use>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Main Transport Controls -->
-      <div class="flex justify-center gap-6 px-4 py-8 text-sm">
-        <button id="play-button"
-                title="Play/Pause"
-                class="w-12 h-12 flex items-center justify-center 
-                       bg-blue-600 hover:bg-blue-700 rounded-full shadow 
-                       text-white transition-all hover:scale-110 
-                       select-none focus:outline-none focus:ring-0">
-          <svg class="w-6 h-6">
-            <use href="#icon-play"></use>
-          </svg>
-        </button>
-
-        <button id="stop-button"
-                title="Stop"
-                class="w-12 h-12 flex items-center justify-center 
-                       bg-blue-600 hover:bg-blue-700 rounded-full shadow 
-                       text-white transition-all hover:scale-110 
-                       select-none focus:outline-none focus:ring-0">
-          <svg class="w-6 h-6">
-            <use href="#icon-stop"></use>
-          </svg>
-        </button>
-
-        <!-- First Vertical Divider -->
-        <div class="h-12 w-px bg-purple-800"></div>
-
-        <button id="record-button"
-                title="Record"
-                class="w-12 h-12 flex items-center justify-center 
-                       bg-red-600 hover:bg-red-700 rounded-full shadow 
-                       text-white transition-all hover:scale-110 
-                       select-none focus:outline-none focus:ring-0">
-          <svg class="w-6 h-6">
-            <use href="#icon-record"></use>
-          </svg>
-        </button>
-
-        <!-- Second Vertical Divider -->
-        <div class="h-12 w-px bg-purple-800"></div>
-
-        <select id="note-duration" class="hidden">
-          <option value="4">𝅝</option>
-          <option value="2">𝅗𝅥</option>
-          <option value="1">𝅘𝅥</option>
-          <option value="0.5">♪</option>
-          <option value="0.25">♬</option>
-          <option value="0.125">𝅘𝅥𝅰</option>
-        </select>
-        
-        <div class="flex items-center gap-2">
-          <span class="text-white">Snap:</span>
-          <select id="snap-resolution"
-              class="bg-gray-800 text-white border border-purple-700 px-2 py-1 rounded text-2xl">
-            <option value="4">𝅝</option>
-            <option value="2">𝅗𝅥</option>
-            <option value="1">𝅘𝅥</option>
-            <option value="0.5">♪</option>
-            <option value="0.25">♬</option>
-            <option value="0.125">𝅘𝅥𝅰</option>
-          </select>
-        </div>        
-
-        <label class="flex items-center gap-2">
-          <input type="checkbox" id="loop-toggle" class="accent-purple-500">
-          <span>Loop</span>
-        </label>
-
-        <label class="flex items-center gap-2">
-          <span>Tempo:</span>
-          <input type="number" id="tempo-input" min="20" max="300" value="120"
-                 class="w-16 bg-gray-800 text-white border border-purple-700 px-2 py-1 rounded">
-        </label>
-
-        <div class="flex items-center gap-2">
-          <span>Measures:</span>
-          <input type="number" 
-                 id="measures-input" 
-                 min="1" 
-                 max="1000" 
-                 value="8"
-                 class="w-16 bg-gray-800 text-white border border-purple-700 px-2 py-1 rounded">
-        </div>
-
-        <div class="flex items-center gap-2">
-          <span>Beats:</span>
-          <input type="number" 
-                 id="beats-per-measure-input" 
-                 min="1" 
-                 max="16" 
-                 value="4"
-                 class="w-16 bg-gray-800 text-white border border-purple-700 px-2 py-1 rounded">
-        </div>
-
-        <button id="save-button"
-                title="Save"
-                class="w-12 h-12 flex items-center justify-center bg-green-600 hover:bg-green-700 rounded-full shadow text-white transition-all hover:scale-110">
-          <svg class="w-6 h-6">
-            <use href="#icon-save"></use>
-          </svg>
-        </button>
-
-        <button id="load-button"
-                title="Load"
-                class="w-12 h-12 flex items-center justify-center bg-yellow-600 hover:bg-yellow-700 rounded-full shadow text-white transition-all hover:scale-110">
-          <svg class="w-6 h-6">
-            <use href="#icon-load"></use>
-          </svg>
-        </button>
-        <input type="file" id="load-input" accept=".json" style="display: none;" />
-
-        <!-- Vertical Divider -->
-        <div class="h-12 w-px bg-purple-800"></div>
-
-        <!-- Configuration Button -->
-        <button id="config-button"
-                title="User Settings"
-                class="w-12 h-12 flex items-center justify-center bg-purple-600 hover:bg-purple-700 rounded-full shadow text-white transition-all hover:scale-110">
-          <svg class="w-6 h-6">
-            <use href="#icon-user-settings"></use>
-          </svg>
-        </button>
-      </div>
-    </div>
+    <!--- Global Controls Injected Here -->
   </div>
 
   <!-- Load Modals and Icons -->
