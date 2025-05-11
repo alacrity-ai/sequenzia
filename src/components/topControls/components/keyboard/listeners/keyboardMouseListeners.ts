@@ -2,7 +2,7 @@
 
 import { playNote } from '@/sounds/audio/audio.js';
 import { drawKeys } from '@/components/topControls/components/keyboard/renderers/renderer.js';
-import { getKeyMapRef } from '../stores/keyboardStore.js';
+import { getKeyMapRef } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 
@@ -53,7 +53,7 @@ export function attachKeyboardMouseListeners(
     if (handle) {
       activeNoteHandles.set(note, handle);
       pressedNotes.add(note);
-      drawKeys(ctx, getKeyMapRef(), pressedNotes);
+      drawKeys(ctx, getKeyMapRef(), pressedNotes, undefined);
     }
   }
 
@@ -65,7 +65,7 @@ export function attachKeyboardMouseListeners(
       activeNoteHandles.delete(note);
     }
     pressedNotes.delete(note);
-    drawKeys(ctx, getKeyMapRef(), pressedNotes);
+    drawKeys(ctx, getKeyMapRef(), pressedNotes, undefined);
   }
 
   function releaseAll(): void {

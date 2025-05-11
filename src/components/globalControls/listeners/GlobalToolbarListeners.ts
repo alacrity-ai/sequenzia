@@ -1,9 +1,11 @@
 // src/globalControls/listeners/GlobalToolbarListeners.ts
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
+
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
 import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
-import { isKeyboardListenersAttached } from '@/components/keyboard/input/keyboard-interaction.js';
+import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
+
 import {
   updateSnapResolution,
   getSnapResolution,
@@ -15,17 +17,6 @@ import {
 } from '@/shared/playback/transportService.js';
 import { onStateUpdated } from '@/appState/onStateUpdated.js';
 
-// Handle AI-Mode Button (Not implemented yet)
-const handleAIModeClick = () => {
-  // TODO: Implement AI mode logic
-};
-
-
-// Handle Edit / Note Mode Button (Not implemented yet)
-const handleEditModeClick = () => {
-  // TODO: Implement note mode logic
-};
-
 const durationHotkeys: Record<string, number> = {
   Digit1: 4,
   Digit2: 2,
@@ -35,7 +26,9 @@ const durationHotkeys: Record<string, number> = {
   Digit6: 0.125
 };
 
-export function attachToolbarListeners(container: HTMLElement): ListenerAttachment {
+export function attachToolbarListeners(
+  container: HTMLElement,
+): ListenerAttachment {
   const durationButtons = container.querySelectorAll<HTMLButtonElement>('button[data-value]');
   const dottedNoteBtn = container.querySelector<HTMLButtonElement>('#dotted-note-btn');
   const tripletNoteBtn = container.querySelector<HTMLButtonElement>('#triplet-note-btn');
@@ -43,7 +36,6 @@ export function attachToolbarListeners(container: HTMLElement): ListenerAttachme
   const highlightActiveDuration = () => {
     const snap = getSnapResolution();
     const duration = getNoteDuration();
-    console.log('Got snap and duration', snap, duration);
 
     durationButtons.forEach(btn => {
       const val = parseFloat(btn.dataset.value ?? '-1');
@@ -156,7 +148,7 @@ dottedNoteBtn?.addEventListener('click', () => {
       target.tagName === 'INPUT' ||
       target.tagName === 'TEXTAREA' ||
       target.isContentEditable ||
-      isKeyboardListenersAttached()
+      isKeyboardInputEnabled()
     ) return;
 
     if (durationHotkeys.hasOwnProperty(e.code)) {

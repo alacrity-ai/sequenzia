@@ -36,32 +36,28 @@ export class TopControlsController {
   }
 
   public setMode(mode: TopControlsMode): void {
-    if (this.activeMode === mode) return;
-
-    // === Unmount previous component ===
+    // Unconditionally switch mode if not yet mounted
     if (this.activeElement) {
+      if (this.activeMode === mode) return; // Only skip if already active *and* mounted
       this.container.removeChild(this.activeElement);
       this.activeElement = null;
     }
 
     this.activeMode = mode;
 
-    // === Render and mount selected component ===
     switch (mode) {
       case 'keyboard':
         this.activeElement = this.keyboardController.render();
         this.container.appendChild(this.activeElement);
-        this.keyboardController.initialize(); // Important!
+        this.keyboardController.initialize();
         break;
 
       case 'ai':
-        // this.activeElement = this.aiMenuController.render();
         this.activeElement = this.createStub('AI View not implemented');
         this.container.appendChild(this.activeElement);
         break;
 
       case 'mixer':
-        // this.activeElement = this.mixerController.render();
         this.activeElement = this.createStub('Mixer View not implemented');
         this.container.appendChild(this.activeElement);
         break;

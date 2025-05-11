@@ -3,9 +3,9 @@
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 import type { VelocityModalController } from '@/components/globalControls/modals/velocity/velocityModalController.js';
 
+import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import { getActiveSelection } from '@/components/sequencer/utils/selectionTracker.js';
 import { popupsController } from '@/main.js';
-import { isKeyboardListenersAttached } from '@/components/keyboard/input/keyboard-interaction.js';
 
 /**
  * Attaches global-level control listeners (e.g. modals triggered via hotkeys or UI popovers).
@@ -34,7 +34,9 @@ export function attachGlobalControlsListeners(
 
     const tag = (document.activeElement as HTMLElement)?.tagName;
     const isTypingContext = tag === 'INPUT' || tag === 'TEXTAREA';
-    if (isTypingContext || isKeyboardListenersAttached()) return;
+    const isIncompatibleContext = isKeyboardInputEnabled();
+
+    if (isTypingContext || isIncompatibleContext) return;
 
     e.preventDefault();
     tryOpenVelocityModal();

@@ -26,6 +26,9 @@ export const sunsetSkin: InterfaceSkin = {
     toggleTrackBase: 'bg-red-700',
     toggleTrackChecked: 'peer-checked:bg-yellow-400',
     toggleKnobBase: 'after:border-orange-300',
-    toggleKnobChecked: 'peer-checked:after:border-white'
+    toggleKnobChecked: 'peer-checked:after:border-white',
+
+    blackKeyColor: '#45122c',    // dusky plum
+    whiteKeyColor: '#fff3e0'     // pastel sand / warm light peach
   };
   

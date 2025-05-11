@@ -1,15 +1,28 @@
 // src/keyboard/renderer.ts
 
+import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 import { KeyInfo } from '../helpers/keys.js';
 
 interface DrawKeyOptions {
   x: number;
   width: number;
   height: number;
-  fill: string;
+  fill: CanvasGradient;
   stroke: string;
   radius?: number;
 }
+
+function shadeColor(hex: string, percent: number): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+
+  const R = Math.max(0, Math.min(255, (num >> 16) + amt));
+  const G = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amt));
+  const B = Math.max(0, Math.min(255, (num & 0x0000FF) + amt));
+
+  return `rgb(${R},${G},${B})`;
+}
+
 
 /**
  * Draws the keyboard based on provided key map and highlighted notes.
@@ -18,24 +31,34 @@ export function drawKeys(
   ctx: CanvasRenderingContext2D,
   keyMap: Record<string, KeyInfo>,
   highlightNotes: Set<string> = new Set(),
-  keyToNoteMap: Record<string, string> | null = null
+  keyToNoteMap: Record<string, string> | null = null,
 ): void {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  // Invert keyToNoteMap to build note → keyChar lookup
+  const { whiteKeyColor, blackKeyColor } = getCurrentSkin();
   const noteToKey: Record<string, string> = {};
+
   if (keyToNoteMap) {
     for (const [keyChar, note] of Object.entries(keyToNoteMap)) {
       noteToKey[note] = keyChar;
     }
   }
 
-  // Draw white keys
+  // === WHITE KEYS ===
   for (const key of Object.values(keyMap)) {
     if (!key.isBlack) {
+      const grad = ctx.createLinearGradient(0, 0, 0, key.height);
+      if (highlightNotes.has(key.note)) {
+        grad.addColorStop(0, '#99cfff');
+        grad.addColorStop(1, '#cce0ff');
+      } else {
+        grad.addColorStop(0, shadeColor(whiteKeyColor, -20));
+        grad.addColorStop(1, whiteKeyColor);
+      }
+
       drawRoundedKey(ctx, {
         ...key,
-        fill: highlightNotes.has(key.note) ? '#cce0ff' : '#ffffff',
+        fill: grad,
         stroke: '#333',
         radius: 6
       });
@@ -45,7 +68,7 @@ export function drawKeys(
       ctx.textAlign = 'center';
 
       if (noteToKey[key.note]) {
-        ctx.fillStyle = '#7c3aed'; // dark purple
+        ctx.fillStyle = '#7c3aed';
         ctx.fillText(noteToKey[key.note], key.x + key.width / 2, key.height - 24);
         ctx.fillStyle = '#333';
       }
@@ -54,20 +77,27 @@ export function drawKeys(
     }
   }
 
-  // Draw black keys
+  // === BLACK KEYS ===
   for (const key of Object.values(keyMap)) {
     if (key.isBlack) {
+      const grad = ctx.createLinearGradient(0, 0, 0, key.height);
+      if (highlightNotes.has(key.note)) {
+        grad.addColorStop(0, '#3040ff');
+        grad.addColorStop(1, '#4a60ff');
+      } else {
+        grad.addColorStop(0, shadeColor(blackKeyColor, -20));
+        grad.addColorStop(1, blackKeyColor);
+      }
+
       drawRoundedKey(ctx, {
         ...key,
-        fill: highlightNotes.has(key.note) ? '#4a60ff' : '#111111',
+        fill: grad,
         stroke: '#000000',
         radius: 4
       });
 
-      drawGloss(ctx, key);
-
       if (noteToKey[key.note]) {
-        ctx.fillStyle = '#c084fc'; // light purple
+        ctx.fillStyle = '#c084fc';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(noteToKey[key.note], key.x + key.width / 2, key.height - 28);
@@ -75,6 +105,7 @@ export function drawKeys(
     }
   }
 }
+
 
 function drawRoundedKey(ctx: CanvasRenderingContext2D, options: DrawKeyOptions): void {
   const { x, width, height, fill, stroke, radius = 8 } = options;

@@ -23,6 +23,10 @@ export const modernLightSkin: InterfaceSkin = {
     toggleTrackBase: 'bg-gray-300',
     toggleTrackChecked: 'peer-checked:bg-blue-600',
     toggleKnobBase: 'after:border-gray-400',
-    toggleKnobChecked: 'peer-checked:after:border-white'
+    toggleKnobChecked: 'peer-checked:after:border-white',
+
+    // Normal Key colors
+    blackKeyColor: '#111111',
+    whiteKeyColor: '#ffffff'
   };
   

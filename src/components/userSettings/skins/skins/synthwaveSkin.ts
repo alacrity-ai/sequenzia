@@ -23,6 +23,9 @@ export const synthwaveSkin: InterfaceSkin = {
     toggleTrackBase: 'bg-pink-800',
     toggleTrackChecked: 'peer-checked:bg-fuchsia-500',
     toggleKnobBase: 'after:border-pink-400',
-    toggleKnobChecked: 'peer-checked:after:border-white'
+    toggleKnobChecked: 'peer-checked:after:border-white',
+
+    blackKeyColor: '#d946ef', // Tailwind fuchsia-500 — rich, vibrant, but not retina-searing
+    whiteKeyColor: '#f5d0fe'  // Tailwind fuchsia-100 — warm pastel pink for balance
   };
   

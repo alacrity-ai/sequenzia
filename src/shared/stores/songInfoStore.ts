@@ -14,9 +14,9 @@ const KEY_SNAP_TO_IN_KEY = 'snap-to-in-key';
 const DEFAULT_SONG_KEY: SongKey = 'CM';
 
 // === Initialization from storage
-let keyGridHighlightingEnabled = loadJSON<boolean>(KEY_GRID_HIGHLIGHT) ?? true;
+let keyGridHighlightingEnabled = loadJSON<boolean>(KEY_GRID_HIGHLIGHT) ?? false;
 let snapToGridEnabled = loadJSON<boolean>(KEY_SNAP_TO_GRID) ?? true;
-let snapToInKeyEnabled = loadJSON<boolean>(KEY_SNAP_TO_IN_KEY) ?? true;
+let snapToInKeyEnabled = loadJSON<boolean>(KEY_SNAP_TO_IN_KEY) ?? false;
 let currentMidiNoteMap: MidiNoteMap = getMidiNoteMapForKey(DEFAULT_SONG_KEY);
 
 // === Accessors & Mutators

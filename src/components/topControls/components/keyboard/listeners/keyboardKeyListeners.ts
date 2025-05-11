@@ -3,8 +3,7 @@
 import { playNote, stopNoteByPitch } from '@/sounds/instrument-player.js';
 import { drawKeys } from '@/components/topControls/components/keyboard/renderers/renderer.js';
 import { WHITE_KEYS, BLACK_KEYS } from '@/components/topControls/components/keyboard/helpers/constants.js';
-import { isKeyboardLoopEnabled } from '@/components/topControls/components/keyboard/stores/keyboardStore.js';
-import { getKeyMapRef } from '@/components/topControls/components/keyboard/stores/keyboardStore.js';
+import { isKeyboardInputEnabled, isKeyboardLoopEnabled, getKeyMapRef } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 
@@ -78,11 +77,12 @@ export function attachKeyboardKeyListeners(
   }
 
   const handleKeydown = (e: KeyboardEvent) => {
-    if (e.repeat) return;
+    if (e.repeat || !isKeyboardInputEnabled()) return;
     pressKey(e.key);
   };
 
   const handleKeyup = (e: KeyboardEvent) => {
+    if (!isKeyboardInputEnabled()) return;
     releaseKey(e.key);
   };
 

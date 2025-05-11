@@ -5,9 +5,9 @@ import { getWebAudioFontPlayer } from './players/webaudiofont-player.js';
 import { EngineName, EnginePlayer } from './interfaces/Engine.js';
 import { getPreviewContext, getPreviewDestination } from './audio/previewContext.js';
 import { getAudioContext } from './audio/audio.js';
+import { getKeyboardInstrument } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 
-
-// // Registry of available players
+// Registry of available players
 const enginePlayers: Record<EngineName, EnginePlayer> = {
     sf2: getSf2Player(),
     webaudiofont: getWebAudioFontPlayer()
@@ -16,10 +16,7 @@ const enginePlayers: Record<EngineName, EnginePlayer> = {
 // Default engine
 const DEFAULT_ENGINE: EngineName = 'sf2';
 
-// 🔥 Public API
-
-// Only for GLOBAL keyboard piano
-let activeGlobalInstrumentFullName: string | null = null;
+// Public API
 
 // Used by GLOBAL VIRTUAL PIANO only
 export async function setGlobalActiveInstrument(
@@ -34,12 +31,11 @@ export async function setGlobalActiveInstrument(
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
   
     await engine.setActiveInstrument(fullName);
-    activeGlobalInstrumentFullName = fullName;
 }  
 
 // Used to get GLOBAL VIRTUAL PIANO instrument
 export function getGlobalActiveInstrumentName(): string | null {
-  return activeGlobalInstrumentFullName;
+  return getKeyboardInstrument();
 }
 
 // Used when loading notes normally
@@ -59,9 +55,10 @@ export function playNote(
     velocity: number = 100,
     loop: boolean = false
   ): (() => void) | null {
-    if (!activeGlobalInstrumentFullName) return null;
+    const fullName = getKeyboardInstrument();
+    if (!fullName) return null;
   
-    const engineName = activeGlobalInstrumentFullName.split('/')[0] as EngineName;
+    const engineName = fullName.split('/')[0] as EngineName;
     const engine = enginePlayers[engineName];
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
   
@@ -70,9 +67,10 @@ export function playNote(
   
 // Crucial for stopping a sustained note, this is used by the virtual piano
 export function stopNoteByPitch(pitch: string): void {
-    if (!activeGlobalInstrumentFullName) return;
+    const fullName = getKeyboardInstrument();
+    if (!fullName) return;
   
-    const engineName = activeGlobalInstrumentFullName.split('/')[0] as EngineName;
+    const engineName = fullName.split('/')[0] as EngineName;
     const engine = enginePlayers[engineName];
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
   
@@ -117,9 +115,6 @@ export async function loadAndPlayNote(
     pan
   );
 }
-
-
-
   
 export function getAvailableEngines(): EngineName[] {
   return Object.keys(enginePlayers) as EngineName[];

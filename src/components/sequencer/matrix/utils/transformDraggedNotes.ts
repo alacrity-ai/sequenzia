@@ -3,6 +3,7 @@
 import type { Note } from '@/shared/interfaces/Note.js';
 import { noteToMidi, midiToPitch } from '@/shared/utils/musical/noteUtils.js';
 import { getTotalBeats } from '@/shared/playback/transportService.js';
+import { isSnapToInKeyEnabled, getMidiNoteMap } from '@/shared/stores/songInfoStore.js';
 
 interface DragTransformOptions {
   originalNotes: Note[];
@@ -26,7 +27,6 @@ export function transformDraggedNotes({
   if (targetMidi == null || anchorMidi == null) return [];
 
   const deltaBeats = targetBeat - anchorNote.start;
-  const deltaMidi = targetMidi - anchorMidi;
 
   const transformedStarts = originalNotes.map(n => n.start + deltaBeats);
   const transformedEnds = originalNotes.map(n => n.start + deltaBeats + n.duration);
@@ -38,24 +38,66 @@ export function transformDraggedNotes({
   const rightClampShift = Math.max(0, maxEnd - getTotalBeats());
   const clampedDeltaBeats = deltaBeats - leftClampShift - rightClampShift;
 
-  return originalNotes.flatMap(n => {
-    const midi = noteToMidi(n.pitch);
-    if (midi == null) return [];
+  const snapToInKey = isSnapToInKeyEnabled();
 
-    let shiftedMidi = midi + deltaMidi;
+  if (!snapToInKey) {
+    // === Linear chromatic transform (default)
+    const deltaMidi = targetMidi - anchorMidi;
 
-    // Clamp vertically
-    if (shiftedMidi < lowestMidi) shiftedMidi = lowestMidi;
-    if (shiftedMidi > highestMidi) shiftedMidi = highestMidi;
+    return originalNotes.flatMap(n => {
+      const midi = noteToMidi(n.pitch);
+      if (midi == null) return [];
 
-    const newPitch = midiToPitch(shiftedMidi);
-    if (!newPitch) return [];
+      let shiftedMidi = midi + deltaMidi;
+      if (shiftedMidi < lowestMidi) shiftedMidi = lowestMidi;
+      if (shiftedMidi > highestMidi) shiftedMidi = highestMidi;
 
-    return [{
-      pitch: newPitch,
-      start: n.start + clampedDeltaBeats,
-      duration: n.duration,
-      velocity: n.velocity ?? 100,
-    }];
-  });
+      const newPitch = midiToPitch(shiftedMidi);
+      if (!newPitch) return [];
+
+      return [{
+        pitch: newPitch,
+        start: n.start + clampedDeltaBeats,
+        duration: n.duration,
+        velocity: n.velocity ?? 100,
+      }];
+    });
+  } else {
+    // === Harmonic in-key transform
+    const inKeyMap = getMidiNoteMap();
+
+    // Build ordered array of in-key MIDI notes, top-down
+    const inKeyNotes: number[] = [];
+    for (let m = highestMidi; m >= lowestMidi; m--) {
+      if (inKeyMap.get(m)) inKeyNotes.push(m);
+    }
+
+    const anchorIndex = inKeyNotes.indexOf(anchorMidi);
+    const targetIndex = inKeyNotes.indexOf(targetMidi);
+    if (anchorIndex === -1 || targetIndex === -1) return [];
+
+    const intervalInSteps = targetIndex - anchorIndex;
+
+    return originalNotes.flatMap(n => {
+      const midi = noteToMidi(n.pitch);
+      if (midi == null) return [];
+
+      const originalIndex = inKeyNotes.indexOf(midi);
+      if (originalIndex === -1) return []; // Skip out-of-key notes
+
+      const newIndex = originalIndex + intervalInSteps;
+      if (newIndex < 0 || newIndex >= inKeyNotes.length) return [];
+
+      const newMidi = inKeyNotes[newIndex];
+      const newPitch = midiToPitch(newMidi);
+      if (!newPitch) return [];
+
+      return [{
+        pitch: newPitch,
+        start: n.start + clampedDeltaBeats,
+        duration: n.duration,
+        velocity: n.velocity ?? 100,
+      }];
+    });
+  }
 }

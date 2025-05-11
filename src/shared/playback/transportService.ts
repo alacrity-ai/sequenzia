@@ -2,6 +2,7 @@
 
 import { getSequencers } from '@/components/sequencer/factories/SequencerFactory.js';
 import { getAppState, recordDiff } from '@/appState/appState.js';
+import { isSnapToGridEnabled } from '../stores/songInfoStore';
 import {
   createChangeTempoDiff,
   createReverseChangeTempoDiff
@@ -109,6 +110,9 @@ export function updateSongKey(newKey: SongKey, record = true): void {
 }
 
 export function getSnapResolution(): number {
+  if (!isSnapToGridEnabled()) {
+    return 0.001;
+  }
   return getAppState().snapResolution;
 }
 

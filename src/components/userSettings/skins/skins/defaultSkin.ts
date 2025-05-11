@@ -26,6 +26,9 @@ export const defaultSkin: InterfaceSkin = {
     toggleTrackBase: 'bg-gray-700',
     toggleTrackChecked: 'peer-checked:bg-purple-600',
     toggleKnobBase: 'after:border-gray-300',
-    toggleKnobChecked: 'peer-checked:after:border-white'
+    toggleKnobChecked: 'peer-checked:after:border-white',
+
+    blackKeyColor: '#a6a09b',
+    whiteKeyColor: '#292524'
   };
   

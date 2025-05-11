@@ -25,6 +25,9 @@ export const blueDreamSkin: InterfaceSkin = {
     toggleTrackBase: 'bg-blue-700',
     toggleTrackChecked: 'peer-checked:bg-cyan-400',
     toggleKnobBase: 'after:border-blue-300',
-    toggleKnobChecked: 'peer-checked:after:border-white'
+    toggleKnobChecked: 'peer-checked:after:border-white',
+
+    blackKeyColor: '#1b1f5f',    // rich indigo-blue
+    whiteKeyColor: '#c0e7ff'     // cool icy blue
   };
   

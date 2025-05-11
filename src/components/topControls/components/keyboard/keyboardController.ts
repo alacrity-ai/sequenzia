@@ -1,7 +1,11 @@
-import { createKeyboardUI } from './ui/keyboardUI.js';
-import { attachKeyboardMouseListeners } from './listeners/keyboardMouseListeners.js';
-import { attachKeyboardKeyListeners } from './listeners/keyboardKeyListeners.js';
-import { attachKeyboardSideButtonListeners } from './listeners/sideButtonListeners.js';
+// src/components/topControls/components/keyboard/keyboardController.ts
+
+import { createKeyboardUI } from '@/components/topControls/components/keyboard/ui/keyboardUI.js';
+import { attachKeyboardMouseListeners } from '@/components/topControls/components/keyboard/listeners/keyboardMouseListeners.js';
+import { attachKeyboardKeyListeners } from '@/components/topControls/components/keyboard/listeners/keyboardKeyListeners.js';
+import { attachKeyboardSideButtonListeners } from '@/components/topControls/components/keyboard/listeners/sideButtonListeners.js';
+import { getKeyboardInstrument, initKeyboardInstrumentState } from '@/components/topControls/components/keyboard/services/keyboardService.js';
+import { refreshInstrumentSelectorModal } from '@/components/sequencer/ui/controls/instrumentSelector.js';
 
 /**
  * Lifecycle manager for the on-screen piano keyboard and its controls.
@@ -30,12 +34,22 @@ export class KeyboardController {
    * Attach event listeners. Should be called after the wrapper has been inserted into the DOM.
    */
   public initialize(): void {
+    // Load default instrument silently
+    initKeyboardInstrumentState();
+    const fullName = getKeyboardInstrument()
+    refreshInstrumentSelectorModal(fullName);
+
+    // Attach listeners
     const mouse = attachKeyboardMouseListeners(this.canvas);
     const keys = attachKeyboardKeyListeners(this.canvas);
     const side = attachKeyboardSideButtonListeners(this.wrapper);
 
+    // Store for later
     this.detachFns = [mouse.detach, keys.detach, side.detach];
     this.refreshFns = [mouse.refreshUI, keys.refreshUI, side.refreshUI];
+
+    // Ensure keyboard is drawn immediately
+    this.refresh();
   }
 
   public refresh(): void {

@@ -23,6 +23,8 @@ import { LoadModalController } from '@/components/globalControls/modals/loadModa
 import { VelocityModalController } from '@/components/globalControls/modals/velocity/velocityModalController.js';
 import { WhatsNewModalController } from '@/components/globalControls/modals/whatsNew/whatsNewModalController.js';
 
+import { topControlsController } from '@/main.js';
+
 import type { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import type { UserConfigModalController } from '@/components/userSettings/userConfig.js';
 
@@ -88,7 +90,7 @@ export class GlobalControlsController {
     );
     const sideButtonListeners = attachSideButtonListeners(sideButtons, this.whatsNewModal);
     const playheadListeners = attachPlayheadListeners(this.controls.getGlobalPlayheadRow());
-    const globalControlsListeners = attachGlobalControlsListeners({ velocity: this.velocityModal});
+    const globalControlsListeners = attachGlobalControlsListeners({ velocity: this.velocityModal });
 
     this.detachFns = [
       contourListeners.detach,

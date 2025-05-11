@@ -22,5 +22,8 @@ export interface InterfaceSkin {
     toggleTrackChecked: string;
     toggleKnobBase: string;
     toggleKnobChecked: string;
+
+    blackKeyColor: string;
+    whiteKeyColor: string;
   }
   

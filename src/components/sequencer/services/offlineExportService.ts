@@ -17,20 +17,17 @@ export async function exportNotesToOffline(
   const beatToSec = 60 / getTempo();
 
   if (signal?.aborted) {
-    console.log('ABORTED Before loading instrument');
     return;
   }
 
   const instrument = await loadInstrument(instrumentName, context, destination, volume, pan);
 
   if (signal?.aborted) {
-    console.log('ABORTED After loading instrument');
     return;
   }
 
   for (const note of notes) {
     if (signal?.aborted) {
-      console.log('ABORTED During note export');
       return;
     }
 

@@ -2,28 +2,19 @@
 
 import { getKeyMap } from '@/components/topControls/components/keyboard/helpers/keys.js';
 import { drawKeys } from '@/components/topControls/components/keyboard/renderers/renderer.js';
-import { WHITE_KEYS, BLACK_KEYS } from '@/components/topControls/components/keyboard/helpers/constants.js';
+import { refreshInstrumentSelectorModal } from '@/components/sequencer/ui/controls/instrumentSelector.js';
+import { setSideButtonActivated } from '@/shared/ui/helpers/setSideButtonActivated.js';
+import { buildKeyToNoteMap } from '@/components/topControls/components/keyboard/helpers/buildKeyToNoteMap.js';
+import {
+  getCurrentOctave,
+  setCurrentOctave,
+  isKeyboardInputEnabled,
+  setKeyboardInputEnabled,
+  setKeyMapRef,
+  getKeyboardInstrument
+} from '@/components/topControls/components/keyboard/services/keyboardService.js';
+
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
-
-let currentOctave = 3;
-let keyboardInputEnabled = true;
-
-function buildKeyToNoteMap(keyMap: ReturnType<typeof getKeyMap>): Record<string, string> {
-  const whiteNotes = Object.values(keyMap)
-    .filter(k => !k.isBlack)
-    .sort((a, b) => a.x - b.x)
-    .map(k => k.note);
-
-  const blackNotes = Object.values(keyMap)
-    .filter(k => k.isBlack)
-    .sort((a, b) => a.x - b.x)
-    .map(k => k.note);
-
-  const map: Record<string, string> = {};
-  WHITE_KEYS.forEach((k, i) => { if (whiteNotes[i]) map[k] = whiteNotes[i]; });
-  BLACK_KEYS.forEach((k, i) => { if (blackNotes[i]) map[k] = blackNotes[i]; });
-  return map;
-}
 
 /**
  * Attaches click handlers to the side buttons next to the keyboard.
@@ -40,32 +31,51 @@ export function attachKeyboardSideButtonListeners(container: HTMLElement): Liste
 
   function refreshKeyboard(): void {
     if (!ctx) return;
-    const keyMap = getKeyMap(currentOctave);
-    const noteMap = keyboardInputEnabled ? buildKeyToNoteMap(keyMap) : null;
+    const currentOct = getCurrentOctave();
+    const keyMap = getKeyMap(currentOct);
+    setKeyMapRef(keyMap);
+    if (toggleBtn) {
+      setSideButtonActivated(toggleBtn, isKeyboardInputEnabled());
+    }
+    const noteMap = isKeyboardInputEnabled() ? buildKeyToNoteMap(keyMap) : null;
     drawKeys(ctx, keyMap, new Set(), noteMap ?? undefined);
   }
 
   const handleOctaveUp = () => {
-    if (currentOctave < 7) {
-      currentOctave++;
+    const current = getCurrentOctave();
+    if (current < 7) {
+      setCurrentOctave(current + 1);
       refreshKeyboard();
     }
   };
 
   const handleOctaveDown = () => {
-    if (currentOctave > 1) {
-      currentOctave--;
+    const current = getCurrentOctave();
+    if (current > 1) {
+      setCurrentOctave(current - 1);
       refreshKeyboard();
     }
   };
 
   const handleToggleInput = () => {
-    keyboardInputEnabled = !keyboardInputEnabled;
+    const enabled = isKeyboardInputEnabled();
+    setKeyboardInputEnabled(!enabled);
     refreshKeyboard();
+    if (toggleBtn) setSideButtonActivated(toggleBtn, !enabled);
   };
 
-  const handleInstrument = () => {
-    console.log('[Keyboard] Instrument selection not implemented yet.');
+  const handleInstrument = async () => {
+    const fullName = getKeyboardInstrument() || 'sf2/fluidr3-gm/acoustic_grand_piano';
+
+    const instrumentSelectModal = document.getElementById('instrument-select-modal') as HTMLElement | null;
+    if (!instrumentSelectModal) {
+      console.warn('[Keyboard] Instrument selector modal not found in DOM.');
+      return;
+    }
+
+    delete instrumentSelectModal.dataset.currentSequencer;
+    await refreshInstrumentSelectorModal(fullName);
+    instrumentSelectModal.classList.remove('hidden');
   };
 
   upBtn?.addEventListener('click', handleOctaveUp);
@@ -80,6 +90,6 @@ export function attachKeyboardSideButtonListeners(container: HTMLElement): Liste
       toggleBtn?.removeEventListener('click', handleToggleInput);
       instrumentBtn?.removeEventListener('click', handleInstrument);
     },
-    refreshUI: () => refreshKeyboard()
+    refreshUI: refreshKeyboard
   };
 }

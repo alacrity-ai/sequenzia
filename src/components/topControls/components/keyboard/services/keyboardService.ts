@@ -2,6 +2,7 @@
 
 import type { KeyMap } from '../helpers/keys.js';
 import { getKeyMap } from '../helpers/keys.js';
+import { setGlobalActiveInstrument } from '@/sounds/instrument-player.js';
 
 let globalKeyboardInstrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano';
 let currentOctave = 3;
@@ -11,9 +12,11 @@ let keyMap: KeyMap = getKeyMap(currentOctave);
 export function initKeyboardInstrumentState(): void {
     // Reset to default on app start
     globalKeyboardInstrument = 'sf2/fluidr3-gm/acoustic_grand_piano';
+    setGlobalActiveInstrument(globalKeyboardInstrument);
 }
 
 export function setKeyboardInstrument(fullName: string): void {
+    setGlobalActiveInstrument(fullName);
     globalKeyboardInstrument = fullName;
 }
 

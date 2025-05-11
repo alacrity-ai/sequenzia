@@ -31,7 +31,7 @@ export function createGridSettingsPopover(): HTMLElement {
   const gridGuidesToggle = createToggleSwitch({
     id: 'toggle-grid-guides',
     stateA: 'Off',
-    stateB: 'Key Guides',
+    stateB: 'Transpose Grid to Key',
     inline: true
   });
   const gridGuidesInput = gridGuidesToggle.querySelector('input')!;
@@ -44,7 +44,7 @@ export function createGridSettingsPopover(): HTMLElement {
   const snapToKeyToggle = createToggleSwitch({
     id: 'toggle-snap-key',
     stateA: 'Off',
-    stateB: 'Snap to Keys',
+    stateB: 'Snap Notes to Key',
     inline: true
   });
   const snapToKeyInput = snapToKeyToggle.querySelector('input')!;
@@ -57,7 +57,7 @@ export function createGridSettingsPopover(): HTMLElement {
   const snapToGridToggle = createToggleSwitch({
     id: 'toggle-snap-grid',
     stateA: 'Off',
-    stateB: 'Snap to Grid',
+    stateB: 'Snap Notes to Grid',
     inline: true
   });
   const snapToGridInput = snapToGridToggle.querySelector('input')!;
@@ -69,8 +69,8 @@ export function createGridSettingsPopover(): HTMLElement {
   // === Content Body
   const contentBody = [
     h('div', { class: 'mb-1' }, gridGuidesToggle),
-    h('div', { class: 'mb-1' }, snapToKeyToggle),
     h('div', { class: `my-2 border-t ${skin.borderColor} mb-3 mx-2` }),
+    h('div', { class: 'mb-1' }, snapToKeyToggle),
     h('div', { class: 'mt-1' }, snapToGridToggle)
   ];
 

@@ -1,17 +1,13 @@
 // src/sequencer/matrix/utils/snapPosition.ts
 
+import { isSnapToInKeyEnabled, getMidiNoteMap } from '@/shared/stores/songInfoStore.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { SnappedNotePosition } from '../interfaces/SnappedNotePosition.js';
 
 /**
  * Converts raw mouse pixel coordinates into a snapped note position (beat + row).
- * @param mouse - { x, y } in canvas-relative pixels
- * @param scroll - GridScroll instance
- * @param config - GridConfig with layout and zoom information
- * @param snapResolution - e.g. 0.25 for 16th notes
- * @param triplet - If true, interprets snap resolution in triplet context
- * @returns SnappedNotePosition or null if outside grid bounds
+ * Supports horizontal snapping to resolution and vertical snapping to in-key MIDI notes.
  */
 export function getSnappedNotePosition(
   mouse: { x: number; y: number },
@@ -30,14 +26,39 @@ export function getSnappedNotePosition(
   const cellHeight = cellWidth / verticalCellRatio;
 
   const beatX = (mouse.x + scroll.getX() - labelWidth) / cellWidth;
-  const rowY = Math.floor((mouse.y + scroll.getY() - headerHeight) / cellHeight);
+  let rowY = Math.floor((mouse.y + scroll.getY() - headerHeight) / cellHeight);
 
-  // Adjust for triplets: shrink resolution by 2/3
   const effectiveSnap = triplet ? snapResolution * (2 / 3) : snapResolution;
   const snappedX = Math.floor(beatX / effectiveSnap) * effectiveSnap;
 
-  if (snappedX >= 0 && rowY >= 0 && rowY < totalRows) {
-    return { x: snappedX, y: rowY };
+  if (snappedX < 0 || rowY < 0 || rowY >= totalRows) return null;
+
+  // === Optional: Snap vertically to in-key notes
+  if (isSnapToInKeyEnabled()) {
+    const inKeyMap = getMidiNoteMap();
+    const rawMidi = highestMidi - rowY;
+
+    let bestRow: number | null = null;
+    let minDistance = Infinity;
+
+    for (let offset = -12; offset <= 12; offset++) {
+      const candidateMidi = rawMidi + offset;
+      if (candidateMidi < lowestMidi || candidateMidi > highestMidi) continue;
+      if (!inKeyMap.get(candidateMidi)) continue;
+
+      const candidateRow = highestMidi - candidateMidi;
+      const distance = Math.abs(candidateRow - rowY);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        bestRow = candidateRow;
+      }
+
+      if (distance === 0) break; // perfect match
+    }
+
+    if (bestRow !== null) rowY = bestRow;
   }
-  return null;
+
+  return { x: snappedX, y: rowY };
 }

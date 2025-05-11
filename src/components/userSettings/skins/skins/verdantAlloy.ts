@@ -25,6 +25,9 @@ export const verdantAlloySkin: InterfaceSkin = {
     toggleTrackBase: 'bg-emerald-700',
     toggleTrackChecked: 'peer-checked:bg-lime-400',
     toggleKnobBase: 'after:border-lime-300',
-    toggleKnobChecked: 'peer-checked:after:border-white'
+    toggleKnobChecked: 'peer-checked:after:border-white',
+
+    blackKeyColor: '#143016',    // mossy forest green
+    whiteKeyColor: '#dbf4dc'     // pale mint
   };
   

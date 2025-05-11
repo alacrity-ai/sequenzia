@@ -19,82 +19,13 @@
     <div class="flex flex-col w-[1260px] space-y-4 relative">
 
       <!-- Interactive Piano -->
-      <div class="flex items-start gap-2">
-      <!-- Left Side Button Column (ABSOLUTE) -->
-      <div class="absolute left-[-46px] flex flex-col gap-2 z-10">
-        <button id="piano-toggle-btn"
-                class="side-button side-button-info"
-                title="Toggle Piano View">
-          🎹
-        </button>
-        <button id="mixer-toggle-btn"
-                class="side-button side-button-info"
-                title="Toggle Mixer View">
-          🎛️
-        </button>
-        <button id="ai-toggle-btn"
-                class="side-button side-button-info"
-                title="Toggle AI View">
-          🤖
-        </button>
-      </div>
-
-        <!-- Piano Canvas -->
-        <canvas id="piano" width="1260" height="200"
-                class="rounded shadow-lg border border-purple-700"></canvas>
-        
-        <!-- Existing Right-side Controls -->
-        <div class="flex flex-col gap-2">
-          <!-- Piano Controls -->
-          <div class="flex flex-col gap-2">
-            <button id="octave-up"
-                    class="side-button side-button-primary"
-                    title="Octave Up">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-arrow-up"></use>
-              </svg>
-            </button>
-            <button id="octave-down"
-                    class="side-button side-button-primary"
-                    title="Octave Down">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-arrow-down"></use>
-              </svg>
-            </button>
-            <button id="global-instrument-select-btn"
-                    class="side-button side-button-primary"
-                    title="Select Instrument">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-list-instrument"></use>
-              </svg>
-            </button>
-            <button id="disable-keyboard-inputs"
-                    class="side-button side-button-secondary"
-                    title="Toggle Keyboard Input">
-              <svg class="w-6 h-6" aria-hidden="true">
-                <use href="#icon-keyboard"></use>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <div id="top-controls-container" class="flex items-start gap-2">
+        <!-- Piano/Mixer/AI Menus Injected Here -->
       </div>
 
       <!-- Waveform Visualizer + Mode Button -->
-      <div class="flex items-start gap-2">
-        <canvas
-          id="waveform"
-          width="1260"
-          height="100"
-          class="rounded border border-purple-800 bg-gray-900"
-        ></canvas>
-        <div class="flex flex-col gap-2">
-          <!-- Visualizer Controls -->
-          <div class="flex flex-col gap-2">
-            <button id="visualizer-mode"
-                    class="side-button side-button-primary"
-                    title="Change visualizer mode">📊</button>
-          </div>
-        </div>
+      <div id="visualizer-container" class="flex items-start gap-2">
+        <!-- Visualizer Injected Here -->
       </div>
 
       <!-- Sequencer Container -->
@@ -211,10 +142,6 @@
     </div>
   </div>
 
-  <!-- Transport Controls (sticky footer) -->
-  <!-- Spacer for fixed footer height -->
-  <!-- <div class="footer-spacer h-[320px]"></div>  -->
-
   <div id="footer-main" class="fixed bottom-0 left-0 right-0 z-40 content-hidden">
     <!--- Global Controls Injected Here -->
   </div>
@@ -233,7 +160,6 @@
       await loadHTML('modal-mount-root', './web/icons/icons.html');
       
       // Then load modals
-      await loadHTML('modal-mount-root', 'web/modals/export-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/delete-confirm-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/ai-extend-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/ai-inpaint-modal.html');
@@ -242,13 +168,7 @@
       await loadHTML('modal-mount-root', 'web/modals/ai-generation-failed-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/ai-working-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/instrument-select-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/loading-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/import-modal.html');
       await loadHTML('modal-mount-root', 'web/modals/splash-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/whats-new-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/feature-not-implemented-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/error-generic-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/save-wav-menu-modal.html');
 
       // Only load the app after modals and icons are present
       await import('/src/main.js');

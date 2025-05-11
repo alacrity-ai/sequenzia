@@ -31,13 +31,10 @@ import { GlobalPopupController } from '@/components/globalPopups/globalPopupCont
 import { setupGlobalUndoRedo } from '@/shared/modals/global/undo-redo.js';
 import { showSplashScreen, hideSplashScreen } from '@/shared/modals/global/splashscreen.js';
 import { VisualizerController } from '@/components/visualizer/visualizerController.js';
-import { SideMenuController } from '@/components/topControls/components/sideMenu/sideMenuController.js';
+import { TopControlsController } from '@/components/topControls/topControlsController.js';
 
 // User Config Modal
 import { UserConfigModalController } from '@/components/userSettings/userConfig.js';
-
-// Input / Visualizers
-import { setupKeyboard } from '@/components/keyboard/factory/setupKeyboard.js';
 
 // Setup (Deprecated)
 import { setupAddTrackButton } from '@/components/sequencer/ui/setupAddTrackButton.js';
@@ -54,6 +51,9 @@ registerGlobalEventGuards();
 // === UI Orchestrator
 const orchestrator = UIOrchestrator.getInstance();
 
+// === Instrument Selector ===
+setupInstrumentSelector(); // Refactor this into a dedicated controller
+
 // === Userconfig Init
 const userConfigModalController = new UserConfigModalController();
 orchestrator.registerReloadable(() => userConfigModalController.reload());
@@ -62,10 +62,10 @@ orchestrator.registerReloadable(() => userConfigModalController.reload());
 export const engine = new PlaybackEngine(getSequencers());
 
 // === Top Controls ===
-const sideMenu = new SideMenuController();
-orchestrator.registerReloadable(() => sideMenu.reload());
+export const topControlsController = new TopControlsController();
+orchestrator.registerReloadable(() => topControlsController.reload());
 
-// === Global Controls ===
+// === Footer Controls (Transport) ===
 const globalControls = new GlobalControlsController(engine, userConfigModalController);
 orchestrator.registerReloadable(() => globalControls.reload());
 globalControls.show();
@@ -84,9 +84,6 @@ visualizer.show();
 // === State Sync ===
 onStateUpdated(resyncFromState);
 
-// === Instrument Selector ===
-setupInstrumentSelector();
-
 // === Initial Sequencer ===
 const firstId = 0;
 const firstInstrument = 'sf2/fluidr3-gm/acoustic_grand_piano';
@@ -94,11 +91,6 @@ recordDiff(
   createCreateSequencerDiff(firstId, firstInstrument),
   createReverseCreateSequencerDiff(firstId)
 );
-
-// === Virtual Piano Keyboard ===
-devLog('Setting up virtual piano keyboard...');
-const pianoCanvas = document.getElementById('piano') as HTMLCanvasElement;
-setupKeyboard(pianoCanvas);
 
 // Lock in the initial application state so undo never goes before this point
 recordDiff(

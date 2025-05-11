@@ -13,7 +13,6 @@ export function showVelocityModal(notes: Note[]): void {
 }
 
 function hideVelocityModal(): void {
-  console.log('CLICKED A BUTTON'); // Not seeing this message
   const modal = document.getElementById('velocity-modal');
   if (modal) modal.classList.add('hidden');
   currentNotes = [];
