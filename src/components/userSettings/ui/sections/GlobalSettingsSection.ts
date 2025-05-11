@@ -33,7 +33,7 @@ export function createGlobalSettingsSection(): GlobalSettingsSectionController {
   const toggle: ToggleSwitchController = createToggleSwitch({
     id: 'note-tool-toggle',
     label: 'Note Placement:',
-    stateA: 'Default',
+    stateA: 'Classic',
     stateB: 'Express',
     tooltipTrigger
   });

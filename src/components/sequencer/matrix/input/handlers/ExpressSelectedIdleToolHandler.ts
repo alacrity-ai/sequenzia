@@ -21,7 +21,7 @@ import { recordDiff } from '@/appState/appState.js';
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '@/appState/diffEngine/types/grid/deleteNotes.js';
 import { NoteManager } from '../../notes/NoteManager.js';
 
-export class SelectedIdleToolHandler implements GridInteractionHandler {
+export class ExpressSelectedIdleToolHandler implements GridInteractionHandler {
   private initialMouseX: number = 0;
   private initialMouseY: number = 0;
   private readonly dragThreshold: number = 3;
@@ -42,7 +42,13 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
   ) {}  
 
   public onEnter(): void {
-    // Cursor state or visual feedback if desired
+    // If we're entering due to a click on a note with mouse still held, prepare for drag
+    if (window && (window.event as MouseEvent)?.buttons & 1) {
+      this.store.beginSelectionDrag();
+      const e = window.event as MouseEvent;
+      this.initialMouseX = e.clientX;
+      this.initialMouseY = e.clientY;
+    }
   }
 
   public onExit(): void {
@@ -52,35 +58,74 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
   }
 
   public onMouseDown(e: MouseEvent): void {
-    if (e.button !== 0 || this.store.isOnNonGridElement()) return;
-  
+    if (this.store.isOnNonGridElement()) return;
+
+    const isLeftClick = e.button === 0;
+    const isRightClick = e.button === 2;
+
     const snapped = getSnappedFromEvent(e, this.canvas, this.grid, this.scroll, this.config);
-    if (!snapped) return;
-  
-    const rawBeat = getRawBeatFromEvent(e, this.canvas, this.scroll, this.config);
-    const pitch = rowToNote(snapped.y, this.config.layout.lowestMidi, this.config.layout.highestMidi);
-    const edgeNote = this.noteManager.findNoteEdgeAtCursor(pitch, rawBeat);
-  
-    if (edgeNote) {
-      const hoveredKey = `${edgeNote.pitch}:${edgeNote.start}`;
-      const selectedKeys = new Set(
-        this.store.getSelectedNotes().map(n => `${n.pitch}:${n.start}`)
-      );
-  
-      // If the edge note is not already selected, select it exclusively
-      if (!selectedKeys.has(hoveredKey)) {
-        this.store.setSelectedNotes([edgeNote]);
+    if (!snapped) {
+      if (isRightClick) {
+        // Can't snap, but still allow marquee drag
+        this.beginSelectionDrag(e);
       }
-  
-      this.controller.transitionTo(InteractionMode.Sizing);
       return;
     }
-  
-    // Otherwise begin drag/marquee logic
+
+    const pitch = rowToNote(snapped.y, this.config.layout.lowestMidi, this.config.layout.highestMidi);
+    if (!pitch) {
+      if (isRightClick) {
+        this.beginSelectionDrag(e);
+      }
+      return;
+    }
+
+    const rawBeat = getRawBeatFromEvent(e, this.canvas, this.scroll, this.config);
+    const hoveredNote = this.noteManager.findNoteUnderCursor(pitch, rawBeat);
+
+    if (isLeftClick) {
+      const edgeNote = this.noteManager.findNoteEdgeAtCursor(pitch, rawBeat);
+
+      // === Edge resize
+      if (edgeNote) {
+        const hoveredKey = `${edgeNote.pitch}:${edgeNote.start}`;
+        const selectedKeys = new Set(
+          this.store.getSelectedNotes().map(n => `${n.pitch}:${n.start}`)
+        );
+
+        if (!selectedKeys.has(hoveredKey)) {
+          this.store.setSelectedNotes([edgeNote]);
+        }
+
+        this.controller.transitionTo(InteractionMode.Sizing);
+        return;
+      }
+
+      // === Prepare for dragging
+      if (hoveredNote) {
+        this.beginSelectionDrag(e);
+        this.initialMouseX = e.clientX;
+        this.initialMouseY = e.clientY;
+      }
+    }
+
+    if (isRightClick) {
+      if (hoveredNote) {
+        const key = `${hoveredNote.pitch}:${hoveredNote.start}`;
+        this.store.setHoveredNoteKey(key);
+      } else {
+        this.store.setHoveredNoteKey(null);
+        this.beginSelectionDrag(e);
+      }
+    }
+  }
+
+  private beginSelectionDrag(e: MouseEvent): void {
     this.store.beginSelectionDrag();
     this.initialMouseX = e.clientX;
     this.initialMouseY = e.clientY;
   }
+
 
   public onMouseMove(e: MouseEvent): void {
     if (this.store.isOnNonGridElement()) {
@@ -94,7 +139,7 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
     const dy = e.clientY - this.initialMouseY;
     const distance = Math.sqrt(dx * dx + dy * dy);
   
-    if (this.store.isDraggingToSelect()) {
+    if (this.store.isDraggingToSelect() && e.buttons & 1) {
       const hoveredKey = this.store.getHoveredNoteKey();
   
       // Drag handling
@@ -119,10 +164,12 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
         this.controller.transitionTo(InteractionMode.Dragging);
         return;
       }
-  
+    } else if (this.store.isDraggingToSelect() && e.buttons & 2) {
+      const hoveredKey = this.store.getHoveredNoteKey();
+
       // Otherwise, drag began over empty space — retry marquee selection
       if (!hoveredKey && distance >= this.dragThreshold) {
-        if (!e.ctrlKey && !e.metaKey) {
+        if (!e.metaKey && !e.shiftKey && !e.ctrlKey) {
           this.store.clearSelection();
         }
         this.store.endSelectionDrag();
@@ -166,6 +213,11 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
 
   public onMouseUp(e: MouseEvent): void {
     if (e.button !== 0 || this.store.isOnNonGridElement()) return;
+
+    if (this.store.consumeSuppressMouseUpFlag()) {
+      // Suppress this mouseup — already handled on mousedown
+      return;
+    }
 
     this.store.endSelectionDrag();
   

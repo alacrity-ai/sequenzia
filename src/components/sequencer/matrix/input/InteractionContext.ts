@@ -10,6 +10,7 @@ import { PastingToolHandler } from './handlers/PastingToolHandler.js';
 import { DraggingToolHandler } from './handlers/DraggingToolHandler.js';
 import { SizingToolHandler } from './handlers/SizingToolHandler.js';
 import { ExpressNoteToolHandler } from './handlers/ExpressNoteToolHandler.js';
+import { ExpressSelectedIdleToolHandler } from './handlers/ExpressSelectedIdleToolHandler.js';
 import { getUserConfig } from '@/components/userSettings/store/userConfigStore.js';
 
 import type { InteractionContextData } from './interfaces/InteractionContextData.js';
@@ -105,7 +106,8 @@ export class InteractionContext {
         ] as const;
       
         return new ctor(...args);
-      }      
+      };
+
       case InteractionMode.Selecting:
         return new SelectingToolHandler(
           this.data.canvas,
@@ -117,8 +119,15 @@ export class InteractionContext {
           this.data.noteManager,
           this.data.requestRedraw
         );
-      case InteractionMode.SelectedIdle:
-        return new SelectedIdleToolHandler(
+
+      case InteractionMode.SelectedIdle: {
+        const { global: { noteToolMode } } = getUserConfig();
+      
+        const ctor = noteToolMode === 'express'
+          ? ExpressSelectedIdleToolHandler
+          : SelectedIdleToolHandler;
+      
+        const args = [
           this.data.canvas,
           this.data.config,
           this.data.scroll,
@@ -131,7 +140,11 @@ export class InteractionContext {
           this.data.cursorController,
           this.data.setClipboard,
           this.data.getClipboard
-        );
+        ] as const;
+
+        return new ctor(...args);
+      };
+
       case InteractionMode.Pasting:
         return new PastingToolHandler(
           this.data.canvas,
@@ -145,6 +158,7 @@ export class InteractionContext {
           this.data.cursorController,
           this.data.getClipboard,
         );
+
       case InteractionMode.Dragging:
         return new DraggingToolHandler(
           this.data.canvas,
@@ -158,6 +172,7 @@ export class InteractionContext {
           this.data.cursorController,
           () => this.data.sequencerContext.getId()
         );
+
       case InteractionMode.Sizing:
         return new SizingToolHandler(
           this.data.canvas,
@@ -171,6 +186,7 @@ export class InteractionContext {
           this.data.cursorController,
           () => this.data.sequencerContext.getId()
         );
+        
       default:
         return {};
     }

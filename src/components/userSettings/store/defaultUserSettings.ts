@@ -4,7 +4,7 @@ import type { UserConfig } from '../interfaces/UserConfig.js';
 
 export const defaultUserConfig: UserConfig = {
   global: {
-    noteToolMode: 'default',
+    noteToolMode: 'express',
   },
   theme: {
     gridColorScheme: 'Darkroom',

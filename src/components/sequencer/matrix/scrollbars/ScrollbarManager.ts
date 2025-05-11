@@ -72,8 +72,8 @@ export class ScrollbarManager {
     // Thumb styling and layering
     ht.style.zIndex = vt.style.zIndex = '6';
     ht.style.position = vt.style.position = 'absolute';
-    ht.style.background = 'bg-purple-700';
-    vt.style.background = 'bg-purple-700';
+    ht.style.background = '#7e22ce';
+    vt.style.background = '#7e22ce';
     ht.style.borderRadius = vt.style.borderRadius = '8px';
     ht.style.height = '100%';
     vt.style.width = '100%';

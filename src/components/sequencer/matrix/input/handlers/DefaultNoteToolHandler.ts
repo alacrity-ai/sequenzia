@@ -64,7 +64,7 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
         }
       }
     
-      // Otherwise begin marquee selection
+      // Otherwise start checking for intent to begin marquee selection
       this.store.beginSelectionDrag();
       this.initialMouseX = e.clientX;
       this.initialMouseY = e.clientY;

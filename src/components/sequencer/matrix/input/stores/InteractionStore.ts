@@ -72,6 +72,19 @@ export class InteractionStore {
     return this.highlightedNoteKeys.has(`${note.pitch}:${note.start}`);
   }
 
+  // ---- Just selected via mousedown (Express Mode) ----
+  private suppressNextMouseUp = false;
+
+  public suppressNextMouseUpEvent(): void {
+    this.suppressNextMouseUp = true;
+  }
+
+  public consumeSuppressMouseUpFlag(): boolean {
+    const result = this.suppressNextMouseUp;
+    this.suppressNextMouseUp = false;
+    return result;
+  }
+
   // ---- Selection state ----
   private selectedNotes: Note[] = [];
 

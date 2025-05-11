@@ -40,34 +40,65 @@ export class ExpressNoteToolHandler implements GridInteractionHandler {
       private readonly playNoteAnimation: (note: Note) => void
     ) {} 
 
+    // Left click: Place a note if able
     public onMouseDown(e: MouseEvent): void {
-      if (e.button !== 0 || this.store.isOnNonGridElement()) return;
-    
-      const snapped = getSnappedFromEvent(e, this.canvas, this.grid, this.scroll, this.config);
-      if (abortIfOutOfGridBounds(snapped, this.store, this.cursorController, this.requestRedraw)) return;
-    
-      const rawBeat = getRawBeatFromEvent(e, this.canvas, this.scroll, this.config);
-      if (snapped) {
-        const pitch = rowToNote(
-          snapped.y,
-          this.config.layout.lowestMidi,
-          this.config.layout.highestMidi
-        );
-      
+      if (this.store.isOnNonGridElement()) return;
+
+      if (e.button !== 0) {
+        // Right click: Begin checking for intent to start marquee selection
+        this.store.beginSelectionDrag();
+        this.initialMouseX = e.clientX;
+        this.initialMouseY = e.clientY;
+      } else {
+        // Left click: Place a note if able
+        const snapped = getSnappedFromEvent(e, this.canvas, this.grid, this.scroll, this.config);
+        if (abortIfOutOfGridBounds(snapped, this.store, this.cursorController, this.requestRedraw)) return;
+        if (!snapped) return;
+
+        const rawBeat = getRawBeatFromEvent(e, this.canvas, this.scroll, this.config);
+        const pitch = rowToNote(snapped.y, this.config.layout.lowestMidi, this.config.layout.highestMidi);
+        if (!pitch) return;
+
+        const hoveredNote = this.noteManager.findNoteUnderCursor(pitch, rawBeat);
         const edgeNote = this.noteManager.findNoteEdgeAtCursor(pitch, rawBeat);
-        const hoveredKey = this.store.getHoveredNoteKey();
-      
-        if (edgeNote && hoveredKey === `${edgeNote.pitch}:${edgeNote.start}`) {
-          this.store.setSelectedNotes([edgeNote]); // lock in single note for resizing
+
+        if (edgeNote && hoveredNote && `${hoveredNote.pitch}:${hoveredNote.start}` === `${edgeNote.pitch}:${edgeNote.start}`) {
+          this.store.setSelectedNotes([edgeNote]);
           this.controller.transitionTo(InteractionMode.Sizing);
           return;
         }
+
+        if (hoveredNote) {
+          this.noteManager.previewNote(hoveredNote.pitch, 0.25);
+          this.store.setSelectedNotes([hoveredNote]);
+          this.store.suppressNextMouseUpEvent();
+          this.controller.transitionTo(InteractionMode.SelectedIdle);
+          return;
+        }
+
+        // Place new note immediately and start counting down selectionDrag
+        this.store.beginSelectionDrag();
+        this.initialMouseX = e.clientX;
+        this.initialMouseY = e.clientY;
+        const duration = this.grid.getNoteDuration();
+        const existing = this.noteManager.findAtPosition(pitch, snapped.x);
+        if (existing) return;
+
+        const newNote: Note = {
+          start: snapped.x,
+          duration,
+          pitch,
+          velocity: 100
+        };
+
+        recordDiff(
+          createPlaceNotesDiff(this.getSequencerId(), [newNote]),
+          createReversePlaceNotesDiff(this.getSequencerId(), [newNote])
+        );
+
+        this.noteManager.previewNote(pitch, duration);
+        this.playNoteAnimation(newNote);
       }
-    
-      // Otherwise begin marquee selection
-      this.store.beginSelectionDrag();
-      this.initialMouseX = e.clientX;
-      this.initialMouseY = e.clientY;
     }
 
     public onMouseMove(e: MouseEvent): void {
@@ -77,28 +108,35 @@ export class ExpressNoteToolHandler implements GridInteractionHandler {
         this.requestRedraw();
         return;
       }
-    
+
       const dx = e.clientX - this.initialMouseX;
       const dy = e.clientY - this.initialMouseY;
       const distance = Math.sqrt(dx * dx + dy * dy);
     
-      // If a drag has started...
-      if (this.store.isDraggingToSelect()) {
+      // If a drag has started, and we're holding down the left mouse button...
+      if (e.buttons === 1 && this.store.isDraggingToSelect()) {
         const hoveredKey = this.store.getHoveredNoteKey();
     
-        // FAST-TRACK: Drag started over an existing note — transition to Dragging
+        // FAST-TRACK: Drag started over an existing note — transition to sizing
         if (hoveredKey && distance >= this.dragThreshold) {
           const [pitch, start] = hoveredKey.split(':');
           const note = this.noteManager.findAtPosition(pitch, Number(start));
           if (note) {
             this.store.setSelectedNotes([note]); // select it (safe to overwrite)
             this.store.endSelectionDrag(); // cleanup pending selection state
-            this.controller.transitionTo(InteractionMode.Dragging);
+            this.controller.transitionTo(InteractionMode.Sizing);
             return;
           }
         }
+      }
+
+      // If a drag has started, and we're holding down the right mouse button...
+      if (e.buttons === 2 && this.store.isDraggingToSelect()) {
+        const dx = e.clientX - this.initialMouseX;
+        const dy = e.clientY - this.initialMouseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
     
-        // Otherwise, begin marquee selection
+        // Begin Marquee selection
         if (distance >= this.dragThreshold) {
           this.store.endSelectionDrag();
           this.controller.transitionTo(InteractionMode.Selecting);
@@ -142,74 +180,8 @@ export class ExpressNoteToolHandler implements GridInteractionHandler {
       this.requestRedraw();
     }
 
-    // Left click: Place a note, or select a note if over an existing note
     public onMouseUp(e: MouseEvent): void {
-      if (e.button !== 0) return;
-
-      // Guard against clicking on scrollbar or another non-grid element
-      if (this.store.isOnNonGridElement()) {
-        this.store.setSnappedCursorGridPosition(null);
-        this.store.setHoveredNoteKey(null);
-        this.requestRedraw();
-        return;
-      }
-
-      if (this.store.isDraggingToSelect()) {
-        this.store.endSelectionDrag();
-        // The drag was too small to start marquee — treat as click
-      }
-
-      // First: are we hovering over a note? Then select it instead of placing
-      const hoveredKey = this.store.getHoveredNoteKey();
-      if (hoveredKey) {
-        // Guard against Chrome mouseup registering as left click even on right click
-        if (performance.now() - this.store.getLastDeletionTime() < 100) {
-          return;
-        }        
-        const [pitch, start] = hoveredKey.split(':');
-        const selectedNote = this.noteManager.findAtPosition(pitch, Number(start));
-        if (selectedNote) {
-          this.noteManager.previewNote(selectedNote.pitch, 0.25);
-          this.store.setSelectedNotes([selectedNote]);
-          this.controller.transitionTo(InteractionMode.SelectedIdle);
-          return;
-        }
-      }
-
-      // Otherwise, try placing a new note
-      const snapped = this.store.getSnappedCursorGridPosition();
-      if (!snapped) return;
-
-      const { layout } = this.config;
-      const duration = this.grid.getNoteDuration();
-      const pitch = rowToNote(snapped.y, layout.lowestMidi, layout.highestMidi);
-      if (!pitch) return;
-
-      const existing = this.noteManager.findAtPosition(pitch, snapped.x);
-      if (existing) return; // Already a note at this spot — no duplicate
-
-      const newNote: Note = {
-        start: snapped.x,
-        duration,
-        pitch,
-        velocity: 100
-      };
-
-      recordDiff(
-        createPlaceNotesDiff(this.getSequencerId(), [newNote]),
-        createReversePlaceNotesDiff(this.getSequencerId(), [newNote])
-      );
-
-      // Play the note 
-      this.noteManager.previewNote(pitch, duration);
-
-      // Play the note animation
-      this.playNoteAnimation({
-        start: snapped.x,
-        duration: duration,
-        pitch,
-        velocity: 100
-      });      
+      this.store.endSelectionDrag();
     }
 
     // Right click: Delete note
