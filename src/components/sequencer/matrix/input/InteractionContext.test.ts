@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InteractionContext } from './InteractionContext';
 import { InteractionMode } from './interfaces/InteractionEnum';
+import { InteractionStore } from './stores/InteractionStore';
 
 vi.mock('@/shared/playback/transportService.js', () => ({}));
 vi.mock('@/main.js', () => ({}));
@@ -19,7 +20,6 @@ vi.mock('./handlers/DefaultNoteToolHandler', () => ({
   })),
 }));
 
-// Repeat for others...
 vi.mock('./handlers/SelectingToolHandler', () => ({
   SelectingToolHandler: vi.fn().mockImplementation(() => ({
     onEnter: vi.fn(),
@@ -31,6 +31,13 @@ vi.mock('./handlers/SelectingToolHandler', () => ({
 // Minimal test canvas
 const canvas = document.createElement('canvas');
 
+const mockStore = new InteractionStore();
+// Stub methods if needed
+vi.spyOn(mockStore, 'isOnNonGridElement').mockReturnValue(false);
+vi.spyOn(mockStore, 'setSnappedCursorGridPosition');
+vi.spyOn(mockStore, 'setHoveredNoteKey');
+vi.spyOn(mockStore, 'endSelectionDrag');
+
 const mockData = {
   canvas,
   noteManager: {} as any,
@@ -38,7 +45,7 @@ const mockData = {
   config: {
     layout: { lowestMidi: 21, highestMidi: 108 },
   } as any,
-  store: {} as any,
+  store: mockStore,
   grid: {} as any,
   requestRedraw: vi.fn(),
   sequencerContext: { getId: () => 'seq-1' },
