@@ -1,27 +1,24 @@
-// src/setup/controls/sequencerPan.ts
+// src/components/sequencer/listeners/panControlListeners.ts
 
-import Sequencer from '@/components/sequencer/sequencer.js';
+import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
+import type { PanControlUI } from '../ui/topBar/panControl.js';
+
 import { recordDiff } from '@/appState/appState.js';
 import { createSetPanDiff, createReverseSetPanDiff } from '@/appState/diffEngine/types/sequencer/setPan.js';
 
-export function setupPanBar(wrapper: HTMLElement, seq: Sequencer): void {
-  const panBar = wrapper.querySelector('.pan-fill')?.parentElement as HTMLElement;
-  const panFill = wrapper.querySelector('.pan-fill') as HTMLElement;
-  const panThumb = wrapper.querySelector('.pan-thumb') as HTMLElement;
+import type Sequencer from '@/components/sequencer/sequencer.js'; // Adjust if you rename/refactor
 
-  let hasSnapped = false;
-  let isShiftDown = false;
+export function attachPanControlListeners(ui: PanControlUI, seq: Sequencer): ListenerAttachment {
+  const { element: panBar, fill: panFill, thumb: panThumb } = ui;
+
   let isDragging = false;
+  let isShiftDown = false;
+  let hasSnapped = false;
   let oldPan: number | null = null;
-
-  if (!panBar || !panFill) {
-    console.warn('[setupPanBar] Pan bar or fill element missing.');
-    return;
-  }
 
   function updateVisualBar(): void {
     const clamped = Math.max(-1, Math.min(1, seq.pan));
-    const normalized = (clamped + 1) / 2; // Convert -1..1 to 0..1
+    const normalized = (clamped + 1) / 2; // Map -1..1 to 0..1
 
     const barWidth = panBar.clientWidth;
     const thumbWidth = 14;
@@ -31,38 +28,27 @@ export function setupPanBar(wrapper: HTMLElement, seq: Sequencer): void {
     const posX = normalized * barWidth;
     const clampedLeft = Math.max(minX, Math.min(maxX, posX - thumbWidth / 2));
 
-    const fillPercent = Math.round(normalized * 100);
-    panFill.style.width = `${fillPercent}%`;
+    panFill.style.width = `${Math.round(normalized * 100)}%`;
     panThumb.style.left = `${clampedLeft}px`;
 
     const displayPan = Math.round(clamped * 100);
     panBar.setAttribute('title', `Pan: ${displayPan}%`);
   }
 
-  seq.refreshPanUI = updateVisualBar;
-
   function applyModifierStyles(): void {
-    if (isShiftDown) {
-      panFill.classList.add('precise');
-      panThumb.classList.add('precise');
-    } else {
-      panFill.classList.remove('precise');
-      panThumb.classList.remove('precise');
-    }
+    panFill.classList.toggle('precise', isShiftDown);
+    panThumb.classList.toggle('precise', isShiftDown);
   }
-
-  requestAnimationFrame(updateVisualBar);
 
   function handlePanInput(clientX: number): number {
     const rect = panBar.getBoundingClientRect();
     const relativeX = clientX - rect.left;
-  
     let ratio = Math.max(0, Math.min(1, relativeX / rect.width));
     let newPan = ratio * 2 - 1;
-  
+
     const snapTarget = 0.0;
     const epsilon = 0.05;
-  
+
     if (!isShiftDown && Math.abs(newPan - snapTarget) < epsilon) {
       newPan = snapTarget;
       if (!hasSnapped && navigator.vibrate) navigator.vibrate(10);
@@ -70,50 +56,59 @@ export function setupPanBar(wrapper: HTMLElement, seq: Sequencer): void {
     } else {
       hasSnapped = false;
     }
-  
+
     seq.pan = newPan;
     updateVisualBar();
-  
-    return newPan;
-  }  
 
-  panBar.addEventListener('mousedown', (e) => {
+    return newPan;
+  }
+
+  const handleMouseDown = (e: MouseEvent) => {
     isDragging = true;
     isShiftDown = e.shiftKey;
     oldPan = seq.pan;
     applyModifierStyles();
     handlePanInput(e.clientX);
     e.preventDefault();
-  });
-  
-  window.addEventListener('mouseup', (e) => {
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging) return;
-  
+    isShiftDown = e.shiftKey;
+    applyModifierStyles();
+    handlePanInput(e.clientX);
+  };
+
+  const handleMouseUp = (e: MouseEvent) => {
+    if (!isDragging) return;
     isDragging = false;
+
     const finalPan = handlePanInput(e.clientX);
-  
+
     if (oldPan !== null && finalPan !== oldPan) {
       recordDiff(
         createSetPanDiff(seq.id, finalPan),
         createReverseSetPanDiff(seq.id, oldPan)
       );
     }
-  
-    isShiftDown = false;
-    applyModifierStyles();
-    panFill.classList.remove('precise');
-    panThumb.classList.remove('precise');
-    updateVisualBar();
-  
-    oldPan = null;
-  });
 
-  window.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-  
-    // Only check shift while dragging
-    isShiftDown = e.shiftKey;
+    oldPan = null;
+    isShiftDown = false;
+    hasSnapped = false;
     applyModifierStyles();
-    handlePanInput(e.clientX);
-  });
+    updateVisualBar();
+  };
+
+  panBar.addEventListener('mousedown', handleMouseDown);
+  window.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener('mouseup', handleMouseUp);
+
+  return {
+    detach: () => {
+      panBar.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    },
+    refreshUI: updateVisualBar
+  };
 }

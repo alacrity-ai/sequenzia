@@ -5,7 +5,7 @@ import { updateAllMatrixPlayheads } from '@/shared/playback/helpers/updateAllGri
 import { drawGlobalPlayhead } from '@/components/globalControls/renderers/GlobalPlayheadRenderer.js';
 import { getTotalBeats, getTimeSignature } from '@/shared/playback/transportService.js';
 import { getSnappedBeat } from '@/components/sequencer/utils/snappedBeat.js';
-import { engine as playbackEngine } from '@/main.js';
+import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
 
 let isDragging = false;
@@ -15,6 +15,8 @@ let wasAutoPaused = false;
 export function attachPlayheadListeners(container: HTMLElement): ListenerAttachment {
   canvas = container.querySelector('#global-mini-playhead');
   if (!canvas) throw new Error('Playhead canvas not found in container.');
+
+  const playbackEngine = PlaybackEngine.getInstance();
 
   const seekToBeat = (unsnappedBeat: number, resumePlayback = true): void => {
     const totalBeats = getTotalBeats();

@@ -7,7 +7,8 @@ import { importSessionFromMIDI } from '@/export/midi/loadFromMidi.js';
 import { exportSessionToMIDI } from '@/export/midi/exportToMidi.js';
 import { loadSession } from '@/export/loadSession.js';
 import { exportSessionToWAV } from '@/export/save.js';
-import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
+
 
 export class SaveLoadService {
     static async save(format: 'json' | 'midi'): Promise<void> {
@@ -26,6 +27,7 @@ export class SaveLoadService {
 
   static async saveWavWithOptions(options: { sampleRate: number; includePan: boolean }): Promise<void> {
     const appState = getAppState();
+    const sequencers = getSequencers();
     try {
         const session = {
             globalConfig: {

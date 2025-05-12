@@ -1,7 +1,7 @@
 // src/globalControls/services/PlaybackService.ts
 
 import type Sequencer from '@/components/sequencer/sequencer.js';
-import type { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
+import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import {
   startGlobalPlayheadLoop,
   cancelGlobalPlayheadLoop,
@@ -12,8 +12,8 @@ export class PlaybackService {
   private engine: PlaybackEngine;
   private playheadCanvasWidth: number;
 
-  constructor(engine: PlaybackEngine) {
-    this.engine = engine;
+  constructor() {
+    this.engine = PlaybackEngine.getInstance();
     this.playheadCanvasWidth = 300
 
     this.engine.setOnResumeCallback(() => {

@@ -10,14 +10,13 @@ import { exportNotesToOffline } from '@/components/sequencer/services/offlineExp
 
 import { getTotalMeasures, getTimeSignature } from '@/shared/playback/transportService.js';
 import { updateTrackStyle } from '@/components/sequencer/ui/helpers/updateTrackStyle.js';
-import { setCollapsed } from '@/components/sequencer/ui/helpers/setCollapsed.js';
 import { updateNoteRange, updateToDrumNoteRange } from '@/components/sequencer/services/rangeUpdateService.js';
-import { ListenerRegistry } from '@/components/sequencer/listeners/ListenerRegistry.js';
+import { rescheduleAllSequencers, isAnySoloActive, unregisterSequencer } from '@/components/sequencer/stores/sequencerStore.js';
 
 import { loadInstrument } from '@/sounds/instrument-loader.js';
 import { loadAndPlayNote } from '@/sounds/instrument-player.js';
 
-import { engine as playbackEngine } from '@/main.js';
+import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import { createGridInSequencerBody } from '@/components/sequencer/matrix/utils/createGridInSequencerBody.js';
 import { Grid } from '@/components/sequencer/matrix/Grid.js';
 import {
@@ -37,7 +36,6 @@ export default class Sequencer {
   squelchLoadingScreen: boolean;
   colorIndex: number = 0;
   matrix?: Grid;
-  _registry: ListenerRegistry | null = null;
 
   id: number = 0;
   mute: boolean = false;
@@ -54,27 +52,6 @@ export default class Sequencer {
   private _volume: number = 100 / 127;
   private _pan: number = 0.0;
 
-  static allSequencers: Sequencer[] = [];
-
-  static isAnySoloActive(): boolean {
-    return Sequencer.allSequencers.some(seq => seq.solo);
-  }
-
-  static rescheduleAll(): void {
-    if (!playbackEngine.isActive()) return;
-  
-    const startAt = playbackEngine.getStartTime();
-    const startBeat = playbackEngine.getStartBeat();
-  
-    for (const seq of Sequencer.allSequencers) {
-      seq.stopScheduledNotes();
-      if (seq.shouldPlay) {
-        void seq.reschedulePlayback(startAt, startBeat);
-        void seq.resumeAnimationsFromCurrentTime(startAt, startBeat);
-      }
-    }
-  }
-
   constructor(
     containerEl: HTMLElement | null,
     config: SequencerConfig,
@@ -83,10 +60,7 @@ export default class Sequencer {
     instrument: string = 'sf2/fluidr3-gm/acoustic_grand_piano',
     squelchLoadingScreen: boolean = false,
     id: number = 0
-    
   ) {
-    Sequencer.allSequencers.push(this);
-
     this.id = id;
     this.container = containerEl;
     this.config = { ...config };
@@ -160,7 +134,7 @@ export default class Sequencer {
   }
 
   get shouldPlay(): boolean {
-    return Sequencer.isAnySoloActive()
+    return isAnySoloActive()
       ? this.solo
       : !this.mute;
   }  
@@ -174,19 +148,21 @@ export default class Sequencer {
   }
 
   toggleMute(): void {
+    const playbackEngine = PlaybackEngine.getInstance();
     this.mute = !this.mute;
     if (this.mute) {
       this.solo = false;
     }
     this.stopScheduledNotes();
     updateTrackStyle(this);
-  
+
     if (playbackEngine.isActive()) {
-      Sequencer.rescheduleAll();
+      rescheduleAllSequencers();
     }
   }
   
   toggleSolo(): void {
+    const playbackEngine = PlaybackEngine.getInstance();
     this.solo = !this.solo;
     if (this.solo) {
       this.mute = false;
@@ -194,12 +170,12 @@ export default class Sequencer {
     updateTrackStyle(this);
   
     if (playbackEngine.isActive()) {
-      Sequencer.rescheduleAll();
+      rescheduleAllSequencers();
     }
   }
 
   setCollapsed(val: boolean): void {
-    setCollapsed(this, val);
+    this.collapsed = val;
   }
 
   resetInteractionMode(): void {
@@ -380,10 +356,6 @@ export default class Sequencer {
       getNotes: () => this.matrix?.notes ?? []
     });
   }
-  
-  setRegistry(registry: ListenerRegistry): void {
-    this._registry = registry;
-  }
 
   destroy(): void {
     // Cleanup
@@ -391,11 +363,11 @@ export default class Sequencer {
     this.matrix?.destroy();
     this.container?.remove();
 
-    // Remove from global registry
-    Sequencer.allSequencers = Sequencer.allSequencers.filter(seq => seq !== this);
-    
-    // Clear all listeners attached during setup
-    this._registry?.clear();
+    // Remove from store
+    unregisterSequencer(this.id);
+
+    // Remove from playback engine
+    PlaybackEngine.getInstance().removeSequencer(this);
 
     // Reference cleanup
     this._instrument = null;

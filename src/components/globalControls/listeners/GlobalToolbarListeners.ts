@@ -3,7 +3,7 @@
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
-import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import { popupsController } from '@/main.js';
 
@@ -81,6 +81,7 @@ export function attachToolbarListeners(
     else if (isTriplet) adjusted *= 2 / 3;
 
     config.currentDuration = adjusted;
+    const sequencers = getSequencers();
 
     sequencers.forEach(seq => {
       seq.config.currentDuration = adjusted;

@@ -1,17 +1,15 @@
-// src/setup/instrumentSelector.ts
-
 import type { EngineName } from '@/sounds/interfaces/Engine.js';
 import { setGlobalActiveInstrument } from '@/sounds/instrument-player.js';
-import { getSequencerById } from '../../factories/SequencerFactory.js';
+import { getSequencerById } from '@/components/sequencer/stores/sequencerStore.js';
 import { recordDiff } from '@/appState/appState.js';
 import { createSetInstrumentDiff, createReverseSetInstrumentDiff } from '@/appState/diffEngine/types/sequencer/setInstrument.js';
+
 import {
-  getAvailableLibraries,
-  getAvailableInstruments,
   getAvailableEngines,
+  getAvailableLibraries,
+  getAvailableInstruments
 } from '@/sounds/instrument-loader.js';
 
-// Internal references
 let instrumentSelectModal: HTMLElement;
 let instrumentSelect: HTMLSelectElement;
 let instrumentSelectConfirm: HTMLElement;
@@ -21,7 +19,6 @@ let instrumentLibrarySelect: HTMLSelectElement;
 
 let currentEngine: EngineName = 'sf2';
 
-// Setup function to call explicitly from main.ts
 export function setupInstrumentSelector(): void {
   instrumentSelectModal = document.getElementById('instrument-select-modal') as HTMLElement;
   instrumentSelect = document.getElementById('instrument-select') as HTMLSelectElement;
@@ -34,7 +31,6 @@ export function setupInstrumentSelector(): void {
   attachListeners();
 }
 
-// Populate engine dropdown
 function setupEngineOptions(): void {
   const engines = getAvailableEngines();
   instrumentEngineSelect.innerHTML = '';
@@ -49,7 +45,6 @@ function setupEngineOptions(): void {
   instrumentEngineSelect.value = currentEngine;
 }
 
-// Attach all event listeners
 function attachListeners(): void {
   instrumentEngineSelect.addEventListener('change', async () => {
     currentEngine = instrumentEngineSelect.value as EngineName;
@@ -75,7 +70,7 @@ function attachListeners(): void {
         option.value = `${currentEngine}/${selectedLibrary}/${inst}`;
         option.textContent = inst
           .split('_')
-          .map(word => word ? (word[0].toUpperCase() + word.slice(1)) : '')
+          .map(word => word ? word[0].toUpperCase() + word.slice(1) : '')
           .join(' ');
         instrumentSelect.appendChild(option);
       });
@@ -94,7 +89,6 @@ function attachListeners(): void {
   instrumentCancelBtn.addEventListener('click', cancelInstrumentSelection);
 }
 
-// Refresh libraries for current engine
 async function refreshLibraries(
   preselectLibrary: string | null = null,
   preselectInstrument: string | null = null
@@ -123,32 +117,27 @@ async function refreshLibraries(
   }
 }
 
-// PUBLIC: Open the modal and preselect engine/library/instrument
-export async function refreshInstrumentSelectorModal(fullName: string, sequencerId?: number): Promise<void> {
-    const [engine, library, instrument] = fullName.split('/');
-    currentEngine = (engine || 'sf2') as EngineName;
-    instrumentEngineSelect.value = currentEngine;
-  
-    // 🛠 Set dataset first
-    if (sequencerId !== undefined) {
-      instrumentSelectModal.dataset.currentSequencer = String(sequencerId);
-    } else {
-      delete instrumentSelectModal.dataset.currentSequencer;
-    }
-  
-    await refreshLibraries(library, fullName);
-  }
-  
+export async function openInstrumentSelectorModal(
+  sequencerId: number,
+  currentInstrument: string
+): Promise<void> {
+  const [engine, library, instrument] = currentInstrument.split('/');
+  currentEngine = (engine || 'sf2') as EngineName;
+  instrumentEngineSelect.value = currentEngine;
 
-// PUBLIC: Confirm selection
-export async function confirmInstrumentSelection(): Promise<string | void> {
+  instrumentSelectModal.classList.remove('hidden');
+  instrumentSelectModal.dataset.currentSequencer = String(sequencerId);
+
+  await refreshLibraries(library, currentInstrument);
+}
+
+async function confirmInstrumentSelection(): Promise<void> {
   const selectedInstrumentFull = instrumentSelect.value;
   instrumentSelectModal.classList.add('hidden');
 
   const seqId = Number(instrumentSelectModal.dataset.currentSequencer);
-  
-  // Only attempt sequencer update if we explicitly have a sequencer ID
-  if (instrumentSelectModal.dataset.currentSequencer !== undefined && !isNaN(seqId)) {
+
+  if (!isNaN(seqId)) {
     const seq = getSequencerById(seqId);
     if (seq) {
       recordDiff(
@@ -156,27 +145,46 @@ export async function confirmInstrumentSelection(): Promise<string | void> {
         createReverseSetInstrumentDiff(seq.id, seq.instrumentName)
       );
       seq.setInstrument(selectedInstrumentFull);
-      return; // Exit early after sequencer update
+    } else {
+      console.warn(`Failed to find sequencer with ID ${seqId}`);
     }
-    console.warn(`Failed to find sequencer with ID ${seqId}`);
-    return; // Exit if sequencer not found instead of updating global
-  }
-  
- // Global instrument
- if (instrumentSelectModal.dataset.currentSequencer === undefined) {
+  } else {
     try {
       await setGlobalActiveInstrument(selectedInstrumentFull);
       window.dispatchEvent(new CustomEvent('global-instrument-selected', {
         detail: { fullName: selectedInstrumentFull }
       }));
-      return selectedInstrumentFull;
     } catch (err) {
       console.error('Failed to load global instrument:', selectedInstrumentFull, err);
     }
   }
 }
 
-// PUBLIC: Cancel selection
-export function cancelInstrumentSelection(): void {
+/**
+ * Public helper to open the instrument selector modal.
+ * Accepts a full instrument name and optional sequencer ID.
+ * Will gracefully handle both global instrument selection and sequencer-specific selection.
+ *
+ * @param fullName - Full instrument name in "engine/library/instrument" format.
+ * @param sequencerId - Optional sequencer ID to apply selection to.
+ */
+export async function refreshInstrumentSelectorModal(fullName: string, sequencerId?: number): Promise<void> {
+  const [engine, library, instrument] = fullName.split('/');
+  currentEngine = (engine || 'sf2') as EngineName;
+  instrumentEngineSelect.value = currentEngine;
+
+  if (sequencerId !== undefined) {
+    instrumentSelectModal.dataset.currentSequencer = String(sequencerId);
+  } else {
+    delete instrumentSelectModal.dataset.currentSequencer;
+  }
+
+  instrumentSelectModal.classList.remove('hidden');
+
+  await refreshLibraries(library, fullName);
+}
+
+
+function cancelInstrumentSelection(): void {
   instrumentSelectModal.classList.add('hidden');
 }

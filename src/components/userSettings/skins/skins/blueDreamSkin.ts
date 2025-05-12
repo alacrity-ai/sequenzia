@@ -28,6 +28,16 @@ export const blueDreamSkin: InterfaceSkin = {
     toggleKnobChecked: 'peer-checked:after:border-white',
 
     blackKeyColor: '#1b1f5f',    // rich indigo-blue
-    whiteKeyColor: '#c0e7ff'     // cool icy blue
+    whiteKeyColor: '#c0e7ff',     // cool icy blue
+
+    volumeGradientFrom: 'from-cyan-500',
+    volumeGradientTo: 'to-cyan-300',
+    volumeThumbColor: 'bg-cyan-400',
+
+    panGradientFrom: 'from-indigo-500',
+    panGradientTo: 'to-indigo-300',
+    panThumbColor: 'bg-indigo-400',
+
+    snapMarkerColor: 'bg-cyan-400/50'
   };
   

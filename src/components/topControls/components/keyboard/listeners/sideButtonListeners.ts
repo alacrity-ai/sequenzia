@@ -2,7 +2,7 @@
 
 import { getKeyMap } from '@/components/topControls/components/keyboard/helpers/keys.js';
 import { drawKeys } from '@/components/topControls/components/keyboard/renderers/renderer.js';
-import { refreshInstrumentSelectorModal } from '@/components/sequencer/ui/controls/instrumentSelector.js';
+import { refreshInstrumentSelectorModal } from '@/components/sequencer/services/instrumentSelectorService.js';
 import { setSideButtonActivated } from '@/shared/ui/helpers/setSideButtonActivated.js';
 import { buildKeyToNoteMap } from '@/components/topControls/components/keyboard/helpers/buildKeyToNoteMap.js';
 import {

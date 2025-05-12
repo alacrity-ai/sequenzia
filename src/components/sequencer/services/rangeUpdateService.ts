@@ -1,7 +1,7 @@
 // src/components/sequencer/services/rangeUpdateService.ts
 
 import { pitchToMidi, midiRangeBetween } from '@/shared/utils/musical/noteUtils.js';
-import { drawMiniContour } from '@/components/sequencer/ui/renderers/drawMiniContour.js';
+import { drawMiniContour } from '@/components/sequencer/renderers/drawMiniContour.js';
 import { DRUM_MIDI_TO_NAME } from '@/sounds/loaders/constants/drums.js';
 import type { Grid } from '@/components/sequencer/matrix/Grid.js';
 import type { Note } from '@/shared/interfaces/Note.js';

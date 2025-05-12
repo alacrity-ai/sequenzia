@@ -1,3 +1,5 @@
+// src/shared/ui/primitives/createIconImg.ts
+
 import { h } from '@/shared/ui/domUtils.js';
 import { getAssetPath } from '@/shared/utils/storage/assetHelpers.js';
 

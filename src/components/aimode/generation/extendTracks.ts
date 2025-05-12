@@ -1,6 +1,6 @@
 // src/aimode/generation/extendTracks.ts
 
-import { getSequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { getStartBeat } from '@/components/aimode/ExtendMode.js';
 import { extendTracks } from '@/components/aimode/clients/OpenAIService.js';
 import {
@@ -9,7 +9,7 @@ import {
   mergeTracksMaps
 } from '@/components/aimode/helpers/trackHelpers.js';
 import { getMaxBeatsContext, getExtendBeatsAmount } from '../aiConfig.js';
-import { drawMiniContour } from '@/components/sequencer/ui/renderers/drawMiniContour.js';
+import { drawMiniContour } from '@/components/sequencer/renderers/drawMiniContour.js';
 import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
 import { updateTotalMeasures, getTimeSignature } from '@/shared/playback/transportService.js';
 import { TrackTuple } from '@/components/sequencer/interfaces/TrackTuple.js';

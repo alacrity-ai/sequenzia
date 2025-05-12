@@ -4,9 +4,11 @@ import { getAudioContext } from '@/sounds/audio/audio.js';
 import { isLoopEnabled, getTotalBeats, getTempo } from '@/shared/playback/transportService.js';
 import type Sequencer from '@/components/sequencer/sequencer.js';
 
+let instance: PlaybackEngine | null = null;
+
 export class PlaybackEngine {
-  private context: AudioContext;
-  private sequencers: Sequencer[];
+  private context!: AudioContext;
+  private sequencers!: Sequencer[];
 
   private startTime = 0;
   private startBeat = 0;
@@ -17,8 +19,22 @@ export class PlaybackEngine {
   private onStopCallback: (() => void) | null = null;
 
   constructor(sequencers: Sequencer[]) {
+    if (instance) {
+      console.warn('[PlaybackEngine] Instance already exists. Returning singleton.');
+      return instance;
+    }
+
     this.context = getAudioContext();
     this.sequencers = sequencers;
+
+    instance = this;
+  }
+
+  public static getInstance(): PlaybackEngine {
+    if (!instance) {
+      throw new Error('[PlaybackEngine] Instance not initialized. You must instantiate it first.');
+    }
+    return instance;
   }
 
   public setOnResumeCallback(cb: () => void): void {
@@ -133,7 +149,6 @@ export class PlaybackEngine {
     }
 
     if (wasPlaying) {
-      // Reschedule all tracks at the new beat position
       const scheduleAt = this.context.currentTime + 0.05;
       this.startTime = scheduleAt;
 
@@ -141,7 +156,6 @@ export class PlaybackEngine {
         this.animationFrameId = requestAnimationFrame(this.tick);
       });
 
-      // Resume the context if needed (safety net)
       if (this.context.state === 'suspended') {
         this.context.resume();
       }
@@ -163,6 +177,17 @@ export class PlaybackEngine {
 
   public setSequencers(newSeqs: Sequencer[]): void {
     this.sequencers = newSeqs;
+  }
+
+  // Idempotently add sequencer
+  public addSequencer(seq: Sequencer): void {
+    if (!this.sequencers.includes(seq)) {
+      this.sequencers.push(seq);
+    }
+  }
+
+  public removeSequencer(seq: Sequencer): void {
+    this.sequencers = this.sequencers.filter(s => s !== seq);
   }
 
   public isActive(): boolean {

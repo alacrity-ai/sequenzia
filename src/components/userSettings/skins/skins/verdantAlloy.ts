@@ -28,6 +28,16 @@ export const verdantAlloySkin: InterfaceSkin = {
     toggleKnobChecked: 'peer-checked:after:border-white',
 
     blackKeyColor: '#143016',    // mossy forest green
-    whiteKeyColor: '#dbf4dc'     // pale mint
+    whiteKeyColor: '#dbf4dc',     // pale mint
+  
+    volumeGradientFrom: 'from-emerald-500',
+    volumeGradientTo: 'to-emerald-300',
+    volumeThumbColor: 'bg-emerald-400',
+
+    panGradientFrom: 'from-lime-500',
+    panGradientTo: 'to-lime-300',
+    panThumbColor: 'bg-lime-400',
+
+    snapMarkerColor: 'bg-lime-300/50'
   };
   

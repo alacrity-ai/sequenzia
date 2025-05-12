@@ -1,6 +1,6 @@
 // src/appState/utils/syncLiveMatrixWithSerializedNotes.ts
 
-import { engine as playbackEngine } from '@/main.js';
+import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 
 import type { Note } from '@/shared/interfaces/Note.js';
 import type { Grid } from '@/components/sequencer/matrix/Grid.js';
@@ -36,6 +36,7 @@ export function syncLiveMatrixWithSerializedNotes(
   }
 
   // Optional: re-schedule playback if engine is active
+  const playbackEngine = PlaybackEngine.getInstance();
   if (playbackEngine?.isActive()) {
     const startAt = playbackEngine.getStartTime();
     const startBeat = playbackEngine.getStartBeat();

@@ -29,6 +29,16 @@ export const defaultSkin: InterfaceSkin = {
     toggleKnobChecked: 'peer-checked:after:border-white',
 
     blackKeyColor: '#a6a09b',
-    whiteKeyColor: '#292524'
+    whiteKeyColor: '#292524',
+  
+    volumeGradientFrom: 'from-purple-600',
+    volumeGradientTo: 'to-purple-400',
+    volumeThumbColor: 'bg-purple-500',
+
+    panGradientFrom: 'from-indigo-600',
+    panGradientTo: 'to-indigo-400',
+    panThumbColor: 'bg-indigo-500',
+
+    snapMarkerColor: 'bg-purple-300/50'
   };
   

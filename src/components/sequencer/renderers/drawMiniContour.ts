@@ -1,4 +1,4 @@
-// src/components/sequencer/ui/renderers/drawMiniContour.ts
+// src/components/sequencer/renderers/drawMiniContour.ts (DEPRECATED, Move to ../renderers/drawMiniContour.ts)
 
 import { pitchToMidi } from '@/sounds/audio/pitch-utils.js';
 import { TRACK_COLORS } from '@/components/sequencer/matrix/rendering/colors/constants/trackColors.js';

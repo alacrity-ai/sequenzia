@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { updateNoteRange, updateToDrumNoteRange } from './rangeUpdateService';
 import { DRUM_MIDI_TO_NAME } from '@/sounds/loaders/constants/drums';
 
-vi.mock('@/components/sequencer/ui/renderers/drawMiniContour', () => ({
+vi.mock('@/components/sequencer/renderers/drawMiniContour', () => ({
   drawMiniContour: vi.fn(),
 }));
 
@@ -31,7 +31,7 @@ vi.mock('@/shared/utils/musical/noteUtils', () => {
 
 vi.mock('@/main', () => ({}));
 
-import * as MiniContourModule from '@/components/sequencer/ui/renderers/drawMiniContour';
+import * as MiniContourModule from '@/components/sequencer/renderers/drawMiniContour';
 
 describe('rangeUpdateService', () => {
   let config: any;

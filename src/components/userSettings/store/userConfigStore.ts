@@ -1,7 +1,7 @@
 // src/components/userSettings/store/userConfigStore.ts
 
 import { defaultUserConfig } from './defaultUserSettings.js';
-import { getSequencers } from '../../sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { getSkinByName } from '../skins/index.js';
 
 import type { UserConfig } from '../interfaces/UserConfig.js';

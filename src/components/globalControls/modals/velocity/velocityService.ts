@@ -1,6 +1,6 @@
 // src/components/globalControls/modals/velocity/velocityService.ts
 
-import { getSequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { getActiveSelection } from '@/components/sequencer/utils/selectionTracker.js';
 import { recordDiff } from '@/appState/appState.js';
 import {

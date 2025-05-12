@@ -5,7 +5,7 @@ import { attachKeyboardMouseListeners } from '@/components/topControls/component
 import { attachKeyboardKeyListeners } from '@/components/topControls/components/keyboard/listeners/keyboardKeyListeners.js';
 import { attachKeyboardSideButtonListeners } from '@/components/topControls/components/keyboard/listeners/sideButtonListeners.js';
 import { getKeyboardInstrument, initKeyboardInstrumentState } from '@/components/topControls/components/keyboard/services/keyboardService.js';
-import { refreshInstrumentSelectorModal } from '@/components/sequencer/ui/controls/instrumentSelector.js';
+import { refreshInstrumentSelectorModal } from '@/components/sequencer/services/instrumentSelectorService.js';
 
 /**
  * Lifecycle manager for the on-screen piano keyboard and its controls.
