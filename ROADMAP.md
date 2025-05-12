@@ -32,18 +32,18 @@
 
 ## Future Todos
 - QOL:
-  - [ ] Smarter snap durations, auto shift down to the note value you're on
-  - [ ] Add alternate note placement mode option in the user config (on mouse down note placement into sizing)
-  - [ ] Hold down alt or something to see all the hotkeys on all UI elements.
+  - [x] Smarter snap durations, auto shift down to the note value you're on
+  - [x] Add alternate note placement mode option in the user config (on mouse down note placement into sizing)
+  - [x] Hold down alt or something to see all the hotkeys on all UI elements.
 - Sequencer Grid:
   - [x] Re-implement sequencer grid drawing entirely.
     - [x] Replace the existing sequencer element with one based from the example in: gridtest.html
     - [x] Thoroughly test after integration
     - [x] Style pass, to make sure it looks as good as the original or better
 - JSX Refactor
-  - [ ] Create all UI components via JSX
-  - [ ] Refactor UI/handler classes into a clean architecture, separated from business code
-  - [ ] Use /setup only as orchestration layer
+  - [x] Create all UI components via JSX
+  - [x] Refactor UI/handler classes into a clean architecture, separated from business code
+  - [x] Use /setup only as orchestration layer
 - Playback Enhancements:
   - [ ] Add loop start/loop end to global playhead
   - [ ] Add playhead follow mode to sequencer topbar (follows playhead, or scrolls when playhead reaches end of screen)
@@ -54,9 +54,18 @@
 
 ## Bugs
 - Critical Bugs:
-  - [ ] Dragging down on a note, and running off of the note can lock handler mode in a weird state where a note has to be placed to do anything.  Drag threshold should be more forgiving moving down.
+  - [ ] Express Note tool ocassionally locks up.  Don't know how to reproduce yet.
+  - [ ] Volume / Pan not updating properly on load session, and in wrong place when creating sequencer
+  - [ ] Instrument select menu pops up immediately on app load (needs to be in a controller)
+    - Load instrument button listener is not attached to sequencers from load session
+  - [ ] Changing skin during playback causes major issues, playback stops, all sequencers are expanded.
+    - First sequencer's event listeners are detached
+    - All sequencers are expanded
+    - Playback engine might not be getting the new sequencers, e.g. we need to resync with that
+    - Other potential issues
+  - [x] Dragging down on a note, and running off of the note can lock handler mode in a weird state where a note has to be placed to do anything.  Drag threshold should be more forgiving moving down.
   - [ ] Velocity not being honored on webaudiofont drums
-  - [ ] When pressing play after a fresh stop, always starts from the beginning - ignores if user manually moved playhead to a spot
+  - [x] When pressing play after a fresh stop, always starts from the beginning - ignores if user manually moved playhead to a spot
   - [x] webaudiofont instrument wav export is silent. OfflineAudioContext issue. (related to currentTime?)
 - Small Bugs:
   - [x] Drum tracks on Wav export throw: Sample not found: '50', Sample not found: '53', etc
