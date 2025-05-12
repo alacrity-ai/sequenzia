@@ -40,6 +40,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         format: 'es',
+        manualChunks: {
+          vendor: ['@tonaljs/tonal', 'flowbite', 'smplr', 'webaudiofont'],
+        },
       },
     },
   }
