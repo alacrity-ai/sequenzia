@@ -1,6 +1,7 @@
 // src/components/userSettings/listeners/attachThemeSettingsListeners.ts
 
 import { getUserConfig, updateUserConfig } from '../store/userConfigStore.js';
+import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import type { ListenerAttachment } from '../interfaces/ListenerAttachment.js';
 
 export function attachThemeSettingsListeners(sectionEl: HTMLElement): ListenerAttachment {
@@ -27,6 +28,9 @@ export function attachThemeSettingsListeners(sectionEl: HTMLElement): ListenerAt
   
     const handleSkinChange = (e: Event) => {
       const target = e.target as HTMLSelectElement;
+      // Stop all sequencers if playing
+      const playbackEngine = PlaybackEngine.getInstance();
+      playbackEngine.stop();
       updateUserConfig({ theme: { skin: target.value } });
     };
   

@@ -1,8 +1,9 @@
 // src/shared/playback/transportService.ts
 
-import { getSequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { getAppState, recordDiff } from '@/appState/appState.js';
 import { isSnapToGridEnabled } from '../stores/songInfoStore';
+import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import {
   createChangeTempoDiff,
   createReverseChangeTempoDiff
@@ -33,7 +34,6 @@ import {
 
 import type { SongKey } from '@/shared/types/SongKey.ts';
 
-import { engine as playbackEngine } from '@/main.js';
 
 let beatDuration = 500; // ms per beat
 let startTime: number | null = null;
@@ -57,7 +57,7 @@ export function updateTempo(bpm: number, record = true): void {
     );
     return;
   }
-
+  const playbackEngine = PlaybackEngine.getInstance();
   const now = performance.now();
   const currentBeat = playbackEngine.getCurrentBeat();
   beatDuration = (60 / bpm) * 1000;

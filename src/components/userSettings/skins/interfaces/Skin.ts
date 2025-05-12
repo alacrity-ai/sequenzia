@@ -25,5 +25,13 @@ export interface InterfaceSkin {
 
     blackKeyColor: string;
     whiteKeyColor: string;
+
+    volumeGradientFrom: string;
+    volumeGradientTo: string;
+    panGradientFrom: string;
+    panGradientTo: string;
+    snapMarkerColor: string;
+    volumeThumbColor: string;
+    panThumbColor: string;
   }
   

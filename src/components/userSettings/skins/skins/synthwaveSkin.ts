@@ -26,6 +26,16 @@ export const synthwaveSkin: InterfaceSkin = {
     toggleKnobChecked: 'peer-checked:after:border-white',
 
     blackKeyColor: '#d946ef', // Tailwind fuchsia-500 — rich, vibrant, but not retina-searing
-    whiteKeyColor: '#f5d0fe'  // Tailwind fuchsia-100 — warm pastel pink for balance
+    whiteKeyColor: '#f5d0fe',  // Tailwind fuchsia-100 — warm pastel pink for balance
+  
+    volumeGradientFrom: 'from-fuchsia-500',
+    volumeGradientTo: 'to-pink-400',
+    volumeThumbColor: 'bg-fuchsia-400',
+
+    panGradientFrom: 'from-purple-600',
+    panGradientTo: 'to-purple-400',
+    panThumbColor: 'bg-purple-500',
+
+    snapMarkerColor: 'bg-fuchsia-300/50'
   };
   

@@ -1,7 +1,7 @@
 // src/components/userSettings/listeners/attachGlobalSettingsListeners.ts
 
 import { getUserConfig, updateUserConfig } from '@/components/userSettings/store/userConfigStore.js';
-import { getSequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 import type { NoteToolFlavor } from '@/components/userSettings/interfaces/GlobalSettings.js';
 

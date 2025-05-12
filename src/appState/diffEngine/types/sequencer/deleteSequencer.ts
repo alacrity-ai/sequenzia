@@ -1,8 +1,6 @@
-// src/appState/diffEngine/types/sequencer/deleteSequencer.ts
-
-import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
-import { AppState } from '@/appState/interfaces/AppState.js';
-import { Diff } from '@/appState/interfaces/Diff.js';
+import { getSequencerControllerById } from '@/components/sequencer/stores/sequencerControllerStore.js';
+import type { AppState } from '@/appState/interfaces/AppState.js';
+import type { Diff } from '@/appState/interfaces/Diff.js';
 
 /**
  * Applies a DELETE_SEQUENCER diff to remove a sequencer.
@@ -11,11 +9,11 @@ export function applyDELETE_SEQUENCER(state: AppState, diff: Diff): AppState {
   const newState = structuredClone(state);
   newState.sequencers = newState.sequencers.filter(s => s.id !== diff.id);
 
-  const index = sequencers.findIndex(seq => seq.id === diff.id);
-  if (index !== -1) {
-    const seq = sequencers[index];
-    seq.destroy();
-    sequencers.splice(index, 1); 
+  const controller = getSequencerControllerById(diff.id);
+  if (controller) {
+    controller.destroy();
+  } else {
+    console.warn(`DELETE_SEQUENCER: No controller found for id ${diff.id}`);
   }
 
   return newState;
@@ -29,7 +27,8 @@ export function createDeleteSequencerDiff(
   instrument: string,
   notes: any[] = [],
   volume?: number,
-  pan?: number
+  pan?: number,
+  collapsed?: boolean
 ): Diff {
   return {
     type: 'DELETE_SEQUENCER',
@@ -38,6 +37,7 @@ export function createDeleteSequencerDiff(
     notes: structuredClone(notes),
     volume,
     pan,
+    collapsed
   };
 }
 
@@ -49,7 +49,8 @@ export function createReverseDeleteSequencerDiff(
   instrument: string,
   notes: any[] = [],
   volume?: number,
-  pan?: number
+  pan?: number,
+  collapsed?: boolean
 ): Diff {
   return {
     type: 'CREATE_SEQUENCER',
@@ -58,5 +59,6 @@ export function createReverseDeleteSequencerDiff(
     notes: structuredClone(notes),
     volume,
     pan,
+    collapsed
   };
 }

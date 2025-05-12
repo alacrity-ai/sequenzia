@@ -2,7 +2,7 @@
 
 import { getAppState } from '@/appState/appState.js';
 import { exportSessionToWAV } from '@/export/save.js';
-import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 
 export interface SaveWavOptions {
   sampleRate: number;
@@ -31,6 +31,7 @@ export async function applySaveWavOptions(): Promise<void> {
 
   // Fetch current state and sequencers
   const appState = getAppState(); // assumes global session state
+  const sequencers = getSequencers();
 
   const session = {
     globalConfig: {

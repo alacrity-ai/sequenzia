@@ -29,6 +29,17 @@ export const sunsetSkin: InterfaceSkin = {
     toggleKnobChecked: 'peer-checked:after:border-white',
 
     blackKeyColor: '#45122c',    // dusky plum
-    whiteKeyColor: '#fff3e0'     // pastel sand / warm light peach
+    whiteKeyColor: '#fff3e0',     // pastel sand / warm light peach
+  
+    volumeGradientFrom: 'from-amber-500',
+    volumeGradientTo: 'to-amber-300',
+    volumeThumbColor: 'bg-amber-400',
+
+    panGradientFrom: 'from-rose-500',
+    panGradientTo: 'to-rose-300',
+    panThumbColor: 'bg-rose-400',
+
+    snapMarkerColor: 'bg-amber-300/50'
+
   };
   

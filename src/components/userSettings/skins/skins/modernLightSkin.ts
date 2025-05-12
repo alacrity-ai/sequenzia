@@ -27,6 +27,17 @@ export const modernLightSkin: InterfaceSkin = {
 
     // Normal Key colors
     blackKeyColor: '#111111',
-    whiteKeyColor: '#ffffff'
+    whiteKeyColor: '#ffffff',
+  
+    volumeGradientFrom: 'from-blue-500',
+    volumeGradientTo: 'to-blue-300',
+    volumeThumbColor: 'bg-blue-400',
+
+    panGradientFrom: 'from-sky-500',
+    panGradientTo: 'to-sky-300',
+    panThumbColor: 'bg-sky-400',
+
+    snapMarkerColor: 'bg-blue-400/50'
+
   };
   

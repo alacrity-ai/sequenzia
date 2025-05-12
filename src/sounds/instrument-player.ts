@@ -8,7 +8,7 @@ import { getAudioContext } from './audio/audio.js';
 import { getKeyboardInstrument } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 
 // Registry of available players
-const enginePlayers: Record<EngineName, EnginePlayer> = {
+export const enginePlayers: Record<EngineName, EnginePlayer> = {
     sf2: getSf2Player(),
     webaudiofont: getWebAudioFontPlayer()
 };  
@@ -32,11 +32,6 @@ export async function setGlobalActiveInstrument(
   
     await engine.setActiveInstrument(fullName);
 }  
-
-// Used to get GLOBAL VIRTUAL PIANO instrument
-export function getGlobalActiveInstrumentName(): string | null {
-  return getKeyboardInstrument();
-}
 
 // Used when loading notes normally
 export async function setInstrumentForPlayback(
@@ -114,8 +109,4 @@ export async function loadAndPlayNote(
     volume,
     pan
   );
-}
-  
-export function getAvailableEngines(): EngineName[] {
-  return Object.keys(enginePlayers) as EngineName[];
 }

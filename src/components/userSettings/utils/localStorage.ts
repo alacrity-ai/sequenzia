@@ -23,6 +23,3 @@ export function loadUserConfigFromLocalStorage(): void {
     updateUserConfig(parsed);
   }
 }
-
-// Optionally auto-load
-loadUserConfigFromLocalStorage();

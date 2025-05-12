@@ -4,7 +4,7 @@ import { Session } from '@/components/sequencer/interfaces/Session.js';
 import { getTempo } from '@/shared/playback/transportService.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { showLoadingModal, hideLoadingModal } from '@/components/globalPopups/helpers/loadingModal.js';
-import Sequencer from '@/components/sequencer/sequencer.js';
+import { createExportSequencer, resetExportSequencerIds } from '@/components/sequencer/factories/exportSequencerFactory.js';
 
 let globalLoading: boolean = false;
 
@@ -113,12 +113,13 @@ export async function exportSessionToWAVWorkers(session: Session): Promise<void>
 }
 
 export async function exportSessionToWAV(
-    session: Session, 
-    options: { sampleRate: number; includePan: boolean } = { sampleRate: 44100, includePan: true }
-  ): Promise<void> {
+  session: Session,
+  options: { sampleRate: number; includePan: boolean } = { sampleRate: 44100, includePan: true }
+): Promise<void> {
   if (!session.tracks || session.tracks.length === 0) {
     throw new Error("No tracks to export.");
   }
+
   const sampleRate = options.sampleRate;
   const numChannels = options.includePan ? 2 : 1;
 
@@ -151,26 +152,28 @@ export async function exportSessionToWAV(
       sampleRate
     );
 
-    for (const state of session.tracks) {
+    // Reset export sequencer id counter for this export pass
+    resetExportSequencerIds();
+
+    for (const track of session.tracks) {
       if (aborted) return;
-    
-      const instrumentName = state.instrument || 'sf2/fluidr3-gm/acoustic_grand_piano';
-      const seq = new Sequencer(null, state.config as any, offlineCtx as any, offlineCtx.destination, instrumentName, true);
-    
-      // Avoid calling setState; just directly pass the notes
-      await seq.exportToOffline(abortController.signal, state.notes);
-    
+
+      const seq = createExportSequencer(offlineCtx, track);
+
+      await seq.exportToOffline(abortController.signal, track.notes);
+
       if (aborted) return;
-    }    
+    }
 
     if (aborted) return;
-    showLoadingModal("Rendering Audio", "Rendering audio buffer…", undefined, true); // without cancel
+
+    showLoadingModal("Rendering Audio", "Rendering audio buffer…", undefined, true);
     const renderedBuffer = await offlineCtx.startRendering();
 
-    showLoadingModal("Converting to WAV", "Converting to WAV format…", undefined, true); // without cancel
+    showLoadingModal("Converting to WAV", "Converting to WAV format…", undefined, true);
     const wavBlob = audioBufferToWavBlob(renderedBuffer);
-    
-    showLoadingModal("Downloading WAV", "Please wait...", undefined, true); // without cancel
+
+    showLoadingModal("Downloading WAV", "Please wait...", undefined, true);
     const url = URL.createObjectURL(wavBlob);
 
     const a = document.createElement('a');
@@ -178,6 +181,7 @@ export async function exportSessionToWAV(
     a.download = `session-${Date.now()}.wav`;
     a.click();
     URL.revokeObjectURL(url);
+
   } catch (e) {
     if (aborted) {
       console.warn("Export operation was cancelled by the user.");

@@ -11,100 +11,80 @@ import { registerGlobalEventGuards } from './shared/boot/GlobalEventGuards.js';
 
 // State Management
 import { getAppState, recordDiff } from './appState/appState.js';
-import { undo, redo } from './appState/stateHistory';
 import { onStateUpdated } from './appState/onStateUpdated.js';
 import { resyncFromState } from './appState/resyncFromState.js';
 import { createCheckpointDiff, createReverseCheckpointDiff } from './appState/diffEngine/types/internal/checkpoint.js';
 import { createCreateSequencerDiff, createReverseCreateSequencerDiff } from './appState/diffEngine/types/sequencer/createSequencer.js';
+import { getSequencers } from './components/sequencer/stores/sequencerStore.js';
+import { loadUserConfigFromLocalStorage } from './components/userSettings/utils/localStorage.js';
 
 // Playback Engine
-import { PlaybackEngine } from './shared/playback/PlaybackEngine.js';
-
-// Sequencer System
-import { getSequencers, sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
-import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
-import { setupInstrumentSelector } from '@/components/sequencer/ui/controls/instrumentSelector.js';
+import { PlaybackEngine, getPlaybackEngine } from './shared/playback/PlaybackEngine.js';
 
 // Global Controls and UI
 import { GlobalControlsController } from '@/components/globalControls/GlobalControlsController.js';
-import { GlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
+import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
 import { setupGlobalUndoRedo } from '@/shared/modals/global/undo-redo.js';
-import { showSplashScreen, hideSplashScreen } from '@/shared/modals/global/splashscreen.js';
 import { VisualizerController } from '@/components/visualizer/visualizerController.js';
 import { TopControlsController } from '@/components/topControls/topControlsController.js';
-
-// User Config Modal
 import { UserConfigModalController } from '@/components/userSettings/userConfig.js';
+import { getOverlaysController } from '@/components/overlays/overlaysController.js';
 
-// Setup (Deprecated)
+// Setup (Deprecated / Needs dedicated Controllers)
 import { setupAddTrackButton } from '@/components/sequencer/ui/setupAddTrackButton.js';
+import { undo, redo } from './appState/stateHistory';
 
-// === Immediately show splash screen //
-showSplashScreen();
+function bootstrapSequenziaApp(): void {
+  const popupsController = getGlobalPopupController();
+  popupsController.showSplashScreen();
 
-// === Dev Mode Toggle
-registerDevTools();
+  loadUserConfigFromLocalStorage();
+  registerDevTools();
+  registerGlobalEventGuards();
 
-// === Global Event Guards ===
-registerGlobalEventGuards();
+  PlaybackEngine.initialize(getSequencers());
 
-// === UI Orchestrator
-const orchestrator = UIOrchestrator.getInstance();
+  const userConfigModalController = new UserConfigModalController();
+  const overlaysController = getOverlaysController();
+  const topControlsController = new TopControlsController();
+  const globalControls = new GlobalControlsController(getPlaybackEngine(), userConfigModalController);
+  const visualizer = new VisualizerController();
 
-// === Instrument Selector ===
-setupInstrumentSelector(); // Refactor this into a dedicated controller
+  globalControls.show();
+  visualizer.show();
 
-// === Userconfig Init
-const userConfigModalController = new UserConfigModalController();
-orchestrator.registerReloadable(() => userConfigModalController.reload());
+  const orchestrator = UIOrchestrator.getInstance();
+  orchestrator.registerReloadable(() => visualizer.reload());
+  orchestrator.registerReloadable(() => topControlsController.reload());
+  orchestrator.registerReloadable(() => userConfigModalController.reload());
+  orchestrator.registerReloadable(() => globalControls.reload());
+  orchestrator.registerReloadable(() => popupsController.reload());
+  orchestrator.registerReloadable(() => overlaysController.reload());
 
-// === Playback Engine
-export const engine = new PlaybackEngine(getSequencers());
+  onStateUpdated(resyncFromState);
 
-// === Top Controls ===
-export const topControlsController = new TopControlsController();
-orchestrator.registerReloadable(() => topControlsController.reload());
+  devLog('Setting up additional UI...');
+  setupGlobalUndoRedo(undo, redo);
+  setupAddTrackButton();
 
-// === Footer Controls (Transport) ===
-const globalControls = new GlobalControlsController(engine, userConfigModalController);
-orchestrator.registerReloadable(() => globalControls.reload());
-globalControls.show();
+  const firstId = 0;
+  const firstInstrument = 'sf2/fluidr3-gm/acoustic_grand_piano';
+  recordDiff(
+    createCreateSequencerDiff(firstId, firstInstrument),
+    createReverseCreateSequencerDiff(firstId)
+  );
 
-// === Global Popup Modals ===
-export const popupsController = new GlobalPopupController(() => {
-  console.warn('User cancelled loading.');
+  recordDiff(
+    createCheckpointDiff('Initial App State'),
+    createReverseCheckpointDiff('Initial App State')
+  );
+
+  popupsController.hideSplashScreen();
+  logMessage('Sequenzia initialized');
+  devLog('Current state: ', getAppState());
+}
+
+// === Defer bootstrap until after first frame ===
+requestAnimationFrame(() => {
+  bootstrapSequenziaApp();
 });
-orchestrator.registerReloadable(() => popupsController.reload());
-
-// === Visualizer ===
-const visualizer = new VisualizerController();
-orchestrator.registerReloadable(() => visualizer.reload());
-visualizer.show();
-
-// === State Sync ===
-onStateUpdated(resyncFromState);
-
-// === Initial Sequencer ===
-const firstId = 0;
-const firstInstrument = 'sf2/fluidr3-gm/acoustic_grand_piano';
-recordDiff(
-  createCreateSequencerDiff(firstId, firstInstrument),
-  createReverseCreateSequencerDiff(firstId)
-);
-
-// Lock in the initial application state so undo never goes before this point
-recordDiff(
-  createCheckpointDiff('Initial App State'),
-  createReverseCheckpointDiff('Initial App State')
-);
-
-// === Additional UI Setup ===
-devLog('Setting up additional UI...');
-setupGlobalUndoRedo(undo, redo);
-setupAddTrackButton();
-
-hideSplashScreen();
-logMessage('Sequenzia initialized');
-devLog('Current config: ', config);
-devLog('Current sequencers: ', sequencers[0]);
-devLog('Current state: ', getAppState());

@@ -1,7 +1,7 @@
 // src/components/sideMenu/listeners/sideMenuListeners.ts
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
-import { popupsController } from '@/main.js';
+import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
 
 /**
  * Attaches event listeners for side menu buttons (piano, mixer, AI).
@@ -13,14 +13,17 @@ export function attachSideMenuListeners(container: HTMLElement): ListenerAttachm
   const aiBtn = container.querySelector('#ai-toggle-btn') as HTMLButtonElement | null;
 
   const handlePiano = () => {
+    const popupsController = getGlobalPopupController();
     popupsController.showFeatureBlocked();
   };
 
   const handleMixer = () => {
+    const popupsController = getGlobalPopupController();
     popupsController.showFeatureBlocked();
   };
 
   const handleAI = () => {
+    const popupsController = getGlobalPopupController();
     popupsController.showFeatureBlocked();
   };
 

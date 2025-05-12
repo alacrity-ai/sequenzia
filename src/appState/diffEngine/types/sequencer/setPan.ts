@@ -1,6 +1,6 @@
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
-import { sequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 
 /**
  * Applies a SET_PAN diff to update track pan.
@@ -11,6 +11,7 @@ export function applySET_PAN(state: AppState, diff: Diff): AppState {
   if (track && typeof diff.pan === 'number') {
     track.pan = diff.pan;
 
+    const sequencers = getSequencers();
     const liveSeq = sequencers.find(s => s.id === diff.id);
     if (liveSeq) {
         liveSeq.pan = diff.pan;

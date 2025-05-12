@@ -1,5 +1,5 @@
 import { drawGlobalMiniContourInCanvas } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
-import { getSequencers } from '@/components/sequencer/factories/SequencerFactory.js';
+import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { getTotalBeats } from '@/shared/playback/transportService.js';
 import { drawExtendPlayhead } from '@/components/aimode/drawing/ExtendMiniContour.js';
 

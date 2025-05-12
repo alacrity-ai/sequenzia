@@ -1,3 +1,5 @@
+// src/shared/modals/global/undo-redo.ts
+
 export function setupGlobalUndoRedo(undo: () => void, redo: () => void): void {
     window.addEventListener(
       'keydown',

@@ -1,35 +1,35 @@
 // src/components/sequencer/matrix/Grid.ts
 
-import { mergeGridConfig, createDefaultGridConfig } from './GridConfig.js';
-import { GridConfig } from './interfaces/GridConfigTypes.js';
-import { GridRenderer } from './rendering/GridRenderer.js';
-import { GridScroll } from './scrollbars/GridScroll.js';
-import { NoteManager } from './notes/NoteManager.js';
-import { NoteRenderer } from './rendering/NoteRenderer.js';
-import { NotePreviewRenderer } from './rendering/NotePreviewRenderer.js';
-import { AnimationRenderer } from './rendering/AnimationRenderer.js';
-import { PlayheadRenderer } from './rendering/PlayheadRenderer.js';
-import { CanvasManager } from './rendering/CanvasManager.js';
-import { ScrollbarManager } from './scrollbars/ScrollbarManager.js';
-import { InteractionContext } from './input/InteractionContext.js';
-import { CursorController } from './input/cursor/CursorController.js';
-import { InputTracker } from './input/InputTracker.js';
-import { WheelHandler } from './input/WheelHandler.js';
-import { InteractionStore } from './input/stores/InteractionStore.js';
-import { GridManager } from './GridManager.js';
-import { HeaderPlayheadRenderer } from './rendering/HeaderPlayheadRenderer.js';
-import { LabelColumnRenderer } from './rendering/LabelColumnRenderer.js';
-import { MarqueeRenderer } from './rendering/MarqueeRenderer.js';
-import { SEQUENCER_CONFIG as sequencerConfig } from '../constants/sequencerConstants.js';
-import { setClipboard, getClipboard } from '../clipboard.js';
-import { EventEmitter } from './events/EventEmitter.js';
+import { mergeGridConfig, createDefaultGridConfig } from '@/components/sequencer/matrix/GridConfig.js';
+import { GridConfig } from '@/components/sequencer/matrix/interfaces/GridConfigTypes.js';
+import { GridRenderer } from '@/components/sequencer/matrix/rendering/GridRenderer.js';
+import { GridScroll } from '@/components/sequencer/matrix/scrollbars/GridScroll.js';
+import { NoteManager } from '@/components/sequencer/matrix/notes/NoteManager.js';
+import { NoteRenderer } from '@/components/sequencer/matrix/rendering/NoteRenderer.js';
+import { NotePreviewRenderer } from '@/components/sequencer/matrix/rendering/NotePreviewRenderer.js';
+import { AnimationRenderer } from '@/components/sequencer/matrix/rendering/AnimationRenderer.js';
+import { PlayheadRenderer } from '@/components/sequencer/matrix/rendering/PlayheadRenderer.js';
+import { CanvasManager } from '@/components/sequencer/matrix/rendering/CanvasManager.js';
+import { ScrollbarManager } from '@/components/sequencer/matrix/scrollbars/ScrollbarManager.js';
+import { InteractionContext } from '@/components/sequencer/matrix/input/InteractionContext.js';
+import { CursorController } from '@/components/sequencer/matrix/input/cursor/CursorController.js';
+import { InputTracker } from '@/components/sequencer/matrix/input/InputTracker.js';
+import { WheelHandler } from '@/components/sequencer/matrix/input/WheelHandler.js';
+import { InteractionStore } from '@/components/sequencer/matrix/input/stores/InteractionStore.js';
+import { GridManager } from '@/components/sequencer/matrix/GridManager.js';
+import { HeaderPlayheadRenderer } from '@/components/sequencer/matrix/rendering/HeaderPlayheadRenderer.js';
+import { LabelColumnRenderer } from '@/components/sequencer/matrix/rendering/LabelColumnRenderer.js';
+import { MarqueeRenderer } from '@/components/sequencer/matrix/rendering/MarqueeRenderer.js';
+import { SEQUENCER_CONFIG as sequencerConfig } from '@/components/sequencer/constants/sequencerConstants.js';
+import { setClipboard, getClipboard } from '@/components/sequencer/stores/clipboard.js';
+import { EventEmitter } from '@/components/sequencer/matrix/events/EventEmitter.js';
 import { getSnapResolution, getIsTripletMode } from '@/shared/playback/transportService.js';
 
-import type { GridEvents } from './interfaces/GridEvents.js';
-import type { TrackedNote } from './interfaces/TrackedNote.js';
-import type { InteractionContextData } from './input/interfaces/InteractionContextData.js';
-import type { GridSnappingContext } from './interfaces/GridSnappingContext.js';
-import type { SequencerContext } from './interfaces/SequencerContext.js';
+import type { GridEvents } from '@/components/sequencer/matrix/interfaces/GridEvents.js';
+import type { TrackedNote } from '@/components/sequencer/matrix/interfaces/TrackedNote.js';
+import type { InteractionContextData } from '@/components/sequencer/matrix/input/interfaces/InteractionContextData.js';
+import type { GridSnappingContext } from '@/components/sequencer/matrix/interfaces/GridSnappingContext.js';
+import type { SequencerContext } from '@/components/sequencer/matrix/interfaces/SequencerContext.js';
 
 import type { Note } from '@/shared/interfaces/Note.js';
 import { computeBlackKeyMidiMap } from '@/shared/utils/musical/noteUtils.js'

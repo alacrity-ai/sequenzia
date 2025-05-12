@@ -1,3 +1,5 @@
+// src/shared/dev/devTools.ts
+
 import { isDevMode, enableDevMode, disableDevMode } from '@/shared/state/devMode.js';
 import { getAllDevTools } from '@/shared/dev/tools/index.js';
 

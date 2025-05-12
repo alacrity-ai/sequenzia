@@ -49,7 +49,7 @@ export class GlobalControlsController {
   constructor(engine: PlaybackEngine, userConfigModalController: UserConfigModalController) {
     this.engine = engine;
     this.userConfigModalController = userConfigModalController;
-    this.playbackService = new PlaybackService(this.engine);
+    this.playbackService = new PlaybackService();
     this.initializeUI();
   }
 
