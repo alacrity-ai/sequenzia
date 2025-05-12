@@ -18,6 +18,10 @@ export class UIOrchestrator {
       this.reloadCallbacks.push(callback);
     }
   
+    public unregisterReloadable(callback: () => void): void {
+      this.reloadCallbacks = this.reloadCallbacks.filter(fn => fn !== callback);
+    }
+
     public reloadAll(): void {
       this.reloadCallbacks.forEach(fn => fn());
     }

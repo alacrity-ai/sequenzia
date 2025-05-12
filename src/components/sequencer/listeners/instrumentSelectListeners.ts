@@ -1,7 +1,9 @@
+// src/components/sequencer/listeners/instrumentSelectListeners.ts
+
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 import type Sequencer from '@/components/sequencer/sequencer.js';
 
-import { openInstrumentSelectorModal } from '@/components/sequencer/services/instrumentSelectorService.js';
+import { getOverlaysController } from '@/components/overlays/overlaysController.js';
 
 /**
  * Attaches the instrument selection button listener for a specific sequencer.
@@ -11,15 +13,12 @@ export function attachInstrumentSelectListeners(
   sequencer: Sequencer
 ): ListenerAttachment {
   const handleClick = () => {
-    openInstrumentSelectorModal(sequencer.id, sequencer.instrumentName);
+    getOverlaysController().showInstrumentSelectModal(sequencer.id, sequencer.instrumentName);
   };
 
   button.addEventListener('click', handleClick);
 
-  const refreshUI = () => {
-    // Could update the label here if the instrument changes externally
-    // e.g., buttonLabel.textContent = sequencer.instrumentShortName;
-  };
+  const refreshUI = () => {};
 
   return {
     detach: () => {

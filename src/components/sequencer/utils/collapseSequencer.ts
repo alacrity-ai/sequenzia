@@ -7,11 +7,13 @@ import { getSequencerControllerById } from '@/components/sequencer/stores/sequen
 import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import { drawMiniContour } from '@/components/sequencer/renderers/drawMiniContour.js';
 
+import { getAssetPath } from '@/shared/utils/storage/assetHelpers.js';
+
 /**
  * Sets the collapsed state of a sequencer in the UI (hides body, shows mini-contour).
  * This does not modify app state or record any undoable diffs.
  */
-export function setCollapsed(seq: Sequencer, val: boolean = true): void {
+export function setCollapsed(seq: Sequencer, val: boolean = true, collapseBtn: HTMLButtonElement | null = null): void {
   const controller = getSequencerControllerById(seq.id);
   if (!controller) return;
 
@@ -31,6 +33,15 @@ export function setCollapsed(seq: Sequencer, val: boolean = true): void {
   body.classList.toggle('hidden', val);
   // Hide/Show the mini contour
   mini.classList.toggle('hidden', !val);
+
+  // If collapseBtn provided:
+  if (collapseBtn) {
+    const collapseIcon = collapseBtn.querySelector('img');
+    if (collapseIcon) {
+      const iconName = val ? 'icon-caret-up' : 'icon-caret-down';
+      collapseIcon.src = getAssetPath(`static/svg/${iconName}.svg`);
+    }
+  }
 
   if (val) {
     // If collapsing: Hide zoom and grip handle UI

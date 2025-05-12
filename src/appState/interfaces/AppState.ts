@@ -10,6 +10,7 @@ export interface SequencerState {
   notes: Note[];
   volume?: number;
   pan?: number;
+  collapsed?: boolean;
 }
 
 export interface AppState {
@@ -31,4 +32,5 @@ export interface CreateSequencerOptions {
   instrument: string;
   volume?: number;
   pan?: number;
+  collapsed?: boolean;
 }

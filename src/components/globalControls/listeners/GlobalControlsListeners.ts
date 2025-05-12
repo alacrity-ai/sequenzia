@@ -8,7 +8,7 @@ import {
 
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import { getActiveSelection } from '@/components/sequencer/utils/selectionTracker.js';
-import { popupsController } from '@/main.js';
+import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
 
 /**
  * Attaches global-level control listeners (e.g. modals triggered via hotkeys or UI popovers).
@@ -22,6 +22,7 @@ export function attachGlobalControlsListeners(
 ): ListenerAttachment {
   // === Velocity Modal Logic (shared by key and click) ===
   const tryOpenVelocityModal = (): void => {
+    const popupsController = getGlobalPopupController();
     const selection = getActiveSelection();
     if (!selection || selection.selectedNotes.length === 0) {
       popupsController.showError('No notes selected. Please select notes before adjusting velocity.');

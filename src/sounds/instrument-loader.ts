@@ -6,13 +6,13 @@ import { getWebAudioFontEngine } from './loaders/webaudiofont-loader.js';
 import { EngineName } from './interfaces/Engine.js';
 
 // Registry of available loaders
-const engineLoaders = {
+export const engineLoaders = {
     sf2: getSf2Engine(),
     webaudiofont: getWebAudioFontEngine(),
 };  
 
 // Current default engine
-const DEFAULT_ENGINE: EngineName = 'sf2';
+export const DEFAULT_ENGINE: EngineName = 'sf2';
 
 // Public API
 
@@ -34,25 +34,4 @@ export async function loadInstrument(
     const engine = engineLoaders[engineName as EngineName];
     if (!engine) throw new Error(`Engine "${engineName}" not available`);
     return await engine.loadInstrument(`${libraryName}/${instrumentName}`, context, destination, volume, pan, squelchLoadingScreen, allowSharedInstance);
-}
-  
-export async function getAvailableLibraries(engineName: EngineName = DEFAULT_ENGINE): Promise<string[]> {
-  const engine = engineLoaders[engineName];
-  if (!engine) throw new Error(`Engine "${engineName}" not available`);
-  const libraries = await engine.getAvailableLibraries();
-  return libraries;
-}
-
-export async function getAvailableInstruments(
-  libraryName: string,
-  engineName: EngineName = DEFAULT_ENGINE
-): Promise<string[]> {
-  const engine = engineLoaders[engineName];
-  if (!engine) throw new Error(`Engine "${engineName}" not available`);
-
-  return await engine.getAvailableInstruments(libraryName);
-}
-
-export function getAvailableEngines(): EngineName[] {
-  return Object.keys(engineLoaders) as EngineName[];
 }

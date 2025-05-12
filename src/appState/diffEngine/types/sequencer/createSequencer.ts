@@ -15,6 +15,7 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
     notes: diff.notes ?? [],
     volume: diff.volume,
     pan: diff.pan,
+    collapsed: diff.collapsed,
   });
 
   const existing = getSequencerById(diff.id);
@@ -25,6 +26,7 @@ export function applyCREATE_SEQUENCER(state: AppState, diff: Diff): AppState {
       notes: diff.notes ?? [],
       volume: diff.volume,
       pan: diff.pan,
+      collapsed: diff.collapsed,
     };
 
     const container = document.getElementById('sequencers-container') as HTMLElement;
@@ -46,7 +48,8 @@ export function createCreateSequencerDiff(
   id: number,
   instrument: string,
   volume?: number,
-  pan?: number
+  pan?: number,
+  collapsed?: boolean
 ): Diff {
   return {
     type: 'CREATE_SEQUENCER',
@@ -54,6 +57,7 @@ export function createCreateSequencerDiff(
     instrument,
     volume,
     pan,
+    collapsed
   };
 }
 

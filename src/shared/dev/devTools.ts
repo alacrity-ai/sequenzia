@@ -1,4 +1,5 @@
-import { isDevMode, enableDevMode, disableDevMode } from '@/shared/state/devMode.js';
+// src/shared/dev/devTools.ts
+
 import { getAllDevTools } from '@/shared/dev/tools/index.js';
 
 const STORAGE_KEY = 'SEQUENZIA_DEV';
@@ -10,8 +11,11 @@ declare global {
   }
 }
 
-export function registerDevTools(): void {
+export async function registerDevTools(): Promise<void> {
   if (typeof window === 'undefined') return;
+
+  // Lazy load devMode bindings to avoid TDZ/circular binding issues
+  const { isDevMode, enableDevMode, disableDevMode } = await import('@/shared/state/devMode.js');
 
   // Restore persisted dev mode
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -33,7 +37,6 @@ export function registerDevTools(): void {
     }
   };
 
-  // First-time exposure
   if (isDevMode()) exposeDevTools();
 }
 

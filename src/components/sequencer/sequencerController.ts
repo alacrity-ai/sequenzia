@@ -5,6 +5,7 @@ import type { ZoomControlUI } from '@/components/sequencer/ui/topBar/zoomControl
 import type { SequencerBody } from '@/components/sequencer/ui/sequencerBody.js';
 import { createSequencer } from '@/components/sequencer/factories/SequencerFactory.js';
 import { unregisterSequencerController } from '@/components/sequencer/stores/sequencerControllerStore.js';
+import { UIOrchestrator } from '@/shared/ui/UIOrchestrator';
 
 // Helpers
 import { setCollapsed as collapseHelper } from '@/components/sequencer/utils/collapseSequencer.js';
@@ -35,14 +36,20 @@ export class SequencerController {
   private body!: SequencerBody;
   private zoomUI: ZoomControlUI | null = null;
   private _collapsed: boolean = false;
+  private collapseBtn!: HTMLButtonElement;
 
   private detachFns: (() => void)[] = [];
   private refreshFns: (() => void)[] = [];
+  
+  public readonly boundReload: () => void;
 
   constructor(parentContainer: HTMLElement, sequencerState: SequencerState, id?: number) {
     this.id = id ?? null;
     this.initializeUI(parentContainer, sequencerState);
     this.toggleZoomControls(true);
+
+    // Cache bound version of reload for later use
+    this.boundReload = this.reload.bind(this);
   }
 
   private initializeUI(parentContainer: HTMLElement, sequencerState: SequencerState): void {
@@ -60,6 +67,9 @@ export class SequencerController {
     const panUI = createPanControl();
     const zoomUI = createZoomControl();
     const rightControlsUI = createRightControls();
+
+    // Store collapseBtn for later
+    this.collapseBtn = rightControlsUI.collapseBtn;
 
     topBar.leftGroup.appendChild(instrumentUI.button);
     topBar.leftGroup.appendChild(instrumentUI.label)
@@ -89,7 +99,6 @@ export class SequencerController {
       rightControlsUI,
       this.sequencer,
       body.matrixContainer,
-      body.gripHandleContainer,
       (collapsed) => this.collapse(collapsed),
       () => this.collapsed
     );
@@ -112,6 +121,9 @@ export class SequencerController {
       zoomListeners.refreshUI,
       rightControlsListeners.refreshUI
     ];
+
+    collapseHelper(this.sequencer, sequencerState.collapsed);
+    this.refreshUI();
   }
 
   public get collapsed(): boolean {
@@ -123,7 +135,7 @@ export class SequencerController {
   }
 
   public collapse(collapsed: boolean = true): boolean {
-    collapseHelper(this.sequencer, collapsed);
+    collapseHelper(this.sequencer, collapsed, this.collapseBtn);
     return this._collapsed;
   }
 
@@ -148,6 +160,7 @@ export class SequencerController {
     this.rootEl.remove();
     this.sequencer.destroy();
     unregisterSequencerController(this.sequencer.id);
+    UIOrchestrator.getInstance().unregisterReloadable(this.boundReload);
   }
 
   public reload(): void {
@@ -163,6 +176,7 @@ export class SequencerController {
       notes: structuredClone(this.sequencer.notes),
       volume: this.sequencer.volume,
       pan: this.sequencer.pan,
+      collapsed: this._collapsed
     };
 
     // === 2. Teardown current UI & sequencer ===

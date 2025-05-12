@@ -1,8 +1,9 @@
 // src/components/topControls/components/keyboard/listeners/keyboardSideButtonListeners.ts
 
+import { getOverlaysController } from '@/components/overlays/overlaysController.js';
+import { getGlobalActiveInstrumentName } from '@/sounds/helpers/getInstruments.js';
 import { getKeyMap } from '@/components/topControls/components/keyboard/helpers/keys.js';
 import { drawKeys } from '@/components/topControls/components/keyboard/renderers/renderer.js';
-import { refreshInstrumentSelectorModal } from '@/components/sequencer/services/instrumentSelectorService.js';
 import { setSideButtonActivated } from '@/shared/ui/helpers/setSideButtonActivated.js';
 import { buildKeyToNoteMap } from '@/components/topControls/components/keyboard/helpers/buildKeyToNoteMap.js';
 import {
@@ -11,7 +12,7 @@ import {
   isKeyboardInputEnabled,
   setKeyboardInputEnabled,
   setKeyMapRef,
-  getKeyboardInstrument
+  getKeyboardInstrument,
 } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
@@ -64,18 +65,10 @@ export function attachKeyboardSideButtonListeners(container: HTMLElement): Liste
     if (toggleBtn) setSideButtonActivated(toggleBtn, !enabled);
   };
 
-  const handleInstrument = async () => {
+  const handleInstrument = () => {
     const fullName = getKeyboardInstrument() || 'sf2/fluidr3-gm/acoustic_grand_piano';
 
-    const instrumentSelectModal = document.getElementById('instrument-select-modal') as HTMLElement | null;
-    if (!instrumentSelectModal) {
-      console.warn('[Keyboard] Instrument selector modal not found in DOM.');
-      return;
-    }
-
-    delete instrumentSelectModal.dataset.currentSequencer;
-    await refreshInstrumentSelectorModal(fullName);
-    instrumentSelectModal.classList.remove('hidden');
+    getOverlaysController().showInstrumentSelectModal(null, fullName);
   };
 
   upBtn?.addEventListener('click', handleOctaveUp);

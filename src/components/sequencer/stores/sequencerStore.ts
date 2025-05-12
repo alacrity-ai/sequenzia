@@ -21,6 +21,10 @@ export function getSequencers(): Sequencer[] {
   return Array.from(sequencers.values());
 }
 
+export function clearSequencers(): void {
+  sequencers.clear();
+}
+
 export function isAnySoloActive(): boolean {
   return getSequencers().some(seq => seq.solo);
 }

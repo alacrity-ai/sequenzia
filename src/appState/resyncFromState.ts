@@ -48,6 +48,7 @@ export function resyncFromState(state: AppState = getAppState()): void {
         notes: structuredClone(serialized.notes),
         volume: serialized.volume,
         pan: serialized.pan,
+        collapsed: serialized.collapsed,
       };
       console.log('No sequencer found, creating one with ID: ', serialized.id);
       createSequencerController(container, initialState);

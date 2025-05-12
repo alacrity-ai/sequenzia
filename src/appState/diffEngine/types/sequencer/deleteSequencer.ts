@@ -27,7 +27,8 @@ export function createDeleteSequencerDiff(
   instrument: string,
   notes: any[] = [],
   volume?: number,
-  pan?: number
+  pan?: number,
+  collapsed?: boolean
 ): Diff {
   return {
     type: 'DELETE_SEQUENCER',
@@ -36,6 +37,7 @@ export function createDeleteSequencerDiff(
     notes: structuredClone(notes),
     volume,
     pan,
+    collapsed
   };
 }
 
@@ -47,7 +49,8 @@ export function createReverseDeleteSequencerDiff(
   instrument: string,
   notes: any[] = [],
   volume?: number,
-  pan?: number
+  pan?: number,
+  collapsed?: boolean
 ): Diff {
   return {
     type: 'CREATE_SEQUENCER',
@@ -56,5 +59,6 @@ export function createReverseDeleteSequencerDiff(
     notes: structuredClone(notes),
     volume,
     pan,
+    collapsed
   };
 }

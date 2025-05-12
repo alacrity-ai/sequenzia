@@ -40,33 +40,7 @@
     <!--- Global Controls Injected Here -->
   </div>
 
-  <!-- Load Modals and Icons -->
-  <script type="module">
-    (async () => {
-      async function loadHTML(id, url) {
-        const res = await fetch(url);
-        const html = await res.text();
-        const container = document.getElementById(id);
-        container.insertAdjacentHTML('beforeend', html);
-      }
-
-      // Load icons first
-      await loadHTML('modal-mount-root', './web/icons/icons.html');
-      
-      // Then load modals
-      await loadHTML('modal-mount-root', 'web/modals/delete-confirm-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/ai-extend-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/ai-inpaint-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/ai-generate-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/openai-key-not-set.html');
-      await loadHTML('modal-mount-root', 'web/modals/ai-generation-failed-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/ai-working-modal.html');
-      await loadHTML('modal-mount-root', 'web/modals/instrument-select-modal.html');
-
-      // Only load the app after modals and icons are present
-      await import('/src/main.js');
-    })();
-  </script>
+  <script type="module" src="/src/main.js"></script>
 
 </body>
 </html>

@@ -1,7 +1,7 @@
 // src/components/globalPopups/helpers/loadingModal.ts
 
 import { isSplashScreenVisible } from '@/shared/modals/global/splashscreen.js';
-import { popupsController } from '@/main.js';
+import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
 
 let globalLoading = false;
 
@@ -22,7 +22,7 @@ export function showLoadingModal(
     hideLoadingModal(); // hide any in-progress modal
     setGlobalLoading(true);
   }
-
+  const popupsController = getGlobalPopupController();
   popupsController.showLoading({
     title,
     subtext,
@@ -44,6 +44,7 @@ export function hideLoadingModal(disableGlobal?: boolean): void {
     setGlobalLoading(false);
   }
   if (!isGlobalLoading()) {
+    const popupsController = getGlobalPopupController();
     popupsController.hideLoading();
   }
 }

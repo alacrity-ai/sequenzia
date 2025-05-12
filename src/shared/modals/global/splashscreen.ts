@@ -1,3 +1,4 @@
+// src/shared/modals/global/splashscreen.ts
 
 export function isSplashScreenVisible(): boolean {
   const splashModal = document.getElementById('splash-modal');

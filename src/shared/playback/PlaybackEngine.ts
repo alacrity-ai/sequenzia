@@ -6,6 +6,10 @@ import type Sequencer from '@/components/sequencer/sequencer.js';
 
 let instance: PlaybackEngine | null = null;
 
+export function getPlaybackEngine(): PlaybackEngine {
+  return PlaybackEngine.getInstance();
+}
+
 export class PlaybackEngine {
   private context!: AudioContext;
   private sequencers!: Sequencer[];
@@ -19,20 +23,21 @@ export class PlaybackEngine {
   private onStopCallback: (() => void) | null = null;
 
   constructor(sequencers: Sequencer[]) {
-    if (instance) {
-      console.warn('[PlaybackEngine] Instance already exists. Returning singleton.');
-      return instance;
-    }
-
     this.context = getAudioContext();
     this.sequencers = sequencers;
+  }
 
-    instance = this;
+  public static initialize(sequencers: Sequencer[]): void {
+    if (instance) {
+      console.warn('[PlaybackEngine] Instance already exists. Ignoring re-initialization.');
+      return;
+    }
+    instance = new PlaybackEngine(sequencers);
   }
 
   public static getInstance(): PlaybackEngine {
     if (!instance) {
-      throw new Error('[PlaybackEngine] Instance not initialized. You must instantiate it first.');
+      throw new Error('[PlaybackEngine] Instance not initialized. Call initialize() first.');
     }
     return instance;
   }
@@ -188,6 +193,11 @@ export class PlaybackEngine {
 
   public removeSequencer(seq: Sequencer): void {
     this.sequencers = this.sequencers.filter(s => s !== seq);
+  }
+
+  public clearSequencers(): void {
+    this.stop();
+    this.sequencers = [];
   }
 
   public isActive(): boolean {

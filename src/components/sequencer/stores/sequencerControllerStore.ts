@@ -8,6 +8,11 @@ export function createId(): number {
   return nextId++;
 }
 
+export function clearControllers(): void {
+  controllers.clear();
+  nextId = 0;
+}
+
 export function registerSequencerController(id: number, controller: SequencerController): void {
   controllers.set(id, controller);
 }

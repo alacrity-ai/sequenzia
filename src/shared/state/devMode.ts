@@ -1,14 +1,17 @@
-// src/shared/state/devMode.ts
-
 import { logMessage, type LogLevel } from '@/shared/logging/logger.js';
 
 const STORAGE_KEY = 'SEQUENZIA_DEV';
 
-let devMode = false;
+let devMode: boolean | null = null;
 
-// Initialize devMode from localStorage (only runs once on import)
-if (typeof window !== 'undefined') {
-  devMode = localStorage.getItem(STORAGE_KEY) === 'true';
+/**
+ * Initializes devMode from localStorage (on-demand).
+ */
+function initDevMode(): boolean {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(STORAGE_KEY) === 'true';
+  }
+  return false;
 }
 
 /**
@@ -33,8 +36,12 @@ export function disableDevMode(): void {
 
 /**
  * Returns whether developer mode is currently enabled.
+ * Initializes from localStorage if not yet set.
  */
 export function isDevMode(): boolean {
+  if (devMode === null) {
+    devMode = initDevMode();
+  }
   return devMode;
 }
 
@@ -46,6 +53,6 @@ export function devLog(
   data?: unknown,
   level: LogLevel = 'log'
 ): void {
-  if (!devMode) return;
+  if (!isDevMode()) return;
   logMessage(message, data, level);
 }

@@ -2,7 +2,8 @@
 
 import Sequencer from '@/components/sequencer/sequencer.js';
 import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
-import { registerSequencer, getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
+import { registerSequencer, getSequencers, clearSequencers } from '@/components/sequencer/stores/sequencerStore.js';
+import { clearControllers } from '@/components/sequencer/stores/sequencerControllerStore.js';
 import { drawMiniContour } from '@/components/sequencer/renderers/drawMiniContour.js';
 import { getAudioContext as audioCtx, getMasterGain } from '@/sounds/audio/audio.js';
 import { recordDiff } from '@/appState/appState.js';
@@ -33,6 +34,7 @@ export function createSequencer(wrapper: HTMLElement, initialState: SequencerSta
       instrument: initialState.instrument,
       volume: initialState.volume,
       pan: initialState.pan,
+      collapsed: initialState.collapsed,
     });
   }
 
@@ -58,15 +60,21 @@ export function destroyAllSequencers(): void {
         seq.instrumentName,
         seq.matrix?.getNoteManager().getAll() ?? [],
         seq.volume,
-        seq.pan
+        seq.pan,
+        seq.collapsed
       ),
       createReverseDeleteSequencerDiff(
         seq.id,
         seq.instrumentName,
         seq.matrix?.getNoteManager().getAll() ?? [],
         seq.volume,
-        seq.pan
+        seq.pan,
+        seq.collapsed
       )
     );
   }
+  // Blast the sequencer registry from space
+  clearSequencers();
+  clearControllers();
+  PlaybackEngine.getInstance().clearSequencers();
 }

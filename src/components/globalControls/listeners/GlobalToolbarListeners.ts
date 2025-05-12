@@ -5,7 +5,7 @@ import type { ListenerAttachment } from '@/components/userSettings/interfaces/Li
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
 import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
-import { popupsController } from '@/main.js';
+import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
 
 import {
   updateSnapResolution,
@@ -182,6 +182,7 @@ dottedNoteBtn?.addEventListener('click', () => {
 
   window.addEventListener('keydown', handleKeydown);
   aiModeBtn?.addEventListener('click', () => {
+    const popupsController = getGlobalPopupController();
     popupsController.showFeatureBlocked();
   });
 

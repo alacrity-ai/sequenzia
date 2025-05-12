@@ -12,6 +12,7 @@ import { getTotalMeasures, getTimeSignature } from '@/shared/playback/transportS
 import { updateTrackStyle } from '@/components/sequencer/ui/helpers/updateTrackStyle.js';
 import { updateNoteRange, updateToDrumNoteRange } from '@/components/sequencer/services/rangeUpdateService.js';
 import { rescheduleAllSequencers, isAnySoloActive, unregisterSequencer } from '@/components/sequencer/stores/sequencerStore.js';
+import { setCollapsed } from '@/components/sequencer/utils/collapseSequencer.js';
 
 import { loadInstrument } from '@/sounds/instrument-loader.js';
 import { loadAndPlayNote } from '@/sounds/instrument-player.js';
@@ -285,12 +286,14 @@ export default class Sequencer {
     instrument,
     volume,
     pan,
+    collapsed
   }: {
     notes: Note[];
     config: Partial<SequencerConfig>;
     instrument?: string;
     volume?: number;
     pan?: number;
+    collapsed?: boolean;
   }): void {
     // Replace note array efficiently
     if (!this.matrix) return;
@@ -307,6 +310,9 @@ export default class Sequencer {
       this.pan = pan;
     }
   
+    // Apply collapsed
+    setCollapsed(this, collapsed);
+
     // Update instrument name (doesn't load it here)
     if (instrument) {
       this.instrumentName = instrument;

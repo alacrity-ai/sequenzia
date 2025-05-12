@@ -25,12 +25,24 @@
     - [x] Project file import/export
 - Selection:
   - [x] Be able to resize groups of notes
-  - [ ] Be able to hold CTRL and then left click on notes to select them (multiple unconnected)
+  - [x] Be able to hold CTRL and then left click on notes to select them (multiple unconnected)
   - [x] Remove select mode entirely, and put velocity mode within it
   - [x] Holding down V should show note velocities regardless of the note render mode
-  - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats
 
 ## Future Todos
+- Wav Editing
+  - [ ] Add wav tracks
+  - [ ] Add recording to a wav track
+  - [ ] Add importing existing wav file to a wave track
+- Playback Enhancements:
+  - [ ] Add loop start/loop end to global playhead
+  - [ ] Add playhead follow mode to sequencer topbar (follows playhead, or scrolls when playhead reaches end of screen)
+- Note Editing:
+  - [ ] Add Quantize Modal for Quantizing groups of selected notes
+  - [ ] Add Recording for keyboard
+    - [ ] Support live quantization
+  - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats
+
 - QOL:
   - [x] Smarter snap durations, auto shift down to the note value you're on
   - [x] Add alternate note placement mode option in the user config (on mouse down note placement into sizing)
@@ -44,27 +56,20 @@
   - [x] Create all UI components via JSX
   - [x] Refactor UI/handler classes into a clean architecture, separated from business code
   - [x] Use /setup only as orchestration layer
-- Playback Enhancements:
-  - [ ] Add loop start/loop end to global playhead
-  - [ ] Add playhead follow mode to sequencer topbar (follows playhead, or scrolls when playhead reaches end of screen)
-- Note Editing:
-  - [ ] Add Quantize Modal for Quantizing groups of selected notes
-  - [ ] Add Recording for keyboard
-    - [ ] Support live quantization
 
 ## Bugs
 - Critical Bugs:
-  - [ ] Express Note tool ocassionally locks up.  Don't know how to reproduce yet.
-  - [ ] Volume / Pan not updating properly on load session, and in wrong place when creating sequencer
-  - [ ] Instrument select menu pops up immediately on app load (needs to be in a controller)
-    - Load instrument button listener is not attached to sequencers from load session
-  - [ ] Changing skin during playback causes major issues, playback stops, all sequencers are expanded.
-    - First sequencer's event listeners are detached
-    - All sequencers are expanded
-    - Playback engine might not be getting the new sequencers, e.g. we need to resync with that
-    - Other potential issues
-  - [x] Dragging down on a note, and running off of the note can lock handler mode in a weird state where a note has to be placed to do anything.  Drag threshold should be more forgiving moving down.
   - [ ] Velocity not being honored on webaudiofont drums
+  - [ ] Express Note tool ocassionally locks up.  Don't know how to reproduce yet.
+  - [x] Existing HTML defined modals are no longer visible, just replace them with controller based.
+  - [x] Volume / Pan not updating properly on load session, and in wrong place when creating sequencer
+  - [x] Instrument select menu pops up immediately on app load (needs to be in a controller)
+    - [x] Load instrument button listener is not attached to sequencers from load session
+  - [x] Changing skin during playback causes major issues, playback stops, all sequencers are expanded.
+    - [x] First sequencer's event listeners are detached
+    - [x] All sequencers are expanded
+    - [x] Playback engine might not be getting the new sequencers, e.g. we need to resync with that
+  - [x] Dragging down on a note, and running off of the note can lock handler mode in a weird state where a note has to be placed to do anything.  Drag threshold should be more forgiving moving down.
   - [x] When pressing play after a fresh stop, always starts from the beginning - ignores if user manually moved playhead to a spot
   - [x] webaudiofont instrument wav export is silent. OfflineAudioContext issue. (related to currentTime?)
 - Small Bugs:
@@ -74,20 +79,3 @@
   - [x] If paused, note placement does not preview sound
   - [x] When pasting a cluster of notes, it's possible for some of those notes to be pasted out of bounds (into the piano roll label on the left)
   - [x] If previewing a note (note placement mode) while playblack is ocurring, significant slowdown ensues
-
-## Phase 0: Refactor to TS
-- [x] Complete all js -> ts refactoring
-
-## Phase 1: Core Functionality
-
-- [x] Handle resizing of groups of selected notes
-- Add velocity
-  - [x] Give notes a velocity property
-  - [x] Make sure it is saved properly, and loaded properly
-  - [x] Make velocity adjustable through UI (groups of notes, single notes)
-  - Make sure AI extend isn't broken from adding velocity
-- [x] Handle MIDI export
-- [x] Handle MIDI import
-- Add wav tracks
-  - Add recording to a wav track
-  - Add importing existing wav file to a wave track

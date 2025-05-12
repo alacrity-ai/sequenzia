@@ -42,9 +42,16 @@ type DeepPartial<T> = {
 export function updateUserConfig(newConfig: DeepPartial<UserConfig>): void {
   mergeDeep(userConfig, newConfig);
 
-  // Refresh Sequencer UI
-  for (const seq of getSequencers()) {
-    seq.redraw();
+  // Only update sequencer UIs if the sequencer store has been initialized
+  try {
+    const sequencers = getSequencers();
+    if (sequencers.length > 0) {
+      for (const seq of sequencers) {
+        seq.redraw();
+      }
+    }
+  } catch (err) {
+    console.warn('[updateUserConfig] Skipped sequencer UI refresh (store not ready yet).', err);
   }
 }
 
