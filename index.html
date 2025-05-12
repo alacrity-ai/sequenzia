@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="./css/styles.css" />
   <link rel="shortcut icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
   <link rel="icon" href="/sequenzia/assets/favicon-MtG4Lj3n.ico" type="image/x-icon" />
-  <script type="module" crossorigin src="/sequenzia/assets/index-CjDU6nsh.js"></script>
+  <script type="module" crossorigin src="/sequenzia/assets/index-CbY6XYb7.js"></script>
+  <link rel="modulepreload" crossorigin href="/sequenzia/assets/vendor-BrbinlG8.js">
+  <link rel="stylesheet" crossorigin href="/sequenzia/assets/index-B43FCdf3.css">
 </head>
 
 
@@ -31,112 +33,6 @@
 
       <!-- Sequencer Container -->
       <div id="sequencers-container" class="flex flex-col space-y-4 mb-[320px]">
-        <template id="sequencer-template">
-          <div class="sequencer flex flex-col space-y-2 p-4 bg-gradient-to-br from-gray-800 to-gray-900 rounded">
-            
-            <!-- Header -->
-            <div class="sequencer-header flex justify-between items-center">
-              
-              <!-- Left Group: Instrument Button + Track Name -->
-              <div class="flex items-center gap-2">
-                <button class="side-button-primary cursor-pointer instrument-select-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Change Instrument">
-                  <svg class="w-6 h-6" aria-hidden="true">
-                    <use href="#icon-list-instrument"></use>
-                  </svg>
-                </button>
-                <span class="track-name text-white font-semibold">Track</span>
-              </div>
-        
-              <!-- Right Group: Volume, Pan, Zoom, Mute, Solo, Collapse, Delete -->
-              <div class="flex items-center gap-3">
-                <!-- Volume Bar -->
-                <div class="volume-bar relative w-[140px] h-[16px] rounded-full bg-gray-700 overflow-hidden shadow-inner border border-purple-700 group cursor-pointer">
-                  <!-- Fill -->
-                  <div class="volume-fill absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 to-purple-300" style="width: 60%;"></div>
-                
-                  <!-- Snap Line -->
-                  <div class="volume-snap-marker absolute top-0 bottom-0 w-[2px] bg-pink-500/50 pointer-events-none" style="left: 78.74%;"></div>
-                
-                  <!-- Thumb -->
-                  <div class="volume-thumb absolute top-1/2 -translate-y-1/2 w-[14px] h-[14px] border-purple-700 bg-purple-700 rounded-full shadow-md border group-hover:scale-110"
-                       style="left: calc(60% - 5px);"></div>
-                </div>
-                
-                <!-- Pan Bar -->
-                <div class="pan-bar relative w-[140px] h-[16px] rounded-full bg-gray-700 overflow-hidden shadow-inner border border-blue-700 group cursor-pointer">
-                  <!-- Fill -->
-                  <div class="pan-fill absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-blue-300" style="width: 50%;"></div>
-
-                  <!-- Snap Line (center) -->
-                  <div class="pan-snap-marker absolute top-0 bottom-0 w-[2px] bg-cyan-400/50 pointer-events-none" style="left: 50%;"></div>
-
-                  <!-- Thumb -->
-                  <div class="pan-thumb absolute top-1/2 -translate-y-1/2 w-[14px] h-[14px] border-blue-700 bg-blue-700 rounded-full shadow-md border group-hover:scale-110"
-                      style="left: calc(50% - 5px);"></div>
-                </div>
-
-                <div class="border-l border-purple-800 mx-2 h-6"></div>
-
-                <!-- Zoom Buttons (hidden until expanded) -->
-                <button class="zoom-in-btn cursor-pointer side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Zoom In">
-                  <svg class="w-6 h-6" aria-hidden="true">
-                    <use href="#icon-zoom-in"></use>
-                  </svg>
-                </button>
-                <button class="zoom-out-btn cursor-pointer side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Zoom Out">
-                  <svg class="w-6 h-6" aria-hidden="true">
-                    <use href="#icon-zoom-out"></use>
-                  </svg>
-                </button>
-                <button class="zoom-reset-btn cursor-pointer side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center hidden" title="Reset Zoom">
-                  <svg class="w-6 h-6" aria-hidden="true">
-                    <use href="#icon-reset"></use>
-                  </svg>
-                </button>
-        
-                <div class="zoom-button-divider border-l border-purple-800 mx-2 h-6 hidden"></div>
-        
-                <!-- Mute / Solo / Collapse / Delete -->
-                <button class="side-button-secondary cursor-pointer mute-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Mute Track">
-                  <svg class="w-6 h-6" aria-hidden="true">
-                    <use href="#icon-volume-mute"></use>
-                  </svg>
-                </button>
-                <button class="side-button-secondary cursor-pointer solo-btn px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Solo Track">
-                  <svg class="w-6 h-6" aria-hidden="true">
-                    <use href="#icon-headphones"></use>
-                  </svg>
-                </button>
-                <button class="collapse-btn cursor-pointer side-button-secondary px-2 py-1 rounded text-white w-8 flex items-center justify-center" title="Expand/Collapse Track">
-                  <svg class="w-6 h-6" aria-hidden="true">
-                    <use href="#icon-caret-down"></use>
-                  </svg>
-                </button>
-                <button class="delete-btn cursor-pointer side-button-secondary px-2 py-1 hover:bg-red-600 rounded text-white w-8 flex items-center justify-center" title="Delete Track">
-                  <svg class="w-6 h-6" aria-hidden="true">
-                    <use href="#icon-close-circle"></use>
-                  </svg>
-                </button>
-              </div>
-            </div>
-        
-            <!-- Mini Contour (hidden by default) -->
-            <canvas class="mini-contour w-full h-10 mb-2 bg-gray-800 rounded hidden"></canvas>
-        
-            <!-- Main Body: Scrollable canvas area -->
-            <div class="sequencer-body flex border-t border-purple-700 pt-2 h-[720px]">
-                <!-- Grid Matrix will be injected here -->
-            </div>
-        
-            <!-- Grip Handle -->
-            <div class="grip-handle group flex justify-center items-center h-6 cursor-grab hover:bg-gray-800 rounded">
-              <svg class="w-6 h-6 text-purple-700 group-hover:text-pink-400 transition-colors duration-150" aria-hidden="true">
-                <use href="#icon-grip"></use>
-              </svg>
-            </div>
-          </div>
-        </template>
-        
         <!-- individual sequencers will be injected here -->
         <button id="add-sequencer" class="self-end px-3 py-1 bg-green-600 rounded" style="cursor: pointer;">＋ Add Track</button>
       </div>
@@ -146,8 +42,7 @@
   <div id="footer-main" class="fixed bottom-0 left-0 right-0 z-40 content-hidden">
     <!--- Global Controls Injected Here -->
   </div>
-
-  <!-- Load Modals and Icons -->
+
 
 </body>
 </html>
