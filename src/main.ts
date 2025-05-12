@@ -39,7 +39,7 @@ function bootstrapSequenziaApp(): void {
   popupsController.showSplashScreen();
 
   loadUserConfigFromLocalStorage();
-  registerDevTools().catch(console.error);
+  registerDevTools();
   registerGlobalEventGuards();
 
   PlaybackEngine.initialize(getSequencers());
