@@ -29,6 +29,35 @@
   - [x] Remove select mode entirely, and put velocity mode within it
   - [x] Holding down V should show note velocities regardless of the note render mode
 
+## AI Autocomplete
+- Autocomplete
+  - [ ] Implement Autocomplete Preview
+  - [ ] Fix Undo/Redo on Autocompletion
+  - [ ] Autocomplete preview occurs automatically when enabled
+  - [ ] Reject button causes a regeneration
+  - [ ] Add settings popup for adjusting autocomplete context length and other settings
+    - [ ] Add setting for full song context (experimental)
+    - [ ] Add reduction of other tracks to roman numerals (experimental)
+    - [ ] Default to single track context 
+
+- Inpaint/Extend
+  - [ ] Grey these out for now (lock)
+
+- AI Overlays / Plugins
+  - [ ] Add chord commander plugin that:
+    - [ ] Prompts AI with existing context (or no context if starting from scratch)
+    - [ ] Generates roman numerals
+    - [ ] Use tonaljs to convert roman numerals to voiceled chords
+  - [ ] AI Texturizer
+    - [ ] Feeds measure by measure of chords into AI.  Chords are arpeggiated or given texture.
+  - [ ] AI Melody Writer
+    - [ ] Feeds measure by measure of chords into AI.  AI generates a melody that fits over the chords.
+  - [ ] AI Bassline Writer
+    - [ ] Feeds measure by measure of chords into AI.  AI generates a bassline that fits over the chords.
+  - [ ] AI Drummer
+    - [ ] Feeds measure by measure of chords into AI.  AI generates drums that fit over the chords.
+
+
 ## Future Todos
 - Wav Editing
   - [ ] Add wav tracks

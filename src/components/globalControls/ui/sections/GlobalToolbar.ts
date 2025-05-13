@@ -20,7 +20,7 @@ export function createGlobalToolbar(): GlobalToolbarController {
     class: 'flex flex-wrap justify-center items-center gap-4 p-4'
   },
 
-    // Group 1: Mode toggles
+    // Mode toggles
     h('div', {
       class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md cursor-pointer'
     },
@@ -38,18 +38,18 @@ export function createGlobalToolbar(): GlobalToolbarController {
         title: 'AI Toolbar (W)'
       }, icon('icon-brain-white', 'AI Mode'))
     ),
+  );
 
-    // Group 2: Placement/editing toggles
+  // Note Options Group
+  const noteOptionsGroup = h('div', { class: 'flex gap-4' },
+    // Subsection 1: Placement/editing submenu toggles
     h('div', {
       class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md cursor-pointer'
     },
       gridSettings.trigger,
       createEditorSelectorPopover()
-    )
-  );
-
-  // Group 3 + 4 combined: Note Options Group
-  const noteOptionsGroup = h('div', { class: 'flex gap-4' },
+    ),
+    // Subsection 2: Note duration buttons
     h('div', {
       class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
     },
@@ -66,6 +66,7 @@ export function createGlobalToolbar(): GlobalToolbarController {
         }, opt.label)
       )
     ),
+    // Subsection 3: Dotted & Triplet toggles
     h('div', {
       class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
     },
@@ -93,7 +94,7 @@ export function createGlobalToolbar(): GlobalToolbarController {
     )
   );
 
-  // Group 5: AI Options Group (Initially hidden)
+  // AI Options Group (Initially hidden)
   const aiOptionsGroup = h('div', { class: 'flex gap-4 hidden' },
 
     // Subsection 1: AI Tools Button (Popover later)
@@ -166,7 +167,7 @@ export function createGlobalToolbar(): GlobalToolbarController {
       h('button', {
         id: 'ai-debugger-btn',
         class: 'bg-transparent hover:bg-gray-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
-        title: 'Open AI Debugger'
+        title: 'AI Debugger'
       }, icon('icon-command-line', 'AI Debugger'))
     )
   );

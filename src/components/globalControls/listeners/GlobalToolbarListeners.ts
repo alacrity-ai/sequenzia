@@ -83,8 +83,13 @@ export function attachToolbarListeners(
   aiModeBtn?.addEventListener('click', () => setMode('ai'));
 
   // === AI Mode Buttons:
-  
+
   // === Autocomplete Controls ===
+
+  autocompleteToggleBtn?.addEventListener('click', () => {
+    toggleIsAutocompleteEnabled();
+  });
+
   autocompleteApproveBtn?.addEventListener('click', () => {
     console.log('Approved Autocompleted Notes');
 

@@ -45,36 +45,49 @@ export async function getAutoCompleteNotes(
   // === Step 2: Build Prompt ===
   const prompt = buildPrompt(context, continuationBeats);
 
-  // === Step 3: Call LLM ===
-  const remiTokens = await callLLM(model, prompt);
-
-  // === Step 4: Parse Tokens into RemiEvents ===
-  const llmContinuationRemi: RemiEvent[] = remiTokens.map(token => {
-    const [type, ...valueParts] = token.split(' ');
-    const value = isNaN(Number(valueParts[0])) ? valueParts.join(' ') : Number(valueParts[0]);
-    return { type: type as RemiEvent['type'], value } as RemiEvent;
-  });
-
-  // === Step 5: Compute Clip Boundary from endBeat ===
+  // === Step 3: Compute Clip Boundary from endBeat ===
   const beatsPerBar = remiSettings?.beatsPerBar ?? 4;
   const stepsPerBeat = remiSettings?.stepsPerBeat ?? 4;
 
   const { clipAfterBar, clipAfterPosition } = getClipBoundaryFromEndBeat(endBeat, beatsPerBar, stepsPerBeat);
 
-  // == Step 6: Normalize LLM REMI Positions 
-  // (In the event that the LLM adds extra beats to a bar, we just roll them into the next bar.)
-  const normalizedContinuationRemi = normalizeLLMPositions(llmContinuationRemi, beatsPerBar, stepsPerBeat);
+  const MAX_RETRIES = 2;
 
-  // === Step 7: Clip Continuation ===
-  const clippedContinuation = clipContinuationAfterPrimary(normalizedContinuationRemi, clipAfterBar, clipAfterPosition);
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    // === Step 4: Call LLM ===
+    const remiTokens = await callLLM(model, prompt);
 
-  // === Step 8: Decode Remi to notes ===
-  const decodedNotes = remiDecode(clippedContinuation, remiSettings);
+    // === Step 5: Parse Tokens into RemiEvents ===
+    const llmContinuationRemi: RemiEvent[] = remiTokens.map(token => {
+      const [type, ...valueParts] = token.split(' ');
+      const value = isNaN(Number(valueParts[0])) ? valueParts.join(' ') : Number(valueParts[0]);
+      return { type: type as RemiEvent['type'], value } as RemiEvent;
+    });
 
-  devLog('[AutoComplete] Final Decoded Notes:', decodedNotes);
+    // == Step 6: Normalize LLM REMI Positions 
+    // (In the event that the LLM adds extra beats to a bar, we just roll them into the next bar.)
+    const normalizedContinuationRemi = normalizeLLMPositions(llmContinuationRemi, beatsPerBar, stepsPerBeat);
 
-  return decodedNotes;
+    // === Step 7: Clip Continuation ===
+    const clippedContinuation = clipContinuationAfterPrimary(normalizedContinuationRemi, clipAfterBar, clipAfterPosition);
+
+    // === Step 8: Decode Remi to notes ===
+    const decodedNotes = remiDecode(clippedContinuation, remiSettings);
+
+    devLog(`[AutoComplete] Attempt ${attempt}: Decoded Notes:`, decodedNotes);
+
+    if (decodedNotes.length > 0) {
+      devLog('[AutoComplete] Final Decoded Notes:', decodedNotes);
+      return decodedNotes;
+    }
+
+    devLog(`[AutoComplete] Attempt ${attempt}: No new notes after clip boundary. Retrying...`);
+  }
+
+  devLog('[AutoComplete] All retry attempts failed to generate new continuation notes.');
+  return [];
 }
+
 
 /**
  * Determines the startBeat and endBeat range for an autocomplete context window.
