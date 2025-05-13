@@ -16,7 +16,7 @@ export function applyPASTE_NOTES(state: AppState, diff: Diff): AppState {
   seq.notes.push(...(diff.notes as Note[]));
 
   setLastActiveSequencerId(diff.sequencerId);
-  
+
   return newState;
 }
 

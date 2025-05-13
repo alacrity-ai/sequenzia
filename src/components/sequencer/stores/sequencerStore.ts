@@ -2,9 +2,10 @@
 
 import type Sequencer from '@/components/sequencer/sequencer.js';
 import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
+import { clearAIPreviewNotes } from '@/components/aimode/autocomplete/stores/autoCompleteStore';
 
 const sequencers = new Map<number, Sequencer>();
-// NEW!
+
 let lastActiveSequencerId: number | null = null;
 
 export function registerSequencer(id: number, sequencer: Sequencer): void {
@@ -23,12 +24,17 @@ export function getSequencers(): Sequencer[] {
   return Array.from(sequencers.values());
 }
 
-// NEW!
 export function getLastActiveSequencerId(): number | null {
   return lastActiveSequencerId;
 }
 
+export function getLastActiveSequencer(): Sequencer | undefined {
+  if (lastActiveSequencerId === null) return undefined;
+  return getSequencerById(lastActiveSequencerId);
+}
+
 export function setLastActiveSequencerId(id: number | null): void {
+  clearAIPreviewNotes();
   lastActiveSequencerId = id;
 }
 

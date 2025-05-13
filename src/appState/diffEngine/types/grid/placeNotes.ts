@@ -14,7 +14,7 @@ export function applyPLACE_NOTES(state: AppState, diff: Diff): AppState {
   if (!seq) return state;
 
   seq.notes.push(...(diff.notes as Note[]));
-  
+
   setLastActiveSequencerId(diff.sequencerId);
 
   return newState;

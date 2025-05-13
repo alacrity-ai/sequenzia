@@ -6,10 +6,14 @@ export class GridManager {
     public noteCanvas: HTMLCanvasElement;
     public animationCanvas: HTMLCanvasElement;
     public playheadCanvas: HTMLCanvasElement;
+    public aipreviewCanvas: HTMLCanvasElement;
+    public aiAnimationCanvas: HTMLCanvasElement;
     public gridCtx: CanvasRenderingContext2D;
     public noteCtx: CanvasRenderingContext2D;
     public animationCtx: CanvasRenderingContext2D;
     public playheadCtx: CanvasRenderingContext2D;
+    public aipreviewCtx: CanvasRenderingContext2D;
+    public aiAnimationCtx: CanvasRenderingContext2D;
   
     constructor(parent: HTMLElement) {
       this.container = this.createContainer();
@@ -19,16 +23,22 @@ export class GridManager {
       this.noteCanvas = this.createCanvas('noteCanvas');
       this.animationCanvas = this.createCanvas('animationCanvas');
       this.playheadCanvas = this.createCanvas('playheadCanvas');
+      this.aipreviewCanvas = this.createCanvas('aipreviewCanvas');
+      this.aiAnimationCanvas = this.createCanvas('aiAnimationCanvas');
 
       this.container.appendChild(this.gridCanvas);
       this.container.appendChild(this.noteCanvas);
       this.container.appendChild(this.animationCanvas);
       this.container.appendChild(this.playheadCanvas);
+      this.container.appendChild(this.aipreviewCanvas);
+      this.container.appendChild(this.aiAnimationCanvas);
   
       this.gridCtx = this.getCtx(this.gridCanvas);
       this.noteCtx = this.getCtx(this.noteCanvas);
       this.animationCtx = this.getCtx(this.animationCanvas);
       this.playheadCtx = this.getCtx(this.playheadCanvas);
+      this.aipreviewCtx = this.getCtx(this.aipreviewCanvas);
+      this.aiAnimationCtx = this.getCtx(this.aiAnimationCanvas);
   
       this.injectContainerStyles();
       this.injectCanvasStyles();
@@ -76,11 +86,17 @@ export class GridManager {
         #grid-container canvas#noteCanvas {
           z-index: 1;
         }
-        #grid-container canvas#animationCanvas {
+        #grid-container canvas#aipreviewCanvas {
           z-index: 2;
         }
-        #grid-container canvas#playheadCanvas {
+        #grid-container canvas#aiAnimationCanvas {
           z-index: 3;
+        }
+        #grid-container canvas#animationCanvas {
+          z-index: 4;
+        }
+        #grid-container canvas#playheadCanvas {
+          z-index: 5;
         }
       `;
       document.head.appendChild(style);

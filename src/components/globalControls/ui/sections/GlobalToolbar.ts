@@ -1,5 +1,7 @@
 // src/components/globalControls/ui/sections/GlobalToolbar.ts
 
+import { setAutocompleteToggleButton } from '@/components/globalControls/controls/autoCompleteButtonControls.js';
+
 import { h } from '@/shared/ui/domUtils.js';
 import { createEditorSelectorPopover } from '@/components/globalControls/ui/prefabs/editorSelectorPopover.js';
 import { createGridSettingsPopover } from '@/components/globalControls/ui/prefabs/gridSettingsPopover.js';
@@ -95,6 +97,16 @@ export function createGlobalToolbar(): GlobalToolbarController {
   );
 
   // AI Options Group (Initially hidden)
+
+  const autocompleteBtn = h('button', {
+    id: 'autocomplete-toggle-btn',
+    class: 'bg-transparent hover:bg-purple-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+    title: 'AI Autocomplete (G/Shift+G)'
+  }, icon('icon-cursor-arrow-rays', 'Toggle Autocomplete'));
+
+  // Register autocomplete button globally (For disabling/enabling)
+  setAutocompleteToggleButton(autocompleteBtn);
+
   const aiOptionsGroup = h('div', { class: 'flex gap-4 hidden' },
 
     // Subsection 1: AI Tools Button (Popover later)
@@ -112,23 +124,12 @@ export function createGlobalToolbar(): GlobalToolbarController {
     h('div', {
       class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
     },
-      h('button', {
-        id: 'autocomplete-toggle-btn',
-        class: 'bg-transparent hover:bg-purple-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
-        title: 'Toggle Autocomplete (1)'
-      }, icon('icon-cursor-arrow-rays', 'Toggle Autocomplete')),
-
+      autocompleteBtn,
       h('button', {
         id: 'autocomplete-approve-btn',
         class: 'bg-transparent hover:bg-green-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
-        title: 'Approve (2)'
+        title: 'Approve (Tab)'
       }, icon('icon-thumbs-up', 'Approve Autocomplete')),
-
-      h('button', {
-        id: 'autocomplete-reject-btn',
-        class: 'bg-transparent hover:bg-red-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
-        title: 'Reject (3)'
-      }, icon('icon-thumbs-down', 'Reject Autocomplete'))
     ),
 
     // Subsection 3: Extend & Paint tools (placeholders for now)

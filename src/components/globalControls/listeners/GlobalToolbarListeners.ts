@@ -2,16 +2,14 @@
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 
-import { getStartBeatAndEndBeat } from '@/components/aimode/autocomplete/helpers/getAutoCompleteNotes';
-import { getSequencerById } from '@/components/sequencer/stores/sequencerStore.js';
+import { isButtonDisabled } from '@/components/globalControls/controls/autoCompleteButtonControls.js';
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
-import { getAutoCompleteNotes } from '@/components/aimode/autocomplete/helpers/getAutoCompleteNotes';
-import { applyAutoCompleteNotes } from '@/components/aimode/autocomplete/helpers/applyAutoCompleteNotes';
+import { handleRunAIAutocomplete } from '@/components/aimode/autocomplete/helpers/runAIAutoComplete.js';
+import { applyAutoCompleteNotes } from '@/components/aimode/autocomplete/helpers/applyAutoCompleteNotes.js';
 import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import {
-  getIsAutocompleteEnabled,
   toggleIsAutocompleteEnabled,
   subscribeAutocompleteState
 } from '@/components/aimode/autocomplete/stores/autoCompleteStore.js';
@@ -86,40 +84,28 @@ export function attachToolbarListeners(
 
   // === Autocomplete Controls ===
 
-  autocompleteToggleBtn?.addEventListener('click', () => {
+  autocompleteToggleBtn?.addEventListener('click', (e: MouseEvent) => {
+    // Left click only
+    if (e.button !== 0) return;
+    handleRunAIAutocomplete('GlobalToolbarListeners');
+  });
+
+  // Right click → toggle mode
+  autocompleteToggleBtn?.addEventListener('contextmenu', (e: MouseEvent) => {
+    e.preventDefault(); // Prevent context menu from showing
     toggleIsAutocompleteEnabled();
+    console.log('Toggled Autocomplete Mode');
   });
 
   autocompleteApproveBtn?.addEventListener('click', () => {
     console.log('Approved Autocompleted Notes');
-
     const lastActiveSequencerId = getLastActiveSequencerId();
     if (lastActiveSequencerId === null) {
       console.warn('No active sequencer to apply autocomplete to.');
       return;
     }
 
-    const sequencer = getSequencerById(lastActiveSequencerId);
-    if (!sequencer) {
-      console.error(`Sequencer with id ${lastActiveSequencerId} not found.`);
-      return;
-    }
-
-    const [startBeat, endBeat] = getStartBeatAndEndBeat(sequencer);
-
-    console.log(`Fetching autocomplete for beats ${startBeat} to ${endBeat} on sequencer ${lastActiveSequencerId}`);
-
-    getAutoCompleteNotes(lastActiveSequencerId, getSequencers(), startBeat, endBeat)
-      .then(notes => {
-        applyAutoCompleteNotes(lastActiveSequencerId, notes);
-      })
-      .catch(err => {
-        console.error('Error fetching autocomplete notes:', err);
-      });
-  });
-
-  autocompleteRejectBtn?.addEventListener('click', () => {
-    console.log('Rejected Autocompleted Notes — Triggering New Generation');
+    applyAutoCompleteNotes(lastActiveSequencerId);
   });
 
   // === AI Tools Button ===
@@ -188,7 +174,7 @@ export function attachToolbarListeners(
   });
 
   const unsubscribeAutocomplete = subscribeAutocompleteState((enabled) => {
-    autocompleteToggleBtn?.classList.toggle('bg-purple-700', enabled);
+    autocompleteToggleBtn?.classList.toggle('bg-pink-400', enabled);
     autocompleteToggleBtn?.classList.toggle('bg-transparent', !enabled);
   });
 
@@ -256,7 +242,7 @@ export function attachToolbarListeners(
     updateCurrentDuration(false);
   });
 
-  // === Hotkeys
+  // === Keyboard Shortcuts ===
   const handleKeydown = (e: KeyboardEvent) => {
     const target = e.target as HTMLElement;
     if (
@@ -266,11 +252,8 @@ export function attachToolbarListeners(
       isKeyboardInputEnabled()
     ) return;
 
-    const isNoteModeActive = !noteOptionsGroup.classList.contains('hidden');
-    const isAIModeActive = !aiOptionsGroup.classList.contains('hidden');
-
-    // === Note Mode Hotkeys ===
-    if (isNoteModeActive) {
+    // === Note Duration Hotkeys
+    if (!noteOptionsGroup.classList.contains('hidden')) {
       if (durationHotkeys.hasOwnProperty(e.code)) {
         e.preventDefault();
         const baseValue = durationHotkeys[e.code];
@@ -297,62 +280,37 @@ export function attachToolbarListeners(
       }
     }
 
-    // === AI Mode Hotkeys ===
-    if (isAIModeActive) {
-      switch (e.code) {
-        case 'Digit1':
-          if (e.shiftKey) {
-            e.preventDefault();
-            aiExtendBeforeBtn?.click();
-          } else {
-            e.preventDefault();
-            autocompleteToggleBtn?.click();
+    // === AI Autocomplete Hotkeys 
+    switch (e.code) {
+      case 'KeyG':
+        e.preventDefault();
+
+        if (e.shiftKey) {
+          toggleIsAutocompleteEnabled();
+          console.log('Toggled Autocomplete Mode via Shift+G');
+        } else {
+          // Don't run autocomplete if already running
+          if (!isButtonDisabled()) {
+            handleRunAIAutocomplete('GlobalToolbarListeners');
           }
-          return;
+        }
+        return;
 
-        case 'Digit2':
-          if (e.shiftKey) {
-            e.preventDefault();
-            aiPaintBtn?.click();
-          } else {
-            e.preventDefault();
-            autocompleteApproveBtn?.click();
-          }
-          return;
+      case 'Tab':
+        e.preventDefault();
+        autocompleteApproveBtn?.click();
+        return;
 
-        case 'Digit3':
-          if (e.shiftKey) {
-            e.preventDefault();
-            aiExtendAfterBtn?.click();
-          } else {
-            e.preventDefault();
-            autocompleteRejectBtn?.click();
-          }
-          return;
+      // Toolbar Menu Switching
+      case 'KeyQ':
+        e.preventDefault();
+        noteModeBtn?.click();
+        return;
 
-        case 'KeyQ':
-          e.preventDefault();
-          noteModeBtn?.click(); // Switch back to Note Mode
-          return;
-
-        case 'KeyW':
-          e.preventDefault();
-          aiModeBtn?.click(); // Redundant but consistent
-          return;
-      }
-    }
-
-    // === Mode Switcher Hotkeys are global ===
-    if (e.code === 'KeyQ') {
-      e.preventDefault();
-      noteModeBtn?.click();
-      return;
-    }
-
-    if (e.code === 'KeyW') {
-      e.preventDefault();
-      aiModeBtn?.click();
-      return;
+      case 'KeyW':
+        e.preventDefault();
+        aiModeBtn?.click();
+        return;
     }
   };
 

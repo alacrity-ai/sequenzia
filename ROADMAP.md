@@ -35,10 +35,13 @@
   - [ ] Fix Undo/Redo on Autocompletion
   - [ ] Autocomplete preview occurs automatically when enabled
   - [ ] Reject button causes a regeneration
+  - [ ] Add guard so autocomplete cannot occur past song end
+  - [ ] Add animation to autocomplete preview notes
   - [ ] Add settings popup for adjusting autocomplete context length and other settings
     - [ ] Add setting for full song context (experimental)
     - [ ] Add reduction of other tracks to roman numerals (experimental)
     - [ ] Default to single track context 
+  - [ ] Handle drums (Pitch 38 e.g.), will need to vary the prompt generation for drums
 
 - Inpaint/Extend
   - [ ] Grey these out for now (lock)

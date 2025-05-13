@@ -31,6 +31,7 @@ export function applyRESIZE_NOTES(state: AppState, diff: Diff): AppState {
   }
 
   setLastActiveSequencerId(diff.sequencerId);
+
   return newState;
 }
 

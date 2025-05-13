@@ -1,6 +1,9 @@
 // src/components/aimode/autocomplete/stores/autoCompleteStore.ts
 
+import type { Note } from '@/shared/interfaces/Note.js';
+
 let isAutocompleteEnabled = false;
+let aiPreviewNotes: Note[] = [];
 
 const listeners = new Set<(enabled: boolean) => void>();
 
@@ -33,4 +36,17 @@ export function subscribeAutocompleteState(
 
 export function clearAutocompleteListeners(): void {
   listeners.clear();
+}
+
+// === API for AI Preview Notes ===
+export function setAIPreviewNotes(notes: Note[]): void {
+  aiPreviewNotes = notes;
+}
+
+export function getAIPreviewNotes(): Note[] {
+  return aiPreviewNotes;
+}
+
+export function clearAIPreviewNotes(): void {
+  aiPreviewNotes = [];
 }
