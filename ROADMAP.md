@@ -30,6 +30,8 @@
   - [x] Holding down V should show note velocities regardless of the note render mode
 
 ## AI Autocomplete
+- Necessary Now
+  - [ ] Allow transport seek to be called from the sequencer header row
 - Autocomplete
   - [ ] Implement Autocomplete Preview
   - [ ] Fix Undo/Redo on Autocompletion
@@ -42,6 +44,9 @@
     - [ ] Add reduction of other tracks to roman numerals (experimental)
     - [ ] Default to single track context 
   - [ ] Handle drums (Pitch 38 e.g.), will need to vary the prompt generation for drums
+  - [ ] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
+  - [ ] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
+    - This is tricky because do we go by where the cursor preview is.. Where the last note placed was.. etc.. with fallback to the last note of the song?
 
 - Inpaint/Extend
   - [ ] Grey these out for now (lock)

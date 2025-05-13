@@ -253,32 +253,31 @@ export function attachToolbarListeners(
     ) return;
 
     // === Note Duration Hotkeys
-    if (!noteOptionsGroup.classList.contains('hidden')) {
-      if (durationHotkeys.hasOwnProperty(e.code)) {
-        e.preventDefault();
-        const baseValue = durationHotkeys[e.code];
+    if (durationHotkeys.hasOwnProperty(e.code)) {
+      e.preventDefault();
+      const baseValue = durationHotkeys[e.code];
 
-        if (e.shiftKey) {
-          updateSnapResolution(baseValue, true);
-        } else {
-          applyNoteDuration(baseValue);
-        }
-
-        return;
+      if (e.shiftKey) {
+        updateSnapResolution(baseValue, true);
+      } else {
+        applyNoteDuration(baseValue);
       }
 
-      if (e.key === '.') {
-        e.preventDefault();
-        dottedNoteBtn?.click();
-        return;
-      }
-
-      if (e.key === '/') {
-        e.preventDefault();
-        tripletNoteBtn?.click();
-        return;
-      }
+      return;
     }
+
+    if (e.key === '.') {
+      e.preventDefault();
+      dottedNoteBtn?.click();
+      return;
+    }
+
+    if (e.key === '/') {
+      e.preventDefault();
+      tripletNoteBtn?.click();
+      return;
+    }
+
 
     // === AI Autocomplete Hotkeys 
     switch (e.code) {
