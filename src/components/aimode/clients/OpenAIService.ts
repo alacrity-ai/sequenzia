@@ -76,7 +76,7 @@ ${JSON.stringify(tracks, null, 2)}`;
 
   try {
     const structuredOutput = await OpenAIClient.responseCompletion(messages, schema, {
-      model,
+      model: 'gpt-4o',
       temperature: 0.3,
       name: 'track_array'
     });

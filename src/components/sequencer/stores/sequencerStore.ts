@@ -4,6 +4,8 @@ import type Sequencer from '@/components/sequencer/sequencer.js';
 import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 
 const sequencers = new Map<number, Sequencer>();
+// NEW!
+let lastActiveSequencerId: number | null = null;
 
 export function registerSequencer(id: number, sequencer: Sequencer): void {
   sequencers.set(id, sequencer);
@@ -19,6 +21,15 @@ export function getSequencerById(id: number): Sequencer | undefined {
 
 export function getSequencers(): Sequencer[] {
   return Array.from(sequencers.values());
+}
+
+// NEW!
+export function getLastActiveSequencerId(): number | null {
+  return lastActiveSequencerId;
+}
+
+export function setLastActiveSequencerId(id: number | null): void {
+  lastActiveSequencerId = id;
 }
 
 export function clearSequencers(): void {

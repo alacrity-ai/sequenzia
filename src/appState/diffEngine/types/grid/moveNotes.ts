@@ -1,5 +1,6 @@
 // src/appState/diffEngine/types/grid/moveNotes.ts
 
+import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 import { Note } from '@/shared/interfaces/Note.js';
@@ -32,6 +33,7 @@ export function applyMOVE_NOTES(state: AppState, diff: Diff): AppState {
     }
   }
 
+  setLastActiveSequencerId(diff.sequencerId);
   return newState;
 }
 

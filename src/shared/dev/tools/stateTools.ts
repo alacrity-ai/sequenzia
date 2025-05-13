@@ -1,3 +1,5 @@
+// src/shared/dev/tools/stateTools.ts
+
 import { getAppState as getAppSt } from '@/appState/appState.js';
 import { devLog } from '@/shared/state/devMode.js';
 

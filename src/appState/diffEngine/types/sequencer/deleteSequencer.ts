@@ -1,3 +1,4 @@
+import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { getSequencerControllerById } from '@/components/sequencer/stores/sequencerControllerStore.js';
 import type { AppState } from '@/appState/interfaces/AppState.js';
 import type { Diff } from '@/appState/interfaces/Diff.js';
@@ -15,6 +16,8 @@ export function applyDELETE_SEQUENCER(state: AppState, diff: Diff): AppState {
   } else {
     console.warn(`DELETE_SEQUENCER: No controller found for id ${diff.id}`);
   }
+  
+  setLastActiveSequencerId(null);
 
   return newState;
 }

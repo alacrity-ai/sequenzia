@@ -10,7 +10,8 @@
     "deploy": "vite build && gh-pages -d dist",
     "dev:clean": "rm -rf node_modules/.vite && vite",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:integration": "vitest run --dir src/test/integration",
+    "test:live": "vitest run --dir src/test/live"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.5",
@@ -28,6 +29,7 @@
     "@tonaljs/tonal": "^4.10.0",
     "@tonejs/midi": "^2.0.28",
     "autoprefixer": "^10.4.21",
+    "dotenv": "^16.5.0",
     "flowbite": "^3.1.2",
     "smplr": "^0.16.3",
     "webaudiofont": "^3.0.4"

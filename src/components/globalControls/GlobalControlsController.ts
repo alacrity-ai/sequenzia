@@ -80,7 +80,14 @@ export class GlobalControlsController {
     this.contour = contour;
 
     const contourListeners = attachContourListeners(contour);
-    const toolbarListeners = attachToolbarListeners(toolbarController.element);
+
+    // Pass noteOptionsGroup & aiOptionsGroup to toolbar listeners
+    const toolbarListeners = attachToolbarListeners({
+      rootElement: toolbarController.element,
+      noteOptionsGroup: toolbarController.noteOptionsGroup,
+      aiOptionsGroup: toolbarController.aiOptionsGroup,
+    });
+
     const transportListeners = attachTransportListeners(
       transport.element,
       this.playbackService,
@@ -88,6 +95,7 @@ export class GlobalControlsController {
       this.saveModal,
       this.loadModal
     );
+
     const sideButtonListeners = attachSideButtonListeners(sideButtons, this.whatsNewModal);
     const playheadListeners = attachPlayheadListeners(this.controls.getGlobalPlayheadRow());
     const globalControlsListeners = attachGlobalControlsListeners({ velocity: this.velocityModal });

@@ -4,5 +4,6 @@ export interface RemiEncodeOptions {
     beatsPerBar?: number;
     stepsPerBeat?: number;
     quantizeDurations?: boolean;
+    ignoreVelocity?: boolean;
   }
   

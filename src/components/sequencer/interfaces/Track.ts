@@ -6,6 +6,10 @@ export interface Track {
   n: Note[];
 }
 
+export interface Tracks {
+  tracks: Track[];
+}
+
 export interface TrackData {
     notes: Note[];
     instrument: string;

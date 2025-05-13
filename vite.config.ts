@@ -30,7 +30,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
-    include: ['src/**/*.test.ts'],
+    include: ['**/*.test.ts'],
+    exclude: ['**/test/integration/**', '**/test/live/**'],
     coverage: {
       reporter: ['text', 'html'],
       reportsDirectory: 'coverage',

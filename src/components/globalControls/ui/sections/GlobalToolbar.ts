@@ -9,6 +9,8 @@ import { icon } from '@/shared/ui/primitives/createIconImg.js';
 export interface GlobalToolbarController {
   element: HTMLElement;
   refreshGridSettings: () => void;
+  noteOptionsGroup: HTMLElement;
+  aiOptionsGroup: HTMLElement;
 }
 
 export function createGlobalToolbar(): GlobalToolbarController {
@@ -26,14 +28,14 @@ export function createGlobalToolbar(): GlobalToolbarController {
         id: 'note-mode-btn',
         class: 'bg-blue-600 px-3 py-1 rounded text-white hover:bg-blue-700 text-sm font-semibold w-[52px] h-[42px] flex items-center justify-center',
         style: 'cursor: pointer;',
-        title: 'Note Options Toolbar'
+        title: 'Drawing Toolbar (Q)'
       }, icon('icon-pen', 'Note Mode')),
 
       h('button', {
         id: 'ai-mode-btn',
         class: 'bg-gray-800 px-3 py-1 rounded text-white hover:bg-purple-700 text-sm font-semibold w-[52px] h-[42px] flex items-center justify-center',
         style: 'cursor: pointer;',
-        title: 'AI Options Toolbar'
+        title: 'AI Toolbar (W)'
       }, icon('icon-brain-white', 'AI Mode'))
     ),
 
@@ -43,9 +45,11 @@ export function createGlobalToolbar(): GlobalToolbarController {
     },
       gridSettings.trigger,
       createEditorSelectorPopover()
-    ),
+    )
+  );
 
-    // Group 3: Duration buttons
+  // Group 3 + 4 combined: Note Options Group
+  const noteOptionsGroup = h('div', { class: 'flex gap-4' },
     h('div', {
       class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
     },
@@ -62,8 +66,6 @@ export function createGlobalToolbar(): GlobalToolbarController {
         }, opt.label)
       )
     ),
-
-    // Group 4: Dotted & Triplet modifiers
     h('div', {
       class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
     },
@@ -91,8 +93,92 @@ export function createGlobalToolbar(): GlobalToolbarController {
     )
   );
 
+  // Group 5: AI Options Group (Initially hidden)
+  const aiOptionsGroup = h('div', { class: 'flex gap-4 hidden' },
+
+    // Subsection 1: AI Tools Button (Popover later)
+    h('div', {
+      class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
+    },
+      h('button', {
+        id: 'ai-tools-btn',
+        class: 'bg-transparent hover:bg-gray-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'AI Tools'
+      }, icon('icon-chip', 'AI Tools'))
+    ),
+
+    // Subsection 2: Autocomplete controls
+    h('div', {
+      class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
+    },
+      h('button', {
+        id: 'autocomplete-toggle-btn',
+        class: 'bg-transparent hover:bg-purple-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'Toggle Autocomplete (1)'
+      }, icon('icon-cursor-arrow-rays', 'Toggle Autocomplete')),
+
+      h('button', {
+        id: 'autocomplete-approve-btn',
+        class: 'bg-transparent hover:bg-green-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'Approve (2)'
+      }, icon('icon-thumbs-up', 'Approve Autocomplete')),
+
+      h('button', {
+        id: 'autocomplete-reject-btn',
+        class: 'bg-transparent hover:bg-red-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'Reject (3)'
+      }, icon('icon-thumbs-down', 'Reject Autocomplete'))
+    ),
+
+    // Subsection 3: Extend & Paint tools (placeholders for now)
+    h('div', {
+      class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
+    },
+      h('button', {
+        id: 'ai-extend-before-btn',
+        class: 'bg-transparent hover:bg-gray-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'AI Extend Before (SHIFT+1)'
+      }, icon('icon-double-arrow-left', 'AI Extend Before')),
+
+      h('button', {
+        id: 'ai-paint-btn',
+        class: 'bg-transparent hover:bg-gray-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'AI Paint Tool (SHIFT+2)'
+      }, icon('icon-paint-brush', 'AI Paint')),
+
+      h('button', {
+        id: 'ai-extend-after-btn',
+        class: 'bg-transparent hover:bg-gray-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'AI Extend After (SHIFT+3)'
+      }, icon('icon-double-arrow-right', 'AI Extend After'))
+    ),
+
+    // Subsection 4: Advanced / Debug (placeholders for now)
+    h('div', {
+      class: 'flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-900/80 backdrop-blur-sm shadow-md'
+    },
+      h('button', {
+        id: 'ai-adjust-prompt-btn',
+        class: 'bg-transparent hover:bg-gray-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'Adjust AI Prompt Settings'
+      }, icon('icon-adjust-ai-prompt', 'Adjust AI Prompt')),
+
+      h('button', {
+        id: 'ai-debugger-btn',
+        class: 'bg-transparent hover:bg-gray-700 text-white cursor-pointer px-3 py-1 rounded w-[52px] h-[42px] flex items-center justify-center',
+        title: 'Open AI Debugger'
+      }, icon('icon-command-line', 'AI Debugger'))
+    )
+  );
+
+  // Add both groups to the toolbar element
+  toolbarEl.appendChild(noteOptionsGroup);
+  toolbarEl.appendChild(aiOptionsGroup);
+
   return {
     element: toolbarEl,
-    refreshGridSettings: gridSettings.refreshToggles
+    refreshGridSettings: gridSettings.refreshToggles,
+    noteOptionsGroup,
+    aiOptionsGroup
   };
 }
