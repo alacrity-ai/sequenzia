@@ -33,16 +33,19 @@
 - Necessary Now
   - [ ] Allow transport seek to be called from the sequencer header row
 - Autocomplete
-  - [ ] Implement Autocomplete Preview
-  - [ ] Fix Undo/Redo on Autocompletion
+  - [x] Implement Autocomplete Preview
+  - [x] Fix Undo/Redo on Autocompletion
   - [ ] Autocomplete preview occurs automatically when enabled
-  - [ ] Reject button causes a regeneration
+  - [x] Reject button causes a regeneration
   - [ ] Add guard so autocomplete cannot occur past song end
-  - [ ] Add animation to autocomplete preview notes
+  - [x] Add animation to autocomplete preview notes
   - [ ] Add settings popup for adjusting autocomplete context length and other settings
     - [ ] Add setting for full song context (experimental)
     - [ ] Add reduction of other tracks to roman numerals (experimental)
     - [ ] Default to single track context 
+    - [ ] Add setting beat suggestion (autocomplete length)
+    - [ ] Add setting Force Diatonic (experimental) (postprocess output to be diatonic to the key)
+    - [ ] Add setting to transpose all inputs to C Major or A minor, and then transpose output back (experimental) 
   - [ ] Handle drums (Pitch 38 e.g.), will need to vary the prompt generation for drums
   - [ ] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
   - [ ] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
@@ -107,6 +110,10 @@
   - [x] If previewing a note (note placement mode) while playblack is ocurring, significant slowdown ensues
 
 ## Future Todos
+- Export Enhancement
+  - [ ] The save menu should allow you to choose filename for Wav or Midi export
+- Drag to Drop
+  - [ ] In export menu, add an option to Drag to Drop, wherein the user can drag their midi file into another DAW
 - Wav Editing
   - [ ] Add wav tracks
   - [ ] Add recording to a wav track
@@ -119,3 +126,5 @@
   - [ ] Add Recording for keyboard
     - [ ] Support live quantization
   - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats
+- [ ] Handle dragging midi files into the app to load them
+- [ ] Handle dragging midi files into a sequencer to load it into the sequencer, will prompt with modal if more than one track in the midi file to automatically create sequencers for each track

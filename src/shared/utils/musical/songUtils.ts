@@ -1,28 +1,35 @@
 // src/shared/utils/musical/songUtils.ts
 
 /**
- * Formats a song key like "C" or "Cm" into "C Major" / "C Minor".
- * Defensively handles bad casing like "CM" or stray inputs.
+ * Formats a song key like "C", "Cm", or "CM" into "C Major" / "C Minor".
+ * Defensively handles bad casing and stray inputs.
  *
  * @param key - Input key string (e.g., "C", "Cm", "CM").
- * @returns Formatted string (e.g., "C Major", "A Minor").
+ * @returns Formatted string (e.g., "C Major", "C Minor", "C Major").
  */
 export function formatSongKey(key: string): string {
-  if (!key || typeof key !== 'string') return 'Unknown Key';
-
-  const normalized = key.trim().toUpperCase();
-
-  // Handle "C", "CM" as "C Major"
-  if (normalized === 'CM' || normalized === 'C') return 'C Major';
-  if (normalized.endsWith('M') && normalized.length === 2) {
-    return `${normalized[0]} Major`;
+  if (!key || typeof key !== 'string' || !key.trim()) {
+    return 'Unknown Key';
   }
 
-  // Handle "Am" / "am" → "A Minor"
-  const isMinor = key.endsWith('m') || key.endsWith('M');
-  const root = key.slice(0, -1).toUpperCase();
-
-  return `${root} ${isMinor ? 'Minor' : 'Major'}`;
+  const trimmed = key.trim();
+  
+  // Check if the key is just a single character (e.g., "C")
+  if (trimmed.length === 1) {
+    return `${trimmed.toUpperCase()} Major`;
+  }
+  
+  // For keys like "Cm" or "CM"
+  const lastChar = trimmed.slice(-1);
+  const root = trimmed.slice(0, -1);
+  
+  if (!root) return 'Unknown Key';
+  
+  if (lastChar === 'm') {
+    return `${root.toUpperCase()} Minor`;
+  } else {
+    return `${root.toUpperCase()} Major`;
+  }
 }
 
 /**

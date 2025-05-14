@@ -108,6 +108,20 @@
     border: 1px solid rgb(255, 213, 88);
   }
   
+  .copy-midi-btn {
+    cursor: grab;
+    user-select: none;
+  }
+
+  .copy-midi-btn:active {
+    cursor: grabbing;
+  }
+
+  .copy-midi-btn.dragging {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+
   /* Hide the main content until fully loaded */
   .content-hidden {
     opacity: 0;

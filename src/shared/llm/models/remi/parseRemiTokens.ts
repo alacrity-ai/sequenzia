@@ -26,16 +26,31 @@ function normalizeTokens(rawTokens: string[]): string[] {
     flattened.push(token);
   }
 
-  // Merge ["Bar", "1"] → "Bar 1" pairs, with type normalization
+  // Alias map for abbreviated types
+  const TYPE_ALIASES: Record<string, string> = {
+    pos: 'Position',
+    vel: 'Velocity',
+    dur: 'Duration'
+  };
+
+  // Merge ["Bar", "1"] → "Bar 1" pairs, with type normalization & alias handling
   const merged: string[] = [];
   for (let i = 0; i < flattened.length; i++) {
     const typeCandidate = flattened[i];
     const valueCandidate = flattened[i + 1];
 
-    const typeMatch = typeCandidate.match(/^(bar|position|pitch|duration|velocity)$/i);
-    const normalizedType = typeMatch
-      ? typeMatch[0][0].toUpperCase() + typeMatch[0].slice(1).toLowerCase()
+    // Handle aliases (e.g., "Pos" → "Position")
+    const aliasMatch = typeCandidate.match(/^(pos|vel|dur)$/i);
+    const aliasResolved = aliasMatch
+      ? TYPE_ALIASES[aliasMatch[0].toLowerCase()]
       : null;
+
+    const typeMatch = typeCandidate.match(/^(bar|position|pitch|duration|velocity)$/i);
+    const normalizedType = aliasResolved
+      ? aliasResolved
+      : typeMatch
+        ? typeMatch[0][0].toUpperCase() + typeMatch[0].slice(1).toLowerCase()
+        : null;
 
     if (normalizedType && valueCandidate !== undefined) {
       merged.push(`${normalizedType} ${valueCandidate}`);
@@ -47,6 +62,7 @@ function normalizeTokens(rawTokens: string[]): string[] {
 
   return merged;
 }
+
 
 export function parseRemiTokens(tokens: string[]): RemiEvent[] {
   const events: RemiEvent[] = [];
