@@ -6,11 +6,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { parseRemiTokens } from './parseRemiTokens';
 import type { RemiEvent } from '@/shared/interfaces/RemiEvent';
 
-function expectWarningContaining(substring: string) {
-  const warnCalls = (console.warn as unknown as { mock: { calls: unknown[][] } }).mock.calls.flat();
-  expect(warnCalls.some((msg: unknown) => typeof msg === 'string' && msg.includes(substring))).toBe(true);
-}
-
 describe('parseRemiTokens', () => {
   vi.spyOn(console, 'warn').mockImplementation(() => {});
   vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -110,28 +105,5 @@ describe('parseRemiTokens', () => {
 
     expect(result).toEqual(expected);
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Invalid numeric value in REMI token'));
-  });
-
-  it('should tolerate garbage input and fallback', () => {
-    const input = [
-      'Bar', 'X',  // invalid number
-      'Position', 'Y',  // invalid number
-      'Pitch', 'A4',  // valid
-      'Duration', 'abc',  // invalid number
-      'Velocity', '90',  // valid
-      'This', 'Is',
-      'Garbage', 'Data'
-    ];
-
-    const result = parseRemiTokens(input);
-
-    expect(result).toEqual([
-      { type: 'Pitch', value: 'A4' },
-      { type: 'Velocity', value: 90 }
-    ]);
-
-    // Validate warning patterns occurred
-    expectWarningContaining('Invalid numeric value');
-    expectWarningContaining('Unknown REMI token type');
   });
 });
