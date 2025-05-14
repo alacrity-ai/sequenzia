@@ -7,15 +7,15 @@ import { createHeader } from '@/shared/ui/primitives/createHeader.js';
 
 /**
  * Renders the UI for the Save/Export modal.
- * @returns The root HTMLElement of the modal.
+ * @returns The root HTMLElement of the modal and the drag-midi button.
  */
-export function createSaveModal(): HTMLElement {
+export function createSaveModal(): { root: HTMLElement, dragMidiBtn: HTMLButtonElement } {
   const header = createHeader('💾 Export');
 
   const saveJsonBtn = createButton({
     id: 'export-json',
     text: 'Save Project',
-    kind: 'primary' // Skin-mapped primary (e.g. purple)
+    kind: 'primary'
   });
 
   const divider = h('div', { class: 'h-px bg-gray-600' });
@@ -34,6 +34,26 @@ export function createSaveModal(): HTMLElement {
     additionalClasses: 'bg-yellow-600 hover:bg-yellow-700'
   });
 
+  // === New Drag MIDI Button ===
+  const dragMidiBtn = h('button', {
+    id: 'drag-midi',
+    draggable: 'true',
+    class: [
+      'drag-midi-btn',
+      'cursor-grab select-none',
+      'px-2 py-1 rounded w-8 flex items-center justify-center',
+      'transition-transform transition-opacity duration-150',
+      'hover:scale-105 hover:brightness-110 active:cursor-grabbing',
+      'bg-yellow-700 hover:bg-yellow-600 text-white',
+      'border border-yellow-500'
+    ].join(' '),
+    title: 'Drag entire song as MIDI file to Desktop'
+  }, '🎵') as HTMLButtonElement;
+
+  const exportMidiRow = h('div', {
+    class: 'flex items-center gap-2'
+  }, exportMidiBtn, dragMidiBtn);
+
   const cancelBtn = createButton({
     id: 'export-cancel',
     text: 'Cancel',
@@ -45,12 +65,15 @@ export function createSaveModal(): HTMLElement {
     saveJsonBtn,
     divider,
     exportWavBtn,
-    exportMidiBtn
+    exportMidiRow
   );
 
-  return createFloatingModal('export-modal', [
+  const root = createFloatingModal('export-modal', [
     header,
     buttonGroup,
     cancelBtn
   ]);
+
+  return { root, dragMidiBtn };
 }
+

@@ -107,6 +107,10 @@
   - [x] If previewing a note (note placement mode) while playblack is ocurring, significant slowdown ensues
 
 ## Future Todos
+- Export Enhancement
+  - [ ] The save menu should allow you to choose filename for Wav or Midi export
+- Drag to Drop
+  - [ ] In export menu, add an option to Drag to Drop, wherein the user can drag their midi file into another DAW
 - Wav Editing
   - [ ] Add wav tracks
   - [ ] Add recording to a wav track

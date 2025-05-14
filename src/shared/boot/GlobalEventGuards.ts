@@ -6,14 +6,25 @@
  */
 export function registerGlobalEventGuards(): void {
   window.addEventListener('contextmenu', (e) => e.preventDefault());
-  window.addEventListener('dragstart', (e) => e.preventDefault());
+
+  window.addEventListener('dragstart', (e) => {
+    const target = e.target as HTMLElement;
+
+    if (
+      target.closest('.copy-midi-btn') || // Allow per-track MIDI drag
+      target.closest('.drag-midi-btn')    // Allow full-song MIDI drag
+    ) return;
+
+    e.preventDefault(); // Block all other drags
+  });
+
   window.addEventListener('selectstart', (e) => e.preventDefault());
   window.addEventListener('drop', (e) => e.preventDefault());
   window.addEventListener('dragover', (e) => e.preventDefault());
 
   window.addEventListener('keydown', (e) => {
     const blockedKeys = [
-      ' ',         // space
+      ' ', // space
       'ArrowUp',
       'ArrowDown',
       'ArrowLeft',
@@ -28,7 +39,6 @@ export function registerGlobalEventGuards(): void {
     const isMacShortcut = e.metaKey;
     const isCtrlShortcut = e.ctrlKey;
 
-    // Block key if it's one of the above, or a reserved shortcut (like Cmd+S)
     if (
       blockedKeys.includes(e.key) ||
       ((isMacShortcut || isCtrlShortcut) && ['s', 'p'].includes(e.key.toLowerCase()))

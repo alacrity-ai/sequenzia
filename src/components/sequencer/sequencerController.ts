@@ -22,6 +22,7 @@ import { createRightControls } from '@/components/sequencer/ui/topBar/rightContr
 // Listeners
 import { attachGripHandleListeners } from '@/components/sequencer/listeners/gripHandleListeners.js';
 import { attachInstrumentSelectListeners } from '@/components/sequencer/listeners/instrumentSelectListeners.js';
+import { attachExportMidiDragListeners } from '@/components/sequencer/listeners/exportMidiDragListeners.js';
 import { attachVolumeControlListeners } from '@/components/sequencer/listeners/volumeControlListeners.js';
 import { attachPanControlListeners } from '@/components/sequencer/listeners/panControlListeners.js';
 import { attachZoomControlListeners } from '@/components/sequencer/listeners/zoomControlListeners.js';
@@ -71,7 +72,8 @@ export class SequencerController {
     // Store collapseBtn for later
     this.collapseBtn = rightControlsUI.collapseBtn;
 
-    topBar.leftGroup.appendChild(instrumentUI.button);
+    topBar.leftGroup.appendChild(instrumentUI.instrumentButton);
+    topBar.leftGroup.appendChild(instrumentUI.copyMidiButton);
     topBar.leftGroup.appendChild(instrumentUI.label)
     topBar.volumeWrapper.appendChild(volumeUI.element);
     topBar.panWrapper.appendChild(panUI.element);
@@ -87,7 +89,8 @@ export class SequencerController {
 
     // === 4. Attach listeners with context ===
     const gripListeners = attachGripHandleListeners(body.gripHandleContainer, body.matrixContainer, this.grid);
-    const instrumentListeners = attachInstrumentSelectListeners(instrumentUI.button, this.sequencer);
+    const exportMidiListeners = attachExportMidiDragListeners(instrumentUI.copyMidiButton, this.sequencer);
+    const instrumentListeners = attachInstrumentSelectListeners(instrumentUI.instrumentButton, this.sequencer);
     const volumeListeners = attachVolumeControlListeners(volumeUI, this.sequencer);
     const panListeners = attachPanControlListeners(panUI, this.sequencer);
     const zoomListeners = attachZoomControlListeners(zoomUI, {
@@ -107,6 +110,7 @@ export class SequencerController {
     this.detachFns = [
       gripListeners.detach,
       instrumentListeners.detach,
+      exportMidiListeners.detach,
       volumeListeners.detach,
       panListeners.detach,
       zoomListeners.detach,
@@ -116,6 +120,7 @@ export class SequencerController {
     this.refreshFns = [
       gripListeners.refreshUI,
       instrumentListeners.refreshUI,
+      exportMidiListeners.refreshUI,
       volumeListeners.refreshUI,
       panListeners.refreshUI,
       zoomListeners.refreshUI,

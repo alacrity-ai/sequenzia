@@ -9,10 +9,12 @@ export class SaveModalController {
   private detachFn: (() => void) | null = null;
 
   constructor(showWavModal: () => void) {
-    this.modal = createSaveModal();
+    const { root, dragMidiBtn } = createSaveModal();
+    this.modal = root;
+
     document.body.appendChild(this.modal);
 
-    const listeners: ListenerAttachment = attachSaveModalListeners(this.modal, showWavModal);
+    const listeners: ListenerAttachment = attachSaveModalListeners(this.modal, dragMidiBtn, showWavModal);
     this.detachFn = listeners.detach;
   }
 
