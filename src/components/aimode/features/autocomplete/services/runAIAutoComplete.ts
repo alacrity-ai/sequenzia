@@ -118,7 +118,9 @@ export async function runRemiContinuationPipeline(
     const remiTokens = await callLLM(model, prompt, remiResponseFormat);
 
     // === Step 5: Parse Tokens into RemiEvents ===
-    const llmContinuationRemi = parseRemiTokens(remiTokens);
+    // Deprecated for now: const llmContinuationRemi = parseRemiTokens(remiTokens);
+
+    const llmContinuationRemi = remiTokens; // Added using structured outputs
 
     // === Step 6: Normalize REMI Positions ===
     const normalizedContinuationRemi = normalizeRemiPositions(llmContinuationRemi, beatsPerBar, stepsPerBeat);
