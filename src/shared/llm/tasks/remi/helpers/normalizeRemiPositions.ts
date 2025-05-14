@@ -1,4 +1,4 @@
-// src/shared/llm/models/remi/normalizeRemiPositions.ts
+// src/shared/llm/tasks/remi/normalizeRemiPositions.ts
 
 import type { RemiEvent } from '@/shared/interfaces/RemiEvent';
 

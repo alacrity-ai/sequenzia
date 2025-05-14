@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { extractRemiContext } from '@/components/aimode/shared/context/extractRemiContext.js';
-import { remiResponseFormat } from '@/shared/llm/models/schemas/remiResponseFormat.js';
+import { remiResponseFormat } from '@/shared/llm/tasks/remi/schemas/remiResponseFormat.js';
 import { AutoCompletePromptBuilder } from '@/components/aimode/features/autocomplete/prompts/autoCompletePromptBuilder.js';
 import { callLLM } from '@/shared/llm/LLMCallerService.js';
 
@@ -106,7 +106,7 @@ describe('Integration: Autocomplete LLM Flow', () => {
 
     // === Step 3: Call LLM ===
     const model = 'gpt-4o';
-    const responseTokens = await callLLM(model, prompt, remiResponseFormat);
+    const responseTokens = await callLLM<string[]>(model, prompt, 'remi');
 
     // === Step 4: Validate Response ===
     console.log('\n--- LLM Response Tokens ---\n', responseTokens, '\n--- End Response ---\n');

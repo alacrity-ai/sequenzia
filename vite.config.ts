@@ -42,7 +42,7 @@ export default defineConfig({
       output: {
         format: 'es',
         manualChunks: {
-          vendor: ['@tonaljs/tonal', 'flowbite', 'smplr', 'webaudiofont'],
+          vendor: ['@tonaljs/tonal', 'flowbite', 'smplr', 'webaudiofont', 'openai', 'zod'],
         },
       },
     },

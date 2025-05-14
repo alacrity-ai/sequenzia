@@ -1,4 +1,4 @@
-// src/shared/llm/interfaces/PromptBuilder.ts
+// src/shared/llm/services/promptBuilderService.ts
 
 import { devLog } from '@/shared/state/devMode';
 

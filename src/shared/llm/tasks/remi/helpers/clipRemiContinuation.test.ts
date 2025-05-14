@@ -1,6 +1,6 @@
-// src/shared/llm/models/remi/clipRemiContinuation.test.ts
+// src/shared/llm/tasks/remi/clipRemiContinuation.test.ts
 
-// npm run test -- src/shared/llm/models/remi/clipRemiContinuation.test.ts
+// npm run test -- src/shared/llm/tasks/remi/clipRemiContinuation.test.ts
 
 import { describe, it, expect } from 'vitest';
 import { clipRemiContinuation } from './clipRemiContinuation';

@@ -2,7 +2,7 @@
 
 import { getSongKey } from '@/shared/playback/transportService.js';
 import { formatSongKey } from '@/shared/utils/musical/songUtils.js';
-import { BasePromptBuilder } from '@/shared/llm/interfaces/PromptBuilder.js';
+import { BasePromptBuilder } from '@/shared/llm/services/promptBuilderService.js';
 
 import type { LLMSettings } from '@/components/aimode/interfaces/LLMSettings';
 import type { ExtractedRemiContext } from '@/components/aimode/interfaces/ExtractedRemiContext.js';

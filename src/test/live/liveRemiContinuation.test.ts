@@ -4,7 +4,11 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import * as dotenv from 'dotenv';
+
+import { RemiOutputAdapter } from '@/shared/llm/tasks/remi/adapters/remiOutputAdapter';
+
 import type { LLMSettings } from '@/components/aimode/interfaces/LLMSettings.js';
+
 
 // === Load .env (VITE_OPENAI_API_KEY) ===
 dotenv.config();
@@ -39,13 +43,12 @@ function createMockLLMSettings(overrides: Partial<LLMSettings> = {}): LLMSetting
   };
 }
 
-
 // === Now safe to import modules ===
 import { extractRemiContext } from '@/components/aimode/shared/context/extractRemiContext';
-import { clipRemiContinuation } from '@/shared/llm/models/remi/clipRemiContinuation';
+import { clipRemiContinuation } from '@/shared/llm/tasks/remi/helpers/clipRemiContinuation';
 import { AutoCompletePromptBuilder } from '@/components/aimode/features/autocomplete/prompts/autoCompletePromptBuilder';
 import { callLLM } from '@/shared/llm/LLMCallerService';
-import { remiResponseFormat } from '@/shared/llm/models/schemas/remiResponseFormat';
+import { remiResponseFormat } from '@/shared/llm/tasks/remi/schemas/remiResponseFormat';
 
 import type { Note } from '@/shared/interfaces/Note.js';
 import type { RemiEvent } from '@/shared/interfaces/RemiEvent.js';
@@ -119,19 +122,12 @@ describe('Live Integration: Full Continuation Flow', () => {
 
     // === Call LLM ===
     const model = 'gpt-4o';
-    const remiTokens = await callLLM(model, prompt, remiResponseFormat);
+    const rawRemiResult = await callLLM<unknown>(model, prompt, 'remi');
 
-    console.log('\n--- Raw LLM Response Tokens ---\n', remiTokens, '\n--- End Response ---\n');
+    console.log('\n--- Raw LLM Result ---\n', rawRemiResult, '\n--- End Raw Result ---\n');
 
-    // === Parse Tokens into RemiEvents ===
-    const llmContinuationRemi: RemiEvent[] = typeof remiTokens[0] === 'string'
-      ? (remiTokens as string[]).map(token => {
-          const [type, ...valueParts] = token.split(' ');
-          const value = isNaN(Number(valueParts[0])) ? valueParts.join(' ') : Number(valueParts[0]);
-          return { type: type as RemiEvent['type'], value } as RemiEvent;
-        })
-      : remiTokens as RemiEvent[];
-
+    // === Convert raw result into RemiEvents ===
+    const llmContinuationRemi: RemiEvent[] = RemiOutputAdapter.parse(rawRemiResult);
 
     // === Compute Clip Boundary from endBeat ===
     const clipAfterBar = Math.floor(endBeat / remiSettings.beatsPerBar!);
