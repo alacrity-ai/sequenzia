@@ -124,11 +124,14 @@ describe('Live Integration: Full Continuation Flow', () => {
     console.log('\n--- Raw LLM Response Tokens ---\n', remiTokens, '\n--- End Response ---\n');
 
     // === Parse Tokens into RemiEvents ===
-    const llmContinuationRemi: RemiEvent[] = remiTokens.map(token => {
-      const [type, ...valueParts] = token.split(' ');
-      const value = isNaN(Number(valueParts[0])) ? valueParts.join(' ') : Number(valueParts[0]);
-      return { type: type as RemiEvent['type'], value } as RemiEvent;
-    });
+    const llmContinuationRemi: RemiEvent[] = typeof remiTokens[0] === 'string'
+      ? (remiTokens as string[]).map(token => {
+          const [type, ...valueParts] = token.split(' ');
+          const value = isNaN(Number(valueParts[0])) ? valueParts.join(' ') : Number(valueParts[0]);
+          return { type: type as RemiEvent['type'], value } as RemiEvent;
+        })
+      : remiTokens as RemiEvent[];
+
 
     // === Compute Clip Boundary from endBeat ===
     const clipAfterBar = Math.floor(endBeat / remiSettings.beatsPerBar!);
