@@ -1,5 +1,6 @@
 // src/shared/llm/models/schemas/remiResponseFormat.ts
 
+// Retired:
 // export const remiResponseFormat = {
 //   name: 'remi_tokens',
 //   schema: {

@@ -5,11 +5,12 @@ import type { LLMModel, LLMResponseFormat } from '@/shared/llm/interfaces/LLMInt
 
 import type { RemiEvent } from '@/shared/interfaces/RemiEvent';
 
-export async function callLLM(model: LLMModel, prompt: string, format: LLMResponseFormat): Promise<RemiEvent[]> {
+export async function callLLM(model: LLMModel, prompt: string, format: LLMResponseFormat): Promise<RemiEvent[] | string[]> {
   if (model.startsWith('gpt-') || model.startsWith('o3') || model.startsWith('o4')) {
     return callOpenAIModel(prompt, model, format);
   }
 
-  // Future providers: Claude, Gemini, Local LLM, etc.
+  // Future: Claude, Gemini, Local models may return string[].
+  // Here you'd call their respective handlers.
   throw new Error(`Unsupported LLM model: ${model}`);
 }

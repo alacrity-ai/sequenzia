@@ -24,6 +24,9 @@ import { remiResponseFormat } from '@/shared/llm/models/schemas/remiResponseForm
 import type { RemiEncodeOptions } from '@/shared/interfaces/RemiEncoderOptions';
 import type Sequencer from '@/components/sequencer/sequencer';
 import type { LLMModel } from '@/shared/llm/interfaces/LLMInterfaces';
+import type { RemiEvent } from '@/shared/interfaces/RemiEvent';
+
+type RemiContinuationResult = RemiEvent[] | string[];
 
 /**
  * Handles running AI Autocomplete for the current active sequencer.
@@ -115,12 +118,12 @@ export async function runRemiContinuationPipeline(
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     // === Step 4: Call LLM ===
-    const remiTokens = await callLLM(model, prompt, remiResponseFormat);
+    const llmResult = await callLLM(model, prompt, remiResponseFormat);
 
-    // === Step 5: Parse Tokens into RemiEvents ===
-    // Deprecated for now: const llmContinuationRemi = parseRemiTokens(remiTokens);
-
-    const llmContinuationRemi = remiTokens; // Added using structured outputs
+    // Handle OpenAI Structured output, or generic model with string[] output
+    const llmContinuationRemi: RemiEvent[] = typeof llmResult[0] === 'string'
+      ? parseRemiTokens(llmResult as string[])
+      : llmResult as RemiEvent[];
 
     // === Step 6: Normalize REMI Positions ===
     const normalizedContinuationRemi = normalizeRemiPositions(llmContinuationRemi, beatsPerBar, stepsPerBeat);
