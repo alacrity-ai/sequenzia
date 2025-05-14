@@ -55,7 +55,7 @@
   - [ ] Schedule notes to play that are in the preview so that user can Demo them
 
 - Inpaint/Extend
-  - [ ] Grey these out for now (lock)
+  - [x] Grey these out for now (lock)
 
 - AI Overlays / Plugins
   - [ ] Add chord commander plugin that:
@@ -110,10 +110,13 @@
   - [x] If previewing a note (note placement mode) while playblack is ocurring, significant slowdown ensues
 
 ## Future Todos
+- Side Grip to Collapsed sequencers
+  - [ ] Collapsed sequencers should have a side grip which allows you to drag them to a different order.
+    - Should probably collapse all sequencers when this grip is active, to facilitate.
 - Export Enhancement
   - [ ] The save menu should allow you to choose filename for Wav or Midi export
 - Drag to Drop
-  - [ ] In export menu, add an option to Drag to Drop, wherein the user can drag their midi file into another DAW
+  - [x] In export menu, add an option to Drag to Drop, wherein the user can drag their midi file into another DAW
 - Wav Editing
   - [ ] Add wav tracks
   - [ ] Add recording to a wav track

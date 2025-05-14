@@ -50,7 +50,7 @@ If you're integrating a **new LLM provider** (e.g., Google Gemini, Local models)
     - Example:
         
 ```
-import type { ProviderProfile } from '../interfaces/ProviderProfile';
+import type { ProviderProfile } from '@/shared/llm/interfaces/ProviderProfile';
 
 export const GoogleProfile: ProviderProfile = {
   provider: 'google',
