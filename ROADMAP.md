@@ -47,6 +47,9 @@
   - [ ] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
   - [ ] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
     - This is tricky because do we go by where the cursor preview is.. Where the last note placed was.. etc.. with fallback to the last note of the song?
+  - [ ] Resolve bug where re-generation doesn't trigger a redraw (Existing preview not vanishing)
+  - [ ] Resolve bug where if generation fails, the blinking measure animation continues to run
+  - [ ] Schedule notes to play that are in the preview so that user can Demo them
 
 - Inpaint/Extend
   - [ ] Grey these out for now (lock)

@@ -1,13 +1,33 @@
 import { describe, it, expect, vi } from 'vitest';
-import { extractContext } from '@/components/aimode/autocomplete/services/contextExtractionService';
-import { buildPrompt } from '@/components/aimode/autocomplete/services/llm/promptBuilderService';
-import { callLLM } from '@/components/aimode/autocomplete/services/llm/llmCallerService';
-import { getOpenAIKey } from '@/components/userSettings/store/userConfigStore';
+import { extractRemiContext } from '@/components/aimode/shared/context/extractRemiContext.js';
+import { remiResponseFormat } from '@/shared/llm/models/schemas/remiResponseFormat.js';
+import { AutoCompletePromptBuilder } from '@/components/aimode/features/autocomplete/prompts/autoCompletePromptBuilder.js';
+import { callLLM } from '@/shared/llm/LLMCallerService.js';
+
+import type { LLMSettings } from '@/components/aimode/interfaces/LLMSettings.js';
 
 // --- Mocking userConfig store for API Key ---
 vi.mock('@/components/userSettings/store/userConfigStore', () => ({
   getOpenAIKey: vi.fn(() => 'sk-test-mock-api-key')
 }));
+
+function createMockLLMSettings(overrides: Partial<LLMSettings> = {}): LLMSettings {
+  return {
+    promptTuning: {
+      styleInstruction: 'Mock Test Style',
+      additionalInstructions: '',
+      avoidStyles: '',
+      ...(overrides.promptTuning ?? {})
+    },
+    context: {
+      useMultiTrackContext: true,
+      contextBeats: 16,
+      ...(overrides.context ?? {})
+    },
+    ...overrides
+  };
+}
+
 
 // --- Mocking the fetch call to OpenAI ---
 global.fetch = vi.fn(() =>
@@ -69,19 +89,24 @@ describe('Integration: Autocomplete LLM Flow', () => {
     const endBeat = 8;
 
     // === Step 1: Extract Context ===
-    const context = extractContext(1, sequencers as any, startBeat, endBeat);
+    const context = extractRemiContext(1, sequencers as any, startBeat, endBeat);
 
     expect(context.primaryTrackRemi.length).toBeGreaterThan(0);
     expect(context.otherTracksRemi.length).toBe(2);
 
     // === Step 2: Build Prompt ===
-    const prompt = buildPrompt(context, 4);
+    const promptBuilder = new AutoCompletePromptBuilder();
+    const prompt = promptBuilder.buildPrompt(context, {
+      continuationBeats: 4,
+      llmSettings: createMockLLMSettings()
+    });
+ 
     console.log('\n--- Generated Prompt ---\n' + prompt + '\n--- End Prompt ---\n');
     expect(prompt).toContain('Primary Track:');
 
     // === Step 3: Call LLM ===
     const model = 'gpt-4o';
-    const responseTokens = await callLLM(model, prompt);
+    const responseTokens = await callLLM(model, prompt, remiResponseFormat);
 
     // === Step 4: Validate Response ===
     console.log('\n--- LLM Response Tokens ---\n', responseTokens, '\n--- End Response ---\n');

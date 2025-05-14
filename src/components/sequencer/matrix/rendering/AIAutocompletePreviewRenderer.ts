@@ -2,7 +2,7 @@
 
 import { drawRoundedRect } from '../utils/roundedRect.js';
 import { noteToMidi } from '@/shared/utils/musical/noteUtils.js';
-import { getAIPreviewNotes } from '@/components/aimode/autocomplete/stores/autoCompleteStore.js';
+import { getAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';

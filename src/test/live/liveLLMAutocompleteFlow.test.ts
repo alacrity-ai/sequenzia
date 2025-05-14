@@ -4,6 +4,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import * as dotenv from 'dotenv';
+import type { LLMSettings } from '@/components/aimode/interfaces/LLMSettings.js';
 
 // === Load .env (VITE_OPENAI_API_KEY) ===
 dotenv.config();
@@ -21,10 +22,31 @@ vi.mock('@/components/userSettings/store/userConfigStore', async (importOriginal
   };
 });
 
+function createMockLLMSettings(overrides: Partial<LLMSettings> = {}): LLMSettings {
+  return {
+    promptTuning: {
+      styleInstruction: 'Mock Test Style',
+      additionalInstructions: '',
+      avoidStyles: '',
+      ...(overrides.promptTuning ?? {})
+    },
+    context: {
+      useMultiTrackContext: true,
+      contextBeats: 16,
+      ...(overrides.context ?? {})
+    },
+    ...overrides
+  };
+}
+
+
 // === Now safe to import modules ===
-import { extractContext, clipContinuationAfterPrimary } from '@/components/aimode/autocomplete/services/contextExtractionService';
-import { buildPrompt } from '@/components/aimode/autocomplete/services/llm/promptBuilderService';
-import { callLLM } from '@/components/aimode/autocomplete/services/llm/llmCallerService';
+import { extractRemiContext } from '@/components/aimode/shared/context/extractRemiContext';
+import { clipRemiContinuation } from '@/shared/llm/models/remi/clipRemiContinuation';
+import { AutoCompletePromptBuilder } from '@/components/aimode/features/autocomplete/prompts/autoCompletePromptBuilder';
+import { callLLM } from '@/shared/llm/LLMCallerService';
+import { remiResponseFormat } from '@/shared/llm/models/schemas/remiResponseFormat';
+
 import type { Note } from '@/shared/interfaces/Note.js';
 import type { RemiEvent } from '@/shared/interfaces/RemiEvent.js';
 import type { RemiEncodeOptions } from '@/shared/interfaces/RemiEncoderOptions.js';
@@ -81,19 +103,23 @@ describe('Live Integration: Full Continuation Flow', () => {
     const endBeat = 8;
 
     // === Extract Context ===
-    const context = extractContext(1, sequencers as any, startBeat, endBeat, remiSettings);
+    const context = extractRemiContext(1, sequencers as any, startBeat, endBeat, remiSettings);
 
     expect(context.primaryTrackRemi.length).toBeGreaterThan(0);
     expect(context.otherTracksRemi.length).toBe(2);
 
     // === Build Prompt ===
-    const prompt = buildPrompt(context, 4);
+    const promptBuilder = new AutoCompletePromptBuilder();
+    const prompt = promptBuilder.buildPrompt(context, {
+      continuationBeats: 4,
+      llmSettings: createMockLLMSettings()
+    });
 
     console.log('\n--- Generated Prompt ---\n' + prompt + '\n--- End Prompt ---\n');
 
     // === Call LLM ===
     const model = 'gpt-4o';
-    const remiTokens = await callLLM(model, prompt);
+    const remiTokens = await callLLM(model, prompt, remiResponseFormat);
 
     console.log('\n--- Raw LLM Response Tokens ---\n', remiTokens, '\n--- End Response ---\n');
 
@@ -109,7 +135,7 @@ describe('Live Integration: Full Continuation Flow', () => {
     const clipAfterPosition = (endBeat % remiSettings.beatsPerBar!) * remiSettings.stepsPerBeat!;
 
     // === Clip Continuation ===
-    const clippedContinuation = clipContinuationAfterPrimary(llmContinuationRemi, clipAfterBar, clipAfterPosition);
+    const clippedContinuation = clipRemiContinuation(llmContinuationRemi, clipAfterBar, clipAfterPosition);
 
     console.log('\n--- Final Clipped Continuation Remi ---\n', clippedContinuation, '\n--- End Clipped Remi ---\n');
 

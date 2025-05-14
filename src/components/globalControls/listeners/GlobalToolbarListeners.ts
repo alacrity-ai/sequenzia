@@ -4,15 +4,15 @@ import type { ListenerAttachment } from '@/components/userSettings/interfaces/Li
 
 import { isButtonDisabled } from '@/components/globalControls/controls/autoCompleteButtonControls.js';
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
-import { handleRunAIAutocomplete } from '@/components/aimode/autocomplete/helpers/runAIAutoComplete.js';
-import { applyAutoCompleteNotes } from '@/components/aimode/autocomplete/helpers/applyAutoCompleteNotes.js';
+import { handleUserAutoCompleteRequest } from '@/components/aimode/features/autocomplete/services/runAIAutoComplete.js';
+import { applyAutoCompleteNotes } from '@/components/aimode/features/autocomplete/services/applyAutoCompleteNotes.js';
 import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import {
   toggleIsAutocompleteEnabled,
   subscribeAutocompleteState
-} from '@/components/aimode/autocomplete/stores/autoCompleteStore.js';
+} from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 
 import {
   updateSnapResolution,
@@ -87,7 +87,7 @@ export function attachToolbarListeners(
   autocompleteToggleBtn?.addEventListener('click', (e: MouseEvent) => {
     // Left click only
     if (e.button !== 0) return;
-    handleRunAIAutocomplete('GlobalToolbarListeners');
+    handleUserAutoCompleteRequest('GlobalToolbarListeners');
   });
 
   // Right click → toggle mode
@@ -290,7 +290,7 @@ export function attachToolbarListeners(
         } else {
           // Don't run autocomplete if already running
           if (!isButtonDisabled()) {
-            handleRunAIAutocomplete('GlobalToolbarListeners');
+            handleUserAutoCompleteRequest('GlobalToolbarListeners');
           }
         }
         return;

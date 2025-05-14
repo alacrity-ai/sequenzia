@@ -14,6 +14,5 @@ export const defaultUserConfig: UserConfig = {
   ai: {
     openaiApiKey: '',
     openaiModel: 'gpt-4o',
-    autoCompleteContextBeats: 32
   },
 };

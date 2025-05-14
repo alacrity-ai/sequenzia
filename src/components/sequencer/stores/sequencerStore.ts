@@ -2,7 +2,7 @@
 
 import type Sequencer from '@/components/sequencer/sequencer.js';
 import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
-import { clearAIPreviewNotes } from '@/components/aimode/autocomplete/stores/autoCompleteStore';
+import { clearAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore';
 
 const sequencers = new Map<number, Sequencer>();
 

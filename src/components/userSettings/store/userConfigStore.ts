@@ -23,10 +23,6 @@ export function getOpenAIModel(): string {
   return userConfig.ai.openaiModel;
 }
 
-export function getAutoCompleteContextBeats(): number {
-  return userConfig.ai.autoCompleteContextBeats;
-}
-
 // Alias for generic use
 export function getLLMModel(): string {
   return getOpenAIModel();

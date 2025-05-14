@@ -5,7 +5,7 @@ import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { Note } from '@/shared/interfaces/Note.js';
 
 import { getTimeSignature } from '@/shared/playback/transportService.js';
-import { getAIPreviewNotes } from '@/components/aimode/autocomplete/stores/autoCompleteStore.js';
+import { getAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import { noteToMidi, pitchToMidi } from '@/shared/utils/musical/noteUtils.js';
 
 interface AcceptanceAnimation {
@@ -47,7 +47,7 @@ export class AIAnimationRenderer {
       requestAnimationFrame(this.renderFrame);
     }
   }
-  
+
   public playNoteAcceptance(notes: Note[]): void {
     const startTime = performance.now();
 
