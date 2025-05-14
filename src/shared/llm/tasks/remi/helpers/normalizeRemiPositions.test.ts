@@ -1,9 +1,9 @@
-// src/shared/llm/models/remi/normalizeRemiPositions.test.ts
+// src/shared/llm/tasks/remi/normalizeRemiPositions.test.ts
 
-// npm run test -- src/shared/llm/models/remi/normalizeRemiPositions.test.ts
+// npm run test -- src/shared/llm/tasks/remi/normalizeRemiPositions.test.ts
 
 import { describe, it, expect } from 'vitest';
-import { normalizeRemiPositions } from './normalizeRemiPositions';
+import { normalizeRemiPositions } from '@/shared/llm/tasks/remi/helpers/normalizeRemiPositions';
 import type { RemiEvent } from '@/shared/interfaces/RemiEvent';
 
 describe('normalizeRemiPositions', () => {

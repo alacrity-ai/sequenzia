@@ -6,68 +6,105 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { callLLM } from './LLMCallerService';
-import { callOpenAIModel } from '@/shared/llm/providers/openai/OpenAICallerService';
 
-import type { LLMResponseFormat } from '@/shared/llm/interfaces/LLMInterfaces';
-import type { LLMModel } from '@/shared/llm/interfaces/LLMInterfaces';
+import { callOpenAIModel } from './providers/openai/OpenAICallerService';
+import { callAnthropicModel } from './providers/anthropic/AnthropicCallerService';
+import { ProviderProfiles } from './providers/profiles/ProviderProfiles';
+
+import type { LLMModel } from './interfaces/LLMInterfaces';
+import type { LLMTask } from './interfaces/LLMTask';
 import type { Mock } from 'vitest';
 
-
-// Mock callOpenAIModel
-vi.mock('@/shared/llm/providers/openai/OpenAICallerService', () => ({
+// === Mocks ===
+vi.mock('./providers/openai/OpenAICallerService', () => ({
   callOpenAIModel: vi.fn()
 }));
 
-describe('callLLM', () => {
-  const mockFormat: LLMResponseFormat = {
-    name: 'test_tokens',
-    schema: {
-      type: 'object',
-      properties: {
-        result: { type: 'array', items: { type: 'string' } }
+vi.mock('./providers/anthropic/AnthropicCallerService', () => ({
+  callAnthropicModel: vi.fn()
+}));
+
+vi.mock('./profiles/ProviderProfiles', () => {
+  const { z } = require('zod');
+
+  return {
+    ProviderProfiles: {
+      openai: {
+        provider: 'openai',
+        tasks: {
+          remi: {
+            schema: { name: 'remi_tokens', schema: z.object({}) },
+          }
+        }
       },
-      required: ['result'],
-      additionalProperties: false
+      anthropic: {
+        provider: 'anthropic',
+        tasks: {
+          remi: {
+            adapter: vi.fn((input) => input)
+          }
+        }
+      }
     }
   };
+});
 
-  const prompt = 'Test Prompt';
 
+vi.mock('./profiles/ModelToProvider', () => ({
+  ModelToProvider: {
+    'gpt-4o': 'openai',
+    'claude-3': 'anthropic'
+  }
+}));
+
+describe('callLLM', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should delegate to callOpenAIModel for gpt-* model', async () => {
-    (callOpenAIModel as Mock).mockResolvedValueOnce(['mockToken']);
+  it('should call OpenAI flow with schema and adapter', async () => {
+    (callOpenAIModel as Mock).mockResolvedValueOnce({ result: ['mockOpenAI'] });
 
-    const result = await callLLM('gpt-4o', prompt, mockFormat);
+    const result = await callLLM<string[]>('gpt-4o', 'Test Prompt', 'remi');
 
-    expect(callOpenAIModel).toHaveBeenCalledWith(prompt, 'gpt-4o', mockFormat);
-    expect(result).toEqual(['mockToken']);
+    expect(callOpenAIModel).toHaveBeenCalledWith(
+      'Test Prompt',
+      'gpt-4o',
+      expect.objectContaining({
+        name: 'remi_tokens',
+        schema: expect.any(Object)
+      })
+    );
+
+    expect(result).toEqual(['mockOpenAI']);
   });
 
-  it('should delegate to callOpenAIModel for o3-* model', async () => {
-    (callOpenAIModel as Mock).mockResolvedValueOnce(['token2']);
+  it('should call Anthropic flow and adapter', async () => {
+    (callAnthropicModel as Mock).mockResolvedValueOnce({ result: ['mockClaude'] });
 
-    const result = await callLLM('o3-mini', prompt, mockFormat);
+    const result = await callLLM<string[]>('claude-3', 'Claude Prompt', 'remi');
 
-    expect(callOpenAIModel).toHaveBeenCalledWith(prompt, 'o3-mini', mockFormat);
-    expect(result).toEqual(['token2']);
+    expect(callAnthropicModel).toHaveBeenCalledWith('Claude Prompt', 'claude-3');
+    expect(result).toEqual(['mockClaude']);
   });
 
-  it('should delegate to callOpenAIModel for o4-* model', async () => {
-    (callOpenAIModel as Mock).mockResolvedValueOnce(['token3']);
-
-    const result = await callLLM('o4-giant' as LLMModel, prompt, mockFormat);
-
-    expect(callOpenAIModel).toHaveBeenCalledWith(prompt, 'o4-giant', mockFormat);
-    expect(result).toEqual(['token3']);
+  it('should throw if model is unknown', async () => {
+    await expect(callLLM('unknown-model' as LLMModel, 'Prompt', 'remi' as LLMTask))
+      .rejects.toThrow('Unknown provider for model: unknown-model');
   });
 
-  it('should throw for unsupported models', async () => {
-    await expect(callLLM('claude-3' as LLMModel, prompt, mockFormat))
-      .rejects.toThrow('Unsupported LLM model: claude-3');
+  it('should throw if task is unsupported for provider', async () => {
+    await expect(callLLM('gpt-4o', 'Prompt', 'chords' as LLMTask))
+      .rejects.toThrow('Task chords requires a schema for OpenAI models.');
+  });
 
-    expect(callOpenAIModel).not.toHaveBeenCalled();
+  it('should throw if OpenAI task lacks schema', async () => {
+    ProviderProfiles.openai.tasks.chords = {
+      schema: undefined,
+      adapter: vi.fn()
+    };
+
+    await expect(callLLM('gpt-4o', 'Prompt', 'chords' as LLMTask))
+      .rejects.toThrow('Task chords requires a schema for OpenAI models.');
   });
 });

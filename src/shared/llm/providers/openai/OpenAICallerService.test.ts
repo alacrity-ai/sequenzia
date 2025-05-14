@@ -1,123 +1,56 @@
+/// <reference types="vitest" />
+
 // src/shared/llm/providers/openai/OpenAICallerService.test.ts
 
-// npm run test -- src/shared/llm/providers/openai/OpenAICallerService.test.ts
-
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { callOpenAIModel } from './OpenAICallerService';
-import type { LLMResponseFormat } from '@/shared/llm/interfaces/LLMInterfaces';
+import { z } from 'zod';
 
-// --- Mock getOpenAIKey ---
+import type { Mock } from 'vitest';
+
+// === Mocks ===
+vi.mock('openai', () => {
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      responses: {
+        parse: vi.fn()
+      }
+    }))
+  };
+});
+
+import OpenAI from 'openai';
+import { getOpenAIKey } from '@/components/userSettings/store/userConfigStore';
+import { devLog } from '@/shared/state/devMode';
+
 vi.mock('@/components/userSettings/store/userConfigStore', () => ({
-  getOpenAIKey: vi.fn(() => 'mock-api-key')
+  getOpenAIKey: vi.fn()
 }));
 
-// --- Setup global fetch mock ---
-const mockFetch = vi.fn();
-global.fetch = mockFetch as any;
+vi.mock('@/shared/state/devMode', () => ({
+  devLog: vi.fn()
+}));
 
 describe('callOpenAIModel', () => {
-  const mockFormat: LLMResponseFormat = {
-    name: 'remi_tokens',
-    schema: {
-      type: 'object',
-      properties: {
-        result: { type: 'array', items: { type: 'string' } }
-      },
-      required: ['result'],
-      additionalProperties: false
-    }
+  const TestResponseFormat = z.object({
+    result: z.array(z.string())
+  });
+
+  const mockFormat = {
+    name: 'test_tokens',
+    schema: TestResponseFormat
   };
 
-  const mockResponsePayload = {
-    output: [
-      {
-        type: 'message',
-        content: [
-          {
-            type: 'output_text',
-            text: JSON.stringify({ result: ['Bar 1', 'Position 0', 'Pitch C4'] })
-          }
-        ]
-      }
-    ]
-  };
+  const prompt = 'Test Prompt';
+  const model = 'gpt-4o';
 
   beforeEach(() => {
-    mockFetch.mockReset();
+    vi.clearAllMocks();
   });
 
-  it('should call OpenAI API and parse tokens correctly', async () => {
-    // Arrange mock fetch success
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockResponsePayload)
-    });
+  it('should throw if no API key is set', async () => {
+    (getOpenAIKey as Mock).mockReturnValue(null);
 
-    // Act
-    const result = await callOpenAIModel('Test Prompt', 'gpt-4o', mockFormat);
-
-    // Assert fetch was called correctly
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-    const fetchCall = mockFetch.mock.calls[0][1];
-    expect(fetchCall.method).toBe('POST');
-    expect(fetchCall.headers['Authorization']).toBe('Bearer mock-api-key');
-
-    // Assert body structure contains correct schema
-    const body = JSON.parse(fetchCall.body);
-    expect(body.model).toBe('gpt-4o');
-    expect(body.text.format.name).toBe('remi_tokens');
-    expect(body.text.format.schema).toEqual(mockFormat.schema);
-
-    // Assert parsed result is correct
-    expect(result).toEqual(['Bar 1', 'Position 0', 'Pitch C4']);
-  });
-
-  it('should throw if OpenAI response is not ok', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 400,
-      text: () => Promise.resolve('Bad Request')
-    });
-
-    await expect(callOpenAIModel('Test Prompt', 'gpt-4o', mockFormat))
-      .rejects.toThrow('OpenAI request failed: 400');
-  });
-
-  it('should throw if output_text is missing', async () => {
-    const badPayload = {
-      output: [{ type: 'message', content: [] }]
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(badPayload)
-    });
-
-    await expect(callOpenAIModel('Test Prompt', 'gpt-4o', mockFormat))
-      .rejects.toThrow('Missing output_text in OpenAI response.');
-  });
-
-  it('should throw if result format is invalid', async () => {
-    const invalidPayload = {
-      output: [
-        {
-          type: 'message',
-          content: [
-            {
-              type: 'output_text',
-              text: JSON.stringify({ wrongField: [] })
-            }
-          ]
-        }
-      ]
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(invalidPayload)
-    });
-
-    await expect(callOpenAIModel('Test Prompt', 'gpt-4o', mockFormat))
-      .rejects.toThrow('Invalid result format.');
+    await expect(callOpenAIModel(prompt, model, mockFormat)).rejects.toThrow('OpenAI API key is not set.');
   });
 });

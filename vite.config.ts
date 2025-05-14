@@ -29,7 +29,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './vitest.setup.ts',
     include: ['**/*.test.ts'],
     exclude: ['**/test/integration/**', '**/test/live/**'],
     coverage: {
@@ -42,7 +41,7 @@ export default defineConfig({
       output: {
         format: 'es',
         manualChunks: {
-          vendor: ['@tonaljs/tonal', 'flowbite', 'smplr', 'webaudiofont'],
+          vendor: ['@tonaljs/tonal', 'flowbite', 'smplr', 'webaudiofont', 'openai', 'zod'],
         },
       },
     },

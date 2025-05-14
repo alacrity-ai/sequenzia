@@ -28,6 +28,7 @@ function normalizeTokens(rawTokens: string[]): string[] {
       }
     }
 
+    // === NEW: Handle structured tokens (CSV, comments, etc.) ===
     const structuredTokens = extractStructuredTokens(token);
     if (structuredTokens.length > 0) {
       flattened.push(...structuredTokens);
@@ -198,10 +199,19 @@ function extractUnderscoreTokens(token: string): string[] {
 }
 
 
-export function parseRemiTokens(tokens: string[]): RemiEvent[] {
-  const events: RemiEvent[] = [];
+/**
+ * Parses a string or array of REMI tokens into RemiEvents.
+ * 
+ * @param rawTokens The raw REMI tokens from the LLM.
+ * @returns Parsed RemiEvents.
+ */
+export function parseRemiTokens(rawTokens: string | string[]): RemiEvent[] {
+  const tokenArray = Array.isArray(rawTokens)
+    ? rawTokens
+    : rawTokens.split(/\s*[\n,]\s*/).filter(Boolean); // split by space/newline/comma, remove empties
 
-  const normalizedTokens = normalizeTokens(tokens);
+  const events: RemiEvent[] = [];
+  const normalizedTokens = normalizeTokens(tokenArray);
 
   for (const token of normalizedTokens) {
     const match = token.match(/^(\w+)\s+(.+)$/);
@@ -256,3 +266,4 @@ export function parseRemiTokens(tokens: string[]): RemiEvent[] {
   devLog('[RemiTokenParser] Parsed RemiEvents:', events);
   return events;
 }
+

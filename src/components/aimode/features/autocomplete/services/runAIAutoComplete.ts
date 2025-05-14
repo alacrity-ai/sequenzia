@@ -3,30 +3,26 @@
 import { devLog } from '@/shared/state/devMode';
 
 import { extractRemiContext } from '@/components/aimode/shared/context/extractRemiContext.js';
-import { clipRemiContinuation } from '@/shared/llm/models/remi/clipRemiContinuation.js';
+import { clipRemiContinuation } from '@/shared/llm/tasks/remi/helpers/clipRemiContinuation.js';
 import { remiDecode } from '@/shared/utils/musical/remi/remiUtils.js';
 
 import { getAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import { getSequencerById, getSequencers, getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { disableAutocompleteToggle, enableAutocompleteToggle } from '@/components/globalControls/controls/autoCompleteButtonControls.js';
 import { setAIPreviewNotes, clearAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
-import { normalizeRemiPositions } from '@/shared/llm/models/remi/normalizeRemiPositions.js';
+import { normalizeRemiPositions } from '@/shared/llm/tasks/remi/helpers/normalizeRemiPositions.js';
 import { getStartBeatAndEndBeat, getAutoCompleteStartBar, getClipBoundaryFromEndBeat } from '@/components/aimode/shared/helpers/contextHelpers.js';
-import { parseRemiTokens } from '@/shared/llm/models/remi/parseRemiTokens.js';
 
 import { getRemiSettings } from '@/components/aimode/shared/settings/getRemiSettings.js';
 import { getLLMSettings } from '@/components/aimode/shared/stores/llmSettingsStore.js';
 
 import { AutoCompletePromptBuilder } from '@/components/aimode/features/autocomplete/prompts/autoCompletePromptBuilder.js';
-import { callLLM } from '@/shared/llm/LLMCallerService.js';
-import { remiResponseFormat } from '@/shared/llm/models/schemas/remiResponseFormat.js';
+import { getRemiContinuation } from '@/shared/llm/tasks/remi/remiContinuationService.js';
 
 import type { RemiEncodeOptions } from '@/shared/interfaces/RemiEncoderOptions';
 import type Sequencer from '@/components/sequencer/sequencer';
 import type { LLMModel } from '@/shared/llm/interfaces/LLMInterfaces';
-import type { RemiEvent } from '@/shared/interfaces/RemiEvent';
 
-type RemiContinuationResult = RemiEvent[] | string[];
 
 /**
  * Handles running AI Autocomplete for the current active sequencer.
@@ -118,12 +114,7 @@ export async function runRemiContinuationPipeline(
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     // === Step 4: Call LLM ===
-    const llmResult = await callLLM(model, prompt, remiResponseFormat);
-
-    // Handle OpenAI Structured output, or generic model with string[] output
-    const llmContinuationRemi: RemiEvent[] = typeof llmResult[0] === 'string'
-      ? parseRemiTokens(llmResult as string[])
-      : llmResult as RemiEvent[];
+    const llmContinuationRemi = await getRemiContinuation(model, prompt);
 
     // === Step 6: Normalize REMI Positions ===
     const normalizedContinuationRemi = normalizeRemiPositions(llmContinuationRemi, beatsPerBar, stepsPerBeat);

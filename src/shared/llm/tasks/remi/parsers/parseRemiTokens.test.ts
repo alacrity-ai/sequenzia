@@ -1,6 +1,6 @@
-// src/shared/llm/models/remi/parseRemiTokens.test.ts
+// src/shared/llm/tasks/remi/parsers/parseRemiTokens.test.ts
 
-// npm run test -- src/shared/llm/models/remi/parseRemiTokens.test.ts
+// npm run test -- src/shared/llm/tasks/remi/parsers/parseRemiTokens.test.ts
 
 import { describe, it, expect, vi } from 'vitest';
 import { parseRemiTokens } from './parseRemiTokens';
@@ -421,6 +421,7 @@ describe('parseRemiTokens', () => {
   });
 
   it('should parse underscore-compound tokens with noise fields', () => {
+    // Potential weird LLM response type
     const input = [
       'Bar_2_pos_0_on_beat_true_pitch_G7_dur_4',
       'Bar_2_pos_4_on_beat_true_pitch_A7_dur_4',
@@ -428,6 +429,7 @@ describe('parseRemiTokens', () => {
       'Bar_2_pos_12_on_beat_true_pitch_C8_dur_4'
     ];
 
+    // Expected output after filtering
     const expected: RemiEvent[] = [
       { type: 'Bar', value: 2 },
       { type: 'Position', value: 0 },

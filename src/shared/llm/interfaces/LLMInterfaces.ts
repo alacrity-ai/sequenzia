@@ -1,8 +1,11 @@
 // src/shared/llm/interfaces/LLMInterfaces.ts
 
-export type LLMModel = 'gpt-4o' | 'gpt-4o-mini' | 'gpt-4.1' | 'o3-mini' | 'o4-mini'; // etc.
+import type { ZodTypeAny } from 'zod';
+import { ModelToProvider } from '@/shared/llm/providers/profiles/ModelToProvider';
 
-export interface LLMResponseFormat {
+export type LLMModel = keyof typeof ModelToProvider;
+
+export interface LLMResponseFormat<TSchema extends ZodTypeAny> {
   name: string;
-  schema: Record<string, any>;
+  schema: TSchema;
 }
