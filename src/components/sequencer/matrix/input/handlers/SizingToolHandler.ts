@@ -42,6 +42,7 @@ export class SizingToolHandler implements GridInteractionHandler {
 
   public onEnter(): void {
     const selected = this.store.getSelectedNotes();
+    this.cursorController.set(CursorState.ResizeHorizontal);
     if (!selected.length) {
       this.controller.transitionTo(InteractionMode.NoteTool);
       return;
@@ -93,7 +94,6 @@ export class SizingToolHandler implements GridInteractionHandler {
   
     this.previewNotes = preview;
     this.store.setPreviewNotes(preview);
-    this.cursorController.set(CursorState.ResizeHorizontal);
     this.hasResized = true;
     this.requestRedraw();
   }  
@@ -137,7 +137,7 @@ export class SizingToolHandler implements GridInteractionHandler {
       }
       this.noteManager.rebuildIndex();
     }
-
+    this.cursorController.set(CursorState.Default);
     this.originalNotes = [];
     this.previewNotes = [];
     this.anchorNote = null;

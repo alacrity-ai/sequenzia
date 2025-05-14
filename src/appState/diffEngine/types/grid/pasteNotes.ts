@@ -1,5 +1,6 @@
 // src/appState/diffEngine/types/grid/pasteNotes.ts
 
+import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 import { Note } from '@/shared/interfaces/Note.js';
@@ -13,13 +14,16 @@ export function applyPASTE_NOTES(state: AppState, diff: Diff): AppState {
   if (!seq) return state;
 
   seq.notes.push(...(diff.notes as Note[]));
+
+  setLastActiveSequencerId(diff.sequencerId);
+
   return newState;
 }
 
 /**
  * Creates a forward diff to paste notes.
  */
-export function createPasteNotesDiff(sequencerId: string, notes: Note[]): Diff {
+export function createPasteNotesDiff(sequencerId: number, notes: Note[]): Diff {
   return {
     type: 'PASTE_NOTES',
     sequencerId,
@@ -30,7 +34,7 @@ export function createPasteNotesDiff(sequencerId: string, notes: Note[]): Diff {
 /**
  * Creates a reverse diff to delete pasted notes.
  */
-export function createReversePasteNotesDiff(sequencerId: string, notes: Note[]): Diff {
+export function createReversePasteNotesDiff(sequencerId: number, notes: Note[]): Diff {
   return {
     type: 'DELETE_NOTES',
     sequencerId,

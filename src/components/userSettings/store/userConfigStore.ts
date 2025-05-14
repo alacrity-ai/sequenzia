@@ -23,6 +23,11 @@ export function getOpenAIModel(): string {
   return userConfig.ai.openaiModel;
 }
 
+// Alias for generic use
+export function getLLMModel(): string {
+  return getOpenAIModel();
+}
+
 export function getCurrentSkin(): InterfaceSkin {
   return getSkinByName(userConfig.theme.skin);
 }

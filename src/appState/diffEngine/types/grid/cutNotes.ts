@@ -1,5 +1,6 @@
 // src/appState/diffEngine/types/grid/cutNotes.ts
 
+import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 import { Note } from '@/shared/interfaces/Note.js';
@@ -20,6 +21,8 @@ export function applyCUT_NOTES(state: AppState, diff: Diff): AppState {
     const key = `${n.pitch}|${n.start}|${n.duration}`;
     return !toDelete.has(key);
   });
+
+  setLastActiveSequencerId(diff.sequencerId);
 
   return newState;
 }

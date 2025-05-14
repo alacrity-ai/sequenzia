@@ -1,5 +1,6 @@
 // src/appState/diffEngine/types/grid/placeNotes.ts
 
+import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 import { Note } from '@/shared/interfaces/Note.js';
@@ -13,6 +14,8 @@ export function applyPLACE_NOTES(state: AppState, diff: Diff): AppState {
   if (!seq) return state;
 
   seq.notes.push(...(diff.notes as Note[]));
+
+  setLastActiveSequencerId(diff.sequencerId);
 
   return newState;
 }

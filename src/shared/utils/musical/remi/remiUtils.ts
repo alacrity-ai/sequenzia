@@ -17,7 +17,8 @@ export function remiEncode(
   const {
     beatsPerBar = 4,
     stepsPerBeat = 4,
-    quantizeDurations = true
+    quantizeDurations = true,
+    ignoreVelocity = false
   } = options;
 
   const tokens: RemiEvent[] = [];
@@ -45,8 +46,10 @@ export function remiEncode(
 
     tokens.push({ type: 'Duration', value: quantizedDuration });
 
-    const velocity = note.velocity ?? 100;
-    tokens.push({ type: 'Velocity', value: velocity });
+    if (!ignoreVelocity) {
+      const velocity = note.velocity ?? 100;
+      tokens.push({ type: 'Velocity', value: velocity });
+    }
   }
 
   return tokens;
@@ -59,7 +62,8 @@ export function remiDecode(
   const {
     beatsPerBar = 4,
     stepsPerBeat = 4,
-    quantizeDurations = true
+    quantizeDurations = true,
+    ignoreVelocity = false
   } = options;
 
   let currentBar = 0;
@@ -88,32 +92,44 @@ export function remiDecode(
         }
 
         const durationToken = tokens[i + 1];
-        const velocityToken = tokens[i + 2];
-
-        const duration = durationToken?.value;
-        const velocity = velocityToken?.value;
 
         const isValidNumber = (val: unknown): val is number =>
           typeof val === 'number' && !Number.isNaN(val) && Number.isFinite(val);
 
         if (
           !durationToken || durationToken.type !== 'Duration' ||
-          !velocityToken || velocityToken.type !== 'Velocity' ||
-          !isValidNumber(duration) ||
-          !isValidNumber(velocity)
+          !isValidNumber(durationToken.value)
         ) {
-          devLog(`REMI decode: Malformed token triplet at index ${i}`, {
+          devLog(`REMI decode: Missing or invalid Duration token after Pitch at index ${i}`, {
             pitchToken: token,
-            durationToken,
-            velocityToken
+            durationToken
           }, 'warn');
           continue;
         }
 
+        let velocity = 100; // default if ignoreVelocity is true
+
+        if (!ignoreVelocity) {
+          const velocityToken = tokens[i + 2];
+
+          if (
+            !velocityToken || velocityToken.type !== 'Velocity' ||
+            !isValidNumber(velocityToken.value)
+          ) {
+            devLog(`REMI decode: Missing or invalid Velocity token after Duration at index ${i}`, {
+              pitchToken: token,
+              velocityToken
+            }, 'warn');
+            continue;
+          }
+
+          velocity = velocityToken.value;
+        }
+
         const start = currentBar * beatsPerBar + currentPosition / stepsPerBeat;
         const decodedDuration = quantizeDurations
-          ? duration / stepsPerBeat
-          : duration;
+          ? durationToken.value / stepsPerBeat
+          : durationToken.value;
 
         notes.push({
           pitch: token.value,
@@ -123,7 +139,7 @@ export function remiDecode(
         });
 
         hasValidPosition = false;
-        i += 2;
+        i += ignoreVelocity ? 1 : 2; // skip tokens accordingly
         break;
       }
 

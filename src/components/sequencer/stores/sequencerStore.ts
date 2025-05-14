@@ -2,8 +2,11 @@
 
 import type Sequencer from '@/components/sequencer/sequencer.js';
 import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
+import { clearAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore';
 
 const sequencers = new Map<number, Sequencer>();
+
+let lastActiveSequencerId: number | null = null;
 
 export function registerSequencer(id: number, sequencer: Sequencer): void {
   sequencers.set(id, sequencer);
@@ -19,6 +22,20 @@ export function getSequencerById(id: number): Sequencer | undefined {
 
 export function getSequencers(): Sequencer[] {
   return Array.from(sequencers.values());
+}
+
+export function getLastActiveSequencerId(): number | null {
+  return lastActiveSequencerId;
+}
+
+export function getLastActiveSequencer(): Sequencer | undefined {
+  if (lastActiveSequencerId === null) return undefined;
+  return getSequencerById(lastActiveSequencerId);
+}
+
+export function setLastActiveSequencerId(id: number | null): void {
+  clearAIPreviewNotes();
+  lastActiveSequencerId = id;
 }
 
 export function clearSequencers(): void {

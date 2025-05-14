@@ -29,19 +29,44 @@
   - [x] Remove select mode entirely, and put velocity mode within it
   - [x] Holding down V should show note velocities regardless of the note render mode
 
-## Future Todos
-- Wav Editing
-  - [ ] Add wav tracks
-  - [ ] Add recording to a wav track
-  - [ ] Add importing existing wav file to a wave track
-- Playback Enhancements:
-  - [ ] Add loop start/loop end to global playhead
-  - [ ] Add playhead follow mode to sequencer topbar (follows playhead, or scrolls when playhead reaches end of screen)
-- Note Editing:
-  - [ ] Add Quantize Modal for Quantizing groups of selected notes
-  - [ ] Add Recording for keyboard
-    - [ ] Support live quantization
-  - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats
+## AI Autocomplete
+- Necessary Now
+  - [ ] Allow transport seek to be called from the sequencer header row
+- Autocomplete
+  - [ ] Implement Autocomplete Preview
+  - [ ] Fix Undo/Redo on Autocompletion
+  - [ ] Autocomplete preview occurs automatically when enabled
+  - [ ] Reject button causes a regeneration
+  - [ ] Add guard so autocomplete cannot occur past song end
+  - [ ] Add animation to autocomplete preview notes
+  - [ ] Add settings popup for adjusting autocomplete context length and other settings
+    - [ ] Add setting for full song context (experimental)
+    - [ ] Add reduction of other tracks to roman numerals (experimental)
+    - [ ] Default to single track context 
+  - [ ] Handle drums (Pitch 38 e.g.), will need to vary the prompt generation for drums
+  - [ ] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
+  - [ ] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
+    - This is tricky because do we go by where the cursor preview is.. Where the last note placed was.. etc.. with fallback to the last note of the song?
+  - [ ] Resolve bug where re-generation doesn't trigger a redraw (Existing preview not vanishing)
+  - [ ] Resolve bug where if generation fails, the blinking measure animation continues to run
+  - [ ] Schedule notes to play that are in the preview so that user can Demo them
+
+- Inpaint/Extend
+  - [ ] Grey these out for now (lock)
+
+- AI Overlays / Plugins
+  - [ ] Add chord commander plugin that:
+    - [ ] Prompts AI with existing context (or no context if starting from scratch)
+    - [ ] Generates roman numerals
+    - [ ] Use tonaljs to convert roman numerals to voiceled chords
+  - [ ] AI Texturizer
+    - [ ] Feeds measure by measure of chords into AI.  Chords are arpeggiated or given texture.
+  - [ ] AI Melody Writer
+    - [ ] Feeds measure by measure of chords into AI.  AI generates a melody that fits over the chords.
+  - [ ] AI Bassline Writer
+    - [ ] Feeds measure by measure of chords into AI.  AI generates a bassline that fits over the chords.
+  - [ ] AI Drummer
+    - [ ] Feeds measure by measure of chords into AI.  AI generates drums that fit over the chords.
 
 - QOL:
   - [x] Smarter snap durations, auto shift down to the note value you're on
@@ -61,6 +86,7 @@
 - Critical Bugs:
   - [ ] Velocity not being honored on webaudiofont drums
   - [ ] Express Note tool ocassionally locks up.  Don't know how to reproduce yet.
+  - [ ] Can't hover/select/drag an existing chromatic note (when in note locking mode) without holding control
   - [x] Existing HTML defined modals are no longer visible, just replace them with controller based.
   - [x] Volume / Pan not updating properly on load session, and in wrong place when creating sequencer
   - [x] Instrument select menu pops up immediately on app load (needs to be in a controller)
@@ -79,3 +105,17 @@
   - [x] If paused, note placement does not preview sound
   - [x] When pasting a cluster of notes, it's possible for some of those notes to be pasted out of bounds (into the piano roll label on the left)
   - [x] If previewing a note (note placement mode) while playblack is ocurring, significant slowdown ensues
+
+## Future Todos
+- Wav Editing
+  - [ ] Add wav tracks
+  - [ ] Add recording to a wav track
+  - [ ] Add importing existing wav file to a wave track
+- Playback Enhancements:
+  - [ ] Add loop start/loop end to global playhead
+  - [ ] Add playhead follow mode to sequencer topbar (follows playhead, or scrolls when playhead reaches end of screen)
+- Note Editing:
+  - [ ] Add Quantize Modal for Quantizing groups of selected notes
+  - [ ] Add Recording for keyboard
+    - [ ] Support live quantization
+  - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats

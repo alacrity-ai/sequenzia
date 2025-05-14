@@ -2,10 +2,19 @@
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 
+import { isButtonDisabled } from '@/components/globalControls/controls/autoCompleteButtonControls.js';
+import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController';
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
+import { handleUserAutoCompleteRequest } from '@/components/aimode/features/autocomplete/services/runAIAutoComplete.js';
+import { applyAutoCompleteNotes } from '@/components/aimode/features/autocomplete/services/applyAutoCompleteNotes.js';
 import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
+import { getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
-import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
+import { getOpenAIKey } from '@/components/userSettings/store/userConfigStore';
+import {
+  toggleIsAutocompleteEnabled,
+  subscribeAutocompleteState
+} from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 
 import {
   updateSnapResolution,
@@ -27,14 +36,120 @@ const durationHotkeys: Record<string, number> = {
   Digit6: 0.125
 };
 
-export function attachToolbarListeners(
-  container: HTMLElement,
-): ListenerAttachment {
-  const durationButtons = container.querySelectorAll<HTMLButtonElement>('button[data-value]');
-  const dottedNoteBtn = container.querySelector<HTMLButtonElement>('#dotted-note-btn');
-  const tripletNoteBtn = container.querySelector<HTMLButtonElement>('#triplet-note-btn');
-  const aiModeBtn = container.querySelector<HTMLButtonElement>('#ai-mode-btn');
+interface ToolbarListenerOptions {
+  rootElement: HTMLElement;
+  noteOptionsGroup: HTMLElement;
+  aiOptionsGroup: HTMLElement;
+}
 
+export function attachToolbarListeners(
+  options: ToolbarListenerOptions
+): ListenerAttachment {
+  const { rootElement, noteOptionsGroup, aiOptionsGroup } = options;
+
+  // Get the DOM elements
+  const durationButtons = rootElement.querySelectorAll<HTMLButtonElement>('button[data-value]');
+  const dottedNoteBtn = rootElement.querySelector<HTMLButtonElement>('#dotted-note-btn');
+  const tripletNoteBtn = rootElement.querySelector<HTMLButtonElement>('#triplet-note-btn');
+  const noteModeBtn = rootElement.querySelector<HTMLButtonElement>('#note-mode-btn');
+  const aiModeBtn = rootElement.querySelector<HTMLButtonElement>('#ai-mode-btn');
+  const autocompleteToggleBtn = rootElement.querySelector<HTMLButtonElement>('#autocomplete-toggle-btn');
+
+  const autocompleteApproveBtn = rootElement.querySelector<HTMLButtonElement>('#autocomplete-approve-btn');
+  const autocompleteRejectBtn = rootElement.querySelector<HTMLButtonElement>('#autocomplete-reject-btn');
+
+  const aiToolsBtn = rootElement.querySelector<HTMLButtonElement>('#ai-tools-btn');
+  const aiExtendBeforeBtn = rootElement.querySelector<HTMLButtonElement>('#ai-extend-before-btn');
+  const aiPaintBtn = rootElement.querySelector<HTMLButtonElement>('#ai-paint-btn');
+  const aiExtendAfterBtn = rootElement.querySelector<HTMLButtonElement>('#ai-extend-after-btn');
+  const aiAdjustPromptBtn = rootElement.querySelector<HTMLButtonElement>('#ai-adjust-prompt-btn');
+  const aiDebuggerBtn = rootElement.querySelector<HTMLButtonElement>('#ai-debugger-btn');
+
+  // === Mode Toggle Logic ===
+  const setMode = (mode: 'note' | 'ai') => {
+    // If api key is not set, don't allow ai mode
+    if (mode === 'ai' && !getOpenAIKey()) {
+      getGlobalPopupController().showOpenAIKeyNotSet();
+      return;
+    }
+
+    const isNoteMode = mode === 'note';
+
+    noteOptionsGroup.classList.toggle('hidden', !isNoteMode);
+    aiOptionsGroup.classList.toggle('hidden', isNoteMode);
+
+    noteModeBtn?.classList.toggle('bg-blue-600', isNoteMode);
+    noteModeBtn?.classList.toggle('bg-gray-800', !isNoteMode);
+
+    aiModeBtn?.classList.toggle('bg-purple-700', !isNoteMode);
+    aiModeBtn?.classList.toggle('bg-gray-800', isNoteMode);
+  };
+
+  noteModeBtn?.addEventListener('click', () => setMode('note'));
+  aiModeBtn?.addEventListener('click', () => setMode('ai'));
+
+  // === AI Mode Buttons:
+
+  // === Autocomplete Controls ===
+
+  autocompleteToggleBtn?.addEventListener('click', (e: MouseEvent) => {
+    // Left click only
+    if (e.button !== 0) return;
+    handleUserAutoCompleteRequest('GlobalToolbarListeners');
+  });
+
+  // Right click → toggle mode
+  autocompleteToggleBtn?.addEventListener('contextmenu', (e: MouseEvent) => {
+    e.preventDefault(); // Prevent context menu from showing
+    toggleIsAutocompleteEnabled();
+    console.log('Toggled Autocomplete Mode');
+  });
+
+  autocompleteApproveBtn?.addEventListener('click', () => {
+    console.log('Approved Autocompleted Notes');
+    const lastActiveSequencerId = getLastActiveSequencerId();
+    if (lastActiveSequencerId === null) {
+      console.warn('No active sequencer to apply autocomplete to.');
+      return;
+    }
+
+    applyAutoCompleteNotes(lastActiveSequencerId);
+  });
+
+  // === AI Tools Button ===
+  aiToolsBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
+    console.log('AI Tools Popover Triggered (placeholder)');
+  });
+
+  // === Extend / Paint Buttons ===
+  aiExtendBeforeBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
+    console.log('AI Extend Before Triggered (placeholder)');
+  });
+
+  aiPaintBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
+    console.log('AI Paint Tool Activated (placeholder)');
+  });
+
+  aiExtendAfterBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
+    console.log('AI Extend After Triggered (placeholder)');
+  });
+
+  // === Advanced Settings Buttons ===
+  aiAdjustPromptBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
+    console.log('AI Prompt Settings Modal Opened (placeholder)');
+  });
+
+  aiDebuggerBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
+    console.log('AI Debugger Panel Opened (placeholder)');
+  });
+
+  // Note Mode Duration Buttons
   const highlightActiveDuration = () => {
     const snap = getSnapResolution();
     const duration = getNoteDuration();
@@ -72,6 +187,12 @@ export function attachToolbarListeners(
     applyNoteDuration(state.noteDuration, false);
   });
 
+  const unsubscribeAutocomplete = subscribeAutocompleteState((enabled) => {
+    autocompleteToggleBtn?.classList.toggle('bg-pink-400', enabled);
+    autocompleteToggleBtn?.classList.toggle('bg-transparent', !enabled);
+  });
+
+
   const applyNoteDuration = (baseValue: number, record = true): void => {
     const isDotted = getIsDottedMode();
     const isTriplet = getIsTripletMode();
@@ -92,7 +213,7 @@ export function attachToolbarListeners(
   };
 
   const updateCurrentDuration = (record = true) => {
-    const activeBtn = container.querySelector<HTMLButtonElement>('button[data-value].bg-purple-700');
+    const activeBtn = rootElement.querySelector<HTMLButtonElement>('button[data-value].bg-purple-700');
     if (activeBtn) {
       const baseValue = parseFloat(activeBtn.dataset.value!);
       applyNoteDuration(baseValue, record);
@@ -101,14 +222,6 @@ export function attachToolbarListeners(
 
   const refreshUI = () => {
     highlightActiveDuration();
-    const isDotted = getIsDottedMode();
-    const isTriplet = getIsTripletMode();
-
-    dottedNoteBtn?.classList.toggle('bg-purple-700', isDotted);
-    dottedNoteBtn?.classList.toggle('bg-transparent', !isDotted);
-
-    tripletNoteBtn?.classList.toggle('bg-purple-700', isTriplet);
-    tripletNoteBtn?.classList.toggle('bg-transparent', !isTriplet);
   };
 
   // === Duration Buttons (left: duration, right: snap)
@@ -129,22 +242,21 @@ export function attachToolbarListeners(
     });
   });
 
-// === Triplet Toggle
-tripletNoteBtn?.addEventListener('click', () => {
-  const nowTriplet = !getIsTripletMode();
-  updateNoteModifierMode(nowTriplet, false); // mutually exclusive
-  updateCurrentDuration(false);
-});
+  // === Triplet Toggle
+  tripletNoteBtn?.addEventListener('click', () => {
+    const nowTriplet = !getIsTripletMode();
+    updateNoteModifierMode(nowTriplet, false); // mutually exclusive
+    updateCurrentDuration(false);
+  });
 
-// === Dotted Toggle
-dottedNoteBtn?.addEventListener('click', () => {
-  const nowDotted = !getIsDottedMode();
-  updateNoteModifierMode(false, nowDotted); // mutually exclusive
-  updateCurrentDuration(false);
-});
+  // === Dotted Toggle
+  dottedNoteBtn?.addEventListener('click', () => {
+    const nowDotted = !getIsDottedMode();
+    updateNoteModifierMode(false, nowDotted); // mutually exclusive
+    updateCurrentDuration(false);
+  });
 
-
-  // === Hotkeys
+  // === Keyboard Shortcuts ===
   const handleKeydown = (e: KeyboardEvent) => {
     const target = e.target as HTMLElement;
     if (
@@ -154,6 +266,7 @@ dottedNoteBtn?.addEventListener('click', () => {
       isKeyboardInputEnabled()
     ) return;
 
+    // === Note Duration Hotkeys
     if (durationHotkeys.hasOwnProperty(e.code)) {
       e.preventDefault();
       const baseValue = durationHotkeys[e.code];
@@ -178,40 +291,91 @@ dottedNoteBtn?.addEventListener('click', () => {
       tripletNoteBtn?.click();
       return;
     }
+
+
+    // === AI Autocomplete Hotkeys 
+    switch (e.code) {
+      case 'KeyG':
+        e.preventDefault();
+
+        if (e.shiftKey) {
+          toggleIsAutocompleteEnabled();
+          console.log('Toggled Autocomplete Mode via Shift+G');
+        } else {
+          // Don't run autocomplete if already running
+          if (!isButtonDisabled()) {
+            handleUserAutoCompleteRequest('GlobalToolbarListeners');
+          }
+        }
+        return;
+
+      case 'Tab':
+        e.preventDefault();
+        autocompleteApproveBtn?.click();
+        return;
+
+      // Toolbar Menu Switching
+      case 'KeyQ':
+        e.preventDefault();
+        noteModeBtn?.click();
+        return;
+
+      case 'KeyW':
+        e.preventDefault();
+        aiModeBtn?.click();
+        return;
+    }
   };
 
   window.addEventListener('keydown', handleKeydown);
-  aiModeBtn?.addEventListener('click', () => {
-    const popupsController = getGlobalPopupController();
-    popupsController.showFeatureBlocked();
-  });
 
   refreshUI();
 
+  // --- Detach & Refresh Functions ---
+  const detach = () => {
+    window.removeEventListener('keydown', handleKeydown);
+    unsubscribe();
+    unsubscribeAutocomplete();
+
+    // Buttons needing listener cleanup
+    const aiButtons = [
+      noteModeBtn,
+      aiModeBtn,
+      autocompleteToggleBtn,
+      autocompleteApproveBtn,
+      autocompleteRejectBtn,
+      aiToolsBtn,
+      aiExtendBeforeBtn,
+      aiPaintBtn,
+      aiExtendAfterBtn,
+      aiAdjustPromptBtn,
+      aiDebuggerBtn
+    ];
+
+    aiButtons.forEach(btn => {
+      if (btn) btn.replaceWith(btn.cloneNode(true));
+    });
+
+    // Duration buttons cleanup
+    durationButtons.forEach(btn => {
+      const clone = btn.cloneNode(true);
+      btn.replaceWith(clone);
+    });
+
+    // Dotted & Triplet buttons cleanup
+    const dottedClone = dottedNoteBtn?.cloneNode(true);
+    if (dottedClone && dottedNoteBtn?.parentNode) {
+      dottedNoteBtn.parentNode.replaceChild(dottedClone, dottedNoteBtn);
+    }
+
+    const tripletClone = tripletNoteBtn?.cloneNode(true);
+    if (tripletClone && tripletNoteBtn?.parentNode) {
+      tripletNoteBtn.parentNode.replaceChild(tripletClone, tripletNoteBtn);
+    }
+  };
+
   return {
-    detach: () => {
-      window.removeEventListener('keydown', handleKeydown);
-      unsubscribe();
-
-      if (aiModeBtn) {
-        aiModeBtn.replaceWith(aiModeBtn.cloneNode(true));
-      }
-
-      durationButtons.forEach(btn => {
-        const clone = btn.cloneNode(true);
-        btn.replaceWith(clone);
-      });
-
-      const dottedClone = dottedNoteBtn?.cloneNode(true);
-      if (dottedClone && dottedNoteBtn?.parentNode) {
-        dottedNoteBtn.parentNode.replaceChild(dottedClone, dottedNoteBtn);
-      }
-
-      const tripletClone = tripletNoteBtn?.cloneNode(true);
-      if (tripletClone && tripletNoteBtn?.parentNode) {
-        tripletNoteBtn.parentNode.replaceChild(tripletClone, tripletNoteBtn);
-      }
-    },
+    detach,
     refreshUI
   };
 }

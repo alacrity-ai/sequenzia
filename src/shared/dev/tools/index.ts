@@ -2,6 +2,7 @@
 
 import * as sequencerTools from './sequencerTools.js';
 import * as stateTools from './stateTools.js';
+import * as userConfigTools from './userConfigTools.js';
 
 export function getAllDevTools(): Record<string, unknown> {
   const tools = Object.create(null);
@@ -9,6 +10,7 @@ export function getAllDevTools(): Record<string, unknown> {
   Object.assign(tools,
     sequencerTools,
     stateTools,
+    userConfigTools
   );
 
   return tools;

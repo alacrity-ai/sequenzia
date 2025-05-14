@@ -1,5 +1,6 @@
 // src/appState/diffEngine/types/grid/resizeNotes.ts
 
+import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 
@@ -28,6 +29,8 @@ export function applyRESIZE_NOTES(state: AppState, diff: Diff): AppState {
       note.duration = resize.newDuration;
     }
   }
+
+  setLastActiveSequencerId(diff.sequencerId);
 
   return newState;
 }

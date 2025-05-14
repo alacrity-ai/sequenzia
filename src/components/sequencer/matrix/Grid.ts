@@ -7,7 +7,9 @@ import { GridScroll } from '@/components/sequencer/matrix/scrollbars/GridScroll.
 import { NoteManager } from '@/components/sequencer/matrix/notes/NoteManager.js';
 import { NoteRenderer } from '@/components/sequencer/matrix/rendering/NoteRenderer.js';
 import { NotePreviewRenderer } from '@/components/sequencer/matrix/rendering/NotePreviewRenderer.js';
+import { AIAutocompletePreviewRenderer } from '@/components/sequencer/matrix/rendering/AIAutocompletePreviewRenderer.js';
 import { AnimationRenderer } from '@/components/sequencer/matrix/rendering/AnimationRenderer.js';
+import { AIAnimationRenderer } from '@/components/sequencer/matrix/rendering/AIAnimationRenderer.js';
 import { PlayheadRenderer } from '@/components/sequencer/matrix/rendering/PlayheadRenderer.js';
 import { CanvasManager } from '@/components/sequencer/matrix/rendering/CanvasManager.js';
 import { ScrollbarManager } from '@/components/sequencer/matrix/scrollbars/ScrollbarManager.js';
@@ -62,11 +64,15 @@ export class Grid {
   private labelRenderer: LabelColumnRenderer;
   private playheadRenderer: PlayheadRenderer;
   private marqueeRenderer: MarqueeRenderer;
+  private aiAutocompletePreviewRenderer: AIAutocompletePreviewRenderer;
+  private aiAnimationRenderer: AIAnimationRenderer;
 
   private gridCanvasManager!: CanvasManager;
   private noteCanvasManager!: CanvasManager;
   private animationCanvasManager!: CanvasManager;
   private playheadCanvasManager!: CanvasManager;
+  private aipreviewCanvasManager!: CanvasManager;
+  private aiAnimationCanvasManager!: CanvasManager;
 
   private initialZoom!: number;
   private customLabels: Record<number, string> | null = null;
@@ -81,11 +87,13 @@ export class Grid {
 
     // Create canvas managers for our canvases
     this.gridManager = new GridManager(parent);
-    const { gridCanvas, noteCanvas, animationCanvas, playheadCanvas } = this.gridManager;
+    const { gridCanvas, noteCanvas, animationCanvas, playheadCanvas, aipreviewCanvas, aiAnimationCanvas } = this.gridManager;
     this.gridCanvasManager = new CanvasManager(gridCanvas);
     this.noteCanvasManager = new CanvasManager(noteCanvas);
     this.animationCanvasManager = new CanvasManager(animationCanvas); 
-    this.playheadCanvasManager = new CanvasManager(playheadCanvas);   
+    this.playheadCanvasManager = new CanvasManager(playheadCanvas);
+    this.aipreviewCanvasManager = new CanvasManager(aipreviewCanvas);
+    this.aiAnimationCanvasManager = new CanvasManager(aiAnimationCanvas); 
 
     // Create components
     const mainContainer = this.gridManager.container
@@ -125,6 +133,8 @@ export class Grid {
     this.labelRenderer = new LabelColumnRenderer(this.scroll, this.config, () => this.customLabels, () => this.getBlackKeyMap());
     this.playheadRenderer = new PlayheadRenderer(this.scroll, this.config);
     this.marqueeRenderer = new MarqueeRenderer(this.scroll, this.config, this.interactionStore);
+    this.aiAutocompletePreviewRenderer = new AIAutocompletePreviewRenderer(this.scroll, this.config);
+    this.aiAnimationRenderer = new AIAnimationRenderer(this.scroll, this.config, this.aiAnimationCanvasManager.getContext());
 
     // Create initial values (for resetting)
     this.initialZoom = this.zoom;
@@ -198,11 +208,13 @@ export class Grid {
     this.noteCanvasManager.clear();
     this.animationCanvasManager.clear();
     this.playheadCanvasManager.clear();
+    this.aipreviewCanvasManager.clear();
     
     const gridCtx = this.gridCanvasManager.getContext();
     const noteCtx = this.noteCanvasManager.getContext();
     const animCtx = this.animationCanvasManager.getContext();
     const playheadCtx = this.playheadCanvasManager.getContext();
+    const aipreviewCtx = this.aipreviewCanvasManager.getContext();
     
     this.gridRenderer.draw(gridCtx);
     this.noteRenderer.draw(noteCtx);
@@ -211,6 +223,7 @@ export class Grid {
     this.labelRenderer.draw(gridCtx);
     this.headerRenderer.draw(gridCtx);
     this.playheadRenderer.draw(playheadCtx);
+    this.aiAutocompletePreviewRenderer.draw(aipreviewCtx);
 
     if (this.interactionStore.hasMarquee()) {
       this.marqueeRenderer.draw(animCtx);
@@ -227,7 +240,9 @@ export class Grid {
     this.gridCanvasManager.resize();
     this.noteCanvasManager.resize();
     this.animationCanvasManager.resize();
-    this.playheadCanvasManager.resize(); 
+    this.playheadCanvasManager.resize();
+    this.aipreviewCanvasManager.resize();
+    this.aiAnimationCanvasManager.resize();
   
     this.scroll.recalculateBounds();
     this.scrollbars.update();
@@ -259,6 +274,27 @@ export class Grid {
 
   public playNoteAnimation(note: Note): void {
     this.animationRenderer.playNote(note);
+  }
+
+  public invalidateAIAutocompleteRenderer(): void {
+    this.aiAnimationRenderer.invalidate();
+  }
+
+  public startAIAutocompleteAnimationLoop(): void {
+    this.aiAnimationRenderer.start();
+  }
+
+  public stopAIAutocompleteAnimationLoop(): void {
+    this.aiAnimationRenderer.stop();
+  }
+
+  public setActiveAutocompleteBar(barIndex: number | null): void {
+    this.aiAnimationRenderer.setActiveAutocompleteBar(barIndex);
+    requestAnimationFrame(this.aiAnimationRenderer.renderFrame)
+  }
+
+  public playNoteAcceptanceAnimation(notes: Note[]): void {
+    this.aiAnimationRenderer.playNoteAcceptance(notes);
   }
 
   public getTrackedNotes(): TrackedNote[] {
@@ -382,12 +418,17 @@ export class Grid {
     this.wheelHandler.destroy();
     this.scrollbars.destroy();
 
+    // Stop any lingering animations
+    this.aiAnimationRenderer.stop();
+
     // Remove DOM elements
     this.gridManager.container.remove(); // removes all 3 canvases in one go
     this.gridCanvasManager.destroy();
     this.noteCanvasManager.destroy();
     this.animationCanvasManager.destroy();
     this.playheadCanvasManager.destroy();
+    this.aipreviewCanvasManager.destroy();
+    this.aiAnimationCanvasManager.destroy();
 
     // Remove global listeners
     this.detachListeners();

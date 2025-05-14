@@ -4,16 +4,18 @@ function getTimestamp(): string {
   return new Date().toISOString();
 }
 
-function summarize(value: any, depth = 1): any {
+function summarize(value: any, depth = 2): any {
   if (value === null || typeof value !== 'object') return value;
-  if (depth === 0) {
+  if (depth <= 0) {
     const typeName = value.constructor?.name || 'Object';
     const keys = Object.keys(value).length;
     return `[${typeName} object, ${keys} keys]`;
-  }  
+  }
 
   if (Array.isArray(value)) {
-    return value.map(v => summarize(v, depth - 1));
+    return value.length > 10
+      ? [...value.slice(0, 10).map(v => summarize(v, depth - 1)), `...(${value.length} total)`]
+      : value.map(v => summarize(v, depth - 1));
   }
 
   const summary: Record<string, any> = {
@@ -32,11 +34,9 @@ function summarize(value: any, depth = 1): any {
     } else if (typeof val === 'function') {
       summary[key] = `[Function]`;
     } else if (typeof val === 'object') {
-      try {
-        summary[key] = summarize(val, depth - 1);
-      } catch {
-        summary[key] = `[Unserializable Object]`;
-      }
+      const childKeys = Object.keys(val);
+      const nextDepth = childKeys.length > 3 ? depth - 1 : depth;  // ✱ Key heuristic ✱
+      summary[key] = summarize(val, nextDepth);
     } else {
       summary[key] = val;
     }
@@ -44,6 +44,7 @@ function summarize(value: any, depth = 1): any {
 
   return summary;
 }
+
 
 function safeSerialize(value: unknown): string {
   try {

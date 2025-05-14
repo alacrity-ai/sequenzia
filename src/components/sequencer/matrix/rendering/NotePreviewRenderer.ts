@@ -28,7 +28,7 @@ export class NotePreviewRenderer {
     ctx.translate(labelWidth - this.scroll.getX(), headerHeight - this.scroll.getY());
     ctx.fillStyle = 'rgba(100, 180, 255, 0.5)';
 
-    // 🎯 Draw clipboard preview notes if present
+    // Draw clipboard preview notes if present
     const previewNotes = this.store.getPreviewNotes();
     if (previewNotes.length > 0) {
       const totalRows = highestMidi - lowestMidi + 1;
@@ -50,7 +50,7 @@ export class NotePreviewRenderer {
       return;
     }    
 
-    // ✏️ Fallback: draw a single snapped note (DefaultNoteToolHandler)
+    // Fallback: draw a single snapped note (DefaultNoteToolHandler)
     const snapped = this.store.getSnappedCursorGridPosition();
     if (!snapped) {
       ctx.restore();
