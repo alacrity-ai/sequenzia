@@ -14,7 +14,7 @@ function hasResultProperty(obj: unknown): obj is { result: unknown } {
 }
 
 /**
- * Unified LLM caller for Sequenzia.
+ * Unified LLM caller.
  * Resolves correct provider logic, schema usage, and adapters per task.
  */
 export async function callLLM<TOutput>(
