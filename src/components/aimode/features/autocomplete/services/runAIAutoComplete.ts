@@ -97,6 +97,7 @@ export async function runRemiContinuationPipeline(
   continuationBeats: number = 4,
 ): Promise<void> {
   const remiSettings: RemiEncodeOptions = getRemiSettings();
+  devLog('[AutoComplete] Running REMI Continuation Pipeline with LLM settings:', getLLMSettings());
 
   // === Step 1: Extract Context ===
   const context = extractRemiContext(activeSequencerId, sequencers, startBeat, endBeat, remiSettings);

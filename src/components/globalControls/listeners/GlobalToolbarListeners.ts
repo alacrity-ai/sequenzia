@@ -3,12 +3,14 @@
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 
 import { isButtonDisabled } from '@/components/globalControls/controls/autoCompleteButtonControls.js';
+import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController';
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
 import { handleUserAutoCompleteRequest } from '@/components/aimode/features/autocomplete/services/runAIAutoComplete.js';
 import { applyAutoCompleteNotes } from '@/components/aimode/features/autocomplete/services/applyAutoCompleteNotes.js';
 import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
+import { getOpenAIKey } from '@/components/userSettings/store/userConfigStore';
 import {
   toggleIsAutocompleteEnabled,
   subscribeAutocompleteState
@@ -65,6 +67,12 @@ export function attachToolbarListeners(
 
   // === Mode Toggle Logic ===
   const setMode = (mode: 'note' | 'ai') => {
+    // If api key is not set, don't allow ai mode
+    if (mode === 'ai' && !getOpenAIKey()) {
+      getGlobalPopupController().showOpenAIKeyNotSet();
+      return;
+    }
+
     const isNoteMode = mode === 'note';
 
     noteOptionsGroup.classList.toggle('hidden', !isNoteMode);
@@ -110,28 +118,34 @@ export function attachToolbarListeners(
 
   // === AI Tools Button ===
   aiToolsBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
     console.log('AI Tools Popover Triggered (placeholder)');
   });
 
   // === Extend / Paint Buttons ===
   aiExtendBeforeBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
     console.log('AI Extend Before Triggered (placeholder)');
   });
 
   aiPaintBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
     console.log('AI Paint Tool Activated (placeholder)');
   });
 
   aiExtendAfterBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
     console.log('AI Extend After Triggered (placeholder)');
   });
 
   // === Advanced Settings Buttons ===
   aiAdjustPromptBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
     console.log('AI Prompt Settings Modal Opened (placeholder)');
   });
 
   aiDebuggerBtn?.addEventListener('click', () => {
+    getGlobalPopupController().showFeatureBlocked();
     console.log('AI Debugger Panel Opened (placeholder)');
   });
 

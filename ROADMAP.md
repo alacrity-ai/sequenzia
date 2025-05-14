@@ -68,21 +68,6 @@
   - [ ] AI Drummer
     - [ ] Feeds measure by measure of chords into AI.  AI generates drums that fit over the chords.
 
-
-## Future Todos
-- Wav Editing
-  - [ ] Add wav tracks
-  - [ ] Add recording to a wav track
-  - [ ] Add importing existing wav file to a wave track
-- Playback Enhancements:
-  - [ ] Add loop start/loop end to global playhead
-  - [ ] Add playhead follow mode to sequencer topbar (follows playhead, or scrolls when playhead reaches end of screen)
-- Note Editing:
-  - [ ] Add Quantize Modal for Quantizing groups of selected notes
-  - [ ] Add Recording for keyboard
-    - [ ] Support live quantization
-  - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats
-
 - QOL:
   - [x] Smarter snap durations, auto shift down to the note value you're on
   - [x] Add alternate note placement mode option in the user config (on mouse down note placement into sizing)
@@ -101,6 +86,7 @@
 - Critical Bugs:
   - [ ] Velocity not being honored on webaudiofont drums
   - [ ] Express Note tool ocassionally locks up.  Don't know how to reproduce yet.
+  - [ ] Can't hover/select/drag an existing chromatic note (when in note locking mode) without holding control
   - [x] Existing HTML defined modals are no longer visible, just replace them with controller based.
   - [x] Volume / Pan not updating properly on load session, and in wrong place when creating sequencer
   - [x] Instrument select menu pops up immediately on app load (needs to be in a controller)
@@ -119,3 +105,17 @@
   - [x] If paused, note placement does not preview sound
   - [x] When pasting a cluster of notes, it's possible for some of those notes to be pasted out of bounds (into the piano roll label on the left)
   - [x] If previewing a note (note placement mode) while playblack is ocurring, significant slowdown ensues
+
+## Future Todos
+- Wav Editing
+  - [ ] Add wav tracks
+  - [ ] Add recording to a wav track
+  - [ ] Add importing existing wav file to a wave track
+- Playback Enhancements:
+  - [ ] Add loop start/loop end to global playhead
+  - [ ] Add playhead follow mode to sequencer topbar (follows playhead, or scrolls when playhead reaches end of screen)
+- Note Editing:
+  - [ ] Add Quantize Modal for Quantizing groups of selected notes
+  - [ ] Add Recording for keyboard
+    - [ ] Support live quantization
+  - [ ] Add "humanize" to the velocity modal that looks at beats/measure/timesignature to articulate velocity on strong vs weak beats

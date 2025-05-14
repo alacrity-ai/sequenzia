@@ -9,15 +9,15 @@ function normalizeTokens(rawTokens: string[]): string[] {
 
   for (const token of rawTokens) {
     // Split bundled tokens with underscores (e.g., "Bar_2_Position_0")
-    if (token.match(/(Bar_|Position_|Pitch_|Duration_|Velocity_)/)) {
-      const parts = token.split(/(?=Bar_|Position_|Pitch_|Duration_|Velocity_)/);
+    if (token.match(/(Bar_|Position_|Pitch_|Duration_|Velocity_)/i)) {
+      const parts = token.split(/(?=Bar_|Position_|Pitch_|Duration_|Velocity_)/i);
       flattened.push(...parts.map(p => p.replace(/_/g, ' ').trim()).filter(Boolean));
       continue;
     }
 
-    // Split bundled tokens with spaces (e.g., "Bar 2 Position 0")
-    if (token.match(/(Bar\s|Position\s|Pitch\s|Duration\s|Velocity\s)/) && token.split(' ').length > 2) {
-      const parts = token.split(/(?=Bar\s|Position\s|Pitch\s|Duration\s|Velocity\s)/);
+    // Split bundled tokens with spaces (e.g., "bar 2 position 0 pitch D2")
+    if (token.match(/(Bar\s|Position\s|Pitch\s|Duration\s|Velocity\s)/i) && token.split(' ').length > 2) {
+      const parts = token.split(/(?=Bar\s|Position\s|Pitch\s|Duration\s|Velocity\s)/i);
       flattened.push(...parts.map(p => p.trim()).filter(Boolean));
       continue;
     }
@@ -26,17 +26,21 @@ function normalizeTokens(rawTokens: string[]): string[] {
     flattened.push(token);
   }
 
-  // Now, if tokens look like ["Bar", "1", "Position", "16"] — merge them pairwise.
+  // Merge ["Bar", "1"] → "Bar 1" pairs, with type normalization
   const merged: string[] = [];
   for (let i = 0; i < flattened.length; i++) {
     const typeCandidate = flattened[i];
     const valueCandidate = flattened[i + 1];
 
-    if (valueCandidate !== undefined && !typeCandidate.includes(' ')) {
-      merged.push(`${typeCandidate} ${valueCandidate}`);
-      i++; // advance by 2 (skip value element next loop)
+    const typeMatch = typeCandidate.match(/^(bar|position|pitch|duration|velocity)$/i);
+    const normalizedType = typeMatch
+      ? typeMatch[0][0].toUpperCase() + typeMatch[0].slice(1).toLowerCase()
+      : null;
+
+    if (normalizedType && valueCandidate !== undefined) {
+      merged.push(`${normalizedType} ${valueCandidate}`);
+      i++; // skip value on next loop
     } else {
-      // Fallback: treat as standalone (best-effort)
       merged.push(typeCandidate);
     }
   }

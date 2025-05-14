@@ -9,10 +9,11 @@ export interface PromptTuningSettings {
 export interface ContextSettings {
   useMultiTrackContext: boolean;
   contextBeats: number;
+  // Future: forceDiatonic, etc
 }
 
 export interface LLMSettings {
   promptTuning: PromptTuningSettings;
   context: ContextSettings;
-  // Future: modelPreferences, temperature, top_p, etc.
+  // Future: modelPreferences, temperature, top_p,
 }
