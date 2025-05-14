@@ -1,10 +1,12 @@
 // src/shared/llm/providers/openai/OpenAICallerService.ts
 
-import { getOpenAIKey } from '@/components/userSettings/store/userConfigStore';
-import type { LLMModel, LLMResponseFormat } from '@/shared/llm/interfaces/LLMInterfaces';
 import { devLog } from '@/shared/state/devMode';
+import { getOpenAIKey } from '@/components/userSettings/store/userConfigStore';
 
-export async function callOpenAIModel(prompt: string, model: LLMModel, format: LLMResponseFormat): Promise<string[]> {
+import type { LLMModel, LLMResponseFormat } from '@/shared/llm/interfaces/LLMInterfaces';
+import type { RemiEvent } from '@/shared/interfaces/RemiEvent';
+
+export async function callOpenAIModel(prompt: string, model: LLMModel, format: LLMResponseFormat): Promise<RemiEvent[]> {
   const apiKey = getOpenAIKey();
   if (!apiKey) throw new Error('OpenAI API key is not set.');
 
@@ -43,7 +45,7 @@ export async function callOpenAIModel(prompt: string, model: LLMModel, format: L
   return extractTokensFromResponse(json);
 }
 
-function extractTokensFromResponse(json: any): string[] {
+function extractTokensFromResponse(json: any): RemiEvent[] {
   const message = json.output?.find((entry: any) => entry.type === 'message');
   const output = message?.content?.find((c: any) => c.type === 'output_text')?.text;
 
@@ -52,7 +54,14 @@ function extractTokensFromResponse(json: any): string[] {
   if (!output) throw new Error('Missing output_text in OpenAI response.');
 
   const parsed = JSON.parse(output);
-  if (!Array.isArray(parsed.result)) throw new Error('Invalid result format.');
 
-  return parsed.result;
+  if (!Array.isArray(parsed.result)) {
+    throw new Error('Invalid result format.');
+  }
+
+  // Strongly typed RemiEvent array now
+  const result: RemiEvent[] = parsed.result;
+
+  return result;
 }
+
