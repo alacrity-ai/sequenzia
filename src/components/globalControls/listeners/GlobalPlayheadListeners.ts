@@ -70,6 +70,33 @@ export function attachPlayheadListeners(container: HTMLElement): ListenerAttachm
     seekToBeat(unsnappedBeat, false);
   };
 
+  const handleMouseDown = async (e: MouseEvent): Promise<void> => {
+    if (playbackEngine.isActive()) {
+      await playbackEngine.pause(); // <-- wait for it to finish
+      wasAutoPaused = true;
+    }
+
+    isDragging = true;
+    updatePlayheadFromEvent(e);
+  };
+
+  const handleMouseMove = (e: MouseEvent): void => {
+    if (!isDragging) return;
+    updatePlayheadFromEvent(e);
+  };
+
+  const handleMouseUp = (e: MouseEvent): void => {
+    if (!isDragging) return;
+
+    updatePlayheadFromEvent(e);
+    isDragging = false;
+
+    if (wasAutoPaused) {
+      playbackEngine.resume();
+      wasAutoPaused = false;
+    }
+  };
+
   const handleSeekKeydown = (e: KeyboardEvent): void => {
     const tag = (document.activeElement as HTMLElement)?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -102,33 +129,6 @@ export function attachPlayheadListeners(container: HTMLElement): ListenerAttachm
 
     e.preventDefault();
     seekToBeat(unsnappedBeat);
-  };
-
-  const handleMouseDown = async (e: MouseEvent): Promise<void> => {
-    if (playbackEngine.isActive()) {
-      await playbackEngine.pause(); // <-- wait for it to finish
-      wasAutoPaused = true;
-    }
-
-    isDragging = true;
-    updatePlayheadFromEvent(e);
-  };
-
-  const handleMouseMove = (e: MouseEvent): void => {
-    if (!isDragging) return;
-    updatePlayheadFromEvent(e);
-  };
-
-  const handleMouseUp = (e: MouseEvent): void => {
-    if (!isDragging) return;
-
-    updatePlayheadFromEvent(e);
-    isDragging = false;
-
-    if (wasAutoPaused) {
-      playbackEngine.resume();
-      wasAutoPaused = false;
-    }
   };
 
   // Attach event listeners
