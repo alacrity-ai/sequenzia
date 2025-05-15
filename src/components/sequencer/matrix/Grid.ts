@@ -122,7 +122,14 @@ export class Grid {
       playNoteAnimation: (note) => this.playNoteAnimation(note)
     };
     this.interactionContext = new InteractionContext(contextData);
-    this.inputTracker = new InputTracker(this.interactionContext, mainContainer)
+    this.inputTracker = new InputTracker(
+      this.interactionContext,
+      mainContainer,
+      {
+        getId: () => this.sequencerContext.getId(),
+        isCollapsed: () => this.sequencerContext.isCollapsed()
+      }
+    );
 
     // Create renderers
     this.gridRenderer = new GridRenderer(this.scroll, this.config, this.interactionStore, () => this.getBlackKeyMap(), () => getMidiNoteMap());
@@ -230,6 +237,16 @@ export class Grid {
     }
 
     this.scrollbars.update();
+  }
+
+  public setConfig(config: Partial<GridConfig>): void {
+    this.config = mergeGridConfig(this.config, config);
+    this.recalculateLabelAndHeader();
+    this.requestRedraw();
+  }
+
+  public getConfig(): GridConfig {
+    return this.config;
   }
 
   public requestRedraw(): void {

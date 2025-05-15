@@ -1,5 +1,5 @@
 import { RemiOutputAdapter } from '@/shared/llm/tasks/remi/adapters/remiOutputAdapter';
-import type { ProviderProfile } from '@/shared/llm/providers/interfaces/ProviderProfile';
+import type { ProviderProfile } from '@/shared/llm/interfaces/ProviderProfile';
 
 export const AnthropicProfile: ProviderProfile = {
   provider: 'anthropic',

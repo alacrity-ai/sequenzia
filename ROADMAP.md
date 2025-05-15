@@ -30,14 +30,16 @@
   - [x] Holding down V should show note velocities regardless of the note render mode
 
 ## AI Autocomplete
+- Critical Bug:
+  - [x] Saving user config causes song measures to revert to DEFAULT_GRID_CONFIG.totalMeasures
 - Necessary Now
   - [ ] Allow transport seek to be called from the sequencer header row
 - Autocomplete
   - [x] Implement Autocomplete Preview
   - [x] Fix Undo/Redo on Autocompletion
-  - [ ] Autocomplete preview occurs automatically when enabled
+  - [ ] Autocomplete preview occurs automatically when enabled (Do we even want this?)
   - [x] Reject button causes a regeneration
-  - [ ] Add guard so autocomplete cannot occur past song end
+  - [x] Add guard so autocomplete cannot occur past song end
   - [x] Add animation to autocomplete preview notes
   - [ ] Add settings popup for adjusting autocomplete context length and other settings
     - [ ] Add setting for full song context (experimental)
@@ -47,15 +49,15 @@
     - [ ] Add setting Force Diatonic (experimental) (postprocess output to be diatonic to the key)
     - [ ] Add setting to transpose all inputs to C Major or A minor, and then transpose output back (experimental) 
   - [ ] Handle drums (Pitch 38 e.g.), will need to vary the prompt generation for drums
-  - [ ] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
-  - [ ] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
-    - This is tricky because do we go by where the cursor preview is.. Where the last note placed was.. etc.. with fallback to the last note of the song?
+  - [x] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
+  - [x] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
+    - [x] This is tricky because do we go by where the cursor preview is.. Where the last note placed was.. etc.. with fallback to the last note of the song?
   - [ ] Resolve bug where re-generation doesn't trigger a redraw (Existing preview not vanishing)
   - [ ] Resolve bug where if generation fails, the blinking measure animation continues to run
   - [ ] Schedule notes to play that are in the preview so that user can Demo them
 
 - Inpaint/Extend
-  - [ ] Grey these out for now (lock)
+  - [x] Grey these out for now (lock)
 
 - AI Overlays / Plugins
   - [ ] Add chord commander plugin that:
@@ -110,10 +112,13 @@
   - [x] If previewing a note (note placement mode) while playblack is ocurring, significant slowdown ensues
 
 ## Future Todos
+- Side Grip to Collapsed sequencers
+  - [ ] Collapsed sequencers should have a side grip which allows you to drag them to a different order.
+    - Should probably collapse all sequencers when this grip is active, to facilitate.
 - Export Enhancement
   - [ ] The save menu should allow you to choose filename for Wav or Midi export
 - Drag to Drop
-  - [ ] In export menu, add an option to Drag to Drop, wherein the user can drag their midi file into another DAW
+  - [x] In export menu, add an option to Drag to Drop, wherein the user can drag their midi file into another DAW
 - Wav Editing
   - [ ] Add wav tracks
   - [ ] Add recording to a wav track

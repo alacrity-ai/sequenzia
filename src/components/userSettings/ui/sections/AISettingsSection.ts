@@ -2,12 +2,19 @@
 
 import { h } from '@/shared/ui/domUtils.js';
 import { OPENAI_MODELS } from '@/components/userSettings/settings/aiConstants.js';
+import { updateUserConfig, getAIIndicatorEnabled } from '@/components/userSettings/store/userConfigStore.js';
 import { createTooltipPair } from '@/shared/ui/primitives/createTooltipPair.js';
 import { createHeader } from '@/shared/ui/primitives/createHeader.js';
 import { createLabel } from '@/shared/ui/primitives/createLabel.js';
 import { createParagraph } from '@/shared/ui/primitives/createParagraph.js';
+import { createToggleSwitch, ToggleSwitchController } from '@/shared/ui/primitives/createToggleSwitch.js';
 
-export function createAISettingsSection(): HTMLElement {
+export interface AISettingsSectionController {
+  element: HTMLElement;
+  refreshToggle: () => void;
+}
+
+export function createAISettingsSection(): AISettingsSectionController {
   const modelOptions = OPENAI_MODELS.map(model =>
     h('option', {
       value: model.value,
@@ -15,6 +22,22 @@ export function createAISettingsSection(): HTMLElement {
       textContent: model.label
     })
   );
+
+  // AI Track Indicator Toggle
+  const aiTrackIndicatorToggle: ToggleSwitchController = createToggleSwitch({
+    id: 'ai-track-indicator-toggle',
+    label: 'AI Track Indicator:',
+    stateA: 'Off',
+    stateB: 'On'
+  });
+
+  aiTrackIndicatorToggle.input.addEventListener('change', () => {
+    updateUserConfig({ ai: { indicatorEnabled: aiTrackIndicatorToggle.getChecked() } });
+  });
+
+  const refreshToggle = () => {
+    aiTrackIndicatorToggle.setChecked(getAIIndicatorEnabled());
+  };
 
   // Tooltip: API Key
   const { trigger: apiKeyTooltipTrigger, tooltip: apiKeyTooltip } = createTooltipPair(
@@ -27,13 +50,14 @@ export function createAISettingsSection(): HTMLElement {
         h('a', {
           href: 'https://platform.openai.com/account/api-keys',
           target: '_blank',
-          class: 'text-blue-400 underline hover:text-blue-300'
+          className: 'text-blue-400 underline hover:text-blue-300'
         }, 'platform.openai.com'),
         ' to manage your key.'
       )
     ]
   );
-  
+
+  // Tooltip: Model Select
   const { trigger: modelTooltipTrigger, tooltip: modelTooltip } = createTooltipPair(
     'tooltip-openai-model',
     '?',
@@ -46,9 +70,9 @@ export function createAISettingsSection(): HTMLElement {
       ),
       'We will add support for new models as they become available.'
     ]
-  );  
+  );
 
-  return h('div', {},
+  const section = h('div', {},
     createHeader('AI Configuration'),
 
     // API Key Input
@@ -71,6 +95,16 @@ export function createAISettingsSection(): HTMLElement {
         className: 'w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-purple-500 cursor-pointer'
       }, ...modelOptions),
       modelTooltip
+    ),
+
+    // AI Track Indicator Toggle
+    h('div', { class: 'mb-8' },
+      aiTrackIndicatorToggle.element
     )
   );
+
+  return {
+    element: section,
+    refreshToggle
+  };
 }

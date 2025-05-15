@@ -46,7 +46,7 @@ function createMockLLMSettings(overrides: Partial<LLMSettings> = {}): LLMSetting
 // === Now safe to import modules ===
 import { extractRemiContext } from '@/components/aimode/shared/context/extractRemiContext';
 import { clipRemiContinuation } from '@/shared/llm/tasks/remi/helpers/clipRemiContinuation';
-import { AutoCompletePromptBuilder } from '@/components/aimode/features/autocomplete/prompts/autoCompletePromptBuilder';
+import { ExtendFromPromptBuilder } from '@/components/aimode/features/autocomplete/prompts/ExtendFromPromptBuilder';
 import { callLLM } from '@/shared/llm/LLMCallerService';
 import { remiResponseFormat } from '@/shared/llm/tasks/remi/schemas/remiResponseFormat';
 
@@ -112,7 +112,7 @@ describe('Live Integration: Full Continuation Flow', () => {
     expect(context.otherTracksRemi.length).toBe(2);
 
     // === Build Prompt ===
-    const promptBuilder = new AutoCompletePromptBuilder();
+    const promptBuilder = new ExtendFromPromptBuilder();
     const prompt = promptBuilder.buildPrompt(context, {
       continuationBeats: 4,
       llmSettings: createMockLLMSettings()

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { extractRemiContext } from '@/components/aimode/shared/context/extractRemiContext.js';
 import { remiResponseFormat } from '@/shared/llm/tasks/remi/schemas/remiResponseFormat.js';
-import { AutoCompletePromptBuilder } from '@/components/aimode/features/autocomplete/prompts/autoCompletePromptBuilder.js';
+import { ExtendFromPromptBuilder } from '@/components/aimode/features/autocomplete/prompts/ExtendFromPromptBuilder.js';
 import { callLLM } from '@/shared/llm/LLMCallerService.js';
 
 import type { LLMSettings } from '@/components/aimode/interfaces/LLMSettings.js';
@@ -95,7 +95,7 @@ describe('Integration: Autocomplete LLM Flow', () => {
     expect(context.otherTracksRemi.length).toBe(2);
 
     // === Step 2: Build Prompt ===
-    const promptBuilder = new AutoCompletePromptBuilder();
+    const promptBuilder = new ExtendFromPromptBuilder();
     const prompt = promptBuilder.buildPrompt(context, {
       continuationBeats: 4,
       llmSettings: createMockLLMSettings()

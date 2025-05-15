@@ -4,7 +4,6 @@ import type { GridConfig } from '../interfaces/GridConfigTypes.js';
 import type { TrackedNote } from '../interfaces/TrackedNote.js';
 import { noteToRowIndex } from '@/shared/utils/musical/noteUtils.js';
 
-
 /**
  * Creates a memoized filter function that returns only visible TrackedNotes
  * based on scroll position and viewport bounds.

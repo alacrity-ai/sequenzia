@@ -13,7 +13,10 @@ interface AutoCompletePromptOptions {
   llmSettings: LLMSettings;
 }
 
-export class AutoCompletePromptBuilder extends BasePromptBuilder<ExtractedRemiContext, AutoCompletePromptOptions> {
+/**
+ * Prompt Builder for REMI Extend from Prompt.
+ */
+export class ExtendFromPromptBuilder extends BasePromptBuilder<ExtractedRemiContext, AutoCompletePromptOptions> {
   readonly name = 'Remi Autocomplete Prompt';
 
   buildPrompt(
@@ -46,7 +49,7 @@ export class AutoCompletePromptBuilder extends BasePromptBuilder<ExtractedRemiCo
       `Background Tracks Context (Can be empty):`,
       backgroundTracksSection,
       ``,
-      `Track to continue from:`,
+      `Track to continue from (If empty, improvise in key):`,
       primaryTrackSection,
       ``,
       `${continuationBeats} beat PRIMARY TRACK CONTINUATION:`,

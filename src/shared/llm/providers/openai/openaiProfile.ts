@@ -1,6 +1,6 @@
 import { remiResponseFormat } from '@/shared/llm/tasks/remi/schemas/remiResponseFormat.js';
 import { RemiOutputAdapter } from '@/shared/llm/tasks/remi/adapters/remiOutputAdapter.js';
-import type { ProviderProfile } from '@/shared/llm/providers/interfaces/ProviderProfile.js';
+import type { ProviderProfile } from '@/shared/llm/interfaces/ProviderProfile.js';
 
 export const OpenAIProfile: ProviderProfile = {
   provider: 'openai',

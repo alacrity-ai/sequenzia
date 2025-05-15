@@ -1,6 +1,6 @@
 import { OpenAIProfile } from '@/shared/llm/providers/openai/openaiProfile';
 import { AnthropicProfile } from '@/shared/llm/providers/anthropic/anthropicProfile';
-import type { ProviderProfile } from '@/shared/llm/providers/interfaces/ProviderProfile';
+import type { ProviderProfile } from '@/shared/llm/interfaces/ProviderProfile';
 
 /**
  * Maps provider keys to their profiles.

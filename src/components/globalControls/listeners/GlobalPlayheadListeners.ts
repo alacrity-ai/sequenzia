@@ -1,6 +1,10 @@
 // src/globalControls/listeners/GlobalPlayheadListeners.ts
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
+
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
+import { getAIIndicatorEnabled } from '@/components/userSettings/store/userConfigStore.js';
+import { setAutoCompleteTargetBeat } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import { updateAllMatrixPlayheads } from '@/shared/playback/helpers/updateAllGridPlayheads.js';
 import { drawGlobalPlayhead } from '@/components/globalControls/renderers/GlobalPlayheadRenderer.js';
 import { getTotalBeats, getTimeSignature } from '@/shared/playback/transportService.js';
@@ -28,6 +32,9 @@ export function attachPlayheadListeners(container: HTMLElement): ListenerAttachm
     // Temporarily disable auto-resume
     playbackEngine.seek(clampedBeat);
 
+    // Update autocomplete target beat
+    setAutoCompleteTargetBeat(clampedBeat);
+
     // Only auto-resume if explicitly desired (keyboard usage)
     if (resumePlayback && wasPlaying) {
       playbackEngine.resume();
@@ -40,6 +47,10 @@ export function attachPlayheadListeners(container: HTMLElement): ListenerAttachm
       const logicalWidth = canvas.width / DPR;
       const snappedX = (clampedBeat / totalBeats) * logicalWidth;
       drawGlobalPlayhead(snappedX);
+    }
+
+    if (getAIIndicatorEnabled()) {
+      drawGlobalMiniContour();
     }
   };
 

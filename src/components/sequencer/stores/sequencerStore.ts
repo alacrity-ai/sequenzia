@@ -3,6 +3,7 @@
 import type Sequencer from '@/components/sequencer/sequencer.js';
 import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import { clearAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore';
+import { clearAutoCompleteTargetBeat } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore';
 
 const sequencers = new Map<number, Sequencer>();
 
@@ -38,7 +39,13 @@ export function setLastActiveSequencerId(id: number | null): void {
   lastActiveSequencerId = id;
 }
 
+export function clearLastActiveSequencerId(): void {
+  clearAIPreviewNotes();
+  lastActiveSequencerId = null;
+}
+
 export function clearSequencers(): void {
+  clearLastActiveSequencerId();
   sequencers.clear();
 }
 

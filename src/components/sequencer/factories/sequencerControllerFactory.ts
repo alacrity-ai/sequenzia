@@ -28,6 +28,5 @@ export function createSequencerController(
   const orchestrator = UIOrchestrator.getInstance();
   orchestrator.registerReloadable(controller.boundReload);
 
-
   return controller
 }

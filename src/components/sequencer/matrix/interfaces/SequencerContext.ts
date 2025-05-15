@@ -5,5 +5,6 @@
 export interface SequencerContext {
     playNote: (pitch: string, durationSec: number, velocity?: number, loop?: boolean) => void;
     getId: () => number;
+    isCollapsed: () => boolean;
   }
   

@@ -1,8 +1,11 @@
+// src/components/aimode/shared/helpers/contextHelpers.ts
+
 import type Sequencer from '@/components/sequencer/sequencer';
+
 import { devLog } from '@/shared/state/devMode';
 import { getLLMSettings } from '@/components/aimode/shared/stores/llmSettingsStore.js';
 import { getRemiSettings } from '@/components/aimode/shared/settings/getRemiSettings.js';
-
+import { getAutoCompleteTargetBeat } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore';
 
 /**
  * Determines the startBeat and endBeat range for an autocomplete context window.
@@ -14,10 +17,24 @@ export function getStartBeatAndEndBeat(sequencer: Sequencer): [number, number] {
   const llmSettings = getLLMSettings();
   const contextLengthBeats = llmSettings.context.contextBeats;
 
+  const targetBeat = getAutoCompleteTargetBeat();
   const notes = sequencer.notes;
+
+  if (targetBeat !== null) {
+    // === We have an explicit target beat from user actions ===
+
+    // EndBeat should still snap to whole beat
+    const endBeat = Math.ceil(targetBeat);
+
+    // StartBeat goes back by context window, clamped to 0
+    const startBeat = Math.max(0, endBeat - contextLengthBeats);
+
+    return [startBeat, endBeat];
+  }
+
+  // === Fallback to legacy behavior if no target beat is available ===
   if (notes.length === 0) return [0, contextLengthBeats];
 
-  // Find the last note by highest start+duration (true end position)
   const lastNote = notes.reduce((latest, note) => {
     const latestEnd = latest.start + latest.duration;
     const noteEnd = note.start + note.duration;
@@ -25,11 +42,7 @@ export function getStartBeatAndEndBeat(sequencer: Sequencer): [number, number] {
   });
 
   const rawEndBeat = lastNote.start + lastNote.duration;
-
-  // Round up endBeat to nearest whole beat (so we cover the whole note duration)
   const endBeat = Math.ceil(rawEndBeat);
-
-  // Start beat goes back by context length, clamped to 0
   const startBeat = Math.max(0, endBeat - contextLengthBeats);
 
   return [startBeat, endBeat];

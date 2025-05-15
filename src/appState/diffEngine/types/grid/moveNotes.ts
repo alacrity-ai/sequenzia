@@ -1,6 +1,6 @@
 // src/appState/diffEngine/types/grid/moveNotes.ts
 
-import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
+import { setAutoCompleteTargetBeatByNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 import { Note } from '@/shared/interfaces/Note.js';
@@ -31,9 +31,13 @@ export function applyMOVE_NOTES(state: AppState, diff: Diff): AppState {
       seq.notes[index].pitch = updated.pitch;
       seq.notes[index].start = updated.start;
     }
+    // Log all the information about the from and to notes:
+    console.log('From:', original, 'To:', updated, 'Index:', index);
   }
+  console.log('To notes:', to);
 
-  setLastActiveSequencerId(diff.sequencerId);
+  // === Update AutoCompleteTargetBeat ===
+  setAutoCompleteTargetBeatByNotes(to);
 
   return newState;
 }
