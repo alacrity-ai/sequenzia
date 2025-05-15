@@ -1,6 +1,6 @@
 // ====== Metadata (update these in PRs) ======
-export const WHATS_NEW_VERSION = 'v0.1.1';
-export const WHATS_NEW_DATE = 'May 13, 2025';
+export const WHATS_NEW_VERSION = 'v0.1.2';
+export const WHATS_NEW_DATE = 'May 15, 2025';
 
 // ====== Content ======
 export const WHATS_NEW_CONTENT: string[] = [
