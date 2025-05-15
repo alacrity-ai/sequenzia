@@ -9,7 +9,9 @@ export class WheelHandler {
   constructor(
     private canvas: HTMLElement,
     private scroll: GridScroll,
-    private requestRedraw: () => void
+    private requestRedraw: () => void,
+    private zoomIn: () => void,
+    private zoomOut: () => void
   ) {
     this.attachListeners();
   }
@@ -20,6 +22,16 @@ export class WheelHandler {
 
   private onWheel = (e: WheelEvent): void => {
     e.preventDefault();
+
+    // === Ctrl+Scroll to Zoom ===
+    if (e.ctrlKey) {
+      if (e.deltaY < 0) {
+        this.zoomIn();
+      } else if (e.deltaY > 0) {
+        this.zoomOut();
+      }
+      return; // No scroll when zooming
+    }
 
     const isHorizontal = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
     const delta = e.deltaX || e.deltaY;

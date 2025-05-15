@@ -14,6 +14,7 @@ import { PlayheadRenderer } from '@/components/sequencer/matrix/rendering/Playhe
 import { CanvasManager } from '@/components/sequencer/matrix/rendering/CanvasManager.js';
 import { ScrollbarManager } from '@/components/sequencer/matrix/scrollbars/ScrollbarManager.js';
 import { InteractionContext } from '@/components/sequencer/matrix/input/InteractionContext.js';
+import { OverlayInteractionContext } from '@/components/sequencer/matrix/input/OverlayInteractionContext.js'; // Added this import here
 import { CursorController } from '@/components/sequencer/matrix/input/cursor/CursorController.js';
 import { InputTracker } from '@/components/sequencer/matrix/input/InputTracker.js';
 import { WheelHandler } from '@/components/sequencer/matrix/input/WheelHandler.js';
@@ -29,7 +30,6 @@ import { getSnapResolution, getIsTripletMode } from '@/shared/playback/transport
 
 import type { GridEvents } from '@/components/sequencer/matrix/interfaces/GridEvents.js';
 import type { TrackedNote } from '@/components/sequencer/matrix/interfaces/TrackedNote.js';
-import type { InteractionContextData } from '@/components/sequencer/matrix/input/interfaces/InteractionContextData.js';
 import type { GridSnappingContext } from '@/components/sequencer/matrix/interfaces/GridSnappingContext.js';
 import type { SequencerContext } from '@/components/sequencer/matrix/interfaces/SequencerContext.js';
 
@@ -49,6 +49,7 @@ export class Grid {
   private scrollbars: ScrollbarManager;
   private inputTracker: InputTracker;
   private interactionContext: InteractionContext;
+  private overlayContext: OverlayInteractionContext;
   private wheelHandler: WheelHandler;
   private interactionStore: InteractionStore;
   private cursorController: CursorController;
@@ -102,11 +103,21 @@ export class Grid {
     this.emitter = new EventEmitter<GridEvents>();
     this.scroll = new GridScroll(mainContainer, this.config);
     this.scrollbars = new ScrollbarManager(mainContainer, this.scroll, this.config, this.interactionStore, () => this.requestRedraw());
-    this.wheelHandler = new WheelHandler(mainContainer, this.scroll, () => this.requestRedraw());
+    this.wheelHandler = new WheelHandler(mainContainer, this.scroll, () => this.requestRedraw(), () => this.zoomIn(), () => this.zoomOut());
     this.cursorController = new CursorController(mainContainer);
 
     // Interaction
-    const contextData: InteractionContextData = {
+    this.overlayContext = new OverlayInteractionContext({
+      canvas: gridCanvas,
+      scroll: this.scroll,
+      config: this.config,
+      sequencerConfig: this.sequencerConfig,
+      requestRedraw: () => this.requestRedraw(),
+      getSequencerId: () => this.sequencerContext.getId(),
+      cursorController: this.cursorController,
+      store: this.interactionStore
+    });
+    this.interactionContext = new InteractionContext({
       canvas: noteCanvas,
       noteManager: this.noteManager,
       scroll: this.scroll,
@@ -120,10 +131,10 @@ export class Grid {
       setClipboard,
       getClipboard,
       playNoteAnimation: (note) => this.playNoteAnimation(note)
-    };
-    this.interactionContext = new InteractionContext(contextData);
+    });
     this.inputTracker = new InputTracker(
       this.interactionContext,
+      this.overlayContext,
       mainContainer,
       {
         getId: () => this.sequencerContext.getId(),
@@ -451,6 +462,7 @@ export class Grid {
     this.detachListeners();
     this.emitter.removeAllListeners();
     this.interactionContext.destroy();
+    this.overlayContext.destroy(); // Added this, but has no destroy!
 
     // Set destroyed flag for render loop
     this.isDestroyed = true;

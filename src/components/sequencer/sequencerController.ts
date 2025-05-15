@@ -4,9 +4,7 @@ import type { Grid } from '@/components/sequencer/matrix/Grid.js';
 import type { ZoomControlUI } from '@/components/sequencer/ui/topBar/zoomControl.js';
 import type { SequencerBody } from '@/components/sequencer/ui/sequencerBody.js';
 
-import type { GridConfig } from '@/components/sequencer/matrix/interfaces/GridConfigTypes.js';
-import { DEFAULT_GRID_CONFIG } from '@/components/sequencer/matrix/GridConfig.js';
-
+// Factories
 import { createSequencer } from '@/components/sequencer/factories/SequencerFactory.js';
 import { unregisterSequencerController } from '@/components/sequencer/stores/sequencerControllerStore.js';
 import { UIOrchestrator } from '@/shared/ui/UIOrchestrator';
