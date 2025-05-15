@@ -4,7 +4,7 @@ function getTimestamp(): string {
   return new Date().toISOString();
 }
 
-function summarize(value: any, depth = 2): any {
+function summarize(value: any, depth = 3): any {
   if (value === null || typeof value !== 'object') return value;
   if (depth <= 0) {
     const typeName = value.constructor?.name || 'Object';
@@ -45,10 +45,9 @@ function summarize(value: any, depth = 2): any {
   return summary;
 }
 
-
 function safeSerialize(value: unknown): string {
   try {
-    const summarized = summarize(value, 2);
+    const summarized = summarize(value, 3);
     return JSON.stringify(summarized, null, 2);
   } catch (err) {
     return JSON.stringify({

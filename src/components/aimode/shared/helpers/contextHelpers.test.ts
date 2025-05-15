@@ -71,4 +71,36 @@ describe('contextHelpers', () => {
       expect(result).toBe(1);
     });
   });
+  
+  describe('getClipBoundaryFromEndBeat', () => {
+    it('should compute clipAfterBar and clipAfterPosition correctly', () => {
+      const result = getClipBoundaryFromEndBeat(10, 4, 4);
+      expect(result).toEqual({ clipAfterBar: 2, clipAfterPosition: 2 * 4 });
+    });
+
+    it('should handle fractional endBeat and rounding', () => {
+      const result = getClipBoundaryFromEndBeat(5.25, 4, 4);
+      // clipAfterBar = 1, clipAfterPosition = 1.25 * 4 = 5
+      expect(result).toEqual({ clipAfterBar: 1, clipAfterPosition: 5 });
+    });
+
+    it('should handle exact bar boundary without position overflow', () => {
+      const result = getClipBoundaryFromEndBeat(8, 4, 4);
+      // clipAfterBar = 2, clipAfterPosition = 0
+      expect(result).toEqual({ clipAfterBar: 2, clipAfterPosition: 0 });
+    });
+
+    it('should handle small fractional beats near zero', () => {
+      const result = getClipBoundaryFromEndBeat(0.125, 4, 4);
+      // clipAfterBar = 0, clipAfterPosition = 0.125 * 4 = 0.5 → rounds to 1
+      expect(result).toEqual({ clipAfterBar: 0, clipAfterPosition: 1 });
+    });
+
+    it('should handle large beat values correctly', () => {
+      const result = getClipBoundaryFromEndBeat(123.75, 4, 4);
+      // clipAfterBar = 30, clipAfterPosition = 3.75 % 4 = 3.75 * 4 = 15
+      expect(result).toEqual({ clipAfterBar: 30, clipAfterPosition: 15 });
+    });
+  });
+
 });

@@ -1,6 +1,8 @@
 // src/appState/diffEngine/types/grid/resizeNotes.ts
 
-import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
+import { setAutoCompleteTargetFromNotes } from '@/components/aimode/features/autocomplete/helpers/setAutoCompleteTargetFromNotes.js';
+import type { Note } from '@/shared/interfaces/Note.js';
+
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 
@@ -23,17 +25,22 @@ export function applyRESIZE_NOTES(state: AppState, diff: Diff): AppState {
 
   const resizes = diff.resizes as ResizeEntry[];
 
+  const affectedNotes: Note[] = [];
+
   for (const resize of resizes) {
     const note = seq.notes.find(n => n.pitch === resize.pitch && n.start === resize.start);
     if (note) {
       note.duration = resize.newDuration;
+      affectedNotes.push(note);
     }
   }
 
-  setLastActiveSequencerId(diff.sequencerId);
+  // === Update AutoCompleteTargetBeat ===
+  setAutoCompleteTargetFromNotes(affectedNotes);
 
   return newState;
 }
+
 
 /**
  * Creates a forward diff to resize notes.

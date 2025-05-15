@@ -1,11 +1,17 @@
 // src/sequencer/matrix/input/MouseTracker.ts
 
 import type { InteractionContext } from './InteractionContext.js';
+import { 
+  getLastActiveSequencerId, 
+  setLastActiveSequencerId,
+  clearLastActiveSequencerId
+ } from '@/components/sequencer/stores/sequencerStore.js';
 
 export class InputTracker {
   constructor(
     private readonly context: InteractionContext,
     private readonly canvas: HTMLElement,
+    private readonly sequencerContext: { getId(): number; isCollapsed(): boolean }
   ) {
     this.attachListeners();
     this.canvas.style.pointerEvents = 'auto';
@@ -34,11 +40,22 @@ export class InputTracker {
   };
 
   private onMouseLeave = (): void => {
+    if (getLastActiveSequencerId() === this.sequencerContext.getId()) {
+      clearLastActiveSequencerId();
+    }
+
     this.context.handleMouseLeave();
   };
 
   private onMouseEnter = (e: MouseEvent): void => {
-    this.context.handleMouseEnter?.(e);
+    if (!this.sequencerContext.isCollapsed()) {
+      const activeId = getLastActiveSequencerId();
+      if (activeId !== this.sequencerContext.getId()) {
+        setLastActiveSequencerId(this.sequencerContext.getId());
+      }
+    }
+
+    this.context.handleMouseEnter(e);
   };
 
   private onContextMenu = (e: MouseEvent): void => {

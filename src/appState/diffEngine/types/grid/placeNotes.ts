@@ -1,5 +1,6 @@
 // src/appState/diffEngine/types/grid/placeNotes.ts
 
+import { setAutoCompleteTargetFromNotes } from '@/components/aimode/features/autocomplete/helpers/setAutoCompleteTargetFromNotes.js';
 import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
@@ -15,7 +16,8 @@ export function applyPLACE_NOTES(state: AppState, diff: Diff): AppState {
 
   seq.notes.push(...(diff.notes as Note[]));
 
-  setLastActiveSequencerId(diff.sequencerId);
+  // === Update AutoCompleteTargetBeat ===
+  setAutoCompleteTargetFromNotes(diff.notes as Note[]);
 
   return newState;
 }

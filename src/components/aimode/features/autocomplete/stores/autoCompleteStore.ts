@@ -4,6 +4,7 @@ import type { Note } from '@/shared/interfaces/Note.js';
 
 let isAutocompleteEnabled = false;
 let aiPreviewNotes: Note[] = [];
+let autoCompleteTargetBeat: number | null = null;
 
 const listeners = new Set<(enabled: boolean) => void>();
 
@@ -49,4 +50,16 @@ export function getAIPreviewNotes(): Note[] {
 
 export function clearAIPreviewNotes(): void {
   aiPreviewNotes = [];
+}
+
+export function getAutoCompleteTargetBeat(): number | null {
+  return autoCompleteTargetBeat;
+}
+
+export function setAutoCompleteTargetBeat(beat: number): void {
+  autoCompleteTargetBeat = beat;
+}
+
+export function clearAutoCompleteTargetBeat(): void {
+  autoCompleteTargetBeat = null;
 }

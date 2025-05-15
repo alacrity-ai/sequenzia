@@ -14,6 +14,8 @@ import { updateNoteRange, updateToDrumNoteRange } from '@/components/sequencer/s
 import { rescheduleAllSequencers, isAnySoloActive, unregisterSequencer } from '@/components/sequencer/stores/sequencerStore.js';
 import { setCollapsed } from '@/components/sequencer/utils/collapseSequencer.js';
 
+import { getLastActiveSequencerId, clearLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
+
 import { loadInstrument } from '@/sounds/instrument-loader.js';
 import { loadAndPlayNote } from '@/sounds/instrument-player.js';
 
@@ -75,7 +77,8 @@ export default class Sequencer {
     
       this.matrix = createGridInSequencerBody(body, {}, {
         playNote: this.playNote.bind(this),
-        getId: () => this.id
+        getId: () => this.id,
+        isCollapsed: () => this.collapsed
       });
     
       this.matrix.refreshNoteRange();
@@ -177,6 +180,15 @@ export default class Sequencer {
 
   setCollapsed(val: boolean): void {
     this.collapsed = val;
+    
+    // If the collapsed sequencer is the active one, clear it
+    if (val && getLastActiveSequencerId() === this.id) {
+      clearLastActiveSequencerId();
+    }
+  }
+
+  isCollapsed(): boolean {
+    return this.collapsed;
   }
 
   resetInteractionMode(): void {

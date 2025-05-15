@@ -1,6 +1,6 @@
 // src/appState/diffEngine/types/grid/deleteNotes.ts
 
-import { setLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
+import { setAutoCompleteTargetAfterDeletion } from '@/components/aimode/features/autocomplete/helpers/setAutoCompleteTargetAfterDeletion.js';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 import { Note } from '@/shared/interfaces/Note.js';
@@ -22,7 +22,8 @@ export function applyDELETE_NOTES(state: AppState, diff: Diff): AppState {
     return !toDelete.has(key);
   });
 
-  setLastActiveSequencerId(diff.sequencerId);
+  // === Update AutoCompleteTargetBeat ===
+  setAutoCompleteTargetAfterDeletion(diff.notes as Note[], seq.notes);
 
   return newState;
 }

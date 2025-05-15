@@ -1,7 +1,11 @@
 // src/shared/llm/LLMCallerService.ts
 
+import { devLog } from '@/shared/state/devMode';
+
 import { ProviderProfiles } from '@/shared/llm/providers/profiles/ProviderProfiles.js';
 import { ModelToProvider } from '@/shared/llm/providers/profiles/ModelToProvider.js';
+
+// Model Callers
 import { callOpenAIModel } from '@/shared/llm/providers/openai/OpenAICallerService.js';
 import { callAnthropicModel } from '@/shared/llm/providers/anthropic/AnthropicCallerService.js';
 // To add more models: Add local, google as needed
@@ -48,6 +52,7 @@ export async function callLLM<TOutput>(
   }
 
   const resultToParse = hasResultProperty(rawResult) ? rawResult.result : rawResult;
+  devLog(`[LLMCaller] Raw Result:`, resultToParse);
 
   return taskProfile.adapter(resultToParse) as TOutput;
 }

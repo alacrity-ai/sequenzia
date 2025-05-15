@@ -1,20 +1,26 @@
 import type { RemiEvent } from '@/shared/interfaces/RemiEvent.js';
 import { devLog } from '@/shared/state/devMode.js';
 
+
 /**
- * Clips LLM continuation RemiEvents to only include events after the given clip point (Bar, Position).
+ * Clips LLM continuation RemiEvents to only include events after a clip-after point,
+ * and optionally before a clip-before point (to prevent overlap with existing notes).
  *
  * Bars are preserved only if they precede surviving Positions.
  *
  * @param llmContinuationRemi - Full LLM response RemiEvents.
- * @param clipAfterBar - Clip point Bar.
- * @param clipAfterPosition - Clip point Position within the bar.
+ * @param clipAfterBar - Lower boundary: Clip events before this bar.
+ * @param clipAfterPosition - Lower boundary: Clip events before this position in the bar.
+ * @param clipBeforeBar - Optional upper boundary: Clip events at/after this bar.
+ * @param clipBeforePosition - Optional upper boundary: Clip events at/after this position in the bar.
  * @returns Clipped continuation RemiEvents.
  */
 export function clipRemiContinuation(
   llmContinuationRemi: RemiEvent[],
   clipAfterBar: number,
-  clipAfterPosition: number
+  clipAfterPosition: number,
+  clipBeforeBar?: number,
+  clipBeforePosition?: number
 ): RemiEvent[] {
   const clippedContinuation: RemiEvent[] = [];
 
@@ -25,7 +31,9 @@ export function clipRemiContinuation(
   devLog('[AutoComplete] Clipping LLM Continuation:', {
     llmContinuationRemi,
     clipAfterBar,
-    clipAfterPosition
+    clipAfterPosition,
+    clipBeforeBar,
+    clipBeforePosition
   });
 
   for (const event of llmContinuationRemi) {
@@ -36,14 +44,19 @@ export function clipRemiContinuation(
     }
 
     if (event.type === 'Position') {
-      const shouldAccept =
+      const isAfterClipAfter =
         currentLLMBar > clipAfterBar ||
         (currentLLMBar === clipAfterBar && event.value >= clipAfterPosition);
 
-      acceptCurrentPosition = shouldAccept;
+      const isBeforeClipBefore =
+        clipBeforeBar === undefined || clipBeforePosition === undefined ||
+        currentLLMBar < clipBeforeBar ||
+        (currentLLMBar === clipBeforeBar && event.value < clipBeforePosition);
+
+      acceptCurrentPosition = isAfterClipAfter && isBeforeClipBefore;
 
       if (acceptCurrentPosition) {
-        // Emit pendingBar if exists and not yet flushed
+        // Emit pending Bar if exists and not yet flushed
         if (pendingBar) {
           clippedContinuation.push(pendingBar);
           pendingBar = null;
@@ -51,7 +64,17 @@ export function clipRemiContinuation(
         clippedContinuation.push(event);
       }
 
-      continue; // Next event
+      // If we've reached clipBefore boundary, stop processing further events
+      if (
+        clipBeforeBar !== undefined &&
+        clipBeforePosition !== undefined &&
+        !isBeforeClipBefore
+      ) {
+        devLog('[AutoComplete] Reached clipBefore boundary. Stopping further clipping.');
+        break;
+      }
+
+      continue;
     }
 
     // Non-Position event (Pitch, Duration, Velocity)
@@ -61,7 +84,7 @@ export function clipRemiContinuation(
     }
   }
 
-  devLog('[AutoComplete] Clipped LLM Continuation:', clippedContinuation);
+  devLog('[AutoComplete] Final Clipped LLM Continuation:', clippedContinuation);
 
   return clippedContinuation;
 }
