@@ -9,7 +9,7 @@ import { remiDecode } from '@/shared/utils/musical/remi/remiUtils.js';
 
 import { getSequencerById, getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { disableAutocompleteToggle, enableAutocompleteToggle } from '@/components/globalControls/controls/autoCompleteButtonControls.js';
-import { setAIPreviewNotes, clearAIPreviewNotes, getAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
+import { setAIPreviewNotes, clearAIPreviewNotes, getAIPreviewNotes, isAutocompletePipelineRunning, setIsAutocompletePipelineRunning } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import { normalizeRemiPositions } from '@/shared/llm/tasks/remi/helpers/normalizeRemiPositions.js';
 import { getStartBeatAndEndBeat, getAutoCompleteStartBar, getClipBoundaryFromEndBeat } from '@/components/aimode/shared/helpers/contextHelpers.js';
 import { getNextNoteStartBeat } from '@/components/sequencer/matrix/utils/getNextNoteStartBeat.js';
@@ -33,15 +33,24 @@ import type { LLMModel } from '@/shared/llm/interfaces/LLMInterfaces';
  * @param source - Optional string for log context (e.g., 'click', 'keypress')
  */
 export async function handleUserAutoCompleteRequest(source: string = 'unknown'): Promise<void> {
+  if (isAutocompletePipelineRunning()) {
+    devLog('[AutoComplete] Ignored request: pipeline is already running.');
+    return;
+  }
+  
+  setIsAutocompletePipelineRunning(true);
+
   const lastActiveSequencerId = getLastActiveSequencerId();
   if (lastActiveSequencerId === null) {
     console.warn('No active sequencer to apply autocomplete to.');
+    setIsAutocompletePipelineRunning(false);
     return;
   }
 
   const sequencer = getSequencerById(lastActiveSequencerId);
   if (!sequencer) {
     console.error(`Sequencer with id ${lastActiveSequencerId} not found.`);
+    setIsAutocompletePipelineRunning(false);
     return;
   }
 
@@ -77,6 +86,8 @@ export async function handleUserAutoCompleteRequest(source: string = 'unknown'):
 
     // Clear active bar highlight (regardless of success/failure)
     sequencer.matrix?.setActiveAutocompleteBar(null);
+
+    setIsAutocompletePipelineRunning(false);
   }
 }
 
@@ -168,7 +179,7 @@ export async function runRemiContinuationPipeline(
       devLog('[AutoComplete] Final Decoded Notes:', decodedNotes);
       setAIPreviewNotes(decodedNotes);
       drawGlobalMiniContour();
-      
+
       const activeSequencer = getSequencerById(activeSequencerId);
       if (activeSequencer) activeSequencer.redraw();
 

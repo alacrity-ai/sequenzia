@@ -1,13 +1,34 @@
 // src/components/aimode/features/autocomplete/stores/autoCompleteStore.ts
 
+import { handleUserAutoCompleteRequest } from '@/components/aimode/features/autocomplete/services/runAIAutoComplete.js';
+
 import type { Note } from '@/shared/interfaces/Note.js';
 
 let isAutocompleteEnabled = true;
 let aiPreviewNotes: Note[] = [];
 let autoCompleteTargetBeat: number | null = null;
 let isAutocompleteIndicatorEnabled = true;
+let autoCompletePipelineRunning = false;
 
 const listeners = new Set<(enabled: boolean) => void>();
+
+export function subscribeAutocompleteState(
+  listener: (enabled: boolean) => void
+): () => void {
+  listeners.add(listener);
+  // Immediately notify with current state
+  listener(isAutocompleteEnabled);
+
+  return () => listeners.delete(listener);
+}
+
+export function isAutocompletePipelineRunning(): boolean {
+  return autoCompletePipelineRunning;
+}
+
+export function setIsAutocompletePipelineRunning(running: boolean): void {
+  autoCompletePipelineRunning = running;
+}
 
 export function getAutoCompleteTargetBeat(): number | null {
   return autoCompleteTargetBeat;
@@ -53,16 +74,6 @@ export function toggleIsAutocompleteEnabled(): boolean {
   isAutocompleteEnabled = !isAutocompleteEnabled;
   listeners.forEach(listener => listener(isAutocompleteEnabled));
   return isAutocompleteEnabled;
-}
-
-export function subscribeAutocompleteState(
-  listener: (enabled: boolean) => void
-): () => void {
-  listeners.add(listener);
-  // Immediately notify with current state
-  listener(isAutocompleteEnabled);
-
-  return () => listeners.delete(listener);
 }
 
 export function clearAutocompleteListeners(): void {

@@ -32,12 +32,14 @@
 ## AI Autocomplete
 - Critical Bug:
   - [x] Saving user config causes song measures to revert to DEFAULT_GRID_CONFIG.totalMeasures
+  - [ ] Some input fields prompt for password saving????
+  - [ ] Last beat of grid is always cut off, need to extend view out a bit
+  - [ ] AI is still generating beyond song end
 - Necessary Now
-  - [ ] Allow transport seek to be called from the sequencer header row
+  - [ ] Allow transport seek to be called from the sequencer header row!
 - Autocomplete
   - [x] Implement Autocomplete Preview
   - [x] Fix Undo/Redo on Autocompletion
-  - [ ] Autocomplete preview occurs automatically when enabled (Do we even want this?)
   - [x] Reject button causes a regeneration
   - [x] Add guard so autocomplete cannot occur past song end
   - [x] Add animation to autocomplete preview notes
@@ -49,12 +51,15 @@
     - [ ] Add setting Force Diatonic (experimental) (postprocess output to be diatonic to the key)
     - [ ] Add setting to transpose all inputs to C Major or A minor, and then transpose output back (experimental) 
   - [ ] Handle drums (Pitch 38 e.g.), will need to vary the prompt generation for drums
+  - [ ] Add bailout to the AI Autocomplete Generation pipeline.
+  - [ ] Narrow the size of the gap that we can generate into.  Half measures would be nice.
   - [x] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
   - [x] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
     - [x] This is tricky because do we go by where the cursor preview is.. Where the last note placed was.. etc.. with fallback to the last note of the song?
   - [ ] Resolve bug where re-generation doesn't trigger a redraw (Existing preview not vanishing)
   - [ ] Resolve bug where if generation fails, the blinking measure animation continues to run
   - [ ] Schedule notes to play that are in the preview so that user can Demo them
+  - [ ] MAIN EFFECT: Autocomplete pipeline occurs automatically when aotcomplete toggle enabled (Do we even want this?)
 
 - Inpaint/Extend
   - [x] Grey these out for now (lock)
