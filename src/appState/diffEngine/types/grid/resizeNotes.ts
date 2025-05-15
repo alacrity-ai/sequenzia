@@ -1,8 +1,8 @@
 // src/appState/diffEngine/types/grid/resizeNotes.ts
 
-import { setAutoCompleteTargetFromNotes } from '@/components/aimode/features/autocomplete/helpers/setAutoCompleteTargetFromNotes.js';
 import type { Note } from '@/shared/interfaces/Note.js';
 
+import { setAutoCompleteTargetBeatByNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore';
 import { AppState } from '@/appState/interfaces/AppState.js';
 import { Diff } from '@/appState/interfaces/Diff.js';
 
@@ -36,7 +36,7 @@ export function applyRESIZE_NOTES(state: AppState, diff: Diff): AppState {
   }
 
   // === Update AutoCompleteTargetBeat ===
-  setAutoCompleteTargetFromNotes(affectedNotes);
+  setAutoCompleteTargetBeatByNotes(affectedNotes);
 
   return newState;
 }

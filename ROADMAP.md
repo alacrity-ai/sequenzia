@@ -37,7 +37,7 @@
   - [x] Fix Undo/Redo on Autocompletion
   - [ ] Autocomplete preview occurs automatically when enabled
   - [x] Reject button causes a regeneration
-  - [ ] Add guard so autocomplete cannot occur past song end
+  - [x] Add guard so autocomplete cannot occur past song end
   - [x] Add animation to autocomplete preview notes
   - [ ] Add settings popup for adjusting autocomplete context length and other settings
     - [ ] Add setting for full song context (experimental)
@@ -47,9 +47,9 @@
     - [ ] Add setting Force Diatonic (experimental) (postprocess output to be diatonic to the key)
     - [ ] Add setting to transpose all inputs to C Major or A minor, and then transpose output back (experimental) 
   - [ ] Handle drums (Pitch 38 e.g.), will need to vary the prompt generation for drums
-  - [ ] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
-  - [ ] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
-    - This is tricky because do we go by where the cursor preview is.. Where the last note placed was.. etc.. with fallback to the last note of the song?
+  - [x] Divise more robust way of setting active sequencer, e.g. just mousing into a sequencer
+  - [x] Autocomplete to determine endbeat right now is just using the last note in the sequencer, instead we should auto complete in gaps if possible,
+    - [x] This is tricky because do we go by where the cursor preview is.. Where the last note placed was.. etc.. with fallback to the last note of the song?
   - [ ] Resolve bug where re-generation doesn't trigger a redraw (Existing preview not vanishing)
   - [ ] Resolve bug where if generation fails, the blinking measure animation continues to run
   - [ ] Schedule notes to play that are in the preview so that user can Demo them

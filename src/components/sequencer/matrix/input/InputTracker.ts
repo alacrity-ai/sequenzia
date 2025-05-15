@@ -40,10 +40,6 @@ export class InputTracker {
   };
 
   private onMouseLeave = (): void => {
-    if (getLastActiveSequencerId() === this.sequencerContext.getId()) {
-      clearLastActiveSequencerId();
-    }
-
     this.context.handleMouseLeave();
   };
 

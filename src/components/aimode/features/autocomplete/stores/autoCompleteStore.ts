@@ -2,11 +2,40 @@
 
 import type { Note } from '@/shared/interfaces/Note.js';
 
-let isAutocompleteEnabled = false;
+let isAutocompleteEnabled = true;
 let aiPreviewNotes: Note[] = [];
 let autoCompleteTargetBeat: number | null = null;
 
 const listeners = new Set<(enabled: boolean) => void>();
+
+export function getAutoCompleteTargetBeat(): number | null {
+  return autoCompleteTargetBeat;
+}
+
+export function setAutoCompleteTargetBeat(beat: number): void {
+  autoCompleteTargetBeat = beat;
+}
+
+export function setAutoCompleteTargetBeatByNotes(notes: Note[]): void {
+  if (notes.length === 0) {
+    console.warn('Tried to set autocomplete target from empty note array', new Error().stack);
+    clearAutoCompleteTargetBeat();
+    return;
+  }
+
+  const latestEndBeat = notes.reduce((latest, note) => {
+    const end = note.start + note.duration;
+    return end > latest ? end : latest;
+  }, -Infinity);
+
+  if (latestEndBeat !== -Infinity) {
+    setAutoCompleteTargetBeat(latestEndBeat);
+  }
+}
+
+export function clearAutoCompleteTargetBeat(): void {
+  autoCompleteTargetBeat = null;
+}
 
 export function getIsAutocompleteEnabled(): boolean {
   return isAutocompleteEnabled;
@@ -50,16 +79,4 @@ export function getAIPreviewNotes(): Note[] {
 
 export function clearAIPreviewNotes(): void {
   aiPreviewNotes = [];
-}
-
-export function getAutoCompleteTargetBeat(): number | null {
-  return autoCompleteTargetBeat;
-}
-
-export function setAutoCompleteTargetBeat(beat: number): void {
-  autoCompleteTargetBeat = beat;
-}
-
-export function clearAutoCompleteTargetBeat(): void {
-  autoCompleteTargetBeat = null;
 }

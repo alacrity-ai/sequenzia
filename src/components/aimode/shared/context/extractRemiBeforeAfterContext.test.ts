@@ -287,7 +287,6 @@ describe('extractRemiBeforeAfterContext (with large beat gap)', () => {
       { type: 'Duration', value: 4 },
       { type: 'Velocity', value: 100 }
     ]);
-
   });
 
   it('should only include afterRemi if no beforeRemi are available', () => {

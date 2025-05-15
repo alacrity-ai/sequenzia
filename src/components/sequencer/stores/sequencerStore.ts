@@ -41,7 +41,6 @@ export function setLastActiveSequencerId(id: number | null): void {
 
 export function clearLastActiveSequencerId(): void {
   clearAIPreviewNotes();
-  clearAutoCompleteTargetBeat();
   lastActiveSequencerId = null;
 }
 

@@ -128,7 +128,7 @@ export class AIAnimationRenderer {
       // Draw highlight rect with pulsing opacity
       this.ctx.save();
       this.ctx.globalAlpha = 0.2 * pulse;
-      this.ctx.fillStyle = 'rgba(180, 255, 255, 1)'; // Light cyan-blue tint
+      this.ctx.fillStyle = 'rgba(244, 114, 181, 0.36)';
       this.ctx.fillRect(barStartX, gridTop, barEndX - barStartX, gridHeight);
       this.ctx.restore();
     }

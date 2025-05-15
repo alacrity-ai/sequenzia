@@ -1,6 +1,8 @@
 // src/globalControls/listeners/GlobalPlayheadListeners.ts
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
+
+import { setAutoCompleteTargetBeat } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import { updateAllMatrixPlayheads } from '@/shared/playback/helpers/updateAllGridPlayheads.js';
 import { drawGlobalPlayhead } from '@/components/globalControls/renderers/GlobalPlayheadRenderer.js';
 import { getTotalBeats, getTimeSignature } from '@/shared/playback/transportService.js';
@@ -27,6 +29,9 @@ export function attachPlayheadListeners(container: HTMLElement): ListenerAttachm
 
     // Temporarily disable auto-resume
     playbackEngine.seek(clampedBeat);
+
+    // Update autocomplete target beat
+    setAutoCompleteTargetBeat(clampedBeat);
 
     // Only auto-resume if explicitly desired (keyboard usage)
     if (resumePlayback && wasPlaying) {

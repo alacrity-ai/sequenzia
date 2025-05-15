@@ -2,6 +2,8 @@
   
 import { Note } from '@/shared/interfaces/Note.js';
 import { SnappedNotePosition } from '@/components/sequencer/matrix/interfaces/SnappedNotePosition.js';
+import { setAutoCompleteTargetBeatByNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore';
+
 import type { SelectionBox } from '@/components/sequencer/matrix/interfaces/SelectionBox.js';
 
 export class InteractionStore {
@@ -93,6 +95,11 @@ export class InteractionStore {
   }
 
   public setSelectedNotes(notes: Note[]): void {
+    // If we are selecting notes, update the autocomplete target
+    if (notes.length > 0) {
+      setAutoCompleteTargetBeatByNotes(notes);
+    }
+
     this.selectedNotes = notes;
   }
 
