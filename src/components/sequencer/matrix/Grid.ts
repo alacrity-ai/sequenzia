@@ -239,6 +239,16 @@ export class Grid {
     this.scrollbars.update();
   }
 
+  public setConfig(config: Partial<GridConfig>): void {
+    this.config = mergeGridConfig(this.config, config);
+    this.recalculateLabelAndHeader();
+    this.requestRedraw();
+  }
+
+  public getConfig(): GridConfig {
+    return this.config;
+  }
+
   public requestRedraw(): void {
     this.needsRedraw = true;
   }

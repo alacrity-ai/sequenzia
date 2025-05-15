@@ -5,6 +5,7 @@ import type { Note } from '@/shared/interfaces/Note.js';
 let isAutocompleteEnabled = true;
 let aiPreviewNotes: Note[] = [];
 let autoCompleteTargetBeat: number | null = null;
+let isAutocompleteIndicatorEnabled = true;
 
 const listeners = new Set<(enabled: boolean) => void>();
 
@@ -79,4 +80,13 @@ export function getAIPreviewNotes(): Note[] {
 
 export function clearAIPreviewNotes(): void {
   aiPreviewNotes = [];
+}
+
+// === API for AI Context Grid Indicator ===
+export function setAutoCompleteTrackIndicator(enabled: boolean): void {
+  isAutocompleteIndicatorEnabled = enabled;
+}
+
+export function getIsAutocompleteIndicatorEnabled(): boolean {
+  return isAutocompleteIndicatorEnabled;
 }

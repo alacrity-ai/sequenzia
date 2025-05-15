@@ -37,7 +37,7 @@ export class UserConfigModalController {
     // === Inject into modal DOM
     this.modal.getSectionContainer('global').appendChild(globalSection.element);
     this.modal.getSectionContainer('theme').appendChild(themeSection);
-    this.modal.getSectionContainer('ai').appendChild(aiSection);
+    this.modal.getSectionContainer('ai').appendChild(aiSection.element);
 
     // === Attach listeners
     const modalDetach = attachModalListeners(this.modal, {
@@ -47,10 +47,10 @@ export class UserConfigModalController {
 
     const global = attachGlobalSettingsListeners(globalSection.element);
     const theme = attachThemeSettingsListeners(themeSection);
-    const ai = attachAISettingsListeners(aiSection);
+    const ai = attachAISettingsListeners(aiSection.element);
 
     this.detachFns.push(modalDetach, global.detach, theme.detach, ai.detach);
-    this.refreshFns.push(global.refreshUI, theme.refreshUI, ai.refreshUI, globalSection.refreshToggle);
+    this.refreshFns.push(global.refreshUI, theme.refreshUI, ai.refreshUI, globalSection.refreshToggle, aiSection.refreshToggle);
 
     // === Tooltips
     initTooltips();

@@ -4,6 +4,7 @@ import { clearAIPreviewNotes } from '@/components/aimode/features/autocomplete/s
 import { getLastActiveSequencerId, getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
 import { runRemiContinuationPipeline } from './runAIAutoComplete.js';
 import { getStartBeatAndEndBeat } from '@/components/aimode/shared/helpers/contextHelpers.js';
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
 
 /**
  * Rejects the current AI autocomplete notes and triggers a new generation.
@@ -11,6 +12,7 @@ import { getStartBeatAndEndBeat } from '@/components/aimode/shared/helpers/conte
 export async function rejectAutoCompleteNotes(): Promise<void> {
   // Clear the current preview notes
   clearAIPreviewNotes();
+  drawGlobalMiniContour();
 
   const lastActiveSequencerId = getLastActiveSequencerId();
   if (lastActiveSequencerId === null) {
@@ -27,5 +29,5 @@ export async function rejectAutoCompleteNotes(): Promise<void> {
   const [startBeat, endBeat] = getStartBeatAndEndBeat(sequencer);
 
   console.log(`Rejecting current autocomplete and re-running for beats ${startBeat} to ${endBeat} on sequencer ${lastActiveSequencerId}`);
-  await runRemiContinuationPipeline(lastActiveSequencerId, getSequencers(), startBeat, endBeat);
+  await runRemiContinuationPipeline(lastActiveSequencerId, endBeat);
 }

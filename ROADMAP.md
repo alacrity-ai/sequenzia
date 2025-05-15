@@ -30,12 +30,14 @@
   - [x] Holding down V should show note velocities regardless of the note render mode
 
 ## AI Autocomplete
+- Critical Bug:
+  - [x] Saving user config causes song measures to revert to DEFAULT_GRID_CONFIG.totalMeasures
 - Necessary Now
   - [ ] Allow transport seek to be called from the sequencer header row
 - Autocomplete
   - [x] Implement Autocomplete Preview
   - [x] Fix Undo/Redo on Autocompletion
-  - [ ] Autocomplete preview occurs automatically when enabled
+  - [ ] Autocomplete preview occurs automatically when enabled (Do we even want this?)
   - [x] Reject button causes a regeneration
   - [x] Add guard so autocomplete cannot occur past song end
   - [x] Add animation to autocomplete preview notes

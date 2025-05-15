@@ -3,7 +3,7 @@
 import type { GridConfig } from './interfaces/GridConfigTypes.js';
 
 export const DEFAULT_GRID_CONFIG: GridConfig = {
-  totalMeasures: 16,
+  totalMeasures: 8,
   beatsPerMeasure: 4,
 
   layout: {

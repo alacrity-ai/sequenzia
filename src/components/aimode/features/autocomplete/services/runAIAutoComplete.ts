@@ -7,10 +7,9 @@ import { clipRemiContinuation } from '@/shared/llm/tasks/remi/helpers/clipRemiCo
 import { hasGapForRemiContinuation } from '@/shared/llm/tasks/remi/helpers/hasGapForRemiContinuation.js';
 import { remiDecode } from '@/shared/utils/musical/remi/remiUtils.js';
 
-import { getAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import { getSequencerById, getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { disableAutocompleteToggle, enableAutocompleteToggle } from '@/components/globalControls/controls/autoCompleteButtonControls.js';
-import { setAIPreviewNotes, clearAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
+import { setAIPreviewNotes, clearAIPreviewNotes, getAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import { normalizeRemiPositions } from '@/shared/llm/tasks/remi/helpers/normalizeRemiPositions.js';
 import { getStartBeatAndEndBeat, getAutoCompleteStartBar, getClipBoundaryFromEndBeat } from '@/components/aimode/shared/helpers/contextHelpers.js';
 import { getNextNoteStartBeat } from '@/components/sequencer/matrix/utils/getNextNoteStartBeat.js';
@@ -22,6 +21,8 @@ import { getLLMSettings } from '@/components/aimode/shared/stores/llmSettingsSto
 import { ContextAwarePromptBuilder } from '@/components/aimode/features/autocomplete/prompts/ContextAwarePromptBuilder.js';
 import { getRemiContinuation } from '@/shared/llm/tasks/remi/remiContinuationService.js';
 import { shiftLLMContinuationToEndBeat } from '@/shared/llm/tasks/remi/helpers/shiftLLMContinuationToEndBeat.js';
+
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
 
 import type { RemiEncodeOptions } from '@/shared/interfaces/RemiEncoderOptions';
 import type { LLMModel } from '@/shared/llm/interfaces/LLMInterfaces';
@@ -48,6 +49,7 @@ export async function handleUserAutoCompleteRequest(source: string = 'unknown'):
   disableAutocompleteToggle();
 
   clearAIPreviewNotes();
+  drawGlobalMiniContour();
   sequencer.matrix?.invalidateAIAutocompleteRenderer();
 
   const [startBeat, endBeat] = getStartBeatAndEndBeat(sequencer);
@@ -165,7 +167,8 @@ export async function runRemiContinuationPipeline(
     if (decodedNotes.length > 0) {
       devLog('[AutoComplete] Final Decoded Notes:', decodedNotes);
       setAIPreviewNotes(decodedNotes);
-
+      drawGlobalMiniContour();
+      
       const activeSequencer = getSequencerById(activeSequencerId);
       if (activeSequencer) activeSequencer.redraw();
 

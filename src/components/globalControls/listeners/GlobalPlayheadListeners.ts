@@ -2,6 +2,8 @@
 
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
+import { getAIIndicatorEnabled } from '@/components/userSettings/store/userConfigStore.js';
 import { setAutoCompleteTargetBeat } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import { updateAllMatrixPlayheads } from '@/shared/playback/helpers/updateAllGridPlayheads.js';
 import { drawGlobalPlayhead } from '@/components/globalControls/renderers/GlobalPlayheadRenderer.js';
@@ -45,6 +47,10 @@ export function attachPlayheadListeners(container: HTMLElement): ListenerAttachm
       const logicalWidth = canvas.width / DPR;
       const snappedX = (clampedBeat / totalBeats) * logicalWidth;
       drawGlobalPlayhead(snappedX);
+    }
+
+    if (getAIIndicatorEnabled()) {
+      drawGlobalMiniContour();
     }
   };
 

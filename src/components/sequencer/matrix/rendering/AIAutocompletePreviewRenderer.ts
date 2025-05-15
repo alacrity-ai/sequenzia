@@ -1,9 +1,11 @@
 // src/components/sequencer/matrix/rendering/AIAutocompletePreviewRenderer.ts
 
+import { getAutoCompleteTargetBeat } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
+import { getAIIndicatorEnabled } from '@/components/userSettings/store/userConfigStore.js';
 import { drawRoundedRect } from '../utils/roundedRect.js';
 import { noteToMidi } from '@/shared/utils/musical/noteUtils.js';
 import { getAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
-import { getIsAutocompleteEnabled, getAutoCompleteTargetBeat } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
+import { drawAIIndicatorChevron } from '@/shared/ui/canvas/drawAIIndicatorChevron.js';
 
 import type { GridScroll } from '../scrollbars/GridScroll.js';
 import type { GridConfig } from '../interfaces/GridConfigTypes.js';
@@ -31,7 +33,7 @@ export class AIAutocompletePreviewRenderer {
     if (previewNotes.length > 0) {
       const totalRows = highestMidi - lowestMidi + 1;
 
-      ctx.fillStyle = 'rgba(255, 100, 180, 0.4)'; // AI preview color
+      ctx.fillStyle = 'rgba(252, 159, 207, 0.4)';
 
       for (const note of previewNotes) {
         const midi = noteToMidi(note.pitch);
@@ -49,7 +51,7 @@ export class AIAutocompletePreviewRenderer {
 
     ctx.restore(); // Exit scroll context before drawing viewport-pinned overlays
 
-    if (getIsAutocompleteEnabled()) {
+    if (getAIIndicatorEnabled()) {
       const targetBeat = getAutoCompleteTargetBeat();
       if (targetBeat !== null) {
         const {
@@ -58,20 +60,11 @@ export class AIAutocompletePreviewRenderer {
         } = this.config;
 
         const cellWidth = baseCellWidth * zoom;
-
         const chevronX = labelWidth - this.scroll.getX() + targetBeat * cellWidth;
-
-        // === Chevron Glyph (flipped upside down) ===
         const chevronWidth = cellWidth * 0.5;
         const chevronHeight = 8;
 
-        ctx.fillStyle = 'rgb(252, 159, 207)';
-        ctx.beginPath();
-        ctx.moveTo(chevronX, headerHeight - chevronHeight); // tip of the chevron (upward)
-        ctx.lineTo(chevronX - chevronWidth / 2, headerHeight); // bottom left
-        ctx.lineTo(chevronX + chevronWidth / 2, headerHeight); // bottom right
-        ctx.closePath();
-        ctx.fill();
+        drawAIIndicatorChevron(ctx, chevronX, headerHeight, chevronWidth, chevronHeight, 'up');
       }
     }
   }

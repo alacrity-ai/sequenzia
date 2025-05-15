@@ -26,6 +26,7 @@ describe('autoCompleteStore', () => {
 
   describe('Autocomplete Enabled State', () => {
     it('should toggle autocomplete state', () => {
+      setIsAutocompleteEnabled(false);
       expect(getIsAutocompleteEnabled()).toBe(false);
 
       toggleIsAutocompleteEnabled();

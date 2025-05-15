@@ -4,6 +4,8 @@ import { getSequencerById } from '@/components/sequencer/stores/sequencerStore.j
 import { recordDiff } from '@/appState/appState.js';
 import { createPlaceNotesDiff, createReversePlaceNotesDiff } from '@/appState/diffEngine/types/grid/placeNotes.js';
 import { clearAIPreviewNotes, getAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
+import { drawGlobalMiniContour } from '@/shared/playback/helpers/drawGlobalMiniContour.js';
+
 
 /**
  * Applies a list of notes to a sequencer via the diff engine.
@@ -19,6 +21,7 @@ export function applyAutoCompleteNotes(sequencerId: number): void {
   );
 
   clearAIPreviewNotes();
+  drawGlobalMiniContour();
 
   const sequencer = getSequencerById(sequencerId);
   if (sequencer) {
