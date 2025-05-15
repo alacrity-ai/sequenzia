@@ -36,7 +36,7 @@
   - [ ] Last beat of grid is always cut off, need to extend view out a bit
   - [ ] AI is still generating beyond song end
 - Necessary Now
-  - [ ] Allow transport seek to be called from the sequencer header row!
+  - [x] Allow transport seek to be called from the sequencer header row!
 - Autocomplete
   - [x] Implement Autocomplete Preview
   - [x] Fix Undo/Redo on Autocompletion
