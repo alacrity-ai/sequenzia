@@ -8,6 +8,7 @@ import {
   setLoopEnabled
 } from '@/shared/playback/transportService.js';
 import { onStateUpdated } from '@/appState/onStateUpdated.js';
+import { matchesMacro } from '@/shared/keybindings/useKeyMacro';
 
 import type { PlaybackService } from '../services/PlaybackService.js';
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
@@ -128,14 +129,18 @@ export function attachTransportListeners(
     const activeTag = (document.activeElement as HTMLElement)?.tagName;
     const isTypingContext = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
 
-    if (e.key === ' ' && !isTypingContext) {
-      e.preventDefault(); // Prevent default scroll
+    if (isTypingContext) return;
 
-      if (e.shiftKey) {
-        handleStop(); // SHIFT + Space
-      } else {
-        handlePlay(); // Regular Space
-      }
+    if (matchesMacro(e, 'TransportStop')) {
+      e.preventDefault();
+      handleStop();
+      return;
+    }
+
+    if (matchesMacro(e, 'TransportPlay')) {
+      e.preventDefault();
+      handlePlay();
+      return;
     }
   };
 

@@ -11,6 +11,7 @@ import { getTotalBeats, getTimeSignature } from '@/shared/playback/transportServ
 import { getSnappedBeat } from '@/components/sequencer/utils/snappedBeat.js';
 import { PlaybackEngine } from '@/shared/playback/PlaybackEngine.js';
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
+import { matchesMacro } from '@/shared/keybindings/useKeyMacro';
 
 let isDragging = false;
 let canvas: HTMLCanvasElement | null = null;
@@ -100,35 +101,42 @@ export function attachPlayheadListeners(container: HTMLElement): ListenerAttachm
   const handleSeekKeydown = (e: KeyboardEvent): void => {
     const tag = (document.activeElement as HTMLElement)?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-    if (!e.shiftKey) return;
 
     const totalBeats = getTotalBeats();
     const beatsPerMeasure = getTimeSignature();
     let unsnappedBeat = playbackEngine.getCurrentBeat();
 
-    switch (e.key.toLowerCase()) {
-      case 'a': unsnappedBeat -= 1; break;
-      case 'd': unsnappedBeat += 1; break;
-      case 's': {
-        const current = Math.floor(unsnappedBeat);
-        const measureStart = Math.floor(current / beatsPerMeasure) * beatsPerMeasure;
-        unsnappedBeat = (current === measureStart)
-          ? Math.max(0, measureStart - beatsPerMeasure)
-          : measureStart;
-        break;
-      }
-      case 'w': {
-        const current = Math.floor(unsnappedBeat);
-        const measureStart = Math.floor(current / beatsPerMeasure) * beatsPerMeasure;
-        const nextMeasureStart = measureStart + beatsPerMeasure;
-        unsnappedBeat = Math.min(totalBeats, nextMeasureStart);
-        break;
-      }
-      default: return;
+    if (matchesMacro(e, 'SeekBackward')) {
+      e.preventDefault();
+      seekToBeat(unsnappedBeat - 1);
+      return;
     }
 
-    e.preventDefault();
-    seekToBeat(unsnappedBeat);
+    if (matchesMacro(e, 'SeekForward')) {
+      e.preventDefault();
+      seekToBeat(unsnappedBeat + 1);
+      return;
+    }
+
+    if (matchesMacro(e, 'SeekMeasureBack')) {
+      e.preventDefault();
+      const current = Math.floor(unsnappedBeat);
+      const measureStart = Math.floor(current / beatsPerMeasure) * beatsPerMeasure;
+      unsnappedBeat = (current === measureStart)
+        ? Math.max(0, measureStart - beatsPerMeasure)
+        : measureStart;
+      seekToBeat(unsnappedBeat);
+      return;
+    }
+
+    if (matchesMacro(e, 'SeekMeasureForward')) {
+      e.preventDefault();
+      const current = Math.floor(unsnappedBeat);
+      const measureStart = Math.floor(current / beatsPerMeasure) * beatsPerMeasure;
+      const nextMeasureStart = measureStart + beatsPerMeasure;
+      seekToBeat(Math.min(totalBeats, nextMeasureStart));
+      return;
+    }
   };
 
   // Attach event listeners

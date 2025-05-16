@@ -30,25 +30,3 @@ export class EventEmitter<Events extends { [key: string]: unknown }> {
     }
   }  
 }
-
-/* Usage:
-
-// src/sequencer/matrix/events/GridEvents.ts
-import type { Note } from '../../../shared/types/Note';
-
-export interface GridEvents {
-  notePlaced: Note;
-  noteDeleted: Note;
-  selectionChanged: Note[]; // or Set<Note>, depending on architecture
-}
-
-import { EventEmitter } from '../events/EventEmitter.ts';
-import type { GridEvents } from '../events/GridEvents.ts';
-
-const emitter = new EventEmitter<GridEvents>();
-
-emitter.on('notePlaced', note => {
-  soundEngine.play(note);
-});
-
-*/

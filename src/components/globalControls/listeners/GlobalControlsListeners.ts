@@ -9,6 +9,8 @@ import {
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import { getActiveSelection } from '@/components/sequencer/utils/selectionTracker.js';
 import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
+import { matchesMacro } from '@/shared/keybindings/useKeyMacro';
+
 
 /**
  * Attaches global-level control listeners (e.g. modals triggered via hotkeys or UI popovers).
@@ -34,7 +36,7 @@ export function attachGlobalControlsListeners(
 
   // === Hotkey Shortcuts ===
   const handleVelocityShortcut = (e: KeyboardEvent): void => {
-    if (e.key.toLowerCase() !== 'v' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!matchesMacro(e, 'ToggleVelocityTool')) return
 
     const tag = (document.activeElement as HTMLElement)?.tagName;
     const isTypingContext = tag === 'INPUT' || tag === 'TEXTAREA';
@@ -48,11 +50,13 @@ export function attachGlobalControlsListeners(
 
   // === Snap-to-Key Override Shortcut (CTRL down to disable in-key snapping temporarily)
   const handleSnapToKeyShortcut = (e: KeyboardEvent): void => {
-    if (e.type === 'keydown' && e.ctrlKey && !isSnapToKeyOverrideActive()) {
+    const isCtrlorMetaDown = e.ctrlKey || e.metaKey;
+
+    if (e.type === 'keydown' && isCtrlorMetaDown && !isSnapToKeyOverrideActive()) {
       setSnapToKeyOverrideActive(true);
     }
 
-    if (e.type === 'keyup' && e.key === 'Control' && isSnapToKeyOverrideActive()) {
+    if (e.type === 'keyup' && !isCtrlorMetaDown && isSnapToKeyOverrideActive()) {
       setSnapToKeyOverrideActive(false);
     }
   };

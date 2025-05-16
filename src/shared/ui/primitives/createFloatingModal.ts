@@ -37,6 +37,12 @@ interface ModalOptions {
    * Used when explicit width/maxWidth classes are not provided.
    */
   sizePreset?: ModalSizeKey;
+
+  /**
+   * Whether the modal content should be scrollable if it exceeds the viewport height.
+   * Default: false.
+   */
+  scrollableContent?: boolean;
 }
 
 /**
@@ -72,6 +78,15 @@ export function createFloatingModal(
     class: 'absolute inset-0 rounded-2xl border-2 border-purple-500 opacity-30 blur-xl animate-pulse pointer-events-none'
   });
 
+  // === Scrollable wrapper if enabled ===
+  const scrollWrapper = options.scrollableContent
+    ? h('div', {
+        class: 'overflow-y-auto overflow-x-hidden max-h-[75vh] w-full flex flex-col gap-6 pr-2'
+      },
+        ...(Array.isArray(content) ? content : [content])
+      )
+    : (Array.isArray(content) ? content : [content]);
+
   const modalInner = h('div', {
     class: [
       'relative flex flex-col',
@@ -83,7 +98,7 @@ export function createFloatingModal(
     ].join(' ')
   },
     haloGlow,
-    ...(Array.isArray(content) ? content : [content])
+    scrollWrapper
   );
 
   return h('div', {

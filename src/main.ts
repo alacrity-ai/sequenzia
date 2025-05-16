@@ -24,11 +24,12 @@ import { PlaybackEngine, getPlaybackEngine } from './shared/playback/PlaybackEng
 // Global Controls and UI
 import { GlobalControlsController } from '@/components/globalControls/GlobalControlsController.js';
 import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
-import { setupGlobalUndoRedo } from '@/shared/modals/global/undo-redo.js';
+import { setupGlobalUndoRedo } from '@/shared/boot/setupGlobalUndo.js';
 import { VisualizerController } from '@/components/visualizer/visualizerController.js';
 import { TopControlsController } from '@/components/topControls/topControlsController.js';
 import { UserConfigModalController } from '@/components/userSettings/userConfig.js';
 import { getOverlaysController } from '@/components/overlays/overlaysController.js';
+import { loadUserKeyMacroBindings } from '@/shared/keybindings/KeyMacroStore';
 
 // Setup (Deprecated / Needs dedicated Controllers)
 import { setupAddTrackButton } from '@/components/sequencer/ui/setupAddTrackButton.js';
@@ -39,6 +40,7 @@ function bootstrapSequenziaApp(): void {
   popupsController.showSplashScreen();
 
   loadUserConfigFromLocalStorage();
+  loadUserKeyMacroBindings();
   registerDevTools();
   registerGlobalEventGuards();
 

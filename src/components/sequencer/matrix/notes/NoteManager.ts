@@ -101,7 +101,8 @@ export class NoteManager {
     canvas: HTMLCanvasElement,
     scroll: GridScroll,
     config: GridConfig,
-    noteManager: NoteManager
+    noteManager: NoteManager,
+    diatonicOnly: boolean = true
   ): Note | undefined {
     const mouse = getRelativeMousePos(e, canvas);
     devLog('Raw mouse pos (grid-relative)', mouse);

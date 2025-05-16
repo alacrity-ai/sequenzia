@@ -10,6 +10,7 @@ import type { InteractionController } from '@/components/sequencer/matrix/input/
 import type { CursorController } from '@/components/sequencer/matrix/input/cursor/CursorController.js';
 
 import { devLog } from '@/shared/state/devMode.js';
+import { matchesMacro } from '@/shared/keybindings/useKeyMacro.js';
 import { getSnappedFromEvent, getRawBeatFromEvent } from '@/components/sequencer/matrix/utils/snapping.js';
 import { abortIfOutOfGridBounds } from '@/components/sequencer/matrix/utils/gridGuards.js';
 import { CursorState } from '@/components/sequencer/matrix/input/interfaces/CursorState.js';
@@ -245,15 +246,14 @@ export class DefaultNoteToolHandler implements GridInteractionHandler {
     }    
 
     public onKeyDown(e: KeyboardEvent): void {
-      const isMac = navigator.platform.toUpperCase().includes('MAC');
-      const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
-    
-      if (isCmdOrCtrl && e.key === 'v') {
+      if (matchesMacro(e, 'PasteNotes')) {
         const clipboard = this.getClipboard();
         if (!clipboard.notes.length) return;
-    
+
         this.store.clearSelection();
         this.controller.transitionTo(InteractionMode.Pasting);
+
+        e.preventDefault();
       }
     }
     

@@ -5,12 +5,12 @@ import { createFloatingModal } from '@/shared/ui/primitives/createFloatingModal.
 import { createTabBar } from '@/shared/ui/primitives/createTabBar.js';
 import { createButton } from '@/shared/ui/primitives/createButton.js';
 
-
 export class UserConfigModal {
   private modal: HTMLElement;
   private globalSection: HTMLElement;
   private themeSection: HTMLElement;
   private aiSection: HTMLElement;
+  private keybindingsSection: HTMLElement;
   private saveButton: HTMLButtonElement;
   private closeButton: HTMLButtonElement;
 
@@ -31,11 +31,17 @@ export class UserConfigModal {
       class: 'settings-section hidden z-10'
     });
 
+    this.keybindingsSection = h('div', {
+      id: 'userconfig-keybindings-settings',
+      class: 'settings-section hidden z-10'
+    });
+
     // Tab bar
     const tabBar = createTabBar([
         { key: 'global-settings', icon: '⚙️', title: 'Global Settings', isActive: true },
         { key: 'theme-settings', icon: '🎹', title: 'Theme Settings' },
-        { key: 'ai-settings', icon: '🤖', title: 'AI Settings' }
+        { key: 'ai-settings', icon: '🤖', title: 'AI Settings' },
+        { key: 'keybindings-settings', icon: '⌨️', title: 'Keybindings' }
       ]);
 
     // Action buttons
@@ -60,8 +66,13 @@ export class UserConfigModal {
       this.globalSection,
       this.themeSection,
       this.aiSection,
+      this.keybindingsSection,
       footer
-    ]);
+    ], 
+    {
+      sizePreset: 'xl',
+      scrollableContent: true
+    });
 
     document.body.appendChild(this.modal);
   }
@@ -82,11 +93,12 @@ export class UserConfigModal {
     this.modal.remove();
   }
 
-  public getSectionContainer(id: 'global' | 'theme' | 'ai'): HTMLElement {
+  public getSectionContainer(id: 'global' | 'theme' | 'ai' | 'keybindings'): HTMLElement {
     switch (id) {
       case 'global': return this.globalSection;
       case 'theme': return this.themeSection;
       case 'ai': return this.aiSection;
+      case 'keybindings': return this.keybindingsSection;
     }
   }
 

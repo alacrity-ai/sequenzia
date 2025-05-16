@@ -26,15 +26,7 @@ import {
   getIsDottedMode
 } from '@/shared/playback/transportService.js';
 import { onStateUpdated } from '@/appState/onStateUpdated.js';
-
-const durationHotkeys: Record<string, number> = {
-  Digit1: 4,
-  Digit2: 2,
-  Digit3: 1,
-  Digit4: 0.5,
-  Digit5: 0.25,
-  Digit6: 0.125
-};
+import { matchesMacro } from '@/shared/keybindings/useKeyMacro';
 
 interface ToolbarListenerOptions {
   rootElement: HTMLElement;
@@ -258,74 +250,101 @@ export function attachToolbarListeners(
 
   // === Keyboard Shortcuts ===
   const handleKeydown = (e: KeyboardEvent) => {
-    const target = e.target as HTMLElement;
-    if (
-      target.tagName === 'INPUT' ||
-      target.tagName === 'TEXTAREA' ||
-      target.isContentEditable ||
-      isKeyboardInputEnabled()
-    ) return;
+  const target = e.target as HTMLElement;
+  if (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable ||
+    isKeyboardInputEnabled()
+  ) return;
 
-    // === Note Duration Hotkeys
-    if (durationHotkeys.hasOwnProperty(e.code)) {
+  const durationMacros = {
+    ApplyDuration1: 4,
+    ApplyDuration2: 2,
+    ApplyDuration3: 1,
+    ApplyDuration4: 0.5,
+    ApplyDuration5: 0.25,
+    ApplyDuration6: 0.125,
+  } as const;
+
+  const snapMacros = {
+    ApplySnap1: 4,
+    ApplySnap2: 2,
+    ApplySnap3: 1,
+    ApplySnap4: 0.5,
+    ApplySnap5: 0.25,
+    ApplySnap6: 0.125,
+  } as const;
+
+  // === Apply Snap Resolution Hotkeys (Shift+DigitX)
+  for (const [macroName, durationValue] of Object.entries(snapMacros)) {
+    if (matchesMacro(e, macroName as keyof typeof snapMacros)) {
       e.preventDefault();
-      const baseValue = durationHotkeys[e.code];
-
-      if (e.shiftKey) {
-        updateSnapResolution(baseValue, true);
-      } else {
-        applyNoteDuration(baseValue);
-      }
-
+      updateSnapResolution(durationValue, true);
       return;
     }
+  }
 
-    if (e.key === '.') {
+  // === Apply Note Duration Hotkeys (DigitX)
+  for (const [macroName, durationValue] of Object.entries(durationMacros)) {
+    if (matchesMacro(e, macroName as keyof typeof durationMacros)) {
       e.preventDefault();
-      dottedNoteBtn?.click();
+      applyNoteDuration(durationValue);
       return;
     }
+  }
 
-    if (e.key === '/') {
-      e.preventDefault();
-      tripletNoteBtn?.click();
-      return;
+  // === Dotted Notes
+  if (matchesMacro(e, 'ToggleDottedNotes')) {
+    e.preventDefault();
+    dottedNoteBtn?.click();
+    return;
+  }
+
+  // === Triplet Notes
+  if (matchesMacro(e, 'ToggleTripletNotes')) {
+    e.preventDefault();
+    tripletNoteBtn?.click();
+    return;
+  }
+
+  // === AI Autocomplete
+  if (matchesMacro(e, 'AIStartAutocomplete')) {
+    e.preventDefault();
+    if (!isButtonDisabled()) {
+      handleUserAutoCompleteRequest('GlobalToolbarListeners');
     }
+    return;
+  }
 
+  // === Toggle AI Autocomplete Mode
+  if (matchesMacro(e, 'ToggleAIMode')) {
+    e.preventDefault();
+    toggleIsAutocompleteEnabled();
+    console.log('Toggled Autocomplete Mode via Shift+G');
+    return;
+  }
 
-    // === AI Autocomplete Hotkeys 
-    switch (e.code) {
-      case 'KeyG':
-        e.preventDefault();
+  // === Approve Autocomplete
+  if (matchesMacro(e, 'ApproveAutocomplete')) {
+    e.preventDefault();
+    autocompleteApproveBtn?.click();
+    return;
+  }
 
-        if (e.shiftKey) {
-          toggleIsAutocompleteEnabled();
-          console.log('Toggled Autocomplete Mode via Shift+G');
-        } else {
-          // Don't run autocomplete if already running
-          if (!isButtonDisabled()) {
-            handleUserAutoCompleteRequest('GlobalToolbarListeners');
-          }
-        }
-        return;
+  // === Toolbar Mode Switching
+  if (matchesMacro(e, 'SwitchToNoteMode')) {
+    e.preventDefault();
+    noteModeBtn?.click();
+    return;
+  }
 
-      case 'Tab':
-        e.preventDefault();
-        autocompleteApproveBtn?.click();
-        return;
-
-      // Toolbar Menu Switching
-      case 'KeyQ':
-        e.preventDefault();
-        noteModeBtn?.click();
-        return;
-
-      case 'KeyW':
-        e.preventDefault();
-        aiModeBtn?.click();
-        return;
-    }
-  };
+  if (matchesMacro(e, 'SwitchToAIMode')) {
+    e.preventDefault();
+    aiModeBtn?.click();
+    return;
+  }
+};
 
   window.addEventListener('keydown', handleKeydown);
 

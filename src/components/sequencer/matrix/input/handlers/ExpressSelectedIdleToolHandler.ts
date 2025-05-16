@@ -15,7 +15,7 @@ import { CursorState } from '../interfaces/CursorState.js';
 import { getRelativeMousePos } from '../../utils/gridPosition.js';
 import { getSnappedNotePosition } from '../../utils/snapPosition.js';
 import { getRawBeatFromEvent, getSnappedFromEvent } from '../../utils/snapping.js';
-
+import { matchesMacro } from '@/shared/keybindings/useKeyMacro.js';
 import { rowToNote } from '@/shared/utils/musical/noteUtils.js';
 import { recordDiff } from '@/appState/appState.js';
 import { createDeleteNotesDiff, createReverseDeleteNotesDiff } from '@/appState/diffEngine/types/grid/deleteNotes.js';
@@ -213,6 +213,7 @@ export class ExpressSelectedIdleToolHandler implements GridInteractionHandler {
 
   public onMouseUp(e: MouseEvent): void {
     if (e.button !== 0 || this.store.isOnNonGridElement()) return;
+    e.stopPropagation();
 
     if (this.store.consumeSuppressMouseUpFlag()) {
       // Suppress this mouseup — already handled on mousedown
@@ -247,14 +248,14 @@ export class ExpressSelectedIdleToolHandler implements GridInteractionHandler {
           this.noteManager.previewNote(noteAtPosition.pitch, 0.25);
           this.store.setSelectedNotes([...selected, noteAtPosition]);
         }
-        this.controller.transitionTo(InteractionMode.SelectedIdle);
+        this.requestRedraw();
         return;
       }
   
       // Regular left-click: replace selection with just this note
       this.store.setSelectedNotes([noteAtPosition]);
       this.noteManager.previewNote(noteAtPosition.pitch, 0.25);
-      this.controller.transitionTo(InteractionMode.SelectedIdle);
+      this.requestRedraw();
       return;
     }
   
@@ -302,52 +303,57 @@ export class ExpressSelectedIdleToolHandler implements GridInteractionHandler {
 
   public onKeyDown(e: KeyboardEvent): void {
     const selected = this.store.getSelectedNotes();
-    const isMac = navigator.platform.toUpperCase().includes('MAC');
-    const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
-  
-    // Copy
-    if (isCmdOrCtrl && e.key === 'c') {
-      if (selected.length) this.setClipboard(selected);
-      return;
-    }
-  
-    // Cut
-    if (isCmdOrCtrl && e.key === 'x') {
-      if (!selected.length) return;
-  
-      this.setClipboard(selected);
-  
-      recordDiff(
-        createDeleteNotesDiff(this.getSequencerId(), selected),
-        createReverseDeleteNotesDiff(this.getSequencerId(), selected)
-      );
-  
-      this.store.clearSelection();
-      this.controller.transitionTo(InteractionMode.NoteTool);
-      return;
-    }
-  
-    // Paste — only if clipboard has content
-    if (isCmdOrCtrl && e.key === 'v') {
-        const clipboard = this.getClipboard();
-        if (!clipboard.notes.length) return;
 
-        this.store.clearSelection();
-        this.controller.transitionTo(InteractionMode.Pasting);
-        return;
+    // Copy
+    if (matchesMacro(e, 'CopyNotes')) {
+      if (selected.length) this.setClipboard(selected);
+      e.preventDefault();
+      return;
     }
-  
-    // Delete
-    if (e.key === 'Delete') {
+
+    // Cut
+    if (matchesMacro(e, 'CutNotes')) {
       if (!selected.length) return;
-  
+
+      this.setClipboard(selected);
+
       recordDiff(
         createDeleteNotesDiff(this.getSequencerId(), selected),
         createReverseDeleteNotesDiff(this.getSequencerId(), selected)
       );
-  
+
       this.store.clearSelection();
       this.controller.transitionTo(InteractionMode.NoteTool);
+
+      e.preventDefault();
+      return;
     }
-  }  
+
+    // Paste
+    if (matchesMacro(e, 'PasteNotes')) {
+      const clipboard = this.getClipboard();
+      if (!clipboard.notes.length) return;
+
+      this.store.clearSelection();
+      this.controller.transitionTo(InteractionMode.Pasting);
+
+      e.preventDefault();
+      return;
+    }
+
+    // Delete
+    if (matchesMacro(e, 'DeleteNotes')) {
+      if (!selected.length) return;
+
+      recordDiff(
+        createDeleteNotesDiff(this.getSequencerId(), selected),
+        createReverseDeleteNotesDiff(this.getSequencerId(), selected)
+      );
+
+      this.store.clearSelection();
+      this.controller.transitionTo(InteractionMode.NoteTool);
+
+      e.preventDefault();
+    }
+  }
 }
