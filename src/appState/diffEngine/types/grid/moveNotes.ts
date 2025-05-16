@@ -32,10 +32,7 @@ export function applyMOVE_NOTES(state: AppState, diff: Diff): AppState {
       seq.notes[index].start = updated.start;
     }
     // Log all the information about the from and to notes:
-    console.log('From:', original, 'To:', updated, 'Index:', index);
   }
-  console.log('To notes:', to);
-
   // === Update AutoCompleteTargetBeat ===
   setAutoCompleteTargetBeatByNotes(to);
 

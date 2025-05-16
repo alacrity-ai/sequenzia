@@ -118,13 +118,9 @@ describe('Live Integration: Full Continuation Flow', () => {
       llmSettings: createMockLLMSettings()
     });
 
-    console.log('\n--- Generated Prompt ---\n' + prompt + '\n--- End Prompt ---\n');
-
     // === Call LLM ===
     const model = 'gpt-4o';
     const rawRemiResult = await callLLM<unknown>(model, prompt, 'remi');
-
-    console.log('\n--- Raw LLM Result ---\n', rawRemiResult, '\n--- End Raw Result ---\n');
 
     // === Convert raw result into RemiEvents ===
     const llmContinuationRemi: RemiEvent[] = RemiOutputAdapter.parse(rawRemiResult);
@@ -135,8 +131,6 @@ describe('Live Integration: Full Continuation Flow', () => {
 
     // === Clip Continuation ===
     const clippedContinuation = clipRemiContinuation(llmContinuationRemi, clipAfterBar, clipAfterPosition);
-
-    console.log('\n--- Final Clipped Continuation Remi ---\n', clippedContinuation, '\n--- End Clipped Remi ---\n');
 
     // === Validate Structure ===
     for (const event of clippedContinuation) {

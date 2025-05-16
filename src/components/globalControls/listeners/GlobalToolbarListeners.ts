@@ -94,11 +94,9 @@ export function attachToolbarListeners(
   autocompleteToggleBtn?.addEventListener('contextmenu', (e: MouseEvent) => {
     e.preventDefault(); // Prevent context menu from showing
     toggleIsAutocompleteEnabled();
-    console.log('Toggled Autocomplete Mode');
   });
 
   autocompleteApproveBtn?.addEventListener('click', () => {
-    console.log('Approved Autocompleted Notes');
     const lastActiveSequencerId = getLastActiveSequencerId();
     if (lastActiveSequencerId === null) {
       console.warn('No active sequencer to apply autocomplete to.');
@@ -111,34 +109,28 @@ export function attachToolbarListeners(
   // === AI Tools Button ===
   aiToolsBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Tools Popover Triggered (placeholder)');
   });
 
   // === Extend / Paint Buttons ===
   aiExtendBeforeBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Extend Before Triggered (placeholder)');
   });
 
   aiPaintBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Paint Tool Activated (placeholder)');
   });
 
   aiExtendAfterBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Extend After Triggered (placeholder)');
   });
 
   // === Advanced Settings Buttons ===
   aiAdjustPromptBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Prompt Settings Modal Opened (placeholder)');
   });
 
   aiDebuggerBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Debugger Panel Opened (placeholder)');
   });
 
   // Note Mode Duration Buttons
@@ -321,7 +313,6 @@ export function attachToolbarListeners(
   if (matchesMacro(e, 'ToggleAIMode')) {
     e.preventDefault();
     toggleIsAutocompleteEnabled();
-    console.log('Toggled Autocomplete Mode via Shift+G');
     return;
   }
 

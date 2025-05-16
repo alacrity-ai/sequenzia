@@ -36,10 +36,8 @@ export function resyncFromState(state: AppState = getAppState()): void {
     return;
   }
 
-  console.log('State.sequencers length is: ', state.sequencers.length);
   for (const serialized of state.sequencers as SerializedSequencer[]) {
     const live = sequencers.find(seq => sequencerIdsMatch(seq.id, serialized.id));
-    console.log('Live sequencer ID: and serialized ID: ', live?.id, serialized.id);
 
     if (!live) {
       const initialState: SequencerState = {
@@ -50,7 +48,6 @@ export function resyncFromState(state: AppState = getAppState()): void {
         pan: serialized.pan,
         collapsed: serialized.collapsed,
       };
-      console.log('No sequencer found, creating one with ID: ', serialized.id);
       createSequencerController(container, initialState);
     } else {
       live.instrumentName = serialized.instrument;

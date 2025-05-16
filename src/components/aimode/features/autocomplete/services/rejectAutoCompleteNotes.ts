@@ -28,6 +28,5 @@ export async function rejectAutoCompleteNotes(): Promise<void> {
 
   const [startBeat, endBeat] = getStartBeatAndEndBeat(sequencer);
 
-  console.log(`Rejecting current autocomplete and re-running for beats ${startBeat} to ${endBeat} on sequencer ${lastActiveSequencerId}`);
   await runRemiContinuationPipeline(lastActiveSequencerId, endBeat);
 }
