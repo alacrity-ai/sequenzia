@@ -5,7 +5,6 @@ import { createFloatingModal } from '@/shared/ui/primitives/createFloatingModal.
 import { createTabBar } from '@/shared/ui/primitives/createTabBar.js';
 import { createButton } from '@/shared/ui/primitives/createButton.js';
 
-
 export class UserConfigModal {
   private modal: HTMLElement;
   private globalSection: HTMLElement;
@@ -69,7 +68,9 @@ export class UserConfigModal {
       this.aiSection,
       this.keybindingsSection,
       footer
-    ], {
+    ], 
+    {
+      sizePreset: 'xl',
       scrollableContent: true
     });
 

@@ -166,6 +166,7 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
 
   public onMouseUp(e: MouseEvent): void {
     if (e.button !== 0 || this.store.isOnNonGridElement()) return;
+    e.stopPropagation();
 
     this.store.endSelectionDrag();
   
@@ -211,7 +212,6 @@ export class SelectedIdleToolHandler implements GridInteractionHandler {
     this.controller.transitionTo(InteractionMode.NoteTool);
   }
   
-
   public onContextMenu(e: MouseEvent): void {
     e.preventDefault();
     if (this.store.isOnNonGridElement()) return;

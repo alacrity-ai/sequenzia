@@ -14,7 +14,7 @@ export function getSnappedNotePosition(
   scroll: GridScroll,
   config: GridConfig,
   snapResolution: number,
-  triplet: boolean = false
+  triplet: boolean = false,
 ): SnappedNotePosition | null {
   const {
     layout: { labelWidth, headerHeight, baseCellWidth, verticalCellRatio, highestMidi, lowestMidi },

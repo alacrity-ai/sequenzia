@@ -1,9 +1,15 @@
+// src/components/userSettings/ui/sections/KeyBindingsSection.ts
+
 import { h } from '@/shared/ui/domUtils.js';
 import { createHeader } from '@/shared/ui/primitives/createHeader.js';
 import { createLabel } from '@/shared/ui/primitives/createLabel.js';
 import { createButton } from '@/shared/ui/primitives/createButton.js';
-import { KeyMacroNames, KeyMacroName } from '@/shared/keybindings/KeyMacroDefinitions.js';
-import { KeyMacros } from '@/shared/keybindings/KeyMacros.js';
+import { createHorizontalDivider } from '@/shared/ui/primitives/createHorizontalDivider.js';
+
+import { getAllKeyMacroBindings } from '@/shared/keybindings/KeyMacroStore.js';
+import type { KeyMacroName } from '@/shared/keybindings/KeyMacroDefinitions.js';
+import type { KeyMacroBinding } from '@/shared/keybindings/KeyMacroBindings.js';
+import { KeyMacroSections } from '@/shared/keybindings/KeyMacroSections.js';
 
 export interface KeyBindingsSectionController {
   element: HTMLElement;
@@ -15,39 +21,62 @@ export interface KeyBindingsSectionController {
   refreshToggle: () => void;
 }
 
+/**
+ * Creates a UI section for displaying and rebinding key macros.
+ */
 export function createKeyBindingsSection(): KeyBindingsSectionController {
   const bindings: KeyBindingsSectionController['bindings'] = [];
+  const sectionBody = h('div', { className: 'flex flex-col gap-y-4' });
 
-  const sectionBody = h('div', { className: 'grid gap-y-3 grid-cols-[150px_1fr_auto]' });
+  const currentBindings = getAllKeyMacroBindings();
 
-  // === Generate Rows for Each Macro ===
-  for (const macroName of Object.keys(KeyMacroNames) as KeyMacroName[]) {
-    const currentBinding = KeyMacros[macroName];
-    const bindingText = Array.isArray(currentBinding) ? currentBinding.join(' / ') : currentBinding;
+  for (const sectionDef of KeyMacroSections) {
+    const sectionHeader = createLabel(sectionDef.name);
+        
+    const grid = h('div', { className: 'grid gap-y-3 grid-cols-[150px_1fr_auto]' });
 
-    const actionLabel = createLabel(macroName);
+    for (const macroName of sectionDef.macros) {
+      const currentBinding = currentBindings[macroName];
+      const bindingText = formatBindingDisplay(currentBinding);
 
-    const bindingLabel = h('span', {
-      className: 'text-sm text-gray-300 self-center'
-    }, bindingText);
+      const actionLabel = createLabel(macroName);
 
-    const rebindButton = createButton({
-      text: 'Rebind',
-      kind: 'secondary'
-    });
+      const bindingLabel = h('span', {
+        className: 'text-sm text-gray-300 self-center'
+      }, bindingText);
 
-    // === Push into bindings for listener attachment later ===
-    bindings.push({
-      macroName,
-      labelEl: bindingLabel,
-      buttonEl: rebindButton
-    });
+      const rebindButton = createButton({
+        text: 'Rebind',
+        kind: 'secondary',
+        additionalClasses: 'px-4 py-2'
+      });
 
-    // === Append to grid layout ===
-    sectionBody.appendChild(actionLabel);
-    sectionBody.appendChild(bindingLabel);
-    sectionBody.appendChild(rebindButton);
+      bindings.push({
+        macroName,
+        labelEl: bindingLabel,
+        buttonEl: rebindButton
+      });
+
+      grid.appendChild(actionLabel);
+      grid.appendChild(bindingLabel);
+      grid.appendChild(rebindButton);
+    }
+
+    sectionBody.appendChild(sectionHeader);
+    if (sectionDef.description) {
+      sectionBody.appendChild(h('p', { className: 'text-xs text-gray-400' }, sectionDef.description));
+    }
+    sectionBody.appendChild(grid);
+    sectionBody.appendChild(createHorizontalDivider());
   }
+
+  const resetButton = createButton({
+    id: 'keybindings-reset-btn',
+    text: 'Reset to Defaults',
+    kind: 'tertiary',
+    additionalClasses: 'self-start px-4 py-2'
+  });
+  sectionBody.appendChild(resetButton);
 
   const section = h('div', {},
     createHeader('Key Bindings'),
@@ -55,10 +84,11 @@ export function createKeyBindingsSection(): KeyBindingsSectionController {
   );
 
   const refreshToggle = () => {
+    const updatedBindings = getAllKeyMacroBindings();
+
     for (const binding of bindings) {
-      const current = KeyMacros[binding.macroName];
-      const bindingText = Array.isArray(current) ? current.join(' / ') : current;
-      binding.labelEl.textContent = bindingText;
+      const current = updatedBindings[binding.macroName];
+      binding.labelEl.textContent = formatBindingDisplay(current);
     }
   };
 
@@ -67,4 +97,24 @@ export function createKeyBindingsSection(): KeyBindingsSectionController {
     bindings,
     refreshToggle
   };
+}
+
+/**
+ * Helper: Formats a KeyMacroBinding or array for display.
+ */
+function formatBindingDisplay(binding: KeyMacroBinding | KeyMacroBinding[]): string {
+  const formatSingle = (b: KeyMacroBinding): string => {
+    const mods = [
+      b.ctrl ? 'Ctrl' : '',
+      b.shift ? 'Shift' : '',
+      b.alt ? 'Alt' : '',
+      b.meta ? 'Meta' : ''
+    ].filter(Boolean);
+
+    return [...mods, b.code].join('+');
+  };
+
+  return Array.isArray(binding)
+    ? binding.map(formatSingle).join(' / ')
+    : formatSingle(binding);
 }

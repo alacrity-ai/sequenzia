@@ -29,6 +29,7 @@ import { VisualizerController } from '@/components/visualizer/visualizerControll
 import { TopControlsController } from '@/components/topControls/topControlsController.js';
 import { UserConfigModalController } from '@/components/userSettings/userConfig.js';
 import { getOverlaysController } from '@/components/overlays/overlaysController.js';
+import { loadUserKeyMacroBindings } from '@/shared/keybindings/KeyMacroStore';
 
 // Setup (Deprecated / Needs dedicated Controllers)
 import { setupAddTrackButton } from '@/components/sequencer/ui/setupAddTrackButton.js';
@@ -39,6 +40,7 @@ function bootstrapSequenziaApp(): void {
   popupsController.showSplashScreen();
 
   loadUserConfigFromLocalStorage();
+  loadUserKeyMacroBindings();
   registerDevTools();
   registerGlobalEventGuards();
 

@@ -1,17 +1,35 @@
 // src/shared/keybindings/useKeyMacro.ts
 
-import { KeyMacros } from './KeyMacros';
+import { getKeyMacroBinding } from './KeyMacroStore';
 import type { KeyMacroName } from './KeyMacroDefinitions';
-import { isShortcutMatch, normalizeKeyCombo } from './ShortcutUtils';
+import type { KeyMacroBinding } from './KeyMacroBindings';
 
 /**
- * Matches a KeyboardEvent against a macro name.
- * Ensures macroName is typed as KeyMacroName.
+ * Determines if the given KeyboardEvent matches the macro binding.
+ */
+function isMacroMatch(e: KeyboardEvent, binding: KeyMacroBinding): boolean {
+  return (
+    e.code === binding.code &&
+    (!!e.ctrlKey === !!binding.ctrl) &&
+    (!!e.shiftKey === !!binding.shift) &&
+    (!!e.altKey === !!binding.alt) &&
+    (!!e.metaKey === !!binding.meta)
+  );
+}
+
+/**
+ * Checks if a KeyboardEvent matches the given macroName binding(s).
  */
 export function matchesMacro(e: KeyboardEvent, macroName: KeyMacroName): boolean {
-  const keyCombos = Array.isArray(KeyMacros[macroName])
-    ? KeyMacros[macroName]
-    : [KeyMacros[macroName]];
+  const bindingOrBindings = getKeyMacroBinding(macroName);
+  const bindings = Array.isArray(bindingOrBindings) ? bindingOrBindings : [bindingOrBindings];
 
-  return keyCombos.some(combo => isShortcutMatch(e, normalizeKeyCombo(combo)));
+  for (const binding of bindings) {
+    if (isMacroMatch(e, binding)) {
+      console.debug('[matchesMacro] Matched macro:', macroName, 'with event:', e, '→ binding:', binding);
+      return true;
+    }
+  }
+
+  return false;
 }

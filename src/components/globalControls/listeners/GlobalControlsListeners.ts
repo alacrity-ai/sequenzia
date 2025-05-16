@@ -50,13 +50,13 @@ export function attachGlobalControlsListeners(
 
   // === Snap-to-Key Override Shortcut (CTRL down to disable in-key snapping temporarily)
   const handleSnapToKeyShortcut = (e: KeyboardEvent): void => {
-    if (!matchesMacro(e, 'GridSnapOverride')) return;
+    const isCtrlorMetaDown = e.ctrlKey || e.metaKey;
 
-    if (e.type === 'keydown' && e.ctrlKey && !isSnapToKeyOverrideActive()) {
+    if (e.type === 'keydown' && isCtrlorMetaDown && !isSnapToKeyOverrideActive()) {
       setSnapToKeyOverrideActive(true);
     }
 
-    if (e.type === 'keyup' && e.key === 'Control' && isSnapToKeyOverrideActive()) {
+    if (e.type === 'keyup' && !isCtrlorMetaDown && isSnapToKeyOverrideActive()) {
       setSnapToKeyOverrideActive(false);
     }
   };

@@ -1,5 +1,7 @@
 // src/shared/keybindings/KeyMacroDefinitions.ts
 
+export type KeyMacroName = keyof typeof KeyMacroNames;
+
 export const KeyMacroNames = {
   Undo: 'Undo',
   Redo: 'Redo',
@@ -8,8 +10,6 @@ export const KeyMacroNames = {
   CutNotes: 'CutNotes',
   DeleteNotes: 'DeleteNotes',
   ToggleVelocityTool: 'ToggleVelocityTool',
-  GridSnapOverride: 'GridSnapOverride',
-  TransportPlayStop: 'TransportPlayStop',
   TransportPlay: 'TransportPlay',
   TransportStop: 'TransportStop',
   SeekBackward: 'SeekBackward',
@@ -37,4 +37,3 @@ export const KeyMacroNames = {
   SwitchToAIMode: 'SwitchToAIMode',
 } as const;
 
-export type KeyMacroName = keyof typeof KeyMacroNames;

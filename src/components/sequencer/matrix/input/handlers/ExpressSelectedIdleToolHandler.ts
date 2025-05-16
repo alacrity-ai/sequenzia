@@ -213,6 +213,7 @@ export class ExpressSelectedIdleToolHandler implements GridInteractionHandler {
 
   public onMouseUp(e: MouseEvent): void {
     if (e.button !== 0 || this.store.isOnNonGridElement()) return;
+    e.stopPropagation();
 
     if (this.store.consumeSuppressMouseUpFlag()) {
       // Suppress this mouseup — already handled on mousedown
@@ -247,14 +248,14 @@ export class ExpressSelectedIdleToolHandler implements GridInteractionHandler {
           this.noteManager.previewNote(noteAtPosition.pitch, 0.25);
           this.store.setSelectedNotes([...selected, noteAtPosition]);
         }
-        this.controller.transitionTo(InteractionMode.SelectedIdle);
+        this.requestRedraw();
         return;
       }
   
       // Regular left-click: replace selection with just this note
       this.store.setSelectedNotes([noteAtPosition]);
       this.noteManager.previewNote(noteAtPosition.pitch, 0.25);
-      this.controller.transitionTo(InteractionMode.SelectedIdle);
+      this.requestRedraw();
       return;
     }
   
