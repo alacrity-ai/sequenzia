@@ -24,7 +24,7 @@ import { PlaybackEngine, getPlaybackEngine } from './shared/playback/PlaybackEng
 // Global Controls and UI
 import { GlobalControlsController } from '@/components/globalControls/GlobalControlsController.js';
 import { getGlobalPopupController } from '@/components/globalPopups/globalPopupController.js';
-import { setupGlobalUndoRedo } from '@/shared/modals/global/undo-redo.js';
+import { setupGlobalUndoRedo } from '@/shared/boot/setupGlobalUndo.js';
 import { VisualizerController } from '@/components/visualizer/visualizerController.js';
 import { TopControlsController } from '@/components/topControls/topControlsController.js';
 import { UserConfigModalController } from '@/components/userSettings/userConfig.js';

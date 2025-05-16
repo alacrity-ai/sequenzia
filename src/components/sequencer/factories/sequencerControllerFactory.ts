@@ -1,7 +1,7 @@
 // src/components/sequencer/factories/SequencerControllerFactory.ts
 
 import { SequencerController } from '@/components/sequencer/sequencerController.js';
-import { registerSequencerController, createId } from '@/components/sequencer/stores/sequencerControllerStore.js';
+import { registerSequencerController } from '@/components/sequencer/stores/sequencerControllerStore.js';
 import { UIOrchestrator } from '@/shared/ui/UIOrchestrator';
 import type { SequencerState } from '@/appState/interfaces/AppState.js';
 
