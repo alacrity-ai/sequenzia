@@ -1,6 +1,6 @@
 import type { ListenerAttachment } from '@/components/userSettings/interfaces/ListenerAttachment.js';
 import type { KeyBindingsSectionController } from '../ui/sections/KeyBindingsSection.js';
-import type { KeyMacroName } from '@/shared/keybindings/KeyMacroDefinitions.js';
+import type { KeyMacroName } from '@/shared/keybindings/interfaces/KeyMacroDefinitions.js';
 
 import { updateKeyMacroBinding, resetKeyMacros } from '@/shared/keybindings/KeyMacroStore.js';
 

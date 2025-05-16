@@ -7,8 +7,8 @@ import { createButton } from '@/shared/ui/primitives/createButton.js';
 import { createHorizontalDivider } from '@/shared/ui/primitives/createHorizontalDivider.js';
 
 import { getAllKeyMacroBindings } from '@/shared/keybindings/KeyMacroStore.js';
-import type { KeyMacroName } from '@/shared/keybindings/KeyMacroDefinitions.js';
-import type { KeyMacroBinding } from '@/shared/keybindings/KeyMacroBindings.js';
+import type { KeyMacroName } from '@/shared/keybindings/interfaces/KeyMacroDefinitions.js';
+import type { KeyMacroBinding } from '@/shared/keybindings/interfaces/KeyMacroBinding.js';
 import { KeyMacroSections } from '@/shared/keybindings/KeyMacroSections.js';
 
 export interface KeyBindingsSectionController {

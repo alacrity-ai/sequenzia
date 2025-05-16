@@ -1,8 +1,9 @@
 // src/shared/keybindings/useKeyMacro.ts
 
-import { getKeyMacroBinding } from './KeyMacroStore';
-import type { KeyMacroName } from './KeyMacroDefinitions';
-import type { KeyMacroBinding } from './KeyMacroBindings';
+import { getKeyMacroBinding } from '@/shared/keybindings/KeyMacroStore.js';
+
+import type { KeyMacroName } from '@/shared/keybindings/interfaces/KeyMacroDefinitions.js';
+import type { KeyMacroBinding } from '@/shared/keybindings/interfaces/KeyMacroBinding.js';
 
 /**
  * Determines if the given KeyboardEvent matches the macro binding.

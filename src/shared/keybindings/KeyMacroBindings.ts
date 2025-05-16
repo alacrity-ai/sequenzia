@@ -1,14 +1,7 @@
 // src/shared/keybindings/KeyMacroBindings.ts
 
-import type { KeyMacroName } from './KeyMacroDefinitions';
-
-export interface KeyMacroBinding {
-  code: string;  // e.g., 'KeyZ', 'BracketRight', 'Digit1'
-  ctrl?: boolean;
-  shift?: boolean;
-  alt?: boolean;
-  meta?: boolean;
-}
+import type { KeyMacroName } from './interfaces/KeyMacroDefinitions';
+import type { KeyMacroBinding } from './interfaces/KeyMacroBinding';
 
 export const DefaultKeyMacros: Record<KeyMacroName, KeyMacroBinding | KeyMacroBinding[]> = {
   Undo: [{ code: 'KeyZ', ctrl: true }, { code: 'KeyZ', meta: true }],
@@ -44,4 +37,3 @@ export const DefaultKeyMacros: Record<KeyMacroName, KeyMacroBinding | KeyMacroBi
   SwitchToNoteMode: { code: 'KeyQ' },
   SwitchToAIMode: { code: 'KeyW' },
 };
-

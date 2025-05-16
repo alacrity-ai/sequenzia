@@ -1,8 +1,10 @@
 // src/shared/keybindings/KeyMacroStore.ts
 
-import { DefaultKeyMacros, type KeyMacroBinding } from './KeyMacroBindings';
-import type { KeyMacroName } from './KeyMacroDefinitions';
-import { saveJSON, loadJSON, removeItem } from '@/shared/utils/storage/localStorage';
+import { DefaultKeyMacros } from '@/shared/keybindings/KeyMacroBindings.js';
+import { saveJSON, loadJSON, removeItem } from '@/shared/utils/storage/localStorage.js';
+
+import type { KeyMacroBinding } from '@/shared/keybindings/interfaces/KeyMacroBinding.js';
+import type { KeyMacroName } from '@/shared/keybindings/interfaces/KeyMacroDefinitions.js';
 
 const STORAGE_KEY = 'userKeyMacroBindings';
 

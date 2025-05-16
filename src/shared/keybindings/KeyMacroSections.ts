@@ -1,12 +1,6 @@
 // src/shared/keybindings/KeyMacroSections.ts
 
-import type { KeyMacroName } from './KeyMacroDefinitions';
-
-export interface KeyMacroSectionDefinition {
-  name: string;
-  description?: string;
-  macros: KeyMacroName[];
-}
+import type { KeyMacroSectionDefinition } from './interfaces/KeyMacroSectionDefinition';
 
 export const KeyMacroSections: KeyMacroSectionDefinition[] = [
   {
