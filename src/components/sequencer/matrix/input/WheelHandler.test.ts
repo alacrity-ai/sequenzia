@@ -19,7 +19,7 @@ describe('WheelHandler', () => {
     };
 
     redraw = vi.fn();
-    handler = new WheelHandler(canvas, mockScroll, redraw);
+    handler = new WheelHandler(canvas, mockScroll, redraw, vi.fn(), vi.fn());
   });
 
   afterEach(() => {
