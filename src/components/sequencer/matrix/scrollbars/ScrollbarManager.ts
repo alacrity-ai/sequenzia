@@ -104,7 +104,7 @@ export class ScrollbarManager {
     const hTrack = width - this.trackThickness;
     const labelWidth = this.config.layout.labelWidth;
     const hThumbWidth = Math.max(40, ((width - labelWidth) / totalWidth) * hTrack);    
-    const hLeft = (scrollX / maxX) * (hTrack - hThumbWidth);
+    const hLeft = maxX > 0 ? (scrollX / maxX) * (hTrack - hThumbWidth) : 0;
     this.hThumb.style.width = `${hThumbWidth}px`;
     this.hThumb.style.left = `${Math.max(0, hLeft)}px`;
 
@@ -112,7 +112,7 @@ export class ScrollbarManager {
     const vTrack = height - this.trackThickness;
     const headerHeight = this.config.layout.headerHeight;
     const vThumbHeight = Math.max(40, ((height - headerHeight) / totalHeight) * vTrack);
-    const vTop = (scrollY / maxY) * (vTrack - vThumbHeight);
+    const vTop = maxY > 0 ? (scrollY / maxY) * (vTrack - vThumbHeight) : 0;
     this.vThumb.style.height = `${vThumbHeight}px`;
     this.vThumb.style.top = `${Math.max(0, vTop)}px`;
   }
