@@ -18,6 +18,10 @@ export function getKeyMacroBinding(macroName: KeyMacroName): KeyMacroBinding | K
   return currentKeyMacros[macroName];
 }
 
+export function getKeyMacroBindingSimpleName(macroName: KeyMacroName): string {
+  return macroName.replace(/([A-Z])/g, ' $1').trim();
+}
+
 /**
  * Updates the binding(s) for a macro.
  */

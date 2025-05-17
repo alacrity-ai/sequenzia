@@ -3,6 +3,7 @@
 import * as sequencerTools from './sequencerTools.js';
 import * as stateTools from './stateTools.js';
 import * as userConfigTools from './userConfigTools.js';
+import * as popoverEmitterTools from './popoverEmitterTools.js';
 
 export function getAllDevTools(): Record<string, unknown> {
   const tools = Object.create(null);
@@ -10,7 +11,8 @@ export function getAllDevTools(): Record<string, unknown> {
   Object.assign(tools,
     sequencerTools,
     stateTools,
-    userConfigTools
+    userConfigTools,
+    popoverEmitterTools
   );
 
   return tools;

@@ -33,8 +33,9 @@
 - Critical Bug:
   - [x] Saving user config causes song measures to revert to DEFAULT_GRID_CONFIG.totalMeasures
   - [ ] Some input fields prompt for password saving????
-  - [ ] Last beat of grid is always cut off, need to extend view out a bit
+  - [x] Last beat of grid is always cut off, need to extend view out a bit
   - [ ] AI is still generating beyond song end
+  - [ ] Resolve bug where notes can be placed within an existing note (need to factor in note duration not just start)
 - Necessary Now
   - [x] Allow transport seek to be called from the sequencer header row!
 - Autocomplete

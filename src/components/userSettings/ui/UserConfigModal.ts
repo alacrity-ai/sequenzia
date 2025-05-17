@@ -4,6 +4,8 @@ import { h } from '@/shared/ui/domUtils.js';
 import { createFloatingModal } from '@/shared/ui/primitives/createFloatingModal.js';
 import { createTabBar } from '@/shared/ui/primitives/createTabBar.js';
 import { createButton } from '@/shared/ui/primitives/createButton.js';
+import { createHorizontalDivider } from '@/shared/ui/primitives/createHorizontalDivider.js';
+import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore';
 
 export class UserConfigModal {
   private modal: HTMLElement;
@@ -58,7 +60,14 @@ export class UserConfigModal {
       });
 
     // Footer
-    const footer = h('div', { class: 'flex gap-3 mt-4 z-10' }, this.saveButton, this.closeButton);
+    const skin = getCurrentSkin();
+    const menuBackground = skin.menuBackground;
+    const borderColor = skin.accentColor;
+    const footer = h('div', {
+      class: `sticky bottom-0 flex gap-3 py-4 px-6 borter-t ${borderColor} ${menuBackground} z-10`
+    }, 
+      this.saveButton, this.closeButton
+    );
 
     // Final modal structure using our primitive
     this.modal = createFloatingModal('userconfig-modal', [

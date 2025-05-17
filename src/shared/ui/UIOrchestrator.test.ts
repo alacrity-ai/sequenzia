@@ -4,6 +4,21 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UIOrchestrator } from './UIOrchestrator';
+import { getKeyMacroBinding } from '../keybindings/KeyMacroStore';
+import { PopoverEmitter } from './PopoverEmitter';
+import type { KeyMacroName } from '../keybindings/interfaces/KeyMacroDefinitions';
+
+// Mock useKeyMacro from @/shared/keybindings/KeyMacroStore
+vi.mock('../keybindings/KeyMacroStore.js', () => ({
+  getKeyMacroBinding: vi.fn(),
+}));
+
+// Mock PopoverEmitter
+vi.mock('./PopoverEmitter.js', () => ({
+  PopoverEmitter: {
+    destroyAll: vi.fn(),
+  },
+}));
 
 describe('UIOrchestrator', () => {
   let orchestrator: UIOrchestrator;
