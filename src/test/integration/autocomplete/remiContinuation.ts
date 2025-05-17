@@ -101,7 +101,6 @@ describe('Integration: Autocomplete LLM Flow', () => {
       llmSettings: createMockLLMSettings()
     });
  
-    console.log('\n--- Generated Prompt ---\n' + prompt + '\n--- End Prompt ---\n');
     expect(prompt).toContain('Primary Track:');
 
     // === Step 3: Call LLM ===
@@ -109,7 +108,6 @@ describe('Integration: Autocomplete LLM Flow', () => {
     const responseTokens = await callLLM<string[]>(model, prompt, 'remi');
 
     // === Step 4: Validate Response ===
-    console.log('\n--- LLM Response Tokens ---\n', responseTokens, '\n--- End Response ---\n');
     expect(Array.isArray(responseTokens)).toBe(true);
     expect(responseTokens.length).toBeGreaterThan(0);
     expect(responseTokens[0]).toMatch(/^(Bar|Position) \d+$/);

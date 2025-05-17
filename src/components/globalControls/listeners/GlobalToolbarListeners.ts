@@ -7,10 +7,11 @@ import { getGlobalPopupController } from '@/components/globalPopups/globalPopupC
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
 import { handleUserAutoCompleteRequest } from '@/components/aimode/features/autocomplete/services/runAIAutoComplete.js';
 import { applyAutoCompleteNotes } from '@/components/aimode/features/autocomplete/services/applyAutoCompleteNotes.js';
-import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
+import { getSequencers, redrawAllSequencerGrids } from '@/components/sequencer/stores/sequencerStore.js';
 import { getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import { getOpenAIKey } from '@/components/userSettings/store/userConfigStore';
+import { clearAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import {
   toggleIsAutocompleteEnabled,
   subscribeAutocompleteState
@@ -94,11 +95,9 @@ export function attachToolbarListeners(
   autocompleteToggleBtn?.addEventListener('contextmenu', (e: MouseEvent) => {
     e.preventDefault(); // Prevent context menu from showing
     toggleIsAutocompleteEnabled();
-    console.log('Toggled Autocomplete Mode');
   });
 
   autocompleteApproveBtn?.addEventListener('click', () => {
-    console.log('Approved Autocompleted Notes');
     const lastActiveSequencerId = getLastActiveSequencerId();
     if (lastActiveSequencerId === null) {
       console.warn('No active sequencer to apply autocomplete to.');
@@ -111,34 +110,28 @@ export function attachToolbarListeners(
   // === AI Tools Button ===
   aiToolsBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Tools Popover Triggered (placeholder)');
   });
 
   // === Extend / Paint Buttons ===
   aiExtendBeforeBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Extend Before Triggered (placeholder)');
   });
 
   aiPaintBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Paint Tool Activated (placeholder)');
   });
 
   aiExtendAfterBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Extend After Triggered (placeholder)');
   });
 
   // === Advanced Settings Buttons ===
   aiAdjustPromptBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Prompt Settings Modal Opened (placeholder)');
   });
 
   aiDebuggerBtn?.addEventListener('click', () => {
     getGlobalPopupController().showFeatureBlocked();
-    console.log('AI Debugger Panel Opened (placeholder)');
   });
 
   // Note Mode Duration Buttons
@@ -321,7 +314,6 @@ export function attachToolbarListeners(
   if (matchesMacro(e, 'ToggleAIMode')) {
     e.preventDefault();
     toggleIsAutocompleteEnabled();
-    console.log('Toggled Autocomplete Mode via Shift+G');
     return;
   }
 
@@ -329,6 +321,14 @@ export function attachToolbarListeners(
   if (matchesMacro(e, 'ApproveAutocomplete')) {
     e.preventDefault();
     autocompleteApproveBtn?.click();
+    return;
+  }
+
+  // === Reject Autocomplete
+  if (matchesMacro(e, 'RejectAutocomplete')) {
+    e.preventDefault();
+    clearAIPreviewNotes();
+    redrawAllSequencerGrids();
     return;
   }
 

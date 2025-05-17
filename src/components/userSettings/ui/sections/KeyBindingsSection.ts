@@ -33,7 +33,7 @@ export function createKeyBindingsSection(): KeyBindingsSectionController {
   for (const sectionDef of KeyMacroSections) {
     const sectionHeader = createLabel(sectionDef.name);
         
-    const grid = h('div', { className: 'grid gap-y-3 grid-cols-[150px_1fr_auto]' });
+    const grid = h('div', { className: 'grid gap-y-3 grid-cols-[200px_1fr_auto]' });
 
     for (const macroName of sectionDef.macros) {
       const currentBinding = currentBindings[macroName];

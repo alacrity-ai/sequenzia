@@ -65,7 +65,6 @@ export function attachRightControlsListeners(
       },
       () => {
         // Cancel callback: no-op or logging if desired.
-        console.log('Delete cancelled');
       }
     );
   };

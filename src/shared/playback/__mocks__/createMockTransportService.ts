@@ -1,0 +1,21 @@
+import { vi } from 'vitest';
+
+export const getTempo = vi.fn(() => 120);
+export const getTotalBeats = vi.fn(() => 64);
+export const updateTempo = vi.fn();
+export const updateTimeSignature = vi.fn();
+export const updateTotalMeasures = vi.fn();
+export const updateSongKey = vi.fn();
+export const getSnapResolution = vi.fn(() => 1);
+export const updateSnapResolution = vi.fn();
+export const updateNoteDuration = vi.fn();
+export const updateNoteModifierMode = vi.fn();
+export const getIsTripletMode = vi.fn(() => false);
+export const getIsDottedMode = vi.fn(() => false);
+export const getNoteDuration = vi.fn(() => 1);
+export const getBeatDuration = vi.fn(() => 0.5);
+export const getTimeSignature = vi.fn(() => 4);
+export const getTotalMeasures = vi.fn(() => 8);
+export const getSongKey = vi.fn(() => 'CM');
+export const setLoopEnabled = vi.fn();
+export const isLoopEnabled = vi.fn(() => false);
