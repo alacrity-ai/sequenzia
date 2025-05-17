@@ -33,7 +33,7 @@ export class GridScroll {
   }
 
   public getMaxScrollX(): number {
-    const visibleWidth = this.canvas.offsetWidth;
+    const visibleWidth = this.canvas.offsetWidth - this.config.layout.labelWidth;
     return Math.max(0, this.getContentWidth() - visibleWidth);
   }
   
