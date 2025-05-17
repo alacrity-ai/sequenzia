@@ -1,5 +1,3 @@
-// src/components/userSettings/ui/sections/KeyBindingsSection.ts
-
 import { h } from '@/shared/ui/domUtils.js';
 import { createHeader } from '@/shared/ui/primitives/createHeader.js';
 import { createLabel } from '@/shared/ui/primitives/createLabel.js';
@@ -7,6 +5,8 @@ import { createButton } from '@/shared/ui/primitives/createButton.js';
 import { createHorizontalDivider } from '@/shared/ui/primitives/createHorizontalDivider.js';
 
 import { getAllKeyMacroBindings } from '@/shared/keybindings/KeyMacroStore.js';
+import { getNormalizedKeyMacroCodeFromBinding } from '@/shared/keybindings/helpers/normalizedKeyMacroCode.js';
+
 import type { KeyMacroName } from '@/shared/keybindings/interfaces/KeyMacroDefinitions.js';
 import type { KeyMacroBinding } from '@/shared/keybindings/interfaces/KeyMacroBinding.js';
 import { KeyMacroSections } from '@/shared/keybindings/KeyMacroSections.js';
@@ -111,7 +111,8 @@ function formatBindingDisplay(binding: KeyMacroBinding | KeyMacroBinding[]): str
       b.meta ? 'Meta' : ''
     ].filter(Boolean);
 
-    return [...mods, b.code].join('+');
+    const codeName = getNormalizedKeyMacroCodeFromBinding(b);
+    return [...mods, codeName].join(' + ');
   };
 
   return Array.isArray(binding)

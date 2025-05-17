@@ -4,13 +4,18 @@ import type { KeyMacroName } from './interfaces/KeyMacroDefinitions';
 import type { KeyMacroBinding } from './interfaces/KeyMacroBinding';
 
 export const DefaultKeyMacros: Record<KeyMacroName, KeyMacroBinding | KeyMacroBinding[]> = {
+  ShowHotkeys: { code: 'Backquote' },
   Undo: [{ code: 'KeyZ', ctrl: true }, { code: 'KeyZ', meta: true }],
   Redo: [{ code: 'KeyY', ctrl: true }, { code: 'KeyY', meta: true }],
   PasteNotes: [{ code: 'KeyV', ctrl: true }, { code: 'KeyV', meta: true }],
   CopyNotes: [{ code: 'KeyC', ctrl: true }, { code: 'KeyC', meta: true }],
   CutNotes: [{ code: 'KeyX', ctrl: true }, { code: 'KeyX', meta: true }],
   DeleteNotes: { code: 'Delete' },
-  ToggleVelocityTool: { code: 'KeyV' },
+  ToggleVelocityTool: { code: 'KeyV', shift: true },
+  ToggleQuantizeTool: { code: 'KeyQ', shift: true },
+  ToggleTransposeTool: { code: 'KeyT', shift: true },
+  ToggleChordifyTool: { code: 'KeyC', shift: true },
+  ToggleHumanizeTool: { code: 'KeyH', shift: true },
   TransportPlay: { code: 'Space' },
   TransportStop: { code: 'Space', shift: true },
   SeekBackward: { code: 'KeyA', shift: true },
@@ -34,7 +39,13 @@ export const DefaultKeyMacros: Record<KeyMacroName, KeyMacroBinding | KeyMacroBi
   AIStartAutocomplete: { code: 'KeyG' },
   ToggleAIMode: { code: 'KeyG', shift: true },
   ApproveAutocomplete: { code: 'Tab' },
-  RejectAutocomplete: { code: 'Tab', shift: true },
+  RejectAutocomplete: { code: 'Tab', shift: true }, // Has no button
+  AIToolsMenu: { code: 'KeyT' },
+  AIExtendBefore: { code: 'KeyY' },
+  AIPaint: { code: 'KeyU' },
+  AIExtendAfter: { code: 'KeyI' },
+  AIAdjustPrompt: { code: 'KeyO' },
+  AIDebugger: { code: 'KeyP' },
   SwitchToNoteMode: { code: 'KeyQ' },
   SwitchToAIMode: { code: 'KeyW' },
 };

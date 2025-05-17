@@ -36,7 +36,7 @@ import { recordDiff } from '@/appState/appState.js';
 export class ExpressNoteToolHandler implements GridInteractionHandler {
   private initialMouseX: number = 0;
   private initialMouseY: number = 0;
-  private readonly dragThreshold: number = 3;
+  private readonly dragThreshold: number = 1;
   
   constructor(
     private readonly canvas: HTMLCanvasElement,

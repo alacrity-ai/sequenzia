@@ -1,5 +1,7 @@
 // src/shared/ui/UIOrchestrator.ts
 
+import { PopoverEmitter } from './PopoverEmitter.js';
+
 export class UIOrchestrator {
     private static instance: UIOrchestrator;
   
@@ -23,6 +25,7 @@ export class UIOrchestrator {
     }
 
     public reloadAll(): void {
+      PopoverEmitter.destroyAll();
       this.reloadCallbacks.forEach(fn => fn());
     }
   }

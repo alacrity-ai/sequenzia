@@ -3,6 +3,7 @@
 export type KeyMacroName = keyof typeof KeyMacroNames;
 
 export const KeyMacroNames = {
+  ShowHotkeys: 'ShowHotkeys',
   Undo: 'Undo',
   Redo: 'Redo',
   PasteNotes: 'PasteNotes',
@@ -10,6 +11,10 @@ export const KeyMacroNames = {
   CutNotes: 'CutNotes',
   DeleteNotes: 'DeleteNotes',
   ToggleVelocityTool: 'ToggleVelocityTool',
+  ToggleQuantizeTool: 'ToggleQuantizeTool',
+  ToggleTransposeTool: 'ToggleTransposeTool',
+  ToggleChordifyTool: 'ToggleChordifyTool',
+  ToggleHumanizeTool: 'ToggleHumanizeTool',
   TransportPlay: 'TransportPlay',
   TransportStop: 'TransportStop',
   SeekBackward: 'SeekBackward',
@@ -36,5 +41,11 @@ export const KeyMacroNames = {
   RejectAutocomplete: 'RejectAutocomplete',
   SwitchToNoteMode: 'SwitchToNoteMode',
   SwitchToAIMode: 'SwitchToAIMode',
+  AIToolsMenu: 'AIToolsMenu',
+  AIExtendBefore: 'AIExtendBefore',
+  AIPaint: 'AIPaint',
+  AIExtendAfter: 'AIExtendAfter',
+  AIAdjustPrompt: 'AIAdjustPrompt',
+  AIDebugger: 'AIDebugger',
 } as const;
 

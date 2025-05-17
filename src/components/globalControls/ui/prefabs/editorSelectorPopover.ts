@@ -1,28 +1,25 @@
-// src/globalControls/ui/prefabs/editorSelectorPopover.ts
-
 import { h } from '@/shared/ui/domUtils.js';
 import { createPopover } from '@/shared/ui/primitives/createPopover.js';
 import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 import { icon } from '@/shared/ui/primitives/createIconImg.js';
+import { getNormalizedKeyMacroCode } from '@/shared/keybindings/helpers/normalizedKeyMacroCode.js';
+import type { KeyMacroName } from '@/shared/keybindings/interfaces/KeyMacroDefinitions.js';
 
 interface EditorOption {
   id: string;
   label: string;
   iconName: string;
-  hotkey?: string | null;
+  macroName: KeyMacroName;
   disabled?: boolean;
 }
 
-
 const editors: EditorOption[] = [
-  { id: 'velocity-tool', label: 'Velocity Tool', iconName: 'icon-cog', hotkey: 'V' },
-  { id: 'quantize-tool', label: 'Quantize Tool', iconName: 'icon-cog', hotkey: 'Q', disabled: true },
-  { id: 'transpose-tool', label: 'Transpose Tool', iconName: 'icon-cog', hotkey: 'T', disabled: true },
-
-  { id: 'chordifier', label: 'Chordifier', iconName: 'icon-adjustments-vertical', hotkey: 'Shift+C', disabled: true },
-  { id: 'humanizer', label: 'Humanizer', iconName: 'icon-adjustments-vertical', hotkey: 'Shift+H', disabled: true }
+  { id: 'velocity-tool', label: 'Velocity Tool', iconName: 'icon-cog', macroName: 'ToggleVelocityTool' },
+  { id: 'quantize-tool', label: 'Quantize Tool', iconName: 'icon-cog', macroName: 'ToggleQuantizeTool', disabled: true },
+  { id: 'transpose-tool', label: 'Transpose Tool', iconName: 'icon-cog', macroName: 'ToggleTransposeTool', disabled: true },
+  { id: 'chordifier', label: 'Chordifier', iconName: 'icon-adjustments-vertical', macroName: 'ToggleChordifyTool', disabled: true },
+  { id: 'humanizer', label: 'Humanizer', iconName: 'icon-adjustments-vertical', macroName: 'ToggleHumanizeTool', disabled: true }
 ];
-
 
 export function createEditorSelectorPopover(): HTMLElement {
   const skin = getCurrentSkin();
@@ -42,6 +39,8 @@ export function createEditorSelectorPopover(): HTMLElement {
     },
       ...editors.flatMap((editor, index) => {
         const isBreakAfter = index === 2;
+
+        const hotkeyLabel = getNormalizedKeyMacroCode(editor.macroName);
 
         const button = h('button', {
           class: [
@@ -68,10 +67,10 @@ export function createEditorSelectorPopover(): HTMLElement {
             icon(editor.iconName, editor.label),
             h('span', { textContent: editor.label })
           ),
-          editor.hotkey
+          hotkeyLabel
             ? h('span', {
                 class: 'text-xs text-gray-400 font-mono',
-                textContent: editor.hotkey
+                textContent: hotkeyLabel
               })
             : null
         );
@@ -93,7 +92,6 @@ export function createEditorSelectorPopover(): HTMLElement {
 
   let keydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
-  // Hook into lifecycle
   instance.updateOnShow(() => {
     keydownHandler = (e: KeyboardEvent) => {
       if (e.key === 'Escape' || e.key.length === 1) {

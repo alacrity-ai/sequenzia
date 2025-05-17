@@ -2,6 +2,7 @@
 
 import { h } from '../domUtils.js';
 import { Popover } from 'flowbite';
+import { PopoverEmitter } from '@/shared/ui/PopoverEmitter.js';
 import { getCurrentSkin } from '@/components/userSettings/store/userConfigStore.js';
 import type { PopoverOptions as FBPopoverOptions, InstanceOptions as FBInstanceOptions } from 'flowbite';
 
@@ -26,11 +27,13 @@ export interface PopoverOptions {
 export function createPopover(
   trigger: HTMLElement,
   contentBody: HTMLElement[] = [],
-  options: PopoverOptions = {}
+  options: PopoverOptions = {},
+  autoSubscribe: boolean = false
 ): {
   trigger: HTMLElement;
   content: HTMLElement;
   instance: Popover;
+  unsubscribe: () => void;
 } {
   const skin = getCurrentSkin();
   const id = options.id || `popover-${Math.random().toString(36).slice(2, 9)}`;
@@ -87,6 +90,21 @@ export function createPopover(
 
   const instance = new Popover(content, trigger, flowbiteOptions, instanceOptions);
 
+  // === Auto-subscribe to PopoverEmitter
+  let subscribed = false;
+
+  if (autoSubscribe) {
+    PopoverEmitter.subscribe(instance, content);
+    subscribed = true;
+  }
+
+  const unsubscribe = (): void => {
+    if (subscribed) {
+      PopoverEmitter.unsubscribe(instance);
+      subscribed = false;
+    }
+  };
+
   // === Add global keydown-to-close behavior
   let keydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
@@ -112,5 +130,5 @@ export function createPopover(
     flowbiteOptions.onHide?.(instance);
   });
 
-  return { trigger, content, instance };
+  return { trigger, content, instance, unsubscribe };
 }

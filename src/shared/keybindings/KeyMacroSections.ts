@@ -7,16 +7,23 @@ export const KeyMacroSections: KeyMacroSectionDefinition[] = [
     name: 'Global',
     description: 'Common editing operations.',
     macros: [
-      'Undo', 'Redo', 'PasteNotes', 'CopyNotes', 'CutNotes', 'DeleteNotes'
+      'ShowHotkeys', 'Undo', 'Redo', 'PasteNotes', 'CopyNotes', 'CutNotes', 'DeleteNotes'
     ]
   },
   {
     name: 'Note Editing',
     description: 'Tools and overrides for note manipulation.',
     macros: [
-      'ToggleVelocityTool', 'ToggleDottedNotes', 'ToggleTripletNotes',
+      'ToggleDottedNotes', 'ToggleTripletNotes',
       'ApplyDuration1', 'ApplyDuration2', 'ApplyDuration3', 'ApplyDuration4', 'ApplyDuration5', 'ApplyDuration6',
       'ApplySnap1', 'ApplySnap2', 'ApplySnap3', 'ApplySnap4', 'ApplySnap5', 'ApplySnap6'
+    ]
+  },
+  {
+    name: 'Tools',
+    description: 'Additional editing tools and utilities.',
+    macros: [
+      'ToggleVelocityTool', 'ToggleQuantizeTool', 'ToggleTransposeTool', 'ToggleChordifyTool', 'ToggleHumanizeTool'
     ]
   },
   {

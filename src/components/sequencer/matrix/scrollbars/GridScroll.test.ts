@@ -78,10 +78,13 @@ describe('GridScroll', () => {
   });
 
   it('clamps scrollX to max scrollable width', () => {
-    (getContentWidth as any).mockReturnValue(1000); // content width
-    setCanvasDimensions(canvas, 800, 600); // width = 800
+    (getContentWidth as any).mockReturnValue(1000);
+    config.layout.labelWidth = 100;  // <-- Move this UP
+    setCanvasDimensions(canvas, 800, 600);
     scroll.setScroll(5000, 0);
-    expect(scroll.getX()).toBe(200); // 1000 - 800
+
+    const expected = 1000 - (800 - 100); // 1000 - 700 = 300
+    expect(scroll.getX()).toBe(expected);
   });
   
   it('clamps scrollY to max scrollable height', () => {
@@ -97,8 +100,8 @@ describe('GridScroll', () => {
     (getContentHeight as any).mockReturnValue(1200);
     setCanvasDimensions(canvas, 1000, 700); // width = 1000, height = 700
     config.layout.headerHeight = 50;
-  
-    expect(scroll.getMaxScrollX()).toBe(400); // 1400 - 1000
+    config.layout.labelWidth = 100;
+    expect(scroll.getMaxScrollX()).toBe(500); // 1400 - 1000
     expect(scroll.getMaxScrollY()).toBe(550); // 1200 - (700 - 50)
   });  
 
