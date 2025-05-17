@@ -33,6 +33,7 @@ export const KeyMacroNames = {
   AIStartAutocomplete: 'AIStartAutocomplete',
   ToggleAIMode: 'ToggleAIMode',
   ApproveAutocomplete: 'ApproveAutocomplete',
+  RejectAutocomplete: 'RejectAutocomplete',
   SwitchToNoteMode: 'SwitchToNoteMode',
   SwitchToAIMode: 'SwitchToAIMode',
 } as const;

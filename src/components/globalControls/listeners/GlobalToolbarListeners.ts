@@ -7,10 +7,11 @@ import { getGlobalPopupController } from '@/components/globalPopups/globalPopupC
 import { SEQUENCER_CONFIG as config } from '@/components/sequencer/constants/sequencerConstants.js';
 import { handleUserAutoCompleteRequest } from '@/components/aimode/features/autocomplete/services/runAIAutoComplete.js';
 import { applyAutoCompleteNotes } from '@/components/aimode/features/autocomplete/services/applyAutoCompleteNotes.js';
-import { getSequencers } from '@/components/sequencer/stores/sequencerStore.js';
+import { getSequencers, redrawAllSequencerGrids } from '@/components/sequencer/stores/sequencerStore.js';
 import { getLastActiveSequencerId } from '@/components/sequencer/stores/sequencerStore.js';
 import { isKeyboardInputEnabled } from '@/components/topControls/components/keyboard/services/keyboardService.js';
 import { getOpenAIKey } from '@/components/userSettings/store/userConfigStore';
+import { clearAIPreviewNotes } from '@/components/aimode/features/autocomplete/stores/autoCompleteStore.js';
 import {
   toggleIsAutocompleteEnabled,
   subscribeAutocompleteState
@@ -320,6 +321,14 @@ export function attachToolbarListeners(
   if (matchesMacro(e, 'ApproveAutocomplete')) {
     e.preventDefault();
     autocompleteApproveBtn?.click();
+    return;
+  }
+
+  // === Reject Autocomplete
+  if (matchesMacro(e, 'RejectAutocomplete')) {
+    e.preventDefault();
+    clearAIPreviewNotes();
+    redrawAllSequencerGrids();
     return;
   }
 

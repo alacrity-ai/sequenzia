@@ -11,7 +11,8 @@
     "dev:clean": "rm -rf node_modules/.vite && vite",
     "test": "vitest run",
     "test:integration": "vitest run --dir src/test/integration",
-    "test:live": "vitest run --dir src/test/live"
+    "test:live": "vitest run --dir src/test/live",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.5",

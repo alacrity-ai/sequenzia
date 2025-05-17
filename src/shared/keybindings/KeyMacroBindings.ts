@@ -34,6 +34,7 @@ export const DefaultKeyMacros: Record<KeyMacroName, KeyMacroBinding | KeyMacroBi
   AIStartAutocomplete: { code: 'KeyG' },
   ToggleAIMode: { code: 'KeyG', shift: true },
   ApproveAutocomplete: { code: 'Tab' },
+  RejectAutocomplete: { code: 'Tab', shift: true },
   SwitchToNoteMode: { code: 'KeyQ' },
   SwitchToAIMode: { code: 'KeyW' },
 };

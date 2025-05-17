@@ -68,3 +68,9 @@ export function rescheduleAllSequencers(): void {
     }
   }
 }
+
+export function redrawAllSequencerGrids(): void {
+  for (const seq of getSequencers()) {
+    seq.matrix?.requestRedraw();
+  }
+}

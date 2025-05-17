@@ -31,7 +31,7 @@ export const KeyMacroSections: KeyMacroSectionDefinition[] = [
     name: 'AI Mode',
     description: 'Autocomplete and AI-assisted operations.',
     macros: [
-      'AIStartAutocomplete', 'ToggleAIMode', 'ApproveAutocomplete', 'SwitchToNoteMode', 'SwitchToAIMode'
+      'AIStartAutocomplete', 'ToggleAIMode', 'ApproveAutocomplete', 'RejectAutocomplete', 'SwitchToNoteMode', 'SwitchToAIMode'
     ]
   }
 ];
